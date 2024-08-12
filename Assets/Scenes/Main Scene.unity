@@ -569,7 +569,7 @@ GameObject:
   - component: {fileID: 1207500129}
   - component: {fileID: 1207500128}
   m_Layer: 0
-  m_Name: Cube
+  m_Name: Archer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -587,12 +587,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d947e1ce8bc243559190d505d98f8ff2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  arrowPrefab: {fileID: 479291577198658237, guid: beca3d0300da16948b947406854b56d9, type: 3}
   targetTransform: {fileID: 1818131586}
   wayPoint1: {fileID: 1170784283}
   wayPoint2: {fileID: 1717180110}
   speed: 1
   chaseDistance: 4
-  explodeDistance: 1
+  explodeDistance: 3
   lostDistance: 5
 --- !u!65 &1207500129
 BoxCollider:
