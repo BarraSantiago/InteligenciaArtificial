@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Units;
 using UnityEngine;
 using Utils;
 
@@ -8,7 +9,7 @@ namespace States.Archer
     public class Shoot : State
     {
         private const float SHOOTCOOLDOWN = 3;
-
+        private float _lastAttack = -SHOOTCOOLDOWN;
         public override List<Action> GetTickBehaviour(params object[] parameters)
         {
             List<Action> behaviours = new List<Action>();
@@ -17,17 +18,24 @@ namespace States.Archer
             Transform ownerTransform = parameters[1] as Transform;
             Transform targetTransform = parameters[2] as Transform;
             float shootForce = Convert.ToSingle(parameters[3]);
-            float lastAttack = Convert.ToSingle(parameters[3]);
+            float lostDistance = Convert.ToSingle(parameters[4]);
 
             behaviours.Add(() =>
             {
-                if (Time.time - lastAttack > SHOOTCOOLDOWN) return;
+                if (Time.time - _lastAttack < SHOOTCOOLDOWN) return;
                 
                 ShootArrow(arrowPrefab, ownerTransform, targetTransform, shootForce);
                 
-                lastAttack = Time.time;
+                _lastAttack = Time.time;
             });
-
+            
+            behaviours.Add(() =>
+            {
+                if (Vector3.Distance(targetTransform.position, ownerTransform.position) > lostDistance)
+                {
+                    OnFlag?.Invoke((int)Flags.OnTargetLost);
+                }
+            });
             return behaviours;
         }
 

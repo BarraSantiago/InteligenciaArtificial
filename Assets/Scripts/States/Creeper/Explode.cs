@@ -9,7 +9,6 @@ namespace States.Creeper
         public override List<Action> GetTickBehaviour(params object[] parameters)
         {
             List<Action> behaviours = new List<Action>();
-            behaviours.Add(() => { Debug.Log("F"); });
         
             GameObject ownerObject = parameters[0] as GameObject;
         

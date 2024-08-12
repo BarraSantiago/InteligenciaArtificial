@@ -6,25 +6,24 @@ namespace StateMachine
     public class FSM
     {
         private const int UNNASIGNED_TRANSITION = -1;
-        private int stateAmount = 0;
-        private int currentState = 0;
-        private Dictionary<int, State> behaviours;
-        private Dictionary<int, Func<object[]>> _behaviourTickParameters;
-        private Dictionary<int, Func<object[]>> _behaviourOnEnterParameters;
-        private Dictionary<int, Func<object[]>> _behaviourOnExitParameters;
-        private int[,] transitions;
+        private int _currentState = 0;
+        private readonly Dictionary<int, State> _behaviours;
+        private readonly Dictionary<int, Func<object[]>> _behaviourTickParameters;
+        private readonly Dictionary<int, Func<object[]>> _behaviourOnEnterParameters;
+        private readonly Dictionary<int, Func<object[]>> _behaviourOnExitParameters;
+        private readonly int[,] _transitions;
 
 
         public FSM(int statesAmount, int flags)
         {
-            behaviours = new Dictionary<int, State>();
-            transitions = new int[statesAmount, flags];
+            _behaviours = new Dictionary<int, State>();
+            _transitions = new int[statesAmount, flags];
 
             for (int i = 0; i < statesAmount; i++)
             {
                 for (int j = 0; j < flags; j++)
                 {
-                    transitions[i, j] = UNNASIGNED_TRANSITION;
+                    _transitions[i, j] = UNNASIGNED_TRANSITION;
                 }
             }
 
@@ -35,17 +34,17 @@ namespace StateMachine
 
         public void Force(int state)
         {
-            currentState = state;
+            _currentState = state;
         }
-        
+
         public void AddBehaviour<T>(int stateIndex, Func<object[]> onTickParameters = null,
             Func<object[]> onEnterParameters = null, Func<object[]> onExitParameters = null) where T : State, new()
         {
-            if (behaviours.ContainsKey(stateIndex)) return;
+            if (_behaviours.ContainsKey(stateIndex)) return;
 
             State newBehaviour = new T();
             newBehaviour.OnFlag += Transition;
-            behaviours.Add(stateIndex, newBehaviour);
+            _behaviours.Add(stateIndex, newBehaviour);
             _behaviourTickParameters.Add(stateIndex, onTickParameters);
             _behaviourOnEnterParameters.Add(stateIndex, onEnterParameters);
             _behaviourOnExitParameters.Add(stateIndex, onExitParameters);
@@ -53,20 +52,20 @@ namespace StateMachine
 
         public void SetTransition(int originState, int flag, int destinationState)
         {
-            transitions[originState, flag] = destinationState;
+            _transitions[originState, flag] = destinationState;
         }
 
-        public void Transition(int flag)
+        private void Transition(int flag)
         {
-            foreach (Action behaviour in behaviours[currentState]
-                         .GetOnExitBehaviour(_behaviourOnEnterParameters[currentState]?.Invoke()))
+            foreach (Action behaviour in _behaviours[_currentState]
+                         .GetOnExitBehaviour(_behaviourOnEnterParameters[_currentState]?.Invoke()))
             {
                 behaviour.Invoke();
             }
 
-            currentState = transitions[currentState, flag];
-            foreach (Action behaviour in behaviours[currentState]
-                         .GetOnEnterBehaviour(_behaviourOnEnterParameters[currentState]?.Invoke()))
+            _currentState = _transitions[_currentState, flag];
+            foreach (Action behaviour in _behaviours[_currentState]
+                         .GetOnEnterBehaviour(_behaviourOnEnterParameters[_currentState]?.Invoke()))
             {
                 behaviour.Invoke();
             }
@@ -75,12 +74,12 @@ namespace StateMachine
 
         public void Tick()
         {
-            if (behaviours.ContainsKey(currentState))
+            if (!_behaviours.ContainsKey(_currentState)) return;
+            
+            foreach (Action behaviour in _behaviours[_currentState]
+                         .GetTickBehaviour(_behaviourTickParameters[_currentState]?.Invoke()))
             {
-                foreach (Action behaviour in behaviours[currentState].GetTickBehaviour(_behaviourTickParameters[currentState]?.Invoke()))
-                {
-                    behaviour.Invoke();
-                }
+                behaviour.Invoke();
             }
         }
     }

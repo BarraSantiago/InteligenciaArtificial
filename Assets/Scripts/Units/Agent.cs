@@ -31,10 +31,11 @@ namespace Units
         [SerializeField] private float speed;
         [SerializeField] private float chaseDistance;
         [SerializeField] private float explodeDistance;
+        [SerializeField] private float shootDistance = 3;
         [SerializeField] private float lostDistance;
         
         private FSM _fsm;
-        private float lastAttack = 0;
+        
         private void Start()
         {
             _fsm = new FSM(Enum.GetValues(typeof(Directions)).Length, Enum.GetValues(typeof(Flags)).Length);
@@ -49,7 +50,7 @@ namespace Units
             _fsm.SetTransition((int)Directions.Patrol, (int)Flags.OnTargetNear, (int)Directions.Chase);
             _fsm.SetTransition((int)Directions.Chase, (int)Flags.OnTargetReach, (int)Directions.Shoot);
             _fsm.SetTransition((int)Directions.Chase, (int)Flags.OnTargetLost, (int)Directions.Patrol);
-            _fsm.SetTransition((int)Directions.Shoot, (int)Flags.OnTargetLost, (int)Directions.Chase);
+            _fsm.SetTransition((int)Directions.Shoot, (int)Flags.OnTargetLost, (int)Directions.Patrol);
         }
 
         private object[] ChaseTickParameters()
@@ -72,7 +73,7 @@ namespace Units
         
         private object[] ShootTickParameters()
         {
-            object[] objects = { arrowPrefab, transform, this.targetTransform, 10f, lastAttack};
+            object[] objects = { arrowPrefab, transform, this.targetTransform, 10f, shootDistance};
             return objects;
         }
 
