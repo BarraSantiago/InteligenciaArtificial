@@ -12,7 +12,7 @@ namespace States.Generic
             Transform ownerTransform = parameters[0] as Transform;
             Transform targetTransform = parameters[1] as Transform;
             float speed = Convert.ToSingle(parameters[2]);
-            float explodeDistance = Convert.ToSingle(parameters[3]);
+            float reachDistance = Convert.ToSingle(parameters[3]);
             float lostDistance = Convert.ToSingle(parameters[4]);
 
             List<Action> behaviours = new List<Action>();
@@ -26,7 +26,7 @@ namespace States.Generic
 
             behaviours.Add(() =>
             {
-                if (Vector3.Distance(targetTransform.position, ownerTransform.position) < explodeDistance)
+                if (Vector3.Distance(targetTransform.position, ownerTransform.position) < reachDistance)
                 {
                     OnFlag?.Invoke((int)Flags.OnTargetReach);
                 }
