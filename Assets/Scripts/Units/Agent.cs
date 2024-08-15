@@ -12,7 +12,7 @@ namespace Units
         OnTargetNear
     }
 
-    public enum Directions
+    public enum Behaviours
     {
         Chase,
         Patrol,
@@ -31,7 +31,7 @@ namespace Units
         [SerializeField] private float reachDistance = 3;
         [SerializeField] private float lostDistance;
         
-        protected FSM _fsm;
+        protected FSM<Behaviours,Flags> _fsm;
         
         private void Start()
         {
@@ -40,13 +40,16 @@ namespace Units
 
         protected virtual void Init()
         {
-            _fsm = new FSM(Enum.GetValues(typeof(Directions)).Length, Enum.GetValues(typeof(Flags)).Length);
+            _fsm = new FSM<Behaviours,Flags>();
             
-            _fsm.AddBehaviour<PatrolState>((int)Directions.Patrol, PatrolTickParameters);
-            _fsm.AddBehaviour<ChaseState>((int)Directions.Chase, ChaseTickParameters);
+            _fsm.AddBehaviour<PatrolState>(Behaviours.Patrol, PatrolTickParameters);
+            _fsm.AddBehaviour<ChaseState>(Behaviours.Chase, ChaseTickParameters);
             
-            _fsm.SetTransition((int)Directions.Patrol, (int)Flags.OnTargetNear, (int)Directions.Chase);
-            _fsm.SetTransition((int)Directions.Chase, (int)Flags.OnTargetLost, (int)Directions.Patrol);
+            _fsm.SetTransition(Behaviours.Patrol, Flags.OnTargetNear, Behaviours.Chase);
+            _fsm.SetTransition(Behaviours.Chase, Flags.OnTargetLost, Behaviours.Patrol);
+            
+            _fsm.ForceTransition(Behaviours.Patrol);
+
         }
         
         protected object[] ChaseTickParameters()

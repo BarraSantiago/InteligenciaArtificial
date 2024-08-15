@@ -11,10 +11,11 @@ namespace Units.Archer
         protected override void Init()
         {
             base.Init();
-            _fsm.AddBehaviour<Shoot>((int)Directions.Shoot, ShootTickParameters);
+            _fsm.AddBehaviour<Shoot>(Behaviours.Shoot, ShootTickParameters);
             
-            _fsm.SetTransition((int)Directions.Chase, (int)Flags.OnTargetReach, (int)Directions.Shoot);
-            _fsm.SetTransition((int)Directions.Shoot, (int)Flags.OnTargetLost, (int)Directions.Patrol);
+            _fsm.SetTransition(Behaviours.Chase, Flags.OnTargetReach, Behaviours.Shoot);
+            _fsm.SetTransition(Behaviours.Shoot, Flags.OnTargetLost, Behaviours.Patrol);
+            
         }
         
         private object[] ShootTickParameters()

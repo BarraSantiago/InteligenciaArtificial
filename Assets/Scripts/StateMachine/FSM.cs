@@ -3,7 +3,9 @@ using System.Collections.Generic;
 
 namespace StateMachine
 {
-    public class FSM
+    public class FSM<EnumState, EnumFlag>
+        where EnumState : Enum
+        where EnumFlag : Enum
     {
         private const int UNNASIGNED_TRANSITION = -1;
         private int _currentState = 0;
@@ -14,12 +16,14 @@ namespace StateMachine
         private readonly int[,] _transitions;
 
 
-        public FSM(int statesAmount, int flags)
+        public FSM()
         {
+            int states = Enum.GetValues(typeof(EnumState)).Length;
+            int flags = Enum.GetValues(typeof(EnumFlag)).Length;
             _behaviours = new Dictionary<int, State>();
-            _transitions = new int[statesAmount, flags];
+            _transitions = new int[states, flags];
 
-            for (int i = 0; i < statesAmount; i++)
+            for (int i = 0; i < states; i++)
             {
                 for (int j = 0; j < flags; j++)
                 {
@@ -32,14 +36,15 @@ namespace StateMachine
             _behaviourOnExitParameters = new Dictionary<int, Func<object[]>>();
         }
 
-        public void Force(int state)
+        public void ForceTransition(Enum state)
         {
-            _currentState = state;
+            _currentState = Convert.ToInt32(state);
         }
 
-        public void AddBehaviour<T>(int stateIndex, Func<object[]> onTickParameters = null,
+        public void AddBehaviour<T>(EnumState stateIndexEnum, Func<object[]> onTickParameters = null,
             Func<object[]> onEnterParameters = null, Func<object[]> onExitParameters = null) where T : State, new()
         {
+            int stateIndex = Convert.ToInt32(stateIndexEnum);
             if (_behaviours.ContainsKey(stateIndex)) return;
 
             State newBehaviour = new T();
@@ -50,20 +55,23 @@ namespace StateMachine
             _behaviourOnExitParameters.Add(stateIndex, onExitParameters);
         }
 
-        public void SetTransition(int originState, int flag, int destinationState)
+        public void SetTransition(Enum originState, Enum flag, Enum destinationState)
         {
-            _transitions[originState, flag] = destinationState;
+            _transitions[Convert.ToInt32(originState), Convert.ToInt32(flag)] = Convert.ToInt32(destinationState);
         }
 
-        private void Transition(int flag)
+        private void Transition(Enum flag)
         {
+            if (_transitions[_currentState, Convert.ToInt32(flag)] == UNNASIGNED_TRANSITION) return;
+
             foreach (Action behaviour in _behaviours[_currentState]
                          .GetOnExitBehaviour(_behaviourOnEnterParameters[_currentState]?.Invoke()))
             {
                 behaviour.Invoke();
             }
 
-            _currentState = _transitions[_currentState, flag];
+            _currentState = _transitions[_currentState, Convert.ToInt32(flag)];
+            
             foreach (Action behaviour in _behaviours[_currentState]
                          .GetOnEnterBehaviour(_behaviourOnEnterParameters[_currentState]?.Invoke()))
             {
@@ -75,7 +83,7 @@ namespace StateMachine
         public void Tick()
         {
             if (!_behaviours.ContainsKey(_currentState)) return;
-            
+
             foreach (Action behaviour in _behaviours[_currentState]
                          .GetTickBehaviour(_behaviourTickParameters[_currentState]?.Invoke()))
             {

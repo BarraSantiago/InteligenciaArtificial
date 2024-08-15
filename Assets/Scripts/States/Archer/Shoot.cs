@@ -33,7 +33,7 @@ namespace States.Archer
             {
                 if (Vector3.Distance(targetTransform.position, ownerTransform.position) > lostDistance)
                 {
-                    OnFlag?.Invoke((int)Flags.OnTargetLost);
+                    OnFlag?.Invoke(Flags.OnTargetLost);
                 }
             });
             return behaviours;

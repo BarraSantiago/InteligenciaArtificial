@@ -5,7 +5,7 @@ using UnityEngine;
 
 public abstract class State
 {
-    public Action<int> OnFlag;
+    public Action<Enum> OnFlag;
     public abstract List<Action> GetTickBehaviour(params object[] parameters);
     public abstract List<Action> GetOnEnterBehaviour(params object[] parameters);
     public abstract List<Action> GetOnExitBehaviour(params object[] parameters);

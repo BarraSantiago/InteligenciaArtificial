@@ -35,7 +35,7 @@ namespace States.Generic
             {
                 if (Vector3.Distance(ownerTransform.position, chaseTarget.position) < chaseDistance)
                 {
-                    OnFlag?.Invoke((int)Flags.OnTargetNear);
+                    OnFlag?.Invoke(Flags.OnTargetNear);
                 }
             });
 

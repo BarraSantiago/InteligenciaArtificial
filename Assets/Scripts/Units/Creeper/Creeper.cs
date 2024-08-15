@@ -8,9 +8,9 @@ namespace Units.Creeper
         {
             base.Init();
             
-            _fsm.AddBehaviour<ExplodeState>((int)Directions.Explode, ExplodeTickParameters);
+            _fsm.AddBehaviour<ExplodeState>(Behaviours.Explode, ExplodeTickParameters);
 
-            _fsm.SetTransition((int)Directions.Chase, (int)Flags.OnTargetReach, (int)Directions.Explode);
+            _fsm.SetTransition(Behaviours.Chase, Flags.OnTargetReach, Behaviours.Explode);
         }
 
         private object[] ExplodeTickParameters()

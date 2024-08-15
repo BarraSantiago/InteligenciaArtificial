@@ -28,7 +28,7 @@ namespace States.Generic
             {
                 if (Vector3.Distance(targetTransform.position, ownerTransform.position) < reachDistance)
                 {
-                    OnFlag?.Invoke((int)Flags.OnTargetReach);
+                    OnFlag?.Invoke(Flags.OnTargetReach);
                 }
             });
 
@@ -36,7 +36,7 @@ namespace States.Generic
             {
                 if (Vector3.Distance(targetTransform.position, ownerTransform.position) > lostDistance)
                 {
-                    OnFlag?.Invoke((int)Flags.OnTargetLost);
+                    OnFlag?.Invoke(Flags.OnTargetLost);
                 }
             });
 
