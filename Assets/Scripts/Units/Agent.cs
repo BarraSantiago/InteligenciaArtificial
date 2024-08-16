@@ -42,11 +42,15 @@ namespace Units
         {
             _fsm = new FSM<Behaviours,Flags>();
             
-            _fsm.AddBehaviour<PatrolState>(Behaviours.Patrol, PatrolTickParameters);
+            _fsm.AddBehaviour<PatrolState>(Behaviours.Patrol,
+                () =>
+                {
+                    return new object[] { transform, wayPoint1, wayPoint2, this.targetTransform, this.speed, this.chaseDistance };
+                });
             _fsm.AddBehaviour<ChaseState>(Behaviours.Chase, ChaseTickParameters);
             
-            _fsm.SetTransition(Behaviours.Patrol, Flags.OnTargetNear, Behaviours.Chase);
-            _fsm.SetTransition(Behaviours.Chase, Flags.OnTargetLost, Behaviours.Patrol);
+            _fsm.SetTransition(Behaviours.Patrol, Flags.OnTargetNear, Behaviours.Chase, () => Debug.Log("Chase"));
+            _fsm.SetTransition(Behaviours.Chase, Flags.OnTargetLost, Behaviours.Patrol, () => Debug.Log("Patrol"));
             
             _fsm.ForceTransition(Behaviours.Patrol);
 

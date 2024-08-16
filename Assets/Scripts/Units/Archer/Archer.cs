@@ -13,8 +13,8 @@ namespace Units.Archer
             base.Init();
             _fsm.AddBehaviour<Shoot>(Behaviours.Shoot, ShootTickParameters);
             
-            _fsm.SetTransition(Behaviours.Chase, Flags.OnTargetReach, Behaviours.Shoot);
-            _fsm.SetTransition(Behaviours.Shoot, Flags.OnTargetLost, Behaviours.Patrol);
+            _fsm.SetTransition(Behaviours.Chase, Flags.OnTargetReach, Behaviours.Shoot, () => Debug.Log("Shoot"));
+            _fsm.SetTransition(Behaviours.Shoot, Flags.OnTargetLost, Behaviours.Patrol, () => Debug.Log("Chase"));
             
         }
         

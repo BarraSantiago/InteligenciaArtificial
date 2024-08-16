@@ -18,6 +18,7 @@ namespace States.Generic
             BehaviourActions behaviours = new BehaviourActions();
 
             if (!ownerTransform && !targetTransform) return default;
+            
             behaviours.AddMainThreadBehaviours(0,() =>
             {
                 ownerTransform.position += (targetTransform.position - ownerTransform.position).normalized *
@@ -26,17 +27,16 @@ namespace States.Generic
 
             behaviours.SetTransitionBehaviour(() =>
             {
-                if (Vector3.Distance(targetTransform.position, ownerTransform.position) < reachDistance)
-                {
-                    OnFlag?.Invoke(Flags.OnTargetReach);
-                }
-            });
-
-            behaviours.SetTransitionBehaviour(() =>
-            {
                 if (Vector3.Distance(targetTransform.position, ownerTransform.position) > lostDistance)
                 {
                     OnFlag?.Invoke(Flags.OnTargetLost);
+                    return;
+                }
+                
+                if (Vector3.Distance(targetTransform.position, ownerTransform.position) < reachDistance)
+                {
+                    OnFlag?.Invoke(Flags.OnTargetReach);
+                    return;
                 }
             });
 
