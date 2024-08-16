@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace States.Creeper
 {
@@ -9,14 +7,11 @@ namespace States.Creeper
         public override BehaviourActions GetTickBehaviour(params object[] parameters)
         {
             BehaviourActions behaviours = new BehaviourActions();
-        
+
             GameObject ownerObject = parameters[0] as GameObject;
-        
-            behaviours.AddMainThreadBehaviours(1,() =>
-            {
-                ownerObject.SetActive( false);
-            });
-        
+
+            behaviours.AddMainThreadBehaviours(1, () => { ownerObject.SetActive(false); });
+
             return behaviours;
         }
 
@@ -24,8 +19,8 @@ namespace States.Creeper
         {
             BehaviourActions behaviours = new BehaviourActions();
             behaviours.AddMultiThreadableBehaviours(0, () => { Debug.Log("Explode!"); });
-        
-        
+
+
             return behaviours;
         }
 

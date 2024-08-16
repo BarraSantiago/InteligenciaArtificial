@@ -44,9 +44,9 @@ namespace States
         {
             transitionBehaviour = behaviour;
         }
-        
+
         public Dictionary<int, List<Action>> MainThreadBehaviour => mainThreadBehaviour;
-        public ConcurrentDictionary<int, ConcurrentBag<Action>> MultiThreadablesBehaviour => multiThreadablesBehaviour ;
+        public ConcurrentDictionary<int, ConcurrentBag<Action>> MultiThreadablesBehaviour => multiThreadablesBehaviour;
         public Action TransitionBehaviour => transitionBehaviour;
     }
 

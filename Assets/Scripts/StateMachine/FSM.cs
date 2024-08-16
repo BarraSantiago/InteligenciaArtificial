@@ -105,7 +105,8 @@ namespace StateMachine
             int executionOrder = 0;
 
             while (behaviourActions.MainThreadBehaviour != null && behaviourActions.MainThreadBehaviour.Count > 0 ||
-                   behaviourActions.MultiThreadablesBehaviour != null && behaviourActions.MultiThreadablesBehaviour.Count > 0)
+                   behaviourActions.MultiThreadablesBehaviour != null &&
+                   behaviourActions.MultiThreadablesBehaviour.Count > 0)
             {
                 Task multithreadableBehaviour = new Task(() =>
                 {

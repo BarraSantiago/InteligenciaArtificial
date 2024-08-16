@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using Units;
 using UnityEngine;
 
@@ -18,8 +17,8 @@ namespace States.Generic
             BehaviourActions behaviours = new BehaviourActions();
 
             if (!ownerTransform && !targetTransform) return default;
-            
-            behaviours.AddMainThreadBehaviours(0,() =>
+
+            behaviours.AddMainThreadBehaviours(0, () =>
             {
                 ownerTransform.position += (targetTransform.position - ownerTransform.position).normalized *
                                            (speed * Time.deltaTime);
@@ -32,7 +31,7 @@ namespace States.Generic
                     OnFlag?.Invoke(Flags.OnTargetLost);
                     return;
                 }
-                
+
                 if (Vector3.Distance(targetTransform.position, ownerTransform.position) < reachDistance)
                 {
                     OnFlag?.Invoke(Flags.OnTargetReach);
