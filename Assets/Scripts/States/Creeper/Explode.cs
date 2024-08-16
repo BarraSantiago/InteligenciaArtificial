@@ -1,18 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using UnityEngine;
 
 namespace States.Creeper
 {
     public sealed class ExplodeState : State
     {
-        public override List<Action> GetTickBehaviour(params object[] parameters)
+        public override BehaviourActions GetTickBehaviour(params object[] parameters)
         {
-            List<Action> behaviours = new List<Action>();
+            BehaviourActions behaviours = new BehaviourActions();
         
             GameObject ownerObject = parameters[0] as GameObject;
         
-            behaviours.Add(() =>
+            behaviours.AddMainThreadBehaviours(1,() =>
             {
                 ownerObject.SetActive( false);
             });
@@ -20,18 +20,18 @@ namespace States.Creeper
             return behaviours;
         }
 
-        public override List<Action> GetOnEnterBehaviour(params object[] parameters)
+        public override BehaviourActions GetOnEnterBehaviour(params object[] parameters)
         {
-            List<Action> behaviours = new List<Action>();
-            behaviours.Add(() => { Debug.Log("Explode!"); });
+            BehaviourActions behaviours = new BehaviourActions();
+            behaviours.AddMultiThreadableBehaviours(0, () => { Debug.Log("Explode!"); });
         
         
             return behaviours;
         }
 
-        public override List<Action> GetOnExitBehaviour(params object[] parameters)
+        public override BehaviourActions GetOnExitBehaviour(params object[] parameters)
         {
-            return new List<Action>();
+            return default;
         }
     }
 }

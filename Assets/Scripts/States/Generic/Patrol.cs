@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Units;
 using UnityEngine;
 
@@ -9,9 +8,9 @@ namespace States.Generic
     {
         private bool direction;
 
-        public override List<Action> GetTickBehaviour(params object[] parameters)
+        public override BehaviourActions GetTickBehaviour(params object[] parameters)
         {
-            List<Action> behaviours = new List<Action>();
+            BehaviourActions behaviours = new BehaviourActions();
 
             Transform ownerTransform = parameters[0] as Transform;
             Transform wayPoint1 = parameters[1] as Transform;
@@ -20,18 +19,20 @@ namespace States.Generic
             float speed = Convert.ToSingle(parameters[4]);
             float chaseDistance = Convert.ToSingle(parameters[5]);
 
-            behaviours.Add(() =>
+            behaviours.AddMainThreadBehaviours(0, () =>
             {
-                if (Vector3.Distance(ownerTransform.position, direction ? wayPoint1.position : wayPoint2.position) < 0.2f)
+                if (Vector3.Distance(ownerTransform.position, direction ? wayPoint1.position : wayPoint2.position) <
+                    0.2f)
                 {
                     direction = !direction;
                 }
 
                 ownerTransform.position +=
-                    (direction ? wayPoint1.position : wayPoint2.position - ownerTransform.position).normalized * (speed * Time.deltaTime);
+                    (direction ? wayPoint1.position : wayPoint2.position - ownerTransform.position).normalized *
+                    (speed * Time.deltaTime);
             });
 
-            behaviours.Add(() =>
+            behaviours.SetTransitionBehaviour(() =>
             {
                 if (Vector3.Distance(ownerTransform.position, chaseTarget.position) < chaseDistance)
                 {
@@ -42,15 +43,14 @@ namespace States.Generic
             return behaviours;
         }
 
-        public override List<Action> GetOnEnterBehaviour(params object[] parameters)
+        public override BehaviourActions GetOnEnterBehaviour(params object[] parameters)
         {
-            return new List<Action>();
+            return default;
         }
 
-        public override List<Action> GetOnExitBehaviour(params object[] parameters)
+        public override BehaviourActions GetOnExitBehaviour(params object[] parameters)
         {
-            return new List<Action>();
+            return default;
         }
     }
-
 }

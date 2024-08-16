@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using States;
 
 namespace StateMachine
 {
@@ -15,6 +17,19 @@ namespace StateMachine
         private readonly Dictionary<int, Func<object[]>> _behaviourOnExitParameters;
         private readonly int[,] _transitions;
 
+        ParallelOptions parallelOptions = new ParallelOptions()
+        {
+            MaxDegreeOfParallelism = 32 
+        };
+
+        private BehaviourActions GetCurrentStateOnEnterBehaviours => _behaviours[_currentState]
+            .GetOnEnterBehaviour(_behaviourOnEnterParameters[_currentState]?.Invoke());
+
+        private BehaviourActions GetCurrentStateOnExitBehaviours => _behaviours[_currentState]
+            .GetOnExitBehaviour(_behaviourOnEnterParameters[_currentState]?.Invoke());
+
+        private BehaviourActions GetCurrentStateTickBehaviours => _behaviours[_currentState]
+            .GetTickBehaviour(_behaviourOnEnterParameters[_currentState]?.Invoke());
 
         public FSM()
         {
@@ -64,19 +79,11 @@ namespace StateMachine
         {
             if (_transitions[_currentState, Convert.ToInt32(flag)] == UNNASIGNED_TRANSITION) return;
 
-            foreach (Action behaviour in _behaviours[_currentState]
-                         .GetOnExitBehaviour(_behaviourOnEnterParameters[_currentState]?.Invoke()))
-            {
-                behaviour.Invoke();
-            }
+            ExecuteBehaviour(GetCurrentStateOnExitBehaviours);
 
             _currentState = _transitions[_currentState, Convert.ToInt32(flag)];
-            
-            foreach (Action behaviour in _behaviours[_currentState]
-                         .GetOnEnterBehaviour(_behaviourOnEnterParameters[_currentState]?.Invoke()))
-            {
-                behaviour.Invoke();
-            }
+
+            ExecuteBehaviour(GetCurrentStateOnEnterBehaviours);
         }
 
 
@@ -84,11 +91,50 @@ namespace StateMachine
         {
             if (!_behaviours.ContainsKey(_currentState)) return;
 
-            foreach (Action behaviour in _behaviours[_currentState]
-                         .GetTickBehaviour(_behaviourTickParameters[_currentState]?.Invoke()))
+            ExecuteBehaviour(GetCurrentStateTickBehaviours);
+        }
+
+        private void ExecuteBehaviour(BehaviourActions behaviourActions)
+        {
+            if (behaviourActions.Equals(default(BehaviourActions))) return;
+
+            int executionOrder = 0;
+
+            while (behaviourActions.MainThreadBehaviour.Count > 0 ||
+                   behaviourActions.MultiThreadablesBehaviour.Count > 0)
             {
-                behaviour.Invoke();
+                Task multithreadableBehaviour = new Task(() =>
+                {
+                    if (!behaviourActions.MultiThreadablesBehaviour.ContainsKey(executionOrder)) return;
+                    
+                    Parallel.ForEach(behaviourActions.MultiThreadablesBehaviour[executionOrder], parallelOptions,
+                        (behaviour) =>
+                        {
+                            (behaviour)?.Invoke(); 
+                                
+                        });
+                    behaviourActions.MultiThreadablesBehaviour.TryRemove(executionOrder, out _);
+                });
+
+                multithreadableBehaviour.Start();
+
+                if (behaviourActions.MainThreadBehaviour.ContainsKey(executionOrder))
+                {
+                    foreach (var action in behaviourActions.MainThreadBehaviour[executionOrder])
+                    {
+                        action.Invoke();
+                    }
+
+                    behaviourActions.MainThreadBehaviour.Remove(executionOrder);
+                }
+
+                multithreadableBehaviour.Wait();
+
+                executionOrder++;
             }
+
+
+            behaviourActions.TransitionBehaviour?.Invoke();
         }
     }
 }

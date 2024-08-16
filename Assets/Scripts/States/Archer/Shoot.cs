@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using Units;
 using UnityEngine;
 using Utils;
@@ -10,9 +10,9 @@ namespace States.Archer
     {
         private const float SHOOTCOOLDOWN = 3;
         private float _lastAttack = -SHOOTCOOLDOWN;
-        public override List<Action> GetTickBehaviour(params object[] parameters)
+        public override BehaviourActions GetTickBehaviour(params object[] parameters)
         {
-            List<Action> behaviours = new List<Action>();
+            BehaviourActions behaviours = new BehaviourActions();
 
             GameObject arrowPrefab = parameters[0] as GameObject;
             Transform ownerTransform = parameters[1] as Transform;
@@ -20,7 +20,7 @@ namespace States.Archer
             float shootForce = Convert.ToSingle(parameters[3]);
             float lostDistance = Convert.ToSingle(parameters[4]);
 
-            behaviours.Add(() =>
+            behaviours.AddMainThreadBehaviours(0,() =>
             {
                 if (Time.time - _lastAttack < SHOOTCOOLDOWN) return;
                 
@@ -29,7 +29,7 @@ namespace States.Archer
                 _lastAttack = Time.time;
             });
             
-            behaviours.Add(() =>
+            behaviours.SetTransitionBehaviour(() =>
             {
                 if (Vector3.Distance(targetTransform.position, ownerTransform.position) > lostDistance)
                 {
@@ -39,14 +39,14 @@ namespace States.Archer
             return behaviours;
         }
 
-        public override List<Action> GetOnEnterBehaviour(params object[] parameters)
+        public override BehaviourActions GetOnEnterBehaviour(params object[] parameters)
         {
-            return new List<Action>();
+            return default;
         }
 
-        public override List<Action> GetOnExitBehaviour(params object[] parameters)
+        public override BehaviourActions GetOnExitBehaviour(params object[] parameters)
         {
-            return new List<Action>();
+            return default;
         }
 
 
