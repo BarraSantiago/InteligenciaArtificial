@@ -24,5 +24,10 @@
         {
             return cost;
         }
+        
+        public bool Equals(INode<Coordinate> other)
+        {
+            return coordinate.Equals(other.GetCoordinate());
+        }
     }
 }
