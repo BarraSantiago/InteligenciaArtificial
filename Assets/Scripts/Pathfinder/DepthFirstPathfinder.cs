@@ -12,7 +12,7 @@ public class DepthFirstPathfinder<NodeType> : Pathfinder<NodeType> where NodeTyp
         throw new System.NotImplementedException();
     }
 
-    protected override bool IsBloqued(NodeType node)
+    protected override bool IsBlocked(NodeType node)
     {
         throw new System.NotImplementedException();
     }

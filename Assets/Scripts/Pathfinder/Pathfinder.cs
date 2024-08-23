@@ -43,7 +43,7 @@ public abstract class Pathfinder<NodeType> where NodeType : INode
             foreach (NodeType neighbor in GetNeighbors(currentNode))
             {
                 if (!nodes.ContainsKey(neighbor) ||
-                IsBloqued(neighbor) ||
+                IsBlocked(neighbor) ||
                 closedList.Contains(neighbor))
                 {
                     continue;
@@ -91,5 +91,5 @@ public abstract class Pathfinder<NodeType> where NodeType : INode
 
     protected abstract int MoveToNeighborCost(NodeType A, NodeType b);
 
-    protected abstract bool IsBloqued(NodeType node);
+    protected abstract bool IsBlocked(NodeType node);
 }

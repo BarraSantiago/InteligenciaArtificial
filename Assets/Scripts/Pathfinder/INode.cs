@@ -1,10 +1,13 @@
 ﻿public interface INode
 {
-    public bool IsBloqued();
+    public bool IsBlocked();
+    public int GetCost();
+    
 }
 
-public interface INode<Coorninate> 
+public interface INode<Coordinate> 
 {
-    public void SetCoordinate(Coorninate coordinateType);
-    public Coorninate GetCoordinate();
+    public void SetCoordinate(Coordinate coordinateType);
+    
+    public Coordinate GetCoordinate();
 }

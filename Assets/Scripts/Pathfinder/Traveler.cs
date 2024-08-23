@@ -22,7 +22,7 @@ public class Traveler : MonoBehaviour
         destinationNode = new Node<Vector2Int>();
         destinationNode.SetCoordinate(new Vector2Int(Random.Range(0, 10), Random.Range(0, 10)));
 
-        List<Node<Vector2Int>> path = Pathfinder.FindPath(startNode, destinationNode, grapfView.grapf.nodes);
+        List<Node<Vector2Int>> path = Pathfinder.FindPath(startNode, destinationNode, grapfView.Graph.nodes);
         StartCoroutine(Move(path));
     }
 

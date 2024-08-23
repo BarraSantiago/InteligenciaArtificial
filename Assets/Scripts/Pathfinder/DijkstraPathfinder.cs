@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-public class DijstraPathfinder<NodeType> : Pathfinder<NodeType> where NodeType : INode
+public class DijkstraPathfinder<NodeType> : Pathfinder<NodeType> where NodeType : INode
 {
     ICollection<NodeType> graph;
     protected override int Distance(NodeType A, NodeType B)
@@ -13,7 +13,7 @@ public class DijstraPathfinder<NodeType> : Pathfinder<NodeType> where NodeType :
         throw new System.NotImplementedException();
     }
 
-    protected override bool IsBloqued(NodeType node)
+    protected override bool IsBlocked(NodeType node)
     {
         throw new System.NotImplementedException();
     }
