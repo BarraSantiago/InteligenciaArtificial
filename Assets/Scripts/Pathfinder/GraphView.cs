@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Pathfinder
@@ -7,7 +8,9 @@ namespace Pathfinder
         public Vector2IntGraph<Node<Vector2Int>> Graph;
         public Node<Vector2Int> startNode;
         public Node<Vector2Int> destinationNode;
-        void Start()
+        public List<Node<Vector2Int>> path;
+        
+        void Awake()
         {
             Graph = new Vector2IntGraph<Node<Vector2Int>>(10, 10);
         }
@@ -18,13 +21,17 @@ namespace Pathfinder
                 return;
             foreach (Node<Vector2Int> node in Graph.nodes)
             {
-                if(node.Equals(startNode))
+                if(node.EqualsTo(startNode))
                 {
                     Gizmos.color = Color.blue;
                 }
-                else if(node.Equals(destinationNode))
+                else if(node.EqualsTo(destinationNode))
                 {
                     Gizmos.color = Color.cyan;
+                }
+                else if(path.Contains(node))
+                {
+                    Gizmos.color = Color.yellow;
                 }
                 else
                 {

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Pathfinder
 {
-    public class BreadthPathfinder<NodeType> : Pathfinder<NodeType> where NodeType : INode<Vector2Int>, INode
+    public class BreadthPathfinder<NodeType> : Pathfinder<NodeType> where NodeType : INode<Vector2Int>, INode, new()
     {
         protected override int Distance(NodeType A, NodeType B)
         {

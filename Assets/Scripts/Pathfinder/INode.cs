@@ -3,8 +3,6 @@
     public interface INode
     {
         public bool IsBlocked();
-        public int GetCost();
-    
     }
 
     public interface INode<Coordinate> 

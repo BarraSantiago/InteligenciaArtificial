@@ -29,7 +29,11 @@ namespace Pathfinder
             graphView.startNode = startNode;
             graphView.destinationNode = destinationNode;
 
-            List<Node<Vector2Int>> path = Pathfinder.FindPath(startNode, destinationNode, graphView.Graph.nodes);
+            List<Node<Vector2Int>> path = Pathfinder.FindPath(startNode, destinationNode);
+            
+            graphView.path = path;
+            Debug.Log("Start: " + startNode.GetCoordinate());
+            Debug.Log("Destination: " + destinationNode.GetCoordinate());
             StartCoroutine(Move(path));
         }
 

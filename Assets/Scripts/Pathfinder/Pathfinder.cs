@@ -4,14 +4,16 @@ using UnityEngine;
 
 namespace Pathfinder
 {
-    public abstract class Pathfinder<NodeType> where NodeType : INode<Vector2Int>, INode
+    public abstract class Pathfinder<NodeType> where NodeType : INode<Vector2Int>, INode, new()
     {
-        public List<NodeType> FindPath(NodeType startNode, NodeType destinationNode, ICollection<NodeType> graph)
+        protected Vector2IntGraph<NodeType> Graph;
+
+        public List<NodeType> FindPath(NodeType startNode, NodeType destinationNode)
         {
             Dictionary<NodeType, (NodeType Parent, int AcumulativeCost, int Heuristic)> nodes =
                 new Dictionary<NodeType, (NodeType Parent, int AcumulativeCost, int Heuristic)>();
 
-            foreach (NodeType node in graph)
+            foreach (NodeType node in Graph.nodes)
             {
                 nodes.Add(node, (default, 0, 0));
             }
@@ -20,13 +22,10 @@ namespace Pathfinder
             List<NodeType> closedList = new List<NodeType>();
 
             openList.Add(startNode);
-
-            var startNodeCoor = startNode.GetCoordinate();
-
+            
             foreach (var node in nodes.Keys.ToList())
             {
-                var nodeCoor = node.GetCoordinate();
-                if (nodeCoor.x != startNodeCoor.x || nodeCoor.y != startNodeCoor.y) continue;
+                if (NodesEquals(startNode, node)) continue;
 
                 var nodeData = nodes[node];
                 nodes.Remove(node);
@@ -43,6 +42,7 @@ namespace Pathfinder
                 {
                     if (nodes[openList[i]].AcumulativeCost + nodes[openList[i]].Heuristic >=
                         nodes[currentNode].AcumulativeCost + nodes[currentNode].Heuristic) continue;
+                    
                     currentNode = openList[i];
                     currentIndex = i;
                 }
@@ -62,15 +62,14 @@ namespace Pathfinder
                         continue;
                     }
 
-                    int tentativeNewAcumulatedCost = 0;
+                    int aproxAcumulativeCost = 0;
 
-                    tentativeNewAcumulatedCost += nodes[currentNode].AcumulativeCost;
-                    tentativeNewAcumulatedCost += MoveToNeighborCost(currentNode, neighbor);
+                    aproxAcumulativeCost += nodes[currentNode].AcumulativeCost;
+                    aproxAcumulativeCost += MoveToNeighborCost(currentNode, neighbor);
 
-                    if (openList.Contains(neighbor) &&
-                        tentativeNewAcumulatedCost >= nodes[currentNode].AcumulativeCost) continue;
+                    if (openList.Contains(neighbor) && aproxAcumulativeCost >= nodes[currentNode].AcumulativeCost) continue;
 
-                    nodes[neighbor] = (currentNode, tentativeNewAcumulatedCost, Distance(neighbor, destinationNode));
+                    nodes[neighbor] = (currentNode, aproxAcumulativeCost, Distance(neighbor, destinationNode));
 
                     if (!openList.Contains(neighbor))
                     {
@@ -89,7 +88,7 @@ namespace Pathfinder
                 while (!NodesEquals(currentNode, startNode))
                 {
                     path.Add(currentNode);
-
+                    
                     foreach (var node in nodes.Keys.ToList().Where(node => NodesEquals(currentNode, node)))
                     {
                         currentNode = nodes[node].Parent;

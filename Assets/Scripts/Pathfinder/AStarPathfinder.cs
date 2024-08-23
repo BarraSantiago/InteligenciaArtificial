@@ -13,14 +13,13 @@ namespace Pathfinder
 
     public class AStarPathfinder<NodeType> : Pathfinder<NodeType> where NodeType : INode<Vector2Int>, INode, new()
     {
-        private Vector2IntGraph<NodeType> graph;
-
         private Dictionary<NodeType, List<Transition<NodeType>>> transitions =
             new Dictionary<NodeType, List<Transition<NodeType>>>();
 
         public AStarPathfinder(Vector2IntGraph<NodeType> graph)
         {
-            this.graph = graph;
+            this.Graph = graph;
+            
             graph.nodes.ForEach(node =>
             {
                 List<Transition<NodeType>> transitionsList = new List<Transition<NodeType>>();
@@ -39,17 +38,18 @@ namespace Pathfinder
             });
         }
         
-        public AStarPathfinder(int x, int y)
+        public AStarPathfinder(int sizeX, int sizeY)
         {
-            graph = new Vector2IntGraph<NodeType>(x, y);
+            Graph = new Vector2IntGraph<NodeType>(sizeX, sizeY);
         }
         
         protected override int Distance(NodeType A, NodeType B)
         {
             int distance = 0;
         
+            // TODO NODE COORDINATE ARE ALWAYS 0,0
             var aCoor = (A).GetCoordinate();
-            var bCoor = (A).GetCoordinate();
+            var bCoor = (B).GetCoordinate();
         
             distance += Math.Abs(aCoor.x - bCoor.x);
             distance += Math.Abs(aCoor.y - bCoor.y);
@@ -60,12 +60,15 @@ namespace Pathfinder
         protected override ICollection<NodeType> GetNeighbors(NodeType node)
         {
             List<NodeType> neighbors = new List<NodeType>();
+            
             var nodeCoor = node.GetCoordinate();
-            graph.nodes.ForEach(neighbor =>
+            
+            Graph.nodes.ForEach(neighbor =>
             {
                 var neighborCoor = neighbor.GetCoordinate();
                 if ((neighborCoor.x == nodeCoor.x && Math.Abs(neighborCoor.y - nodeCoor.y) == 1) ||
-                    (neighborCoor.y == nodeCoor.y && Math.Abs(neighborCoor.x - nodeCoor.x) == 1))
+                    (neighborCoor.y == nodeCoor.y && Math.Abs(neighborCoor.x - nodeCoor.x) == 1) ||
+                    (Math.Abs(neighborCoor.y - nodeCoor.y) == 1 && Math.Abs(neighborCoor.x - nodeCoor.x) == 1))
                 {
                     neighbors.Add(neighbor);
                 }
@@ -92,7 +95,7 @@ namespace Pathfinder
 
             transition?.ForEach(t =>
             {
-                if (t.to.Equals(B))
+                if (NodesEquals(t.to, B))
                 {
                     cost = t.cost;
                 }

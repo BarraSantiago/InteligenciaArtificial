@@ -3,7 +3,6 @@
     public class Node<Coordinate> : INode, INode<Coordinate>
     {
         private Coordinate coordinate;
-        private int cost;
     
         public void SetCoordinate(Coordinate coordinate)
         {
@@ -19,13 +18,8 @@
         {
             return false;
         }
-
-        public int GetCost()
-        {
-            return cost;
-        }
         
-        public bool Equals(INode<Coordinate> other)
+        public bool EqualsTo(INode<Coordinate> other)
         {
             return coordinate.Equals(other.GetCoordinate());
         }
