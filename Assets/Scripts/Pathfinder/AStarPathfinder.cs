@@ -47,7 +47,6 @@ namespace Pathfinder
         {
             int distance = 0;
         
-            // TODO NODE COORDINATE ARE ALWAYS 0,0
             var aCoor = (A).GetCoordinate();
             var bCoor = (B).GetCoordinate();
         

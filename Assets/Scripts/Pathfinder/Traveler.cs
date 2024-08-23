@@ -9,17 +9,17 @@ namespace Pathfinder
     {
         [FormerlySerializedAs("grapfView")] public GraphView graphView;
 
-        private AStarPathfinder<Node<Vector2Int>> Pathfinder;
-        //private DijstraPathfinder<Node<Vector2Int>> Pathfinder;
+        //private AStarPathfinder<Node<Vector2Int>> Pathfinder;
+        //private DijkstraPathfinder<Node<Vector2Int>> Pathfinder;
         //private DepthFirstPathfinder<Node<Vector2Int>> Pathfinder;
-        //private BreadthPathfinder<Node<Vector2Int>> Pathfinder;
+        private BreadthPathfinder<Node<Vector2Int>> Pathfinder;
 
         private Node<Vector2Int> startNode;
         private Node<Vector2Int> destinationNode;
 
         void Start()
         {
-            Pathfinder = new AStarPathfinder<Node<Vector2Int>>(graphView.Graph);
+            Pathfinder = new BreadthPathfinder<Node<Vector2Int>>(graphView.Graph);
             startNode = new Node<Vector2Int>();
             startNode.SetCoordinate(new Vector2Int(Random.Range(0, 10), Random.Range(0, 10)));
 
