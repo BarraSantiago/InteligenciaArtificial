@@ -1,25 +1,28 @@
-﻿public class Node<Coordinate> : INode, INode<Coordinate>
+﻿namespace Pathfinder
 {
-    private Coordinate coordinate;
-    private int cost;
+    public class Node<Coordinate> : INode, INode<Coordinate>
+    {
+        private Coordinate coordinate;
+        private int cost;
     
-    public void SetCoordinate(Coordinate coordinate)
-    {
-        this.coordinate = coordinate;
-    }
+        public void SetCoordinate(Coordinate coordinate)
+        {
+            this.coordinate = coordinate;
+        }
 
-    public Coordinate GetCoordinate()
-    {
-        return coordinate;
-    }
+        public Coordinate GetCoordinate()
+        {
+            return coordinate;
+        }
 
-    public bool IsBlocked()
-    {
-        return false;
-    }
+        public bool IsBlocked()
+        {
+            return false;
+        }
 
-    public int GetCost()
-    {
-        return cost;
+        public int GetCost()
+        {
+            return cost;
+        }
     }
 }

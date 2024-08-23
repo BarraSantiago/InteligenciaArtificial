@@ -1,26 +1,26 @@
 using UnityEngine;
 
-public class GrapfView : MonoBehaviour
+namespace Pathfinder
 {
-    public Vector2IntGraph<Node<Vector2Int>> Graph;
-
-    void Start()
+    public class GrapfView : MonoBehaviour
     {
-        Graph = new Vector2IntGraph<Node<Vector2Int>>(10, 10);
-    }
+        public Vector2IntGraph<Node<Vector2Int>> Graph;
 
-    private void OnDrawGizmos()
-    {
-        if (!Application.isPlaying)
-            return;
-        foreach (Node<Vector2Int> node in Graph.nodes)
+        void Start()
         {
-            if (node.IsBlocked())
-                Gizmos.color = Color.red;
-            else
-                Gizmos.color = Color.green;
-            
-            Gizmos.DrawWireSphere(new Vector3(node.GetCoordinate().x, node.GetCoordinate().y), 0.1f);
+            Graph = new Vector2IntGraph<Node<Vector2Int>>(10, 10);
+        }
+
+        private void OnDrawGizmos()
+        {
+            if (!Application.isPlaying)
+                return;
+            foreach (Node<Vector2Int> node in Graph.nodes)
+            {
+                Gizmos.color = node.IsBlocked() ? Color.red : Color.green;
+
+                Gizmos.DrawWireSphere(new Vector3(node.GetCoordinate().x, node.GetCoordinate().y), 0.1f);
+            }
         }
     }
 }

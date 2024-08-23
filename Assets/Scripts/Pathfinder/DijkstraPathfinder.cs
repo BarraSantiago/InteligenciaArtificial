@@ -1,30 +1,33 @@
 ﻿using System.Collections.Generic;
 
-public class DijkstraPathfinder<NodeType> : Pathfinder<NodeType> where NodeType : INode
+namespace Pathfinder
 {
-    ICollection<NodeType> graph;
-    protected override int Distance(NodeType A, NodeType B)
+    public class DijkstraPathfinder<NodeType> : Pathfinder<NodeType> where NodeType : INode
     {
-        throw new System.NotImplementedException();
-    }
+        ICollection<NodeType> graph;
+        protected override int Distance(NodeType A, NodeType B)
+        {
+            throw new System.NotImplementedException();
+        }
 
-    protected override ICollection<NodeType> GetNeighbors(NodeType node)
-    {
-        throw new System.NotImplementedException();
-    }
+        protected override ICollection<NodeType> GetNeighbors(NodeType node)
+        {
+            throw new System.NotImplementedException();
+        }
 
-    protected override bool IsBlocked(NodeType node)
-    {
-        throw new System.NotImplementedException();
-    }
+        protected override bool IsBlocked(NodeType node)
+        {
+            throw new System.NotImplementedException();
+        }
 
-    protected override int MoveToNeighborCost(NodeType A, NodeType b)
-    {
-        throw new System.NotImplementedException();
-    }
+        protected override int MoveToNeighborCost(NodeType A, NodeType b)
+        {
+            throw new System.NotImplementedException();
+        }
 
-    protected override bool NodesEquals(NodeType A, NodeType B)
-    {
-        throw new System.NotImplementedException();
+        protected override bool NodesEquals(NodeType A, NodeType B)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

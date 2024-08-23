@@ -1,13 +1,16 @@
-﻿public interface INode
+﻿namespace Pathfinder
 {
-    public bool IsBlocked();
-    public int GetCost();
+    public interface INode
+    {
+        public bool IsBlocked();
+        public int GetCost();
     
-}
+    }
 
-public interface INode<Coordinate> 
-{
-    public void SetCoordinate(Coordinate coordinateType);
+    public interface INode<Coordinate> 
+    {
+        public void SetCoordinate(Coordinate coordinateType);
     
-    public Coordinate GetCoordinate();
+        public Coordinate GetCoordinate();
+    }
 }

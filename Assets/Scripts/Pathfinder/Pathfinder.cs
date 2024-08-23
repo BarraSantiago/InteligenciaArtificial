@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Pathfinder;
 
 public abstract class Pathfinder<NodeType> where NodeType : INode
 {
