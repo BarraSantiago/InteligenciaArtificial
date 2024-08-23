@@ -1,12 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Pathfinder
 {
     public class Traveler : MonoBehaviour
     {
-        public GrapfView grapfView;
+        [FormerlySerializedAs("grapfView")] public GraphView graphView;
 
         private AStarPathfinder<Node<Vector2Int>> Pathfinder;
         //private DijstraPathfinder<Node<Vector2Int>> Pathfinder;
@@ -18,17 +19,17 @@ namespace Pathfinder
 
         void Start()
         {
-            Pathfinder = new AStarPathfinder<Node<Vector2Int>>(grapfView.Graph);
+            Pathfinder = new AStarPathfinder<Node<Vector2Int>>(graphView.Graph);
             startNode = new Node<Vector2Int>();
             startNode.SetCoordinate(new Vector2Int(Random.Range(0, 10), Random.Range(0, 10)));
 
             destinationNode = new Node<Vector2Int>();
             destinationNode.SetCoordinate(new Vector2Int(Random.Range(0, 10), Random.Range(0, 10)));
 
-            grapfView.startNode = startNode;
-            grapfView.destinationNode = destinationNode;
+            graphView.startNode = startNode;
+            graphView.destinationNode = destinationNode;
 
-            List<Node<Vector2Int>> path = Pathfinder.FindPath(startNode, destinationNode, grapfView.Graph.nodes);
+            List<Node<Vector2Int>> path = Pathfinder.FindPath(startNode, destinationNode, graphView.Graph.nodes);
             StartCoroutine(Move(path));
         }
 
