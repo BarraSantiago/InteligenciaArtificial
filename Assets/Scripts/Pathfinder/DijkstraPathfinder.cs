@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace Pathfinder
 {
-    public class DijkstraPathfinder<NodeType> : Pathfinder<NodeType> where NodeType : INode
+    public class DijkstraPathfinder<NodeType> : Pathfinder<NodeType> where NodeType : INode<Vector2Int>, INode
     {
         ICollection<NodeType> graph;
         protected override int Distance(NodeType A, NodeType B)
@@ -20,7 +21,7 @@ namespace Pathfinder
             throw new System.NotImplementedException();
         }
 
-        protected override int MoveToNeighborCost(NodeType A, NodeType b)
+        protected override int MoveToNeighborCost(NodeType A, NodeType B)
         {
             throw new System.NotImplementedException();
         }
