@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+using Utils;
 
 namespace Pathfinder
 {
-    public class Vector2IntGraph<NodeType> where NodeType : INode<UnityEngine.Vector2Int>, INode, new()
+    public class Vector2IntGraph<NodeType> where NodeType : INode<Vec2Int>, INode, new()
     { 
         public List<NodeType> nodes = new List<NodeType>();
 
@@ -13,7 +14,7 @@ namespace Pathfinder
                 for (int j = 0; j < y; j++)
                 {
                     NodeType node = new NodeType();
-                    node.SetCoordinate(new UnityEngine.Vector2Int(i, j));
+                    node.SetCoordinate(new Vec2Int(i, j));
                     nodes.Add(node);
                 }
             }

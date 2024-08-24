@@ -1,25 +1,26 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Utils;
 
 namespace Pathfinder
 {
     public class GraphView : MonoBehaviour
     {
-        public Vector2IntGraph<Node<Vector2Int>> Graph;
-        public Node<Vector2Int> startNode;
-        public Node<Vector2Int> destinationNode;
-        public List<Node<Vector2Int>> path;
+        public Vector2IntGraph<Node<Vec2Int>> Graph;
+        public Node<Vec2Int> startNode;
+        public Node<Vec2Int> destinationNode;
+        public List<Node<Vec2Int>> path;
         
         void Awake()
         {
-            Graph = new Vector2IntGraph<Node<Vector2Int>>(10, 10);
+            Graph = new Vector2IntGraph<Node<Vec2Int>>(10, 10);
         }
 
         private void OnDrawGizmos()
         {
             if (!Application.isPlaying)
                 return;
-            foreach (Node<Vector2Int> node in Graph.nodes)
+            foreach (Node<Vec2Int> node in Graph.nodes)
             {
                 if(node.EqualsTo(startNode))
                 {

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
+using Utils;
 
 namespace Pathfinder
 {
-    public class BreadthPathfinder<NodeType> : Pathfinder<NodeType> where NodeType : INode<Vector2Int>, INode, new()
+    public class BreadthPathfinder<NodeType> : Pathfinder<NodeType> where NodeType : INode<Vec2Int>, INode, new()
     {
         
         public BreadthPathfinder(Vector2IntGraph<NodeType> graph)

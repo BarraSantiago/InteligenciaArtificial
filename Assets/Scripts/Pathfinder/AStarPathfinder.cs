@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
+using Utils;
 
 namespace Pathfinder
 {
@@ -11,7 +11,7 @@ namespace Pathfinder
         public int distance;
     }
 
-    public class AStarPathfinder<NodeType> : Pathfinder<NodeType> where NodeType : INode<Vector2Int>, INode, new()
+    public class AStarPathfinder<NodeType> : Pathfinder<NodeType> where NodeType : INode<Vec2Int>, INode, new()
     {
         private Dictionary<NodeType, List<Transition<NodeType>>> transitions =
             new Dictionary<NodeType, List<Transition<NodeType>>>();

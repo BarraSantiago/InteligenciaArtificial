@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
+using Utils;
 
 namespace Pathfinder
 {
@@ -12,24 +13,24 @@ namespace Pathfinder
         //private AStarPathfinder<Node<Vector2Int>> Pathfinder;
         //private DijkstraPathfinder<Node<Vector2Int>> Pathfinder;
         //private DepthFirstPathfinder<Node<Vector2Int>> Pathfinder;
-        private BreadthPathfinder<Node<Vector2Int>> Pathfinder;
+        private BreadthPathfinder<Node<Vec2Int>> Pathfinder;
 
-        private Node<Vector2Int> startNode;
-        private Node<Vector2Int> destinationNode;
+        private Node<Vec2Int> startNode;
+        private Node<Vec2Int> destinationNode;
 
         void Start()
         {
-            Pathfinder = new BreadthPathfinder<Node<Vector2Int>>(graphView.Graph);
-            startNode = new Node<Vector2Int>();
-            startNode.SetCoordinate(new Vector2Int(Random.Range(0, 10), Random.Range(0, 10)));
+            Pathfinder = new BreadthPathfinder<Node<Vec2Int>>(graphView.Graph);
+            startNode = new Node<Vec2Int>();
+            startNode.SetCoordinate(new Vec2Int(Random.Range(0, 10), Random.Range(0, 10)));
 
-            destinationNode = new Node<Vector2Int>();
-            destinationNode.SetCoordinate(new Vector2Int(Random.Range(0, 10), Random.Range(0, 10)));
+            destinationNode = new Node<Vec2Int>();
+            destinationNode.SetCoordinate(new Vec2Int(Random.Range(0, 10), Random.Range(0, 10)));
 
             graphView.startNode = startNode;
             graphView.destinationNode = destinationNode;
 
-            List<Node<Vector2Int>> path = Pathfinder.FindPath(startNode, destinationNode);
+            List<Node<Vec2Int>> path = Pathfinder.FindPath(startNode, destinationNode);
             
             graphView.path = path;
             Debug.Log("Start: " + startNode.GetCoordinate());
@@ -37,9 +38,9 @@ namespace Pathfinder
             StartCoroutine(Move(path));
         }
 
-        public IEnumerator Move(List<Node<Vector2Int>> path)
+        public IEnumerator Move(List<Node<Vec2Int>> path)
         {
-            foreach (Node<Vector2Int> node in path)
+            foreach (Node<Vec2Int> node in path)
             {
                 transform.position = new Vector3(node.GetCoordinate().x, node.GetCoordinate().y);
                 yield return new WaitForSeconds(1.0f);
