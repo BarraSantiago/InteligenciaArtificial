@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Numerics;
 using System.Runtime.CompilerServices;
+using Vector2 = System.Numerics.Vector2;
 
 namespace Utils
 {

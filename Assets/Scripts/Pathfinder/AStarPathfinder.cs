@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using Utils;
 
 namespace Pathfinder
 {
-    struct Transition<NodeType>
+    public struct Transition<NodeType>
     {
         public NodeType to;
         public int cost;
@@ -13,10 +14,11 @@ namespace Pathfinder
 
     public class AStarPathfinder<NodeType> : Pathfinder<NodeType> where NodeType : INode<Vec2Int>, INode, new()
     {
-        private Dictionary<NodeType, List<Transition<NodeType>>> transitions =
+        public Dictionary<NodeType, List<Transition<NodeType>>> transitions =
             new Dictionary<NodeType, List<Transition<NodeType>>>();
 
-        public AStarPathfinder(Vector2IntGraph<NodeType> graph)
+        
+        public AStarPathfinder(Vector2IntGraph<NodeType> graph, int minCost = -1, int maxCost = 3)
         {
             this.Graph = graph;
             
@@ -30,7 +32,7 @@ namespace Pathfinder
                     transitionsList.Add(new Transition<NodeType>
                     {
                         to = neighbor,
-                        cost = 0,
+                        cost = RandomNumberGenerator.GetInt32(minCost, maxCost),
                         distance = Distance(node, neighbor)
                     });
                 });
