@@ -7,7 +7,7 @@ namespace Pathfinder
         public bool IsBlocked();
     }
 
-    public interface INode<Coordinate> : IEquatable<Coordinate>
+    public interface INode<Coordinate> : IEquatable<Coordinate> where Coordinate : IEquatable<Coordinate>
     {
         public void SetCoordinate(Coordinate coordinateType);
     

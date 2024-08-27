@@ -34,8 +34,6 @@ namespace Pathfinder
             
             graphView.Graph = _graph;
             
-            if(_pathfinderType == PathfinderType.AStar) graphView.UpdateVectors();
-            
             Pathfinder<Node<Vec2Int>> pathfinder = _pathfinderType switch
             {
                 PathfinderType.AStar => new AStarPathfinder<Node<Vec2Int>>(_graph),
@@ -44,8 +42,6 @@ namespace Pathfinder
                 PathfinderType.Depth => new DepthFirstPathfinder<Node<Vec2Int>>(_graph),
                 _ => new AStarPathfinder<Node<Vec2Int>>(_graph)
             };
-            
-            pathfinder = new AStarPathfinder<Node<Vec2Int>>(_graph);
             
             startNode = new Node<Vec2Int>();
             startNode.SetCoordinate(new Vec2Int(Random.Range(0, 10), Random.Range(0, 10)));

@@ -5,8 +5,6 @@ using Utils;
 
 namespace Pathfinder
 {
-    
-
     public class AStarPathfinder<NodeType> : Pathfinder<NodeType> where NodeType : INode<Vec2Int>, INode, new()
     {
         public AStarPathfinder(Vector2IntGraph<NodeType> graph, int minCost = -1, int maxCost = 3)

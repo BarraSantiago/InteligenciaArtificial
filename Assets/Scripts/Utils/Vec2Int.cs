@@ -4,7 +4,7 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace Utils
 {
-    public class Vec2Int
+    public class Vec2Int : IEquatable<Vec2Int>
     {
         private int m_X;
         private int m_Y;
