@@ -23,11 +23,6 @@ namespace Pathfinder
         private Node<Vec2Int> startNode;
         private Node<Vec2Int> destinationNode;
 
-        void Start()
-        {
-            StartPath();
-        }
-
         private void OnValidate()
         {
             StartPath();
@@ -38,6 +33,8 @@ namespace Pathfinder
             _graph = new Vector2IntGraph<Node<Vec2Int>>(10, 10);
             
             graphView.Graph = _graph;
+            
+            if(_pathfinderType == PathfinderType.AStar) graphView.UpdateVectors();
             
             Pathfinder<Node<Vec2Int>> pathfinder = _pathfinderType switch
             {

@@ -23,5 +23,10 @@
         {
             return coordinate.Equals(other.GetCoordinate());
         }
+
+        public bool Equals(Coordinate other)
+        {
+            return coordinate.Equals(other);
+        }
     }
 }

@@ -4,7 +4,8 @@ using Utils;
 
 namespace Pathfinder
 {
-    public class DijkstraPathfinder<NodeType> : Pathfinder<NodeType> where NodeType : INode<Vec2Int>, INode, new()
+    public class DijkstraPathfinder<NodeType> : Pathfinder<NodeType> 
+        where NodeType : INode<Vec2Int>, INode, new()
     { 
         public DijkstraPathfinder(Vector2IntGraph<NodeType> graph)
         {
