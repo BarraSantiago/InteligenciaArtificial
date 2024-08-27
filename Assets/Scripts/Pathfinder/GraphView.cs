@@ -94,10 +94,10 @@ namespace Pathfinder
             {
                 switch (node)
                 {
-                    case var _ when node.Equals(startNode):
+                    case var _ when node.EqualsTo(startNode):
                         Gizmos.color = Color.blue;
                         break;
-                    case var _ when node.Equals(destinationNode):
+                    case var _ when node.EqualsTo(destinationNode):
                         Gizmos.color = Color.cyan;
                         break;
                     case var _ when path.Contains(node):
@@ -114,7 +114,6 @@ namespace Pathfinder
                 if (Transitions == null) continue;
                 if (!Transitions.TryGetValue(node, out var transition1)) continue;
 
-                int id = 0;
                 foreach (Transition<Node<Vec2Int>> transition in transition1)
                 {
                     _transition = transition;
@@ -123,23 +122,9 @@ namespace Pathfinder
 
                     float red = normalized;
                     float green = 1 - normalized;
-
-                    Vector3 node1 = new Vector3(node.GetCoordinate().x, node.GetCoordinate().y);
-                    Vector3 node2 = new Vector3(_transition.to.GetCoordinate().x, _transition.to.GetCoordinate().y) - node1;
-
-                    Color color = transition.cost == 0 ? Color.blue : new Color(red, green, 0, 0.5f);
-                    string vectorId = id.ToString();
-
-                    if (!Vector3Debugger.ContainsVector(vectorId))
-                    {
-                        Vector3Debugger.AddVector(node1, node2, color, vectorId);
-                    }
-                    else
-                    {
-                        Vector3Debugger.UpdateVector(node1, node2, color, vectorId);
-                    }
-
-                    id++;
+                    Gizmos.color = transition.cost == 0 ? Color.blue : new Color(red, green, 0, 0.5f);
+                    Gizmos.DrawLine(new Vector3(node.GetCoordinate().x, node.GetCoordinate().y),
+                        new Vector3(_transition.to.GetCoordinate().x, _transition.to.GetCoordinate().y));
                 }
             }
         }
