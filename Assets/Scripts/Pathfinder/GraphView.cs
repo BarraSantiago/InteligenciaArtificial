@@ -44,11 +44,6 @@ namespace Pathfinder
             this.destinationNode = destinationNode;
         }
 
-        void Awake()
-        {
-            Graph = new Vector2IntGraph<Node<Vec2Int>>(10, 10);
-        }
-
         private void OnDrawGizmos()
         {
             if (!Application.isPlaying)
@@ -74,9 +69,10 @@ namespace Pathfinder
                 Gizmos.DrawSphere(new Vector3(node.GetCoordinate().x, node.GetCoordinate().y), 0.15f);
 
                 if (!showTransitions) continue;
-                if (!Transitions.ContainsKey(node)) continue;
+                if(Transitions == null) continue;
+                if (!Transitions.TryGetValue(node, out var transition1)) continue;
 
-                foreach (Transition<Node<Vec2Int>> transition in Transitions[node])
+                foreach (Transition<Node<Vec2Int>> transition in transition1)
                 {
                     _transition = transition;
 

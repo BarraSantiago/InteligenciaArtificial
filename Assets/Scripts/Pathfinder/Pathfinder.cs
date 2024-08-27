@@ -4,10 +4,19 @@ using Utils;
 
 namespace Pathfinder
 {
+    public struct Transition<NodeType>
+    {
+        public NodeType to;
+        public int cost;
+        public int distance;
+    }
+    
     public abstract class Pathfinder<NodeType> where NodeType : INode<Vec2Int>, INode, new()
     {
         protected Vector2IntGraph<NodeType> Graph;
-
+        
+        public Dictionary<NodeType, List<Transition<NodeType>>> transitions =
+            new Dictionary<NodeType, List<Transition<NodeType>>>();
         public List<NodeType> FindPath(NodeType startNode, NodeType destinationNode)
         {
             Dictionary<NodeType, (NodeType Parent, int AcumulativeCost, int Heuristic)> nodes =
