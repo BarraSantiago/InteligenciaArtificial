@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 using Utils;
 
 namespace Pathfinder
-{
+{ 
     public struct Transition<NodeType>
     {
         public NodeType to;

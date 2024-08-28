@@ -1,39 +1,65 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Utils;
+using Random = UnityEngine.Random;
 
 namespace Pathfinder
 {
+    enum PathfinderType
+    {
+        AStar,
+        Dijkstra,
+        Breath,
+        Depth
+    }
+
     public class Traveler : MonoBehaviour
     {
-        [FormerlySerializedAs("grapfView")] public GraphView graphView;
+        [SerializeField] private PathfinderType _pathfinderType;
+        public GraphView graphView;
 
-        private AStarPathfinder<Node<Vec2Int>> Pathfinder;
-        //private DijkstraPathfinder<Node<Vector2Int>> Pathfinder;
-        //private DepthFirstPathfinder<Node<Vector2Int>> Pathfinder;
-        //private BreadthPathfinder<Node<Vec2Int>> Pathfinder;
-
+        private Pathfinder<Node<Vec2Int>> Pathfinder;
+        private Vector2IntGraph<Node<Vec2Int>> _graph;
         private Node<Vec2Int> startNode;
         private Node<Vec2Int> destinationNode;
 
-        void Start()
+        private void OnValidate()
         {
-            Pathfinder = new AStarPathfinder<Node<Vec2Int>>(graphView.Graph.nodes);
+            if (!Application.isPlaying) return;
+
+            StartPath();
+        }
+
+        private void StartPath()
+        {
+            graphView.Graph = _graph;
+
+            Pathfinder<Node<Vec2Int>> pathfinder = _pathfinderType switch
+            {
+                PathfinderType.AStar => new AStarPathfinder<Node<Vec2Int>>(_graph.nodes),
+                PathfinderType.Dijkstra => new DijkstraPathfinder<Node<Vec2Int>>(_graph.nodes),
+                PathfinderType.Breath => new BreadthPathfinder<Node<Vec2Int>>(_graph.nodes),
+                PathfinderType.Depth => new DepthFirstPathfinder<Node<Vec2Int>>(_graph.nodes),
+                _ => new AStarPathfinder<Node<Vec2Int>>(_graph.nodes)
+            };
+
             startNode = new Node<Vec2Int>();
             startNode.SetCoordinate(new Vec2Int(Random.Range(0, 10), Random.Range(0, 10)));
 
             destinationNode = new Node<Vec2Int>();
             destinationNode.SetCoordinate(new Vec2Int(Random.Range(0, 10), Random.Range(0, 10)));
 
-            List<Node<Vec2Int>> path = Pathfinder.FindPath(startNode, destinationNode);
+            List<Node<Vec2Int>> path = pathfinder.FindPath(startNode, destinationNode);
 
-            graphView.Transitions = Pathfinder.transitions;
+            graphView.Transitions = pathfinder.transitions;
             graphView.startNode = startNode;
             graphView.destinationNode = destinationNode;
             graphView.path = path;
-            
+
+            transform.position = new Vector3(startNode.GetCoordinate().x, startNode.GetCoordinate().y);
+
             StartCoroutine(Move(path));
         }
 

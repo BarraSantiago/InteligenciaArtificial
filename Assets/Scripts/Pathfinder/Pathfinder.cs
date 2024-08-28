@@ -8,6 +8,16 @@ namespace Pathfinder
     {
         protected ICollection<NodeType> Graph;
 
+        public struct Transition<NodeType>
+        {
+            public NodeType to;
+            public int cost;
+            public int distance;
+        }
+        
+        public Dictionary<NodeType, List<Transition<NodeType>>> transitions =
+            new Dictionary<NodeType, List<Transition<NodeType>>>();
+
         public List<NodeType> FindPath(NodeType startNode, NodeType destinationNode)
         {
             Dictionary<NodeType, (NodeType Parent, int AcumulativeCost, int Heuristic)> nodes =
@@ -22,7 +32,7 @@ namespace Pathfinder
             List<NodeType> closedList = new List<NodeType>();
 
             openList.Add(startNode);
-            
+
             foreach (var node in nodes.Keys.ToList())
             {
                 if (NodesEquals(startNode, node)) continue;
@@ -42,7 +52,7 @@ namespace Pathfinder
                 {
                     if (nodes[openList[i]].AcumulativeCost + nodes[openList[i]].Heuristic >=
                         nodes[currentNode].AcumulativeCost + nodes[currentNode].Heuristic) continue;
-                    
+
                     currentNode = openList[i];
                     currentIndex = i;
                 }
@@ -67,7 +77,8 @@ namespace Pathfinder
                     aproxAcumulativeCost += nodes[currentNode].AcumulativeCost;
                     aproxAcumulativeCost += MoveToNeighborCost(currentNode, neighbor);
 
-                    if (openList.Contains(neighbor) && aproxAcumulativeCost >= nodes[currentNode].AcumulativeCost) continue;
+                    if (openList.Contains(neighbor) &&
+                        aproxAcumulativeCost >= nodes[currentNode].AcumulativeCost) continue;
 
                     nodes[neighbor] = (currentNode, aproxAcumulativeCost, Distance(neighbor, destinationNode));
 
@@ -88,7 +99,7 @@ namespace Pathfinder
                 while (!NodesEquals(currentNode, startNode))
                 {
                     path.Add(currentNode);
-                    
+
                     foreach (var node in nodes.Keys.ToList().Where(node => NodesEquals(currentNode, node)))
                     {
                         currentNode = nodes[node].Parent;

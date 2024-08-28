@@ -6,6 +6,7 @@ using Utils;
 namespace Pathfinder
 {
     public class DijkstraPathfinder<NodeType> : Pathfinder<NodeType> where NodeType : INode, new()
+
     { 
         public DijkstraPathfinder(ICollection<NodeType> graph)
         {

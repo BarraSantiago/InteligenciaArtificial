@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Pathfinder
 {
-    public class Node<Coordinate> : INode, INode<Coordinate>, IEquatable<Node<Coordinate>> where Coordinate : IEquatable<Coordinate>
+    public class Node<Coordinate> : INode, INode<Coordinate> , IEquatable<INode<Coordinate>> where Coordinate : IEquatable<Coordinate>
     {
         private Coordinate coordinate;
     
@@ -27,10 +27,19 @@ namespace Pathfinder
             return coordinate.Equals(other.GetCoordinate());
         }
 
-        public bool Equals(Node<Coordinate> other)
+        protected bool Equals(Node<Coordinate> other)
         {
-            if (ReferenceEquals(null, other)) return false;
-            return ReferenceEquals(this, other) || EqualityComparer<Coordinate>.Default.Equals(coordinate, other.coordinate);
+            return EqualityComparer<Coordinate>.Default.Equals(coordinate, other.coordinate);
+        }
+
+        public bool Equals(Coordinate other)
+        {
+            return coordinate.Equals(other);
+        }
+
+        public bool Equals(INode<Coordinate> other)
+        {
+            return other != null && coordinate.Equals(other.GetCoordinate());
         }
 
         public override bool Equals(object obj)
