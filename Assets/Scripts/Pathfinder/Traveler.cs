@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
@@ -21,9 +22,14 @@ namespace Pathfinder
         public GraphView graphView;
 
         private Pathfinder<Node<Vec2Int>> Pathfinder;
-        private Vector2IntGraph<Node<Vec2Int>> _graph;
+        private Vector2IntGraph<Node<Vec2Int>> _graph = new Vector2IntGraph<Node<Vec2Int>>(10,10);
         private Node<Vec2Int> startNode;
         private Node<Vec2Int> destinationNode;
+
+        private void Awake()
+        {
+            graphView.Graph = _graph;
+        }
 
         private void OnValidate()
         {
