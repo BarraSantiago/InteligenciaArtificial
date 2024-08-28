@@ -16,37 +16,9 @@ namespace Pathfinder
         public int max = 3;
         
         private Transition<Node<Vec2Int>> _transition;
-
-        public GraphView(int min, int max)
-        {
-            Graph = new Vector2IntGraph<Node<Vec2Int>>(10, 10);
-            Transitions = new Dictionary<Node<Vec2Int>, List<Transition<Node<Vec2Int>>>>();
-            this.min = min;
-            this.max = max;
-        }
-
-        public GraphView(Vector2IntGraph<Node<Vec2Int>> Graph, int min, int max)
-        {
-            this.Graph = Graph;
-            Transitions = new Dictionary<Node<Vec2Int>, List<Transition<Node<Vec2Int>>>>();
-            this.min = min;
-            this.max = max;
-        }
-
-        public GraphView(Vector2IntGraph<Node<Vec2Int>> Graph,
-            Dictionary<Node<Vec2Int>, List<Transition<Node<Vec2Int>>>> transitions, Node<Vec2Int> startNode, Node<Vec2Int> destinationNode, int min, int max)
-        {
-            this.Graph = Graph;
-            this.Transitions = transitions;
-            this.min = min;
-            this.max = max;
-            this.startNode = startNode;
-            this.destinationNode = destinationNode;
-        }
-
         void Awake()
         {
-            Graph = new Vector2IntGraph<Node<Vec2Int>>(10, 10);
+            Graph = new Vector2IntGraph<Node<Vec2Int>>(10,10);
         }
 
         private void OnDrawGizmos()

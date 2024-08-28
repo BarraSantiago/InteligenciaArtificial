@@ -4,16 +4,16 @@ using Utils;
 
 namespace Pathfinder
 {
-    public abstract class Pathfinder<NodeType> where NodeType : INode<Vec2Int>, INode, new()
+    public abstract class Pathfinder<NodeType> where NodeType : INode
     {
-        protected Vector2IntGraph<NodeType> Graph;
+        protected ICollection<NodeType> Graph;
 
         public List<NodeType> FindPath(NodeType startNode, NodeType destinationNode)
         {
             Dictionary<NodeType, (NodeType Parent, int AcumulativeCost, int Heuristic)> nodes =
                 new Dictionary<NodeType, (NodeType Parent, int AcumulativeCost, int Heuristic)>();
 
-            foreach (NodeType node in Graph.nodes)
+            foreach (NodeType node in Graph)
             {
                 nodes.Add(node, (default, 0, 0));
             }

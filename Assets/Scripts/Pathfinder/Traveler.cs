@@ -20,7 +20,7 @@ namespace Pathfinder
 
         void Start()
         {
-            Pathfinder = new AStarPathfinder<Node<Vec2Int>>(graphView.Graph);
+            Pathfinder = new AStarPathfinder<Node<Vec2Int>>(graphView.Graph.nodes);
             startNode = new Node<Vec2Int>();
             startNode.SetCoordinate(new Vec2Int(Random.Range(0, 10), Random.Range(0, 10)));
 

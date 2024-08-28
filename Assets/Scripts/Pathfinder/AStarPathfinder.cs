@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography;
 using Utils;
 
@@ -12,17 +13,17 @@ namespace Pathfinder
         public int distance;
     }
 
-    public class AStarPathfinder<NodeType> : Pathfinder<NodeType> where NodeType : INode<Vec2Int>, INode, new()
+    public class AStarPathfinder<NodeType> : Pathfinder<NodeType> where NodeType : INode, new()
     {
         public Dictionary<NodeType, List<Transition<NodeType>>> transitions =
             new Dictionary<NodeType, List<Transition<NodeType>>>();
 
         
-        public AStarPathfinder(Vector2IntGraph<NodeType> graph, int minCost = -1, int maxCost = 3)
+        public AStarPathfinder(ICollection<NodeType> graph, int minCost = -1, int maxCost = 3)
         {
             this.Graph = graph;
             
-            graph.nodes.ForEach(node =>
+            graph.ToList().ForEach(node =>
             {
                 List<Transition<NodeType>> transitionsList = new List<Transition<NodeType>>();
                 
@@ -40,20 +41,14 @@ namespace Pathfinder
             });
         }
         
-        public AStarPathfinder(int sizeX, int sizeY)
-        {
-            Graph = new Vector2IntGraph<NodeType>(sizeX, sizeY);
-        }
-        
         protected override int Distance(NodeType A, NodeType B)
         {
             int distance = 0;
+            Node<Vec2Int> nodeA = A as Node<Vec2Int>;
+            Node<Vec2Int> nodeB = B as Node<Vec2Int>;
         
-            var aCoor = (A).GetCoordinate();
-            var bCoor = (B).GetCoordinate();
-        
-            distance += Math.Abs(aCoor.x - bCoor.x);
-            distance += Math.Abs(aCoor.y - bCoor.y);
+            distance += Math.Abs(nodeA.GetCoordinate().x - nodeB.GetCoordinate().x);
+            distance += Math.Abs(nodeA.GetCoordinate().y - nodeB.GetCoordinate().y);
 
             return distance;
         }
@@ -62,11 +57,16 @@ namespace Pathfinder
         {
             List<NodeType> neighbors = new List<NodeType>();
             
-            var nodeCoor = node.GetCoordinate();
+            Node<Vec2Int> a = node as Node<Vec2Int>;
             
-            Graph.nodes.ForEach(neighbor =>
+            var nodeCoor = a.GetCoordinate();
+            
+            Graph.ToList().ForEach(neighbor =>
             {
-                var neighborCoor = neighbor.GetCoordinate();
+                var neighborNode = neighbor as Node<Vec2Int>;
+                
+                var neighborCoor = neighborNode.GetCoordinate();
+                
                 if ((neighborCoor.x == nodeCoor.x && Math.Abs(neighborCoor.y - nodeCoor.y) == 1) ||
                     (neighborCoor.y == nodeCoor.y && Math.Abs(neighborCoor.x - nodeCoor.x) == 1) ||
                     (Math.Abs(neighborCoor.y - nodeCoor.y) == 1 && Math.Abs(neighborCoor.x - nodeCoor.x) == 1))
@@ -107,7 +107,10 @@ namespace Pathfinder
 
         protected override bool NodesEquals(NodeType A, NodeType B)
         {
-            return A.GetCoordinate().x == B.GetCoordinate().x && A.GetCoordinate().y == B.GetCoordinate().y;
+            var nodeA = A as Node<Vec2Int>;
+            var nodeB = B as Node<Vec2Int>;
+            
+            return nodeA.GetCoordinate().x == nodeB.GetCoordinate().x && nodeA.GetCoordinate().y == nodeB.GetCoordinate().y;
         }
     }
 }
