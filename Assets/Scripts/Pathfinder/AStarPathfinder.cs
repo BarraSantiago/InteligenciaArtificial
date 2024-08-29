@@ -15,10 +15,6 @@ namespace Pathfinder
 
     public class AStarPathfinder<NodeType> : Pathfinder<NodeType> where NodeType : INode, new()
     {
-        public Dictionary<NodeType, List<Transition<NodeType>>> transitions =
-            new Dictionary<NodeType, List<Transition<NodeType>>>();
-
-        
         public AStarPathfinder(ICollection<NodeType> graph, int minCost = -1, int maxCost = 3)
         {
             this.Graph = graph;
