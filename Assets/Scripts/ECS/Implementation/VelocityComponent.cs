@@ -1,3 +1,5 @@
+using ECS.Patron;
+
 public class VelocityComponent : ECSComponent
 {
     public float velocity;

@@ -1,3 +1,5 @@
+using ECS.Patron;
+
 public class PositionComponent : ECSComponent
 {
     public float X;

@@ -1,3 +1,5 @@
+using ECS.Patron;
+
 namespace ECS.Implementation
 {
     public class VelRotationComponent : ECSComponent

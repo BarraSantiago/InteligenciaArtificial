@@ -1,17 +1,20 @@
-public abstract class ECSSystem
+namespace ECS.Patron
 {
-    public void Run(float deltaTime)
+    public abstract class ECSSystem
     {
-        PreExecute(deltaTime);
-        Execute(deltaTime);
-        PostExecute(deltaTime);
+        public void Run(float deltaTime)
+        {
+            PreExecute(deltaTime);
+            Execute(deltaTime);
+            PostExecute(deltaTime);
+        }
+
+        public abstract void Initialize();
+
+        protected abstract void PreExecute(float deltaTime);
+
+        protected abstract void Execute(float deltaTime);
+
+        protected abstract void PostExecute(float deltaTime);
     }
-
-    public abstract void Initialize();
-
-    protected abstract void PreExecute(float deltaTime);
-
-    protected abstract void Execute(float deltaTime);
-
-    protected abstract void PostExecute(float deltaTime);
 }
