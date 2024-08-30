@@ -6,13 +6,6 @@ using Utils;
 
 namespace Pathfinder
 { 
-    public struct Transition<NodeType>
-    {
-        public NodeType to;
-        public int cost;
-        public int distance;
-    }
-
     public class AStarPathfinder<NodeType> : Pathfinder<NodeType> where NodeType : INode, new()
     {
         public AStarPathfinder(ICollection<NodeType> graph, int minCost = -1, int maxCost = 3)

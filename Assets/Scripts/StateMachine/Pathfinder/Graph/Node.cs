@@ -3,8 +3,16 @@ using System.Collections.Generic;
 
 namespace Pathfinder
 {
+    public enum NodeType
+    {
+        Empty,
+        Blocked,
+        Mine,
+        TownCenter
+    }
     public class Node<Coordinate> : INode, INode<Coordinate> , IEquatable<INode<Coordinate>> where Coordinate : IEquatable<Coordinate>
     {
+        public NodeType NodeType { get; set; }
         private Coordinate coordinate;
     
         public void SetCoordinate(Coordinate coordinate)

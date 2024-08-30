@@ -3,17 +3,18 @@ using System.Linq;
 
 namespace Pathfinder
 {
+    public struct Transition<NodeType>
+    {
+        public NodeType to;
+        public int cost;
+        public int distance;
+    }
+
     public abstract class Pathfinder<NodeType> where NodeType : INode
     {
         protected ICollection<NodeType> Graph;
 
-        public struct Transition<NodeType>
-        {
-            public NodeType to;
-            public int cost;
-            public int distance;
-        }
-        
+
         public Dictionary<NodeType, List<Transition<NodeType>>> transitions =
             new Dictionary<NodeType, List<Transition<NodeType>>>();
 

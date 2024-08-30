@@ -10,14 +10,14 @@ namespace Pathfinder
     {
         [SerializeField] private bool showTransitions = true;
         public Vector2IntGraph<Node<Vec2Int>> Graph;
-        public Dictionary<Node<Vec2Int>, List<Pathfinder<Node<Vec2Int>>.Transition<Node<Vec2Int>>>> Transitions;
+        public Dictionary<Node<Vec2Int>, List<Transition<Node<Vec2Int>>>> Transitions;
         public Node<Vec2Int> startNode;
         public Node<Vec2Int> destinationNode;
         public List<Node<Vec2Int>> path;
         public int min = -1;
         public int max = 3;
 
-        private Pathfinder<Node<Vec2Int>>.Transition<Node<Vec2Int>> _transition;
+        private Transition<Node<Vec2Int>> _transition;
         
 
         public void UpdateVectors()
@@ -30,7 +30,7 @@ namespace Pathfinder
             {
                 if (!Transitions.TryGetValue(node, out var transition1)) continue;
 
-                foreach (Pathfinder<Node<Vec2Int>>.Transition<Node<Vec2Int>> transition in transition1)
+                foreach (var transition in transition1)
                 {
                     _transition = transition;
 
@@ -79,7 +79,7 @@ namespace Pathfinder
                 if (Transitions == null) continue;
                 if (!Transitions.TryGetValue(node, out var transition1)) continue;
 
-                foreach (Pathfinder<Node<Vec2Int>>.Transition<Node<Vec2Int>> transition in transition1)
+                foreach (Transition<Node<Vec2Int>> transition in transition1)
                 {
                     _transition = transition;
 
