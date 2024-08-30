@@ -5,7 +5,7 @@ namespace ECS.Implementation
         public float X;
         public float Y;
         public float Z;
-
+   
         public RotationComponent(float x, float y, float z)
         {
             this.X = x;
