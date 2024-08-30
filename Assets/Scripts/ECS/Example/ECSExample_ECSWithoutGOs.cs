@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using ECS.Implementation;
 using UnityEngine;
 
-public class ECSExample_ECSWhitoutGOs : MonoBehaviour
+public class ECSExample_ECSWithoutGOs : MonoBehaviour
 {
     public int entityCount = 100;
     public float velocity = 0.1f;

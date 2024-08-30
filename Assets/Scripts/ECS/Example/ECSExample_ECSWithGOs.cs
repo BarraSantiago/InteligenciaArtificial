@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using ECS.Implementation;
 using UnityEngine;
 
-public class ECSExample_ECSWhitGOs : MonoBehaviour
+public class ECSExample_ECSWithGOs : MonoBehaviour
 {
     public int entityCount = 100;
     public float velocity = 10.0f;
