@@ -32,16 +32,14 @@ namespace StateMachine.Agents.RTS
         public float speed = 1.0f;
         public bool retreat;
         public int food;
+        public Node<Vector2> currentNode;
+        public Node<Vector2> targetNode;
         
-        public Node<System.Numerics.Vector2> currentNode;
-        public Node<System.Numerics.Vector2> targetNode;
         private FSM<Behaviours, Flags> _fsm;
-
-        private AStarPathfinder<Node<System.Numerics.Vector2>> _pathfinder;
-
-        private List<Node<System.Numerics.Vector2>> path;
-        private int _currentGold;
-        private int _lastTimeEat;
+        private AStarPathfinder<Node<Vector2>> _pathfinder;
+        private List<Node<Vector2>> _path;
+        private int _currentGold = 0;
+        private int _lastTimeEat = 0;
         private const int GoldPerFood = 3;
         private const int GoldLimit = 15;
 
@@ -58,20 +56,27 @@ namespace StateMachine.Agents.RTS
         private void Init()
         {
             _fsm = new FSM<Behaviours, Flags>();
+            
             targetNode = MapGenerator.nodes.Find(x => x.NodeType == NodeType.Mine && x.gold > 0);
             //_pathfinder = new AStarPathfinder<Node<Vector2>>(MapGenerator.nodes, 0, 0);
             //path = _pathfinder.FindPath(currentNode, targetNode);
             _fsm.AddBehaviour<WaitState>(Behaviours.Wait, WaitTickParameters);
             _fsm.AddBehaviour<WalkState>(Behaviours.Walk, WalkTickParameters);
             _fsm.AddBehaviour<GatherGoldState>(Behaviours.GatherResources, GatherTickParameters);
+            currentNode.OnUpdatePosition += UpdatePosition;
 
 
             WalkTransitions();
             GatherTeransitions();
             WaitTransitions();
 
-            
+
             _fsm.ForceTransition(Behaviours.Walk);
+        }
+
+        private void UpdatePosition()
+        {
+            transform.position = new Vector3(currentNode.GetCoordinate().X, currentNode.GetCoordinate().Y);
         }
 
         private void WaitTransitions()
@@ -91,10 +96,13 @@ namespace StateMachine.Agents.RTS
                 () =>
                 {
                     targetNode = townCenter;
-                    path = _pathfinder.FindPath(currentNode, targetNode);
+                    _path = _pathfinder.FindPath(currentNode, targetNode);
                     Debug.Log("walk to " + targetNode.GetCoordinate());
                 });
-            _fsm.SetTransition(Behaviours.GatherResources, Flags.OnHunger, Behaviours.Wait, () => Debug.Log("Wait"));
+            
+            _fsm.SetTransition(Behaviours.GatherResources, Flags.OnHunger, Behaviours.Wait,
+                () => Debug.Log("Wait"));
+            
             _fsm.SetTransition(Behaviours.GatherResources, Flags.OnFull, Behaviours.Walk,
                 () =>
                 {
@@ -119,7 +127,6 @@ namespace StateMachine.Agents.RTS
                     targetNode = townCenter;
                     //path = _pathfinder.FindPath(currentNode, targetNode);
                     Debug.Log("Retreat. Walk to " + targetNode.GetCoordinate());
-
                 });
 
             _fsm.SetTransition(Behaviours.Walk, Flags.OnTargetLost, Behaviours.Walk,
@@ -136,7 +143,7 @@ namespace StateMachine.Agents.RTS
 
         private object[] WalkTickParameters()
         {
-            object[] objects = { currentNode, targetNode, speed, retreat };
+            object[] objects = { currentNode, targetNode, speed, retreat, transform };
             return objects;
         }
 

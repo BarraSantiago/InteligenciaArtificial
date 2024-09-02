@@ -7,7 +7,7 @@ namespace StateMachine.States.RTSStates
     {
         public override BehaviourActions GetTickBehaviour(params object[] parameters)
         {
-            throw new System.NotImplementedException();
+            return default;
         }
 
         public override BehaviourActions GetOnEnterBehaviour(params object[] parameters)
@@ -29,7 +29,7 @@ namespace StateMachine.States.RTSStates
 
         public override BehaviourActions GetOnExitBehaviour(params object[] parameters)
         {
-            throw new System.NotImplementedException();
+            return default;
         }
     }
 }

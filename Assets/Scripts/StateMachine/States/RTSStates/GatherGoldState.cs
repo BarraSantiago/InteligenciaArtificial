@@ -18,14 +18,15 @@ namespace StateMachine.States.RTSStates
             
             behaviours.AddMainThreadBehaviours(0, () =>
             {
+                if(food <= 0) return;
+                
                 gold++;
                 lastTimeEat++;
+
+                if (lastTimeEat < goldPerFood) return;
                 
-                if (lastTimeEat >= goldPerFood)
-                {
-                    food--;
-                    lastTimeEat = 0;
-                }
+                food--;
+                lastTimeEat = 0;
             });
             
             behaviours.SetTransitionBehaviour(() =>
@@ -40,12 +41,12 @@ namespace StateMachine.States.RTSStates
 
         public override BehaviourActions GetOnEnterBehaviour(params object[] parameters)
         {
-            throw new System.NotImplementedException();
+            return default;
         }
 
         public override BehaviourActions GetOnExitBehaviour(params object[] parameters)
         {
-            throw new System.NotImplementedException();
+            return default;
         }
     }
 }
