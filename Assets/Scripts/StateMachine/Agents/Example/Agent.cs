@@ -16,7 +16,8 @@ namespace Units
         Chase,
         Patrol,
         Explode,
-        Shoot
+        Shoot,
+        Mine,
     }
 
     public class Agent : MonoBehaviour

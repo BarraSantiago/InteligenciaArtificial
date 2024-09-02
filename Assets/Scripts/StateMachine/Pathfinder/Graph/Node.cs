@@ -14,6 +14,8 @@ namespace Pathfinder
     {
         public NodeType NodeType { get; set; }
         private Coordinate coordinate;
+        public int food;
+        public int gold;
     
         public void SetCoordinate(Coordinate coordinate)
         {
