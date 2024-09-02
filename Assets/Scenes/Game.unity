@@ -402,7 +402,7 @@ MonoBehaviour:
   minesQuantity: 2
   nodesSize: 0.1
   minerPrefab: {fileID: 2785322424147078408, guid: 40cb8ae62e1a2ed4e857f1bc1d348a61, type: 3}
-  minersQuantity: 0
+  minersQuantity: 1
   cartsQuantity: 0
   graphView: {fileID: 0}
   voronoi: {fileID: 813648983}
