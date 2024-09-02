@@ -16,7 +16,7 @@ namespace StateMachine.States.RTSStates
             int goldPerFood = (int) parameters[4];
             int goldLimit = (int) parameters[5];
             
-            behaviours.AddMultiThreadableBehaviours(0, () =>
+            behaviours.AddMainThreadBehaviours(0, () =>
             {
                 gold++;
                 lastTimeEat++;

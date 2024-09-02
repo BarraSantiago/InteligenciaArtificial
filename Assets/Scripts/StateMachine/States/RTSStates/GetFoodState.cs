@@ -16,7 +16,7 @@ namespace StateMachine.States.RTSStates
             int food = (int) parameters[0];
             int foodLimit = (int) parameters[1];
             
-            behaviours.AddMultiThreadableBehaviours(0, () =>
+            behaviours.AddMainThreadBehaviours(0, () =>
             {
                 food += foodLimit;
             });

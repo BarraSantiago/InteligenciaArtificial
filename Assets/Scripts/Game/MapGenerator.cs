@@ -16,11 +16,10 @@ namespace Game
             public GameObject prefab;
         }
 
-        [Header("Map")] [SerializeField] private int width;
+        [Header("Map")] 
+        [SerializeField] private int width;
         [SerializeField] private int height;
-
-        [SerializeField, Tooltip("Distance between map nodes")]
-        private float cellSize;
+        [SerializeField, Tooltip("Distance between map nodes")] private float cellSize;
 
         [SerializeField] private Vector2 originPosition;
 
@@ -41,7 +40,8 @@ namespace Game
         //private Pathfinding pathfinding;
 
         //public Pathfinding Pathfinding => pathfinding;
-        public static List<Node<System.Numerics.Vector2>> Vector2s = new List<Node<System.Numerics.Vector2>>();
+        public static List<Node<System.Numerics.Vector2>> mines = new List<Node<System.Numerics.Vector2>>();
+        public static List<Node<System.Numerics.Vector2>> nodes = new List<Node<System.Numerics.Vector2>>();
 
         public static List<Vector2> Vector2sBeingUsed = new List<Vector2>();
 
@@ -133,7 +133,7 @@ namespace Game
 
         public void RemoveEmptyMine(Node<System.Numerics.Vector2> Vector2)
         {
-            Vector2s.Remove(Vector2);
+            mines.Remove(Vector2);
         }
     }
 }
