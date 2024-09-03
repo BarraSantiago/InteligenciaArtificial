@@ -402,6 +402,7 @@ MonoBehaviour:
   minesQuantity: 2
   nodesSize: 0.1
   minerPrefab: {fileID: 2785322424147078408, guid: 40cb8ae62e1a2ed4e857f1bc1d348a61, type: 3}
+  caravanPrefab: {fileID: 4554709164701513831, guid: f2e723e0f6f769a41b04e83e8a055270, type: 3}
   minersQuantity: 1
   cartsQuantity: 0
   graphView: {fileID: 0}

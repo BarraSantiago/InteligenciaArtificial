@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Game;
 using Pathfinder;
@@ -20,7 +21,7 @@ namespace StateMachine.States.RTSStates
             float speed = Convert.ToSingle(parameters[2]);
             bool retreat = (bool)parameters[3];
             Transform position = (Transform)parameters[4];
-            //List<Node<Vector2>> path = (List<Node<Vector2>>)parameters[4];
+            List<Node<Vector2>> path = (List<Node<Vector2>>)parameters[5];
 
 
             behaviours.AddMainThreadBehaviours(0, () =>
@@ -30,22 +31,16 @@ namespace StateMachine.States.RTSStates
                 if (Vector2.Distance(currentNode.GetCoordinate(), targetNode.GetCoordinate()) < 0.5f)
                 {
                     currentNode = targetNode;
+                    return;
                 }
 
-                if (MapGenerator.nodes.Any(x =>
-                        Vector2.Distance(new Vector2(position.position.x, position.position.y), x.GetCoordinate()) <
-                        0.5f))
-                {
-                    currentNode = MapGenerator.nodes.Find(x =>
-                        Vector2.Distance(new Vector2(position.position.x, position.position.y), x.GetCoordinate()) <
-                        0.5f);
-                }
-
-
-                Vector3 direction = new Vector3(targetNode.GetCoordinate().X - currentNode.GetCoordinate().X,
-                    targetNode.GetCoordinate().Y - currentNode.GetCoordinate().Y).normalized;
-
-                position.position += direction * (speed * Time.deltaTime);
+                currentNode = path[0];
+                path.RemoveAt(0);
+                
+                position.position = new Vector3(currentNode.GetCoordinate().X, currentNode.GetCoordinate().Y);
+                
+                //Vector3 direction = new Vector3(targetNode.GetCoordinate().X - currentNode.GetCoordinate().X,targetNode.GetCoordinate().Y - currentNode.GetCoordinate().Y).normalized;
+                //position.position += direction * (speed * Time.deltaTime);
             });
 
             behaviours.SetTransitionBehaviour(() =>

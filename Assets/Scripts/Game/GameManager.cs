@@ -8,20 +8,20 @@ namespace Game
 {
     public class GameManager : MonoBehaviour
     {
-        [Header("Map Config")] [SerializeField]
-        private int mapWidth;
-
+        [Header("Map Config")]
+        [SerializeField] private int mapWidth;
         [SerializeField] private int mapHeight;
         [SerializeField] private int minesQuantity;
         [SerializeField] private float nodesSize;
 
-        [Header("Units Config")] [SerializeField]
-        private GameObject minerPrefab;
-
+        [Header("Units Config")] 
+        [SerializeField] private GameObject minerPrefab;
+        [SerializeField] private GameObject caravanPrefab;
         [SerializeField] private int minersQuantity;
         [SerializeField] private int cartsQuantity;
 
-        [Header("Setup")] [SerializeField] private GraphView graphView;
+        [Header("Setup")]
+        [SerializeField] private GraphView graphView;
         [SerializeField] private Voronoi voronoi;
         [SerializeField] private bool validate;
         private Vector2IntGraph<Node<System.Numerics.Vector2>> graph;
@@ -63,7 +63,9 @@ namespace Game
             GameObject miner = Instantiate(minerPrefab, townCenterPosition, Quaternion.identity);
             RTSAgent agent = miner.GetComponent<RTSAgent>();
             agent.currentNode = graph.nodes[towncenterNode];
-
+            GameObject caravan = Instantiate(caravanPrefab, townCenterPosition, Quaternion.identity);
+            agent = caravan.GetComponent<RTSAgent>();
+            agent.currentNode = graph.nodes[towncenterNode];
             //voronoi.Init();
             //voronoi.SetVoronoi(MapGenerator.Vector2s);
         }

@@ -16,12 +16,10 @@ namespace Pathfinder
         private Coordinate coordinate;
         public int food;
         public int gold;
-        public Action OnUpdatePosition;
     
         public void SetCoordinate(Coordinate coordinate)
         {
             this.coordinate = coordinate;
-            OnUpdatePosition?.Invoke();
         }
 
         public Coordinate GetCoordinate()

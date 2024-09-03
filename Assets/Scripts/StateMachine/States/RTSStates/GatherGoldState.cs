@@ -1,7 +1,9 @@
 ﻿using System;
+using Pathfinder;
 using StateMachine.Agents.RTS;
 using States;
 using UnityEngine;
+using Vector2 = System.Numerics.Vector2;
 
 namespace StateMachine.States.RTSStates
 {
@@ -17,6 +19,7 @@ namespace StateMachine.States.RTSStates
             refInt lastTimeEat = parameters[3] as refInt;
             int goldPerFood = Convert.ToInt32(parameters[4]);
             int goldLimit = Convert.ToInt32(parameters[5]);
+            Node<Vector2> mine = parameters[6] as Node<Vector2>;
 
             behaviours.AddMainThreadBehaviours(0, () =>
             {
@@ -26,7 +29,8 @@ namespace StateMachine.States.RTSStates
                 
                 gold.value++;
                 lastTimeEat.value++;
-
+                mine.gold--;
+                
                 if (lastTimeEat.value < goldPerFood) return;
 
                 food.value--;

@@ -7,7 +7,6 @@ namespace Pathfinder
     {
         public NodeType to;
         public int cost;
-        public int distance;
     }
 
     public abstract class Pathfinder<NodeType> where NodeType : INode

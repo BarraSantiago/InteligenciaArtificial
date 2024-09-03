@@ -14,7 +14,7 @@ namespace StateMachine.Agents.RTS
             this.value = value;
         }
 
-        public int value; 
+        public int value;
     }
 
     public class RTSAgent : MonoBehaviour
@@ -35,6 +35,7 @@ namespace StateMachine.Agents.RTS
             Wait,
             Walk,
             GatherResources,
+            Deliver
         }
 
         public static Node<Vector2> townCenter;
@@ -45,13 +46,14 @@ namespace StateMachine.Agents.RTS
         public Node<Vector2> currentNode;
         public Node<Vector2> targetNode;
 
-        private FSM<Behaviours, Flags> _fsm;
-        private AStarPathfinder<Node<Vector2>> _pathfinder;
-        private List<Node<Vector2>> _path;
+        protected FSM<Behaviours, Flags> _fsm;
+        protected AStarPathfinder<Node<Vector2>> _pathfinder;
+        protected List<Node<Vector2>> _path;
         private refInt _currentGold = new refInt(0);
         private refInt _lastTimeEat = new refInt(0);
         private const int GoldPerFood = 3;
         private const int GoldLimit = 15;
+        private const int FoodLimit = 10;
 
         private void Start()
         {
@@ -63,79 +65,63 @@ namespace StateMachine.Agents.RTS
             _fsm.Tick();
         }
 
-        private void Init()
+        protected virtual void Init()
         {
             _fsm = new FSM<Behaviours, Flags>();
 
             targetNode = MapGenerator.nodes.Find(x => x.NodeType == NodeType.Mine && x.gold > 0);
-            //_pathfinder = new AStarPathfinder<Node<Vector2>>(MapGenerator.nodes, 0, 0);
-            //path = _pathfinder.FindPath(currentNode, targetNode);
-            _fsm.AddBehaviour<WaitState>(Behaviours.Wait, WaitTickParameters);
-            _fsm.AddBehaviour<WalkState>(Behaviours.Walk, WalkTickParameters);
-            _fsm.AddBehaviour<GatherGoldState>(Behaviours.GatherResources, GatherTickParameters);
-            currentNode.OnUpdatePosition += UpdatePosition;
+            _pathfinder = new AStarPathfinder<Node<Vector2>>(MapGenerator.nodes, 0, 0);
+            _path = _pathfinder.FindPath(currentNode, targetNode);
 
+            FsmBehaviours();
 
-            WalkTransitions();
-            GatherTeransitions();
-            WaitTransitions();
-
+            FsmTransitions();
 
             _fsm.ForceTransition(Behaviours.Walk);
         }
 
-        private void UpdatePosition()
+        private void FsmTransitions()
         {
-            transform.position = new Vector3(currentNode.GetCoordinate().X, currentNode.GetCoordinate().Y);
+            WalkTransitions();
+            WaitTransitions();
+            GatherTransitions();
+            GetFoodTransitions();
+            DeliverTransitions();
         }
 
-        private void WaitTransitions()
+
+        protected virtual void FsmBehaviours()
         {
-            _fsm.SetTransition(Behaviours.Wait, Flags.OnGather, Behaviours.Walk,
-                () =>
-                {
-                    targetNode = MapGenerator.nodes.Find(x => x.NodeType == NodeType.Mine && x.gold > 0);
-                    //path = _pathfinder.FindPath(currentNode, targetNode);
-                    Debug.Log("walk to " + targetNode.GetCoordinate());
-                });
+            _fsm.AddBehaviour<WaitState>(Behaviours.Wait, WaitTickParameters);
+            _fsm.AddBehaviour<WalkState>(Behaviours.Walk, WalkTickParameters);
         }
 
-        private void GatherTeransitions()
+        protected virtual void GatherTransitions()
         {
             _fsm.SetTransition(Behaviours.GatherResources, Flags.OnRetreat, Behaviours.Walk,
                 () =>
                 {
                     targetNode = townCenter;
                     _path = _pathfinder.FindPath(currentNode, targetNode);
-                    Debug.Log("walk to " + targetNode.GetCoordinate());
-                });
-
-            _fsm.SetTransition(Behaviours.GatherResources, Flags.OnHunger, Behaviours.Wait,
-                () => Debug.Log("Wait"));
-
-            _fsm.SetTransition(Behaviours.GatherResources, Flags.OnFull, Behaviours.Walk,
-                () =>
-                {
-                    targetNode = townCenter;
-                    Debug.Log("Gold full. Walk to " + targetNode.GetCoordinate());
+                    Debug.Log("Retreat to " + targetNode.GetCoordinate());
                 });
         }
 
 
-        private object[] GatherTickParameters()
+        protected virtual object[] GatherTickParameters()
         {
-            object[] objects = { retreat, food, _currentGold, _lastTimeEat, GoldPerFood, GoldLimit };
+            object[] objects = { retreat, food, _currentGold, _lastTimeEat, GoldPerFood, GoldLimit, currentNode };
             return objects;
         }
 
 
-        private void WalkTransitions()
+        protected virtual void WalkTransitions()
         {
             _fsm.SetTransition(Behaviours.Walk, Flags.OnRetreat, Behaviours.Walk,
                 () =>
                 {
                     targetNode = townCenter;
-                    //path = _pathfinder.FindPath(currentNode, targetNode);
+                    _path = _pathfinder.FindPath(currentNode, targetNode);
                     Debug.Log("Retreat. Walk to " + targetNode.GetCoordinate());
                 });
 
@@ -143,30 +129,59 @@ namespace StateMachine.Agents.RTS
                 () =>
                 {
                     targetNode = MapGenerator.nodes.Find(x => x.NodeType == NodeType.Mine && x.gold > 0);
-                    //path = _pathfinder.FindPath(currentNode, targetNode);
-                    Debug.Log("Retreat. Walk to " + targetNode.GetCoordinate());
+                    _path = _pathfinder.FindPath(currentNode, targetNode);
+                    Debug.Log("Walk to " + targetNode.GetCoordinate());
                 });
-            _fsm.SetTransition(Behaviours.Walk, Flags.OnGather, Behaviours.GatherResources,
-                () => Debug.Log("Gather gold"));
+
             _fsm.SetTransition(Behaviours.Walk, Flags.OnWait, Behaviours.Wait, () => Debug.Log("Wait"));
         }
 
-        private object[] WalkTickParameters()
+        protected virtual object[] WalkTickParameters()
         {
-            object[] objects = { currentNode, targetNode, speed, retreat, transform };
+            object[] objects = { currentNode, targetNode, speed, retreat, transform, _path };
             return objects;
         }
 
-        private object[] WalkEnterParameters()
+        protected virtual object[] WalkEnterParameters()
         {
             object[] objects = { currentNode, targetNode, _pathfinder };
             return objects;
         }
 
-        private object[] WaitTickParameters()
+        protected virtual void WaitTransitions()
+        {
+            _fsm.SetTransition(Behaviours.Wait, Flags.OnGather, Behaviours.Walk,
+                () =>
+                {
+                    targetNode = MapGenerator.nodes.Find(x => x.NodeType == NodeType.Mine && x.gold > 0);
+                    _path = _pathfinder.FindPath(currentNode, targetNode);
+                    Debug.Log("walk to " + targetNode.GetCoordinate());
+                });
+        }
+
+        protected virtual object[] WaitTickParameters()
         {
             object[] objects = { retreat, food, _currentGold, currentNode };
             return objects;
         }
+
+        protected virtual void GetFoodTransitions()
+        {
+            return;
+        }
+
+        protected virtual object[] GetFoodEnterParameters()
+        {
+            object[] objects = { food, FoodLimit };
+            return objects;
+        }
+        
+        
+        protected virtual void DeliverTransitions()
+        {
+            return;
+        }
+        
+        
     }
 }
