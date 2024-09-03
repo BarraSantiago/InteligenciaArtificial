@@ -7,6 +7,16 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace StateMachine.Agents.RTS
 {
+    public class refInt
+    {
+        public refInt(int value)
+        {
+            this.value = value;
+        }
+
+        public int value; 
+    }
+
     public class RTSAgent : MonoBehaviour
     {
         public enum Flags
@@ -31,15 +41,15 @@ namespace StateMachine.Agents.RTS
 
         public float speed = 1.0f;
         public bool retreat;
-        public int food;
+        public refInt food = new refInt(3);
         public Node<Vector2> currentNode;
         public Node<Vector2> targetNode;
-        
+
         private FSM<Behaviours, Flags> _fsm;
         private AStarPathfinder<Node<Vector2>> _pathfinder;
         private List<Node<Vector2>> _path;
-        private int _currentGold = 0;
-        private int _lastTimeEat = 0;
+        private refInt _currentGold = new refInt(0);
+        private refInt _lastTimeEat = new refInt(0);
         private const int GoldPerFood = 3;
         private const int GoldLimit = 15;
 
@@ -56,7 +66,7 @@ namespace StateMachine.Agents.RTS
         private void Init()
         {
             _fsm = new FSM<Behaviours, Flags>();
-            
+
             targetNode = MapGenerator.nodes.Find(x => x.NodeType == NodeType.Mine && x.gold > 0);
             //_pathfinder = new AStarPathfinder<Node<Vector2>>(MapGenerator.nodes, 0, 0);
             //path = _pathfinder.FindPath(currentNode, targetNode);
@@ -99,10 +109,10 @@ namespace StateMachine.Agents.RTS
                     _path = _pathfinder.FindPath(currentNode, targetNode);
                     Debug.Log("walk to " + targetNode.GetCoordinate());
                 });
-            
+
             _fsm.SetTransition(Behaviours.GatherResources, Flags.OnHunger, Behaviours.Wait,
                 () => Debug.Log("Wait"));
-            
+
             _fsm.SetTransition(Behaviours.GatherResources, Flags.OnFull, Behaviours.Walk,
                 () =>
                 {
@@ -155,7 +165,7 @@ namespace StateMachine.Agents.RTS
 
         private object[] WaitTickParameters()
         {
-            object[] objects = { retreat, food };
+            object[] objects = { retreat, food, _currentGold, currentNode };
             return objects;
         }
     }

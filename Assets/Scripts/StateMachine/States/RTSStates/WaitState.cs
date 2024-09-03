@@ -12,8 +12,8 @@ namespace StateMachine.States.RTSStates
             BehaviourActions behaviours = new BehaviourActions();
 
             bool retreat = (bool)parameters[0];
-            int food = (int)parameters[1];
-            int gold = (int)parameters[2];
+            refInt food = parameters[1] as refInt;
+            refInt gold = parameters[2] as refInt;
             Node<Vector2> currentNode = (Node<Vector2>)parameters[3];
 
             
@@ -21,20 +21,20 @@ namespace StateMachine.States.RTSStates
             {
                 if (currentNode.NodeType == NodeType.Mine && currentNode.food > 0)
                 {
-                    if(food > 1) return;
-                    food++;
+                    if(food.value > 1) return;
+                    food.value++;
                     currentNode.food--;
                 }
 
-                if (currentNode.NodeType != NodeType.TownCenter || gold < 15) return;
+                if (currentNode.NodeType != NodeType.TownCenter || gold.value < 15) return;
                 
-                currentNode.gold += gold;
-                gold = 0;
+                currentNode.gold += gold.value;
+                gold.value = 0;
             });
             
             behaviours.SetTransitionBehaviour(() =>
             {
-                if (food > 0 && !retreat) OnFlag?.Invoke(RTSAgent.Flags.OnGather);
+                if (food.value > 0 && !retreat) OnFlag?.Invoke(RTSAgent.Flags.OnGather);
             });
 
             return behaviours;
