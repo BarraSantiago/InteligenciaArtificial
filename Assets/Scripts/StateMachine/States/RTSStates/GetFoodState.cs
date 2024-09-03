@@ -10,11 +10,11 @@ namespace StateMachine.States.RTSStates
         {
             BehaviourActions behaviours = new BehaviourActions();
             refInt food = parameters[0] as refInt;
-            refInt foodLimit = parameters[1] as refInt;
+            int foodLimit = Convert.ToInt32(parameters[1]);
 
             behaviours.SetTransitionBehaviour(() =>
             {
-                if (food.value >= foodLimit.value) OnFlag?.Invoke(RTSAgent.Flags.OnFull);
+                if (food.value >= foodLimit) OnFlag?.Invoke(RTSAgent.Flags.OnFull);
             });
 
             return behaviours;

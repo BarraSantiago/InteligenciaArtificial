@@ -8,6 +8,12 @@ namespace StateMachine.Agents.RTS
     {
         private NodeType nodeObjective = NodeType.Mine;
 
+        protected override void Init()
+        {
+            base.Init();
+            _fsm.ForceTransition(Behaviours.Walk);
+        }
+
         protected override void FsmBehaviours()
         {
             base.FsmBehaviours();

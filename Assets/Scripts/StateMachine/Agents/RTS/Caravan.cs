@@ -7,6 +7,12 @@ namespace StateMachine.Agents.RTS
 {
     public class Caravan : RTSAgent
     {
+        protected override void Init()
+        {
+            base.Init();
+            _fsm.ForceTransition(Behaviours.GatherResources);
+        }
+
         protected override void FsmBehaviours()
         {
             base.FsmBehaviours();
