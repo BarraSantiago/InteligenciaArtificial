@@ -22,6 +22,7 @@ namespace StateMachine.States.RTSStates
             bool retreat = (bool)parameters[3];
             Transform position = (Transform)parameters[4];
             List<Node<Vector2>> path = (List<Node<Vector2>>)parameters[5];
+            Pathfinder<Node<Vector2>> pathfinder = parameters[6] as Pathfinder<Node<Vector2>>;
 
 
             behaviours.AddMainThreadBehaviours(0, () =>
@@ -32,6 +33,10 @@ namespace StateMachine.States.RTSStates
                 {
                     currentNode = targetNode;
                     return;
+                }
+                else if (path.Count == 0 && !currentNode.Equals(targetNode))
+                {
+                    path = pathfinder.FindPath(currentNode, targetNode);
                 }
 
                 currentNode = path[0];

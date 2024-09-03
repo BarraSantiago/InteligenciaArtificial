@@ -76,8 +76,6 @@ namespace StateMachine.Agents.RTS
             FsmBehaviours();
 
             FsmTransitions();
-
-            _fsm.ForceTransition(Behaviours.Walk);
         }
 
         private void FsmTransitions()
@@ -138,7 +136,7 @@ namespace StateMachine.Agents.RTS
 
         protected virtual object[] WalkTickParameters()
         {
-            object[] objects = { currentNode, targetNode, speed, retreat, transform, _path };
+            object[] objects = { currentNode, targetNode, speed, retreat, transform, _path, _pathfinder };
             return objects;
         }
 
