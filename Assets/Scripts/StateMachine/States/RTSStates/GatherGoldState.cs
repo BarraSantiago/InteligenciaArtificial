@@ -21,11 +21,10 @@ namespace StateMachine.States.RTSStates
             int goldLimit = Convert.ToInt32(parameters[5]);
             Node<Vector2> mine = parameters[6] as Node<Vector2>;
 
-            behaviours.AddMainThreadBehaviours(0, () =>
+            behaviours.AddMultiThreadableBehaviours(0, () =>
             {
                 if (food.value <= 0) return;
 
-                Debug.Log("gold: " + gold.value);
 
                 gold.value++;
                 lastTimeEat.value++;
@@ -40,6 +39,10 @@ namespace StateMachine.States.RTSStates
 
                 food.value++;
                 mine.food--;
+            });
+            behaviours.AddMainThreadBehaviours(1, () =>
+            {
+                Debug.Log("gold: " + gold.value);
             });
 
             behaviours.SetTransitionBehaviour(() =>

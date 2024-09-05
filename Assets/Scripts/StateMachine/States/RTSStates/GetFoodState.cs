@@ -13,11 +13,16 @@ namespace StateMachine.States.RTSStates
             refInt food = parameters[0] as refInt;
             int foodLimit = Convert.ToInt32(parameters[1]);
 
-            behaviours.AddMainThreadBehaviours(0, () =>
+            behaviours.AddMultiThreadableBehaviours(0, () =>
             {
                 food.value++;
+            });
+            
+            behaviours.AddMainThreadBehaviours(1, () =>
+            {
                 Debug.Log("food: " + food.value);
             });
+            
             behaviours.SetTransitionBehaviour(() =>
             {
                 if(food.value >= foodLimit) OnFlag?.Invoke(RTSAgent.Flags.OnFull);

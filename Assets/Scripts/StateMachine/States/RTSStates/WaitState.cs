@@ -18,7 +18,7 @@ namespace StateMachine.States.RTSStates
             Node<Vec2Int> currentNode = (Node<Vec2Int>)parameters[3];
 
             
-            behaviours.AddMainThreadBehaviours(0, () =>
+            behaviours.AddMultiThreadableBehaviours(0, () =>
             {
                 if (currentNode.NodeType == NodeType.Mine && currentNode.food > 0)
                 {

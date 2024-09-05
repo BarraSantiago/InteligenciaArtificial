@@ -25,11 +25,10 @@ namespace StateMachine.States.RTSStates
             Pathfinder<Node<Vector2>> pathfinder = parameters[6] as Pathfinder<Node<Vector2>>;
 
 
-            behaviours.AddMainThreadBehaviours(0, () =>
+            behaviours.AddMultiThreadableBehaviours(0, () =>
             {
                 if (currentNode == null || targetNode == null || pathfinder == null)
                 {
-                    Debug.LogError("One or more required parameters are null.");
                     return;
                 }
 
@@ -44,6 +43,16 @@ namespace StateMachine.States.RTSStates
 
                 currentNode = path[i.value];
                 i.value++;
+            });
+
+            behaviours.AddMainThreadBehaviours(1, () =>
+            {
+                if (currentNode == null || targetNode == null || pathfinder == null)
+                {
+                    Debug.LogError("One or more required parameters are null.");
+                    return;
+                }
+                
                 position.position = new Vector3(currentNode.GetCoordinate().x, currentNode.GetCoordinate().y);
             });
 
