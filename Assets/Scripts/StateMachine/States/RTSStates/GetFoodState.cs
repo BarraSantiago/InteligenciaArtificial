@@ -1,6 +1,7 @@
 ﻿using System;
 using StateMachine.Agents.RTS;
 using States;
+using UnityEngine;
 
 namespace StateMachine.States.RTSStates
 {
@@ -15,6 +16,7 @@ namespace StateMachine.States.RTSStates
             behaviours.AddMainThreadBehaviours(0, () =>
             {
                 food.value++;
+                Debug.Log("food: " + food.value);
             });
             behaviours.SetTransitionBehaviour(() =>
             {

@@ -19,7 +19,7 @@ namespace StateMachine.Agents.RTS
             _fsm.AddBehaviour<GetFoodState>(Behaviours.GatherResources, GetFoodEnterParameters, GetFoodEnterParameters);
             _fsm.AddBehaviour<DeliverFoodState>(Behaviours.Deliver, DeliverTickParameters);
         }
-        
+
         protected override void FsmTransitions()
         {
             base.FsmTransitions();
@@ -27,21 +27,32 @@ namespace StateMachine.Agents.RTS
             WalkTransitions();
             DeliverTransitions();
         }
-        
+
         protected override void GetFoodTransitions()
         {
             _fsm.SetTransition(Behaviours.GatherResources, Flags.OnFull, Behaviours.Walk,
-                () =>
-                {
-                    targetNode = MapGenerator.nodes.Find(x => x.NodeType == NodeType.Mine && x.gold > 0);
-                    _path = _pathfinder.FindPath(currentNode, targetNode);
-                });
+                () => { targetNode = MapGenerator.nodes.Find(x => x.NodeType == NodeType.Mine && x.gold > 0); });
         }
 
         protected override void WalkTransitions()
         {
-            base.WalkTransitions();
+            _fsm.SetTransition(Behaviours.Walk, Flags.OnRetreat, Behaviours.Walk,
+                () =>
+                {
+                    targetNode = townCenter;
+                    Debug.Log("Retreat. Walk to " + targetNode.GetCoordinate().x + " - " +
+                              targetNode.GetCoordinate().y);
+                });
+
+            _fsm.SetTransition(Behaviours.Walk, Flags.OnTargetLost, Behaviours.Walk,
+                () =>
+                {
+                    targetNode = MapGenerator.nodes.Find(x => x.NodeType == NodeType.Mine && x.gold > 0);
+                    Debug.Log("Walk to " + targetNode.GetCoordinate().x + " - " + targetNode.GetCoordinate().y);
+                });
             _fsm.SetTransition(Behaviours.Walk, Flags.OnGather, Behaviours.Deliver,
+                () => Debug.Log("Deliver food"));
+            _fsm.SetTransition(Behaviours.Walk, Flags.OnWait, Behaviours.GatherResources,
                 () => Debug.Log("Deliver food"));
         }
 
