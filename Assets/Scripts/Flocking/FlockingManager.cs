@@ -95,7 +95,7 @@ namespace Flocking
 
             foreach (Boid b in boids)
             {
-                if (Vector3.Distance(boid.transform.position, b.transform.position) < boid.detectionRadious)
+                if (Vector3.Distance(boid.transform.position, b.transform.position) < boid.detectionRadius)
                 {
                     insideRadiusBoids.Add(b);
                 }

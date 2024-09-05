@@ -7,7 +7,7 @@ namespace Flocking
     {
         public float speed = 2.5f;
         public float turnSpeed = 5f;
-        public float detectionRadious = 3.0f;
+        public float detectionRadius = 3.0f;
 
         public static float alignmentWeight = 1.0f;
         public static float cohesionWeight = 1.0f;
