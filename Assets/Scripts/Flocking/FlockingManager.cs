@@ -14,7 +14,7 @@ namespace Flocking
         [SerializeField] private float cohesionWeight = 1.0f;
         [SerializeField] private float separationWeight = 1.0f;
         [SerializeField] private float directionWeight = 1.0f;
-        
+
         private List<Boid> boids = new List<Boid>();
 
         private void Start()
@@ -23,7 +23,7 @@ namespace Flocking
             {
                 GameObject boidGO = Instantiate(boidPrefab.gameObject,
                     new Vector3(Random.Range(-10, 10), Random.Range(-10, 10)), Quaternion.identity);
-                
+
                 Boid boid = boidGO.GetComponent<Boid>();
                 boid.Init(Alignment, Cohesion, Separation, Direction);
                 boids.Add(boid);
@@ -42,21 +42,23 @@ namespace Flocking
         public Vector3 Alignment(Boid boid)
         {
             List<Boid> insideRadiusBoids = GetBoidsInsideRadius(boid);
+            if (insideRadiusBoids.Count == 0) return Vector3.zero;
+
             Vector3 avg = Vector3.zero;
-            
             foreach (Boid b in insideRadiusBoids)
             {
-                avg += b.transform.up.normalized;
+                avg += b.transform.up;
             }
 
             avg /= insideRadiusBoids.Count;
-            avg.Normalize();
-            return avg;
+            return avg.normalized;
         }
 
         public Vector3 Cohesion(Boid boid)
         {
             List<Boid> insideRadiusBoids = GetBoidsInsideRadius(boid);
+            if (insideRadiusBoids.Count == 0) return Vector3.zero;
+
             Vector3 avg = Vector3.zero;
             foreach (Boid b in insideRadiusBoids)
             {
@@ -70,16 +72,16 @@ namespace Flocking
         public Vector3 Separation(Boid boid)
         {
             List<Boid> insideRadiusBoids = GetBoidsInsideRadius(boid);
+            if (insideRadiusBoids.Count == 0) return Vector3.zero;
+
             Vector3 avg = Vector3.zero;
-            
             foreach (Boid b in insideRadiusBoids)
             {
-                avg += (b.transform.position - boid.transform.position);
+                avg += (boid.transform.position - b.transform.position);
             }
 
             avg /= insideRadiusBoids.Count;
-            avg.Normalize();
-            return avg;
+            return avg.normalized;
         }
 
         public Vector3 Direction(Boid boid)

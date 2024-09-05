@@ -8,7 +8,7 @@ namespace Flocking
         public float speed = 2.5f;
         public float turnSpeed = 5f;
         public float detectionRadious = 3.0f;
-        
+
         public static float alignmentWeight = 1.0f;
         public static float cohesionWeight = 1.0f;
         public static float separationWeight = 1.0f;
@@ -19,10 +19,10 @@ namespace Flocking
         private Func<Boid, Vector3> Separation;
         private Func<Boid, Vector3> Direction;
 
-        public void Init(Func<Boid, Vector3> Alignment, 
-            Func<Boid, Vector3> Cohesion, 
-            Func<Boid, Vector3> Separation, 
-            Func<Boid, Vector3> Direction) 
+        public void Init(Func<Boid, Vector3> Alignment,
+            Func<Boid, Vector3> Cohesion,
+            Func<Boid, Vector3> Separation,
+            Func<Boid, Vector3> Direction)
         {
             this.Alignment = Alignment;
             this.Cohesion = Cohesion;
@@ -32,13 +32,14 @@ namespace Flocking
 
         private void Update()
         {
-            transform.position += transform.up * (speed * Time.deltaTime);
-            transform.up = Vector3.Lerp(transform.up, ACS(), turnSpeed * Time.deltaTime);
+            transform.position += transform.forward * (speed * Time.deltaTime);
+            transform.forward = Vector3.Lerp(transform.forward, ACS(), turnSpeed * Time.deltaTime);
         }
 
         public Vector3 ACS()
         {
-            Vector3 ACS = Alignment(this) * alignmentWeight + Cohesion(this) * cohesionWeight + Separation(this) * separationWeight  + Direction(this) * directionWeight;
+            Vector3 ACS = Alignment(this) * alignmentWeight + Cohesion(this) * cohesionWeight +
+                          Separation(this) * separationWeight + Direction(this) * directionWeight;
             return ACS.normalized;
         }
     }
