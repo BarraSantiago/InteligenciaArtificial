@@ -3,7 +3,7 @@ using Game;
 using Pathfinder;
 using StateMachine.States.RTSStates;
 using UnityEngine;
-using Vector2 = System.Numerics.Vector2;
+using Vector2 = Utils.Vec2Int;
 
 namespace StateMachine.Agents.RTS
 {
@@ -55,17 +55,12 @@ namespace StateMachine.Agents.RTS
         private const int GoldLimit = 15;
         private const int FoodLimit = 10;
 
-        private void Start()
-        {
-            Init();
-        }
-
         private void Update()
         {
             _fsm.Tick();
         }
 
-        protected virtual void Init()
+        public virtual void Init()
         {
             _fsm = new FSM<Behaviours, Flags>();
 
@@ -78,7 +73,7 @@ namespace StateMachine.Agents.RTS
             FsmTransitions();
         }
 
-        private void FsmTransitions()
+        protected virtual void FsmTransitions()
         {
             WalkTransitions();
             WaitTransitions();
@@ -100,8 +95,7 @@ namespace StateMachine.Agents.RTS
                 () =>
                 {
                     targetNode = townCenter;
-                    _path = _pathfinder.FindPath(currentNode, targetNode);
-                    Debug.Log("Retreat to " + targetNode.GetCoordinate());
+                    Debug.Log("Retreat to " + targetNode.GetCoordinate().x + " - " + targetNode.GetCoordinate().y);
                 });
         }
 
@@ -119,16 +113,14 @@ namespace StateMachine.Agents.RTS
                 () =>
                 {
                     targetNode = townCenter;
-                    _path = _pathfinder.FindPath(currentNode, targetNode);
-                    Debug.Log("Retreat. Walk to " + targetNode.GetCoordinate());
+                    Debug.Log("Retreat. Walk to " + targetNode.GetCoordinate().x + " - " + targetNode.GetCoordinate().y);
                 });
 
             _fsm.SetTransition(Behaviours.Walk, Flags.OnTargetLost, Behaviours.Walk,
                 () =>
                 {
                     targetNode = MapGenerator.nodes.Find(x => x.NodeType == NodeType.Mine && x.gold > 0);
-                    _path = _pathfinder.FindPath(currentNode, targetNode);
-                    Debug.Log("Walk to " + targetNode.GetCoordinate());
+                    Debug.Log("Walk to " + targetNode.GetCoordinate().x + " - " + targetNode.GetCoordinate().y);
                 });
 
             _fsm.SetTransition(Behaviours.Walk, Flags.OnWait, Behaviours.Wait, () => Debug.Log("Wait"));
@@ -152,8 +144,7 @@ namespace StateMachine.Agents.RTS
                 () =>
                 {
                     targetNode = MapGenerator.nodes.Find(x => x.NodeType == NodeType.Mine && x.gold > 0);
-                    _path = _pathfinder.FindPath(currentNode, targetNode);
-                    Debug.Log("walk to " + targetNode.GetCoordinate());
+                    Debug.Log("walk to " + targetNode.GetCoordinate().x + " - " + targetNode.GetCoordinate().y);
                 });
         }
 

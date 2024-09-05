@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using UnityEngine;
-using Vector2 = System.Numerics.Vector2;
+using Vector2 = Utils.Vec2Int;
 
 namespace Pathfinder
 {
@@ -32,12 +32,17 @@ namespace Pathfinder
 
         protected override int Distance(NodeType A, NodeType B)
         {
+            if (A == null || B == null)
+            {
+                return int.MaxValue;
+            }
+            
             float distance = 0;
             Node<Vector2> nodeA = A as Node<Vector2>;
             Node<Vector2> nodeB = B as Node<Vector2>;
 
-            distance += Math.Abs(nodeA.GetCoordinate().X - nodeB.GetCoordinate().X);
-            distance += Math.Abs(nodeA.GetCoordinate().Y - nodeB.GetCoordinate().Y);
+            distance += Math.Abs(nodeA.GetCoordinate().x - nodeB.GetCoordinate().x);
+            distance += Math.Abs(nodeA.GetCoordinate().y - nodeB.GetCoordinate().y);
 
             return (int)distance;
         }
@@ -56,12 +61,12 @@ namespace Pathfinder
 
                 var neighborCoor = neighborNode.GetCoordinate();
 
-                if ((Mathf.Approximately(neighborCoor.X, nodeCoor.X) &&
-                     Mathf.Approximately(Math.Abs(neighborCoor.Y - nodeCoor.Y), 1)) ||
-                    (Mathf.Approximately(neighborCoor.Y, nodeCoor.Y) &&
-                     Mathf.Approximately(Math.Abs(neighborCoor.X - nodeCoor.Y), 1)) ||
-                    (Mathf.Approximately(Math.Abs(neighborCoor.Y - nodeCoor.Y), 1) &&
-                     Mathf.Approximately(Math.Abs(neighborCoor.X - nodeCoor.X), 1)))
+                if ((Mathf.Approximately(neighborCoor.x, nodeCoor.x) &&
+                     Mathf.Approximately(Math.Abs(neighborCoor.y - nodeCoor.y), 1)) ||
+                    (Mathf.Approximately(neighborCoor.y, nodeCoor.y) &&
+                     Mathf.Approximately(Math.Abs(neighborCoor.x - nodeCoor.y), 1)) ||
+                    (Mathf.Approximately(Math.Abs(neighborCoor.y - nodeCoor.y), 1) &&
+                     Mathf.Approximately(Math.Abs(neighborCoor.x - nodeCoor.x), 1)))
                 {
                     neighbors.Add(neighbor);
                 }
@@ -99,11 +104,19 @@ namespace Pathfinder
 
         protected override bool NodesEquals(NodeType A, NodeType B)
         {
+            if (A == null || B == null)
+            {
+                return false;
+            }
             var nodeA = A as Node<Vector2>;
             var nodeB = B as Node<Vector2>;
-
-            return nodeA.GetCoordinate().X == nodeB.GetCoordinate().X &&
-                   nodeA.GetCoordinate().Y == nodeB.GetCoordinate().Y;
+            
+            if (nodeA == null || nodeB == null)
+            {
+                return false;
+            }
+            return Mathf.Approximately(nodeA.GetCoordinate().x, nodeB.GetCoordinate().x) &&
+                   Mathf.Approximately(nodeA.GetCoordinate().y, nodeB.GetCoordinate().y);
         }
     }
 }

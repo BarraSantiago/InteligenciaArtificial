@@ -7,7 +7,7 @@ namespace StateMachine.Agents.RTS
 {
     public class Caravan : RTSAgent
     {
-        protected override void Init()
+        public override void Init()
         {
             base.Init();
             _fsm.ForceTransition(Behaviours.GatherResources);
@@ -18,6 +18,14 @@ namespace StateMachine.Agents.RTS
             base.FsmBehaviours();
             _fsm.AddBehaviour<GetFoodState>(Behaviours.GatherResources, GetFoodEnterParameters, GetFoodEnterParameters);
             _fsm.AddBehaviour<DeliverFoodState>(Behaviours.Deliver, DeliverTickParameters);
+        }
+        
+        protected override void FsmTransitions()
+        {
+            base.FsmTransitions();
+            GetFoodTransitions();
+            WalkTransitions();
+            DeliverTransitions();
         }
         
         protected override void GetFoodTransitions()
@@ -34,7 +42,7 @@ namespace StateMachine.Agents.RTS
         {
             base.WalkTransitions();
             _fsm.SetTransition(Behaviours.Walk, Flags.OnGather, Behaviours.Deliver,
-                () => Debug.Log("Gather food"));
+                () => Debug.Log("Deliver food"));
         }
 
         protected override void DeliverTransitions()
@@ -44,6 +52,7 @@ namespace StateMachine.Agents.RTS
                 {
                     targetNode = townCenter;
                     _path = _pathfinder.FindPath(currentNode, targetNode);
+                    Debug.Log("To town center");
                 });
         }
 

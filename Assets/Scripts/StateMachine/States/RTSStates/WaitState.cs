@@ -2,6 +2,7 @@
 using Pathfinder;
 using StateMachine.Agents.RTS;
 using States;
+using Utils;
 
 namespace StateMachine.States.RTSStates
 {
@@ -14,7 +15,7 @@ namespace StateMachine.States.RTSStates
             bool retreat = (bool)parameters[0];
             refInt food = parameters[1] as refInt;
             refInt gold = parameters[2] as refInt;
-            Node<Vector2> currentNode = (Node<Vector2>)parameters[3];
+            Node<Vec2Int> currentNode = (Node<Vec2Int>)parameters[3];
 
             
             behaviours.AddMainThreadBehaviours(0, () =>

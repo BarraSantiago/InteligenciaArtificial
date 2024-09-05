@@ -2,6 +2,7 @@ using System.Numerics;
 using Pathfinder;
 using StateMachine.Agents.RTS;
 using States;
+using Utils;
 
 namespace StateMachine.States.RTSStates
 {
@@ -11,21 +12,21 @@ namespace StateMachine.States.RTSStates
         {
             BehaviourActions behaviours = new BehaviourActions();
             refInt food = parameters[0] as refInt;
-            Node<Vector2> node = parameters[1] as Node<Vector2>;
-            
+            Node<Vec2Int> node = parameters[1] as Node<Vec2Int>;
+
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {
                 if (food.value <= 0) return;
-                
+
                 food.value--;
                 node.food++;
             });
-            
+
             behaviours.SetTransitionBehaviour(() =>
             {
-                if (food.value < 0) OnFlag?.Invoke(RTSAgent.Flags.OnHunger);
+                if (food.value <= 0) OnFlag?.Invoke(RTSAgent.Flags.OnHunger);
             });
-            
+
             return behaviours;
         }
 

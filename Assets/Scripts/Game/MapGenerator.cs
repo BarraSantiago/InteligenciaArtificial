@@ -40,8 +40,8 @@ namespace Game
         //private Pathfinding pathfinding;
 
         //public Pathfinding Pathfinding => pathfinding;
-        public static List<Node<System.Numerics.Vector2>> mines = new List<Node<System.Numerics.Vector2>>();
-        public static List<Node<System.Numerics.Vector2>> nodes = new List<Node<System.Numerics.Vector2>>();
+        public static List<Node<Vec2Int>> mines = new List<Node<Vec2Int>>();
+        public static List<Node<Vec2Int>> nodes = new List<Node<Vec2Int>>();
 
         public static List<Vector2> Vector2sBeingUsed = new List<Vector2>();
 
@@ -131,7 +131,7 @@ namespace Game
             return GO;
         }*/
 
-        public void RemoveEmptyMine(Node<System.Numerics.Vector2> Vector2)
+        public void RemoveEmptyMine(Node<Vec2Int> Vector2)
         {
             mines.Remove(Vector2);
         }

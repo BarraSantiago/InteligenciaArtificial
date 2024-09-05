@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3315875941710006004}
   - component: {fileID: 6180685295771343898}
-  - component: {fileID: 3330978505691948120}
+  - component: {fileID: 3430654975918205027}
   m_Layer: 0
   m_Name: Miner
   m_TagString: Untagged
@@ -85,7 +85,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &3330978505691948120
+--- !u!114 &3430654975918205027
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -94,9 +94,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 2785322424147078408}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cdb34083cd77405fac01a446fcbc7d5e, type: 3}
+  m_Script: {fileID: 11500000, guid: 6fe78fcd5d9d409cad1c24b8b5445703, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 1
   retreat: 0
-  food: 3

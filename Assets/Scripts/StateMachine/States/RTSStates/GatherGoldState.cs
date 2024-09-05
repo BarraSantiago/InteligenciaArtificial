@@ -3,7 +3,7 @@ using Pathfinder;
 using StateMachine.Agents.RTS;
 using States;
 using UnityEngine;
-using Vector2 = System.Numerics.Vector2;
+using Vector2 = Utils.Vec2Int;
 
 namespace StateMachine.States.RTSStates
 {
@@ -24,17 +24,22 @@ namespace StateMachine.States.RTSStates
             behaviours.AddMainThreadBehaviours(0, () =>
             {
                 if (food.value <= 0) return;
-                
+
                 Debug.Log("gold: " + gold.value);
-                
+
                 gold.value++;
                 lastTimeEat.value++;
                 mine.gold--;
-                
+
                 if (lastTimeEat.value < goldPerFood) return;
 
                 food.value--;
                 lastTimeEat.value = 0;
+
+                if (food.value > 0 || mine.food <= 0) return;
+
+                food.value++;
+                mine.food--;
             });
 
             behaviours.SetTransitionBehaviour(() =>

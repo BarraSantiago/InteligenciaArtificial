@@ -1,17 +1,21 @@
-﻿using Pathfinder;
-using StateMachine.States.RTSStates;
+﻿using StateMachine.States.RTSStates;
 using UnityEngine;
 
 namespace StateMachine.Agents.RTS
 {
     public class Miner : RTSAgent
     {
-        private NodeType nodeObjective = NodeType.Mine;
-
-        protected override void Init()
+        public override void Init()
         {
             base.Init();
             _fsm.ForceTransition(Behaviours.Walk);
+        }
+
+        protected override void FsmTransitions()
+        {
+            base.FsmTransitions();
+            GatherTransitions();
+            WalkTransitions();
         }
 
         protected override void FsmBehaviours()
@@ -30,8 +34,7 @@ namespace StateMachine.Agents.RTS
                 () =>
                 {
                     targetNode = townCenter;
-                    _path = _pathfinder.FindPath(currentNode, targetNode);
-                    Debug.Log("Gold full. Walk to " + targetNode.GetCoordinate());
+                    Debug.Log("Gold full. Walk to " + targetNode.GetCoordinate().x + " - " + targetNode.GetCoordinate().y);
                 });
         }
 

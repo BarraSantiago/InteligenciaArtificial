@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using Game;
 using Pathfinder;
 using StateMachine.Agents.RTS;
 using States;
 using UnityEngine;
-using Vector2 = System.Numerics.Vector2;
+using Vector2 = Utils.Vec2Int;
 
 namespace StateMachine.States.RTSStates
 {
     public class WalkState : State
     {
+        private refInt i = new refInt(0);
+
         public override BehaviourActions GetTickBehaviour(params object[] parameters)
         {
             BehaviourActions behaviours = new BehaviourActions();
@@ -27,25 +27,24 @@ namespace StateMachine.States.RTSStates
 
             behaviours.AddMainThreadBehaviours(0, () =>
             {
-                //if (path.Count == 0) return;
-
-                if (Vector2.Distance(currentNode.GetCoordinate(), targetNode.GetCoordinate()) < 0.5f)
+                if (currentNode == null || targetNode == null || pathfinder == null)
                 {
-                    currentNode = targetNode;
+                    Debug.LogError("One or more required parameters are null.");
                     return;
                 }
-                else if (path.Count == 0 && !currentNode.Equals(targetNode))
+
+                if (currentNode.Equals(targetNode)) return;
+
+                if ((path is null || i.value >= path.Count) && !currentNode.Equals(targetNode))
                 {
                     path = pathfinder.FindPath(currentNode, targetNode);
                 }
 
-                currentNode = path[0];
-                path.RemoveAt(0);
-                
-                position.position = new Vector3(currentNode.GetCoordinate().X, currentNode.GetCoordinate().Y);
-                
-                //Vector3 direction = new Vector3(targetNode.GetCoordinate().X - currentNode.GetCoordinate().X,targetNode.GetCoordinate().Y - currentNode.GetCoordinate().Y).normalized;
-                //position.position += direction * (speed * Time.deltaTime);
+                if (path.Count <= 0 || i.value >= path.Count) return;
+
+                currentNode = path[i.value];
+                i.value++;
+                position.position = new Vector3(currentNode.GetCoordinate().x, currentNode.GetCoordinate().y);
             });
 
             behaviours.SetTransitionBehaviour(() =>
@@ -53,18 +52,22 @@ namespace StateMachine.States.RTSStates
                 if (retreat && targetNode.NodeType != NodeType.TownCenter)
                 {
                     OnFlag?.Invoke(RTSAgent.Flags.OnRetreat);
+                    i.value = 0;
                     return;
                 }
 
-                if (targetNode.NodeType == NodeType.Mine && targetNode.gold <= 0)
+
+                if (currentNode == null || targetNode == null || pathfinder == null ||
+                    targetNode.NodeType == NodeType.Mine && targetNode.gold <= 0)
                 {
                     OnFlag?.Invoke(RTSAgent.Flags.OnTargetLost);
+                    i.value = 0;
                     return;
                 }
 
                 if (!currentNode.Equals(targetNode)) return;
 
-                switch (targetNode.NodeType)
+                switch (currentNode.NodeType)
                 {
                     case NodeType.Mine:
                         OnFlag?.Invoke(RTSAgent.Flags.OnGather);
@@ -72,9 +75,13 @@ namespace StateMachine.States.RTSStates
                     case NodeType.TownCenter:
                         OnFlag?.Invoke(RTSAgent.Flags.OnWait);
                         break;
+                    case NodeType.Empty:
+                    case NodeType.Blocked:
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
+
+                i.value = 0;
             });
 
             return behaviours;

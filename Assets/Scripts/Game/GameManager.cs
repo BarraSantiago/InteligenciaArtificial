@@ -1,6 +1,8 @@
-﻿using Pathfinder;
+﻿using System;
+using Pathfinder;
 using StateMachine.Agents.RTS;
 using UnityEngine;
+using Utils;
 using VoronoiDiagram;
 using Random = UnityEngine.Random;
 
@@ -24,7 +26,7 @@ namespace Game
         [SerializeField] private GraphView graphView;
         [SerializeField] private Voronoi voronoi;
         [SerializeField] private bool validate;
-        private Vector2IntGraph<Node<System.Numerics.Vector2>> graph;
+        private Vector2IntGraph<Node<Vec2Int>> graph;
 
         private void Start()
         {
@@ -34,10 +36,10 @@ namespace Game
             MapGenerator.CellSize = nodesSize;
             MapGenerator.MapDimensions = new Vector2Int(mapWidth, mapHeight);
 
-            graph = new Vector2IntGraph<Node<System.Numerics.Vector2>>(mapWidth, mapHeight);
+            graph = new Vector2IntGraph<Node<Vec2Int>>(mapWidth, mapHeight);
 
 
-            Node<System.Numerics.Vector2> node = graph.nodes[Random.Range(0, graph.nodes.Count)];
+            Node<Vec2Int> node = graph.nodes[Random.Range(0, graph.nodes.Count)];
             node.NodeType = NodeType.Mine;
             node.gold = 100;
             MapGenerator.mines.Add(node);
@@ -56,18 +58,32 @@ namespace Game
 
             MapGenerator.nodes = graph.nodes;
 
-            Vector3 townCenterPosition = new Vector3(graph.nodes[towncenterNode].GetCoordinate().X,
-                graph.nodes[towncenterNode].GetCoordinate().Y);
+            Vector3 townCenterPosition = new Vector3(graph.nodes[towncenterNode].GetCoordinate().x,
+                graph.nodes[towncenterNode].GetCoordinate().y);
 
 
             GameObject miner = Instantiate(minerPrefab, townCenterPosition, Quaternion.identity);
-            RTSAgent agent = miner.GetComponent<RTSAgent>();
+            Miner agent = miner.GetComponent<Miner>();
             agent.currentNode = graph.nodes[towncenterNode];
+            RTSAgent.townCenter = graph.nodes[towncenterNode];
+            agent.Init();
+            
             GameObject caravan = Instantiate(caravanPrefab, townCenterPosition, Quaternion.identity);
-            agent = caravan.GetComponent<RTSAgent>();
-            agent.currentNode = graph.nodes[towncenterNode];
+            Caravan agent2 = caravan.GetComponent<Caravan>();
+            agent2.currentNode = graph.nodes[towncenterNode];
+            agent2.Init();
             //voronoi.Init();
             //voronoi.SetVoronoi(MapGenerator.Vector2s);
+        }
+
+        private void OnValidate()
+        {
+            if(!Application.isPlaying) return;
+            
+            Miner agent = FindObjectOfType<Miner>();
+            agent.retreat = validate;
+            Caravan agent2 = FindObjectOfType<Caravan>();
+            agent2.retreat = validate;
         }
 
         private void OnDrawGizmos()
@@ -76,7 +92,7 @@ namespace Game
                 return;
             //voronoi.Draw();
 
-            foreach (Node<System.Numerics.Vector2> node in graph.nodes)
+            foreach (Node<Vec2Int> node in graph.nodes)
             {
                 Gizmos.color = node.NodeType switch
                 {
@@ -87,7 +103,7 @@ namespace Game
                     _ => Color.white
                 };
 
-                Gizmos.DrawSphere(new Vector3(node.GetCoordinate().X, node.GetCoordinate().Y), nodesSize);
+                Gizmos.DrawSphere(new Vector3(node.GetCoordinate().x, node.GetCoordinate().y), nodesSize);
             }
         }
     }
