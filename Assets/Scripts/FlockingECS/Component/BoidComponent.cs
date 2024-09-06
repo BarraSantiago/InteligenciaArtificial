@@ -6,7 +6,11 @@
         public float turnSpeed = 5f;
         public float detectionRadius = 3.0f;
         
-        
-
+        BoidComponent(float speed, float turnSpeed, float detectionRadius)
+        {
+            this.speed = speed;
+            this.turnSpeed = turnSpeed;
+            this.detectionRadius = detectionRadius;
+        }
     }
 }
