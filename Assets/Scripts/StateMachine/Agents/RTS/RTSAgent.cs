@@ -7,16 +7,6 @@ using Vector2 = Utils.Vec2Int;
 
 namespace StateMachine.Agents.RTS
 {
-    public class refInt
-    {
-        public refInt(int value)
-        {
-            this.value = value;
-        }
-
-        public int value;
-    }
-
     public class RTSAgent : MonoBehaviour
     {
         public enum Flags
@@ -42,15 +32,15 @@ namespace StateMachine.Agents.RTS
 
         public float speed = 1.0f;
         public bool retreat;
-        public refInt food = new refInt(3);
         public Node<Vector2> currentNode;
         public Node<Vector2> targetNode;
-
+        
+        protected int? Food = (3);
+        private int? _currentGold = (0);
+        private int? _lastTimeEat = (0);
         protected FSM<Behaviours, Flags> _fsm;
         protected AStarPathfinder<Node<Vector2>> _pathfinder;
         protected List<Node<Vector2>> _path;
-        private refInt _currentGold = new refInt(0);
-        private refInt _lastTimeEat = new refInt(0);
         private const int GoldPerFood = 3;
         private const int GoldLimit = 15;
         private const int FoodLimit = 10;
@@ -102,7 +92,7 @@ namespace StateMachine.Agents.RTS
 
         protected virtual object[] GatherTickParameters()
         {
-            object[] objects = { retreat, food, _currentGold, _lastTimeEat, GoldPerFood, GoldLimit, currentNode };
+            object[] objects = { retreat, Food, _currentGold, _lastTimeEat, GoldPerFood, GoldLimit, currentNode };
             return objects;
         }
 
@@ -150,7 +140,7 @@ namespace StateMachine.Agents.RTS
 
         protected virtual object[] WaitTickParameters()
         {
-            object[] objects = { retreat, food, _currentGold, currentNode };
+            object[] objects = { retreat, Food, _currentGold, currentNode };
             return objects;
         }
 
@@ -161,7 +151,7 @@ namespace StateMachine.Agents.RTS
 
         protected virtual object[] GetFoodEnterParameters()
         {
-            object[] objects = { food, FoodLimit };
+            object[] objects = { Food, FoodLimit };
             return objects;
         }
         

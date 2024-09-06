@@ -10,7 +10,7 @@ namespace StateMachine.States.RTSStates
 {
     public class WalkState : State
     {
-        private refInt i = new refInt(0);
+        private int? i = (0);
 
         public override BehaviourActions GetTickBehaviour(params object[] parameters)
         {
@@ -34,15 +34,15 @@ namespace StateMachine.States.RTSStates
 
                 if (currentNode.Equals(targetNode)) return;
 
-                if ((path is null || i.value >= path.Count) && !currentNode.Equals(targetNode))
+                if ((path is null || i >= path.Count) && !currentNode.Equals(targetNode))
                 {
                     path = pathfinder.FindPath(currentNode, targetNode);
                 }
 
-                if (path.Count <= 0 || i.value >= path.Count) return;
+                if (path.Count <= 0 || i >= path.Count) return;
 
-                currentNode = path[i.value];
-                i.value++;
+                currentNode = path[(int)i];
+                i++;
             });
 
             behaviours.AddMainThreadBehaviours(1, () =>
@@ -61,7 +61,7 @@ namespace StateMachine.States.RTSStates
                 if (retreat && targetNode.NodeType != NodeType.TownCenter)
                 {
                     OnFlag?.Invoke(RTSAgent.Flags.OnRetreat);
-                    i.value = 0;
+                    i = 0;
                     return;
                 }
 
@@ -70,7 +70,7 @@ namespace StateMachine.States.RTSStates
                     targetNode.NodeType == NodeType.Mine && targetNode.gold <= 0)
                 {
                     OnFlag?.Invoke(RTSAgent.Flags.OnTargetLost);
-                    i.value = 0;
+                    i = 0;
                     return;
                 }
 
@@ -90,7 +90,7 @@ namespace StateMachine.States.RTSStates
                         throw new ArgumentOutOfRangeException();
                 }
 
-                i.value = 0;
+                i = 0;
             });
 
             return behaviours;

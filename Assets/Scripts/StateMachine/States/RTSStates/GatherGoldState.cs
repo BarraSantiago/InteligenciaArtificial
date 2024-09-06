@@ -14,42 +14,42 @@ namespace StateMachine.States.RTSStates
             BehaviourActions behaviours = new BehaviourActions();
 
             bool retreat = Convert.ToBoolean(parameters[0]);
-            refInt food = parameters[1] as refInt;
-            refInt gold = parameters[2] as refInt;
-            refInt lastTimeEat = parameters[3] as refInt;
+            int? food = Convert.ToInt32( parameters[1]);
+            int? gold = Convert.ToInt32( parameters[2]);
+            int? lastTimeEat = Convert.ToInt32( parameters[3]);
             int goldPerFood = Convert.ToInt32(parameters[4]);
             int goldLimit = Convert.ToInt32(parameters[5]);
             Node<Vector2> mine = parameters[6] as Node<Vector2>;
 
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {
-                if (food.value <= 0) return;
+                if (food <= 0) return;
 
 
-                gold.value++;
-                lastTimeEat.value++;
+                gold++;
+                lastTimeEat++;
                 mine.gold--;
 
-                if (lastTimeEat.value < goldPerFood) return;
+                if (lastTimeEat < goldPerFood) return;
 
-                food.value--;
-                lastTimeEat.value = 0;
+                food--;
+                lastTimeEat = 0;
 
-                if (food.value > 0 || mine.food <= 0) return;
+                if (food > 0 || mine.food <= 0) return;
 
-                food.value++;
+                food++;
                 mine.food--;
             });
             behaviours.AddMainThreadBehaviours(1, () =>
             {
-                Debug.Log("gold: " + gold.value);
+                Debug.Log("gold: " + gold);
             });
 
             behaviours.SetTransitionBehaviour(() =>
             {
                 if (retreat) OnFlag?.Invoke(RTSAgent.Flags.OnRetreat);
-                if (food.value <= 0) OnFlag?.Invoke(RTSAgent.Flags.OnHunger);
-                if (gold.value >= goldLimit) OnFlag?.Invoke(RTSAgent.Flags.OnFull);
+                if (food <= 0) OnFlag?.Invoke(RTSAgent.Flags.OnHunger);
+                if (gold >= goldLimit) OnFlag?.Invoke(RTSAgent.Flags.OnFull);
             });
 
             return behaviours;

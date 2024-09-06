@@ -1,4 +1,4 @@
-using System.Numerics;
+using System;
 using Pathfinder;
 using StateMachine.Agents.RTS;
 using States;
@@ -11,20 +11,20 @@ namespace StateMachine.States.RTSStates
         public override BehaviourActions GetTickBehaviour(params object[] parameters)
         {
             BehaviourActions behaviours = new BehaviourActions();
-            refInt food = parameters[0] as refInt;
+            int? food = Convert.ToInt32(parameters[0]);
             Node<Vec2Int> node = parameters[1] as Node<Vec2Int>;
 
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {
-                if (food.value <= 0) return;
+                if (food <= 0) return;
 
-                food.value--;
+                food--;
                 node.food++;
             });
 
             behaviours.SetTransitionBehaviour(() =>
             {
-                if (food.value <= 0) OnFlag?.Invoke(RTSAgent.Flags.OnHunger);
+                if (food <= 0) OnFlag?.Invoke(RTSAgent.Flags.OnHunger);
             });
 
             return behaviours;

@@ -69,7 +69,7 @@ namespace StateMachine.Agents.RTS
 
         private object[] DeliverTickParameters()
         {
-            return new object[] { food, currentNode };
+            return new object[] { Food, currentNode };
         }
     }
 }
