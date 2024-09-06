@@ -6,9 +6,9 @@ namespace ECS.Patron
     public enum FlagType
     {
         None = 0,
-        TypeA = 1 << 0,
-        TypeB = 1 << 1,
-        TypeC = 1 << 2,
+        Miner = 1 << 0,
+        Caravan = 1 << 1,
+        Target = 1 << 2,
         TypeD = 1 << 3,
         TypeE = 1 << 4
     }

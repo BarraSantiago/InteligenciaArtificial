@@ -57,27 +57,26 @@ public static class ECSManager
 
     public static uint CreateEntity()
     {
-        ECSEntity ecsEntity;
-        ecsEntity = new ECSEntity();
+        var ecsEntity = new ECSEntity();
         entities.TryAdd(ecsEntity.GetID(), ecsEntity);
         return ecsEntity.GetID();
     }
 
-    public static void AddComponent<ComponentType>(uint entityID, ComponentType component)
-        where ComponentType : ECSComponent
+    public static void AddComponent<TComponentType>(uint entityID, TComponentType component)
+        where TComponentType : ECSComponent
     {
         component.EntityOwnerID = entityID;
-        entities[entityID].AddComponentType(typeof(ComponentType));
-        components[typeof(ComponentType)].TryAdd(entityID, component);
+        entities[entityID].AddComponentType(typeof(TComponentType));
+        components[typeof(TComponentType)].TryAdd(entityID, component);
     }
 
-    public static bool ContainsComponent<ComponentType>(uint entityID) where ComponentType : ECSComponent
+    public static bool ContainsComponent<TComponentType>(uint entityID) where TComponentType : ECSComponent
     {
-        return entities[entityID].ContainsComponentType<ComponentType>();
+        return entities[entityID].ContainsComponentType<TComponentType>();
     }
 
 
-    public static IEnumerable<uint> GetEntitiesWhitComponentTypes(params Type[] componentTypes)
+    public static IEnumerable<uint> GetEntitiesWithComponentTypes(params Type[] componentTypes)
     {
         ConcurrentBag<uint> matchs = new ConcurrentBag<uint>();
         Parallel.ForEach(entities, parallelOptions, entity =>
@@ -94,28 +93,28 @@ public static class ECSManager
     }
 
 
-    public static ConcurrentDictionary<uint, ComponentType> GetComponents<ComponentType>()
-        where ComponentType : ECSComponent
+    public static ConcurrentDictionary<uint, TComponentType> GetComponents<TComponentType>()
+        where TComponentType : ECSComponent
     {
-        if (!components.ContainsKey(typeof(ComponentType))) return null;
+        if (!components.ContainsKey(typeof(TComponentType))) return null;
 
-        ConcurrentDictionary<uint, ComponentType> comps = new ConcurrentDictionary<uint, ComponentType>();
+        ConcurrentDictionary<uint, TComponentType> comps = new ConcurrentDictionary<uint, TComponentType>();
 
-        Parallel.ForEach(components[typeof(ComponentType)], parallelOptions,
-            component => { comps.TryAdd(component.Key, component.Value as ComponentType); });
+        Parallel.ForEach(components[typeof(TComponentType)], parallelOptions,
+            component => { comps.TryAdd(component.Key, component.Value as TComponentType); });
 
         return comps;
     }
 
-    public static ComponentType GetComponent<ComponentType>(uint entityID) where ComponentType : ECSComponent
+    public static TComponentType GetComponent<TComponentType>(uint entityID) where TComponentType : ECSComponent
     {
-        return components[typeof(ComponentType)][entityID] as ComponentType;
+        return components[typeof(TComponentType)][entityID] as TComponentType;
     }
 
 
-    public static void RemoveComponent<ComponentType>(uint entityID) where ComponentType : ECSComponent
+    public static void RemoveComponent<TComponentType>(uint entityID) where TComponentType : ECSComponent
     {
-        components[typeof(ComponentType)].TryRemove(entityID, out _);
+        components[typeof(TComponentType)].TryRemove(entityID, out _);
     }
 
     public static IEnumerable<uint> GetEntitiesWhitFlagTypes(params Type[] flagTypes)
@@ -134,38 +133,38 @@ public static class ECSManager
         return matchs;
     }
 
-    public static void AddFlag<FlagType>(uint entityID, FlagType flag)
-        where FlagType : ECSFlag
+    public static void AddFlag<TFlagType>(uint entityID, TFlagType flag)
+        where TFlagType : ECSFlag
     {
         flag.EntityOwnerID = entityID;
-        entities[entityID].AddComponentType(typeof(FlagType));
-        flags[typeof(FlagType)].TryAdd(entityID, flag);
+        entities[entityID].AddComponentType(typeof(TFlagType));
+        flags[typeof(TFlagType)].TryAdd(entityID, flag);
     }
 
-    public static bool ContainsFlag<FlagType>(uint entityID) where FlagType : ECSFlag
+    public static bool ContainsFlag<TFlagType>(uint entityID) where TFlagType : ECSFlag
     {
-        return entities[entityID].ContainsFlagType<FlagType>();
+        return entities[entityID].ContainsFlagType<TFlagType>();
     }
     
-    public static ConcurrentDictionary<uint, FlagType> GetFlags<FlagType>() where FlagType : ECSFlag
+    public static ConcurrentDictionary<uint, TFlagType> GetFlags<TFlagType>() where TFlagType : ECSFlag
     {
-        if (!flags.ContainsKey(typeof(FlagType))) return null;
+        if (!flags.ContainsKey(typeof(TFlagType))) return null;
 
-        ConcurrentDictionary<uint, FlagType> flgs = new ConcurrentDictionary<uint, FlagType>();
+        ConcurrentDictionary<uint, TFlagType> flgs = new ConcurrentDictionary<uint, TFlagType>();
 
-        Parallel.ForEach(flags[typeof(FlagType)], parallelOptions,
-            flag => { flgs.TryAdd(flag.Key, flag.Value as FlagType); });
+        Parallel.ForEach(flags[typeof(TFlagType)], parallelOptions,
+            flag => { flgs.TryAdd(flag.Key, flag.Value as TFlagType); });
 
         return flgs;
     }
 
-    public static FlagType GetFlag<FlagType>(uint entityID) where FlagType : ECSFlag
+    public static TFlagType GetFlag<TFlagType>(uint entityID) where TFlagType : ECSFlag
     {
-        return flags[typeof(FlagType)][entityID] as FlagType;
+        return flags[typeof(TFlagType)][entityID] as TFlagType;
     }
 
-    public static void RemoveFlag<FlagType>(uint entityID) where FlagType : ECSFlag
+    public static void RemoveFlag<TFlagType>(uint entityID) where TFlagType : ECSFlag
     {
-        flags[typeof(FlagType)].TryRemove(entityID, out _);
+        flags[typeof(TFlagType)].TryRemove(entityID, out _);
     }
 }

@@ -21,7 +21,7 @@ namespace ECS.Implementation
         {
             rotationComponents??= ECSManager.GetComponents<RotationComponent>();
             velRotationComponents??= ECSManager.GetComponents<VelRotationComponent>();
-            queryedEntities??= ECSManager.GetEntitiesWhitComponentTypes(typeof(RotationComponent), typeof(VelRotationComponent));
+            queryedEntities??= ECSManager.GetEntitiesWithComponentTypes(typeof(RotationComponent), typeof(VelRotationComponent));
         }
 
         protected override void Execute(float deltaTime)

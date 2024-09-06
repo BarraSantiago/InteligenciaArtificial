@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Numerics;
 using System.Threading.Tasks;
 using ECS.Patron;
 
@@ -6,9 +7,9 @@ public sealed class MovementSystem : ECSSystem
 {
     private ParallelOptions parallelOptions;
 
-    private IDictionary<uint, PositionComponent> positionComponents;
-    private IDictionary<uint, VelocityComponent> velocityComponents;
-    private IEnumerable<uint> queryedEntities;
+    private IDictionary<uint, PositionComponent<Vector3>> positionComponents;
+    private IDictionary<uint, VelocityComponent<Vector3>> velocityComponents;
+    private IEnumerable<uint> queriedEntities;
 
     public override void Initialize()
     {
@@ -17,18 +18,18 @@ public sealed class MovementSystem : ECSSystem
 
     protected override void PreExecute(float deltaTime)
     {
-        positionComponents??= ECSManager.GetComponents<PositionComponent>();
-        velocityComponents??= ECSManager.GetComponents<VelocityComponent>();
-        queryedEntities??= ECSManager.GetEntitiesWhitComponentTypes(typeof(PositionComponent), typeof(VelocityComponent));
+        positionComponents??= ECSManager.GetComponents<PositionComponent<Vector3>>();
+        velocityComponents??= ECSManager.GetComponents<VelocityComponent<Vector3>>();
+        queriedEntities??= ECSManager.GetEntitiesWithComponentTypes(typeof(PositionComponent<Vector3>), typeof(VelocityComponent<Vector3>));
     }
 
     protected override void Execute(float deltaTime)
     {
-        Parallel.ForEach(queryedEntities, parallelOptions, i =>
+        Parallel.ForEach(queriedEntities, parallelOptions, i =>
         {
-            positionComponents[i].X += velocityComponents[i].directionX * velocityComponents[i].velocity * deltaTime;
-            positionComponents[i].Y += velocityComponents[i].directionY * velocityComponents[i].velocity * deltaTime;
-            positionComponents[i].Z += velocityComponents[i].directionZ * velocityComponents[i].velocity * deltaTime;
+            positionComponents[i].Position.X += velocityComponents[i].direction.X * velocityComponents[i].velocity * deltaTime;
+            positionComponents[i].Position.Y += velocityComponents[i].direction.Y * velocityComponents[i].velocity * deltaTime;
+            positionComponents[i].Position.Z += velocityComponents[i].direction.Z * velocityComponents[i].velocity * deltaTime;
         });
     }
 

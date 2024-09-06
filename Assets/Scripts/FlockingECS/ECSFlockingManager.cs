@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using ECS.Implementation;
+using FlockingECS.Component;
 using UnityEngine;
+using Vector3 = global::System.Numerics.Vector3;
 
-namespace ECS.Example
+namespace FlockingECS
 {
-    public class ECSAgentTest : MonoBehaviour
+    public class ECSFlockingManager : MonoBehaviour
     {
         public int entityCount = 100;
         public float velocity = 0.1f;
@@ -14,20 +16,20 @@ namespace ECS.Example
         private const int MAX_OBJS_PER_DRAWCALL = 1000;
         private Mesh prefabMesh;
         private Material prefabMaterial;
-        private Vector3 prefabScale;
+        private UnityEngine.Vector3 prefabScale;
 
         private List<uint> entities;
 
-        private void Start()
+        void Start()
         {
             ECSManager.Init();
             entities = new List<uint>();
-            
             for (int i = 0; i < entityCount; i++)
             {
                 uint entityID = ECSManager.CreateEntity();
-                ECSManager.AddComponent(entityID, new PositionComponent<Vector3>(new Vector3( 0, 0, 0)));
-                ECSManager.AddComponent(entityID, new VelocityComponent<Vector3>(velocity, Vector3.right));
+                ECSManager.AddComponent(entityID, new PositionComponent<Vector3>(new Vector3(0, -i, 0)));
+                ECSManager.AddComponent(entityID,
+                    new FlockComponent<Vector3>(new Vector3(), new Vector3(), new Vector3(), new Vector3()));
                 entities.Add(entityID);
             }
 
@@ -36,12 +38,12 @@ namespace ECS.Example
             prefabScale = prefab.transform.localScale;
         }
 
-        private void Update()
+        void Update()
         {
             ECSManager.Tick(Time.deltaTime);
         }
 
-        private void LateUpdate()
+        void LateUpdate()
         {
             List<Matrix4x4[]> drawMatrix = new List<Matrix4x4[]>();
             int meshes = entities.Count;
@@ -56,12 +58,12 @@ namespace ECS.Example
                 PositionComponent<Vector3> position = ECSManager.GetComponent<PositionComponent<Vector3>>(entities[i]);
                 RotationComponent rotation = ECSManager.GetComponent<RotationComponent>(entities[i]);
                 drawMatrix[(i / MAX_OBJS_PER_DRAWCALL)][(i % MAX_OBJS_PER_DRAWCALL)]
-                    .SetTRS(new Vector3(position.Position.x, position.Position.y, position.Position.z),
+                    .SetTRS(new UnityEngine.Vector3(position.Position.X, position.Position.Y, position.Position.Z),
                         Quaternion.Euler(rotation.X, rotation.Y, rotation.Z), prefabScale);
             });
-            foreach (var matrix in drawMatrix)
+            for (int i = 0; i < drawMatrix.Count; i++)
             {
-                Graphics.DrawMeshInstanced(prefabMesh, 0, prefabMaterial, matrix);
+                Graphics.DrawMeshInstanced(prefabMesh, 0, prefabMaterial, drawMatrix[i]);
             }
         }
     }

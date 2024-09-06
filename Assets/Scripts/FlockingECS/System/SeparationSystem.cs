@@ -1,28 +1,54 @@
-﻿using ECS.Patron;
-using NotImplementedException = System.NotImplementedException;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using ECS.Patron;
+using FlockingECS.Component;
+using Utils;
 
 namespace FlockingECS.System
 {
-    public class SeparationSystem : ECSSystem
+    public class SeparationSystem<TVector> : ECSSystem
     {
+        private ParallelOptions parallelOptions;
+        private IDictionary<uint, PositionComponent<TVector>> positionComponents;
+        private IDictionary<uint, FlockComponent<TVector>> flockComponents;
+        private IEnumerable<uint> queriedEntities;
+
         public override void Initialize()
         {
-            throw new NotImplementedException();
+            parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 32 };
         }
 
         protected override void PreExecute(float deltaTime)
         {
-            throw new NotImplementedException();
+            positionComponents ??= ECSManager.GetComponents<PositionComponent<TVector>>();
+            flockComponents ??= ECSManager.GetComponents<FlockComponent<TVector>>();
+            queriedEntities ??= ECSManager.GetEntitiesWithComponentTypes(typeof(PositionComponent<TVector>), 
+                typeof(FlockComponent<TVector>));
         }
 
         protected override void Execute(float deltaTime)
         {
-            throw new NotImplementedException();
+            Parallel.ForEach(queriedEntities, parallelOptions, entityId =>
+            {
+                var position = positionComponents[entityId];
+                var flock = flockComponents[entityId];
+                var insideRadiusBoids = VectorHelper<TVector>.GetBoidsInsideRadius(position, positionComponents);
+                if (insideRadiusBoids.Count == 0) return;
+
+                TVector separation = default;
+                foreach (var b in insideRadiusBoids)
+                {
+                    var diff = VectorHelper<TVector>.SubtractVectors(position.Position, b.Position);
+                    separation = VectorHelper<TVector>.AddVectors(separation, diff);
+                }
+
+                separation = VectorHelper<TVector>.NormalizeVector(separation);
+                flock.Separation = separation;
+            });
         }
 
         protected override void PostExecute(float deltaTime)
         {
-            throw new NotImplementedException();
         }
     }
 }
