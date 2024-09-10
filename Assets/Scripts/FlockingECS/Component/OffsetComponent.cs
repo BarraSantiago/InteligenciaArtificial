@@ -1,6 +1,8 @@
-﻿namespace FlockingECS.Component
+﻿using ECS.Patron;
+
+namespace FlockingECS.Component
 {
-    public class OffsetComponent
+    public class OffsetComponent : ECSComponent
     {
         public float alignmentWeight = 1.0f;
         public float cohesionWeight = 1.0f;

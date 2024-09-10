@@ -23,8 +23,7 @@ namespace FlockingECS.System
         {
             positionComponents ??= ECSManager.GetComponents<PositionComponent<TVector>>();
             flockComponents ??= ECSManager.GetComponents<FlockComponent<TVector>>();
-            queriedEntities ??= ECSManager.GetEntitiesWithComponentTypes(typeof(PositionComponent<TVector>),
-                typeof(VelocityComponent<TVector>), typeof(FlockComponent<TVector>));
+            queriedEntities ??= ECSManager.GetEntitiesWithComponentTypes(typeof(PositionComponent<TVector>), typeof(FlockComponent<TVector>));
 
             // TODO FIX THIS
             targetPosition = ECSManager.GetComponent<PositionComponent<TVector>>(0);

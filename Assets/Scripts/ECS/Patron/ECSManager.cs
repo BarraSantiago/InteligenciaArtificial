@@ -57,9 +57,31 @@ public static class ECSManager
 
     public static uint CreateEntity()
     {
+        entities ??= new ConcurrentDictionary<uint, ECSEntity>();
         var ecsEntity = new ECSEntity();
         entities.TryAdd(ecsEntity.GetID(), ecsEntity);
         return ecsEntity.GetID();
+    }
+
+    public static void AddSystem(ECSSystem system)
+    {
+        systems ??= new ConcurrentDictionary<Type, ECSSystem>();
+
+        systems.TryAdd(system.GetType(), system);
+    }
+
+    public static void InitSystems()
+    {
+        foreach (KeyValuePair<Type, ECSSystem> system in systems)
+        {
+            system.Value.Initialize();
+        }
+    }
+
+    public static void AddComponentList(Type component)
+    {
+        components ??= new ConcurrentDictionary<Type, ConcurrentDictionary<uint, ECSComponent>>();
+        components.TryAdd(component, new ConcurrentDictionary<uint, ECSComponent>());
     }
 
     public static void AddComponent<TComponentType>(uint entityID, TComponentType component)
@@ -145,7 +167,7 @@ public static class ECSManager
     {
         return entities[entityID].ContainsFlagType<TFlagType>();
     }
-    
+
     public static ConcurrentDictionary<uint, TFlagType> GetFlags<TFlagType>() where TFlagType : ECSFlag
     {
         if (!flags.ContainsKey(typeof(TFlagType))) return null;

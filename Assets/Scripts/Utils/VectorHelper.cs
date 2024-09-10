@@ -124,5 +124,21 @@ namespace Utils
             double radiusSquared = 3.0;
             return distanceSquared <= radiusSquared;
         }
+
+        public static bool IsValid<TVector>(TVector newPosition)
+        {
+            var type = typeof(TVector);
+            if (type == typeof(Vector2))
+            {
+                var v = (Vector2)(object)newPosition;
+                return !float.IsNaN(v.X) && !float.IsNaN(v.Y);
+            }
+            else if (type == typeof(Vector3))
+            {
+                var v = (Vector3)(object)newPosition;
+                return !float.IsNaN(v.X) && !float.IsNaN(v.Y) && !float.IsNaN(v.Z);
+            }
+            throw new InvalidOperationException("Unsupported vector type");
+        }
     }
 }
