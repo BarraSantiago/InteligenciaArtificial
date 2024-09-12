@@ -12,7 +12,6 @@ namespace FlockingECS.System
         private IDictionary<uint, PositionComponent<TVector>> positionComponents;
         private IDictionary<uint, FlockComponent<TVector>> flockComponents;
         private IEnumerable<uint> queriedEntities;
-        private PositionComponent<TVector> targetPosition;
         private OffsetComponent offsetComponent;
 
         public override void Initialize()

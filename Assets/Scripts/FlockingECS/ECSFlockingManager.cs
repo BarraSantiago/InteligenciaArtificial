@@ -9,22 +9,22 @@ namespace FlockingECS
 {
     public class ECSFlockingManager : MonoBehaviour
     {
+        [SerializeField] private GameObject target;
         public int entityCount = 100;
         public float velocity = 0.1f;
         public GameObject prefab;
-
         private const int MAX_OBJS_PER_DRAWCALL = 1000;
         private Mesh prefabMesh;
         private Material prefabMaterial;
         private UnityEngine.Vector3 prefabScale;
-
+        private PositionComponent<Vector3> targetPositionComponent;
         private List<uint> entities;
 
         private void Start()
         {
             InitializeSystems();
             InitComponents();
-            
+
             entities = new List<uint>();
             for (int i = 0; i < entityCount; i++)
             {
@@ -34,6 +34,7 @@ namespace FlockingECS
                     new FlockComponent<Vector3>(Vector3.Zero, Vector3.Zero, Vector3.Zero, Vector3.Zero));
                 entities.Add(entityID);
             }
+            targetPositionComponent = new PositionComponent<Vector3>(new Vector3(target.transform.position.x, target.transform.position.y, target.transform.position.z));
 
             prefabMesh = prefab.GetComponent<MeshFilter>().sharedMesh;
             prefabMaterial = prefab.GetComponent<MeshRenderer>().sharedMaterial;
@@ -44,7 +45,7 @@ namespace FlockingECS
         {
             ECSManager.AddSystem(new AlignmentSystem<Vector3>());
             ECSManager.AddSystem(new CohesionSystem<Vector3>());
-            ECSManager.AddSystem(new DirectionSystem<Vector3>());
+            ECSManager.AddSystem(new DirectionSystem<Vector3>(targetPositionComponent));
             ECSManager.AddSystem(new SeparationSystem<Vector3>());
             ECSManager.AddSystem(new MoveSystem<Vector3>());
             ECSManager.InitSystems();
@@ -75,15 +76,16 @@ namespace FlockingECS
             Parallel.For(0, entities.Count, i =>
             {
                 PositionComponent<Vector3> position = ECSManager.GetComponent<PositionComponent<Vector3>>(entities[i]);
-                UnityEngine.Vector3 pos = new UnityEngine.Vector3(position.Position.X, position.Position.Y, position.Position.Z);
-                
+                UnityEngine.Vector3 pos =
+                    new UnityEngine.Vector3(position.Position.X, position.Position.Y, position.Position.Z);
+
                 if (float.IsNaN(pos.x) || float.IsNaN(pos.y) || float.IsNaN(pos.z) ||
                     float.IsInfinity(pos.x) || float.IsInfinity(pos.y) || float.IsInfinity(pos.z))
                 {
                     Debug.LogWarning($"Invalid position for entity {entities[i]}: {pos}");
                     pos = UnityEngine.Vector3.zero;
                 }
-    
+
                 drawMatrix[(i / MAX_OBJS_PER_DRAWCALL)][(i % MAX_OBJS_PER_DRAWCALL)]
                     .SetTRS(pos, Quaternion.identity, prefabScale);
             });

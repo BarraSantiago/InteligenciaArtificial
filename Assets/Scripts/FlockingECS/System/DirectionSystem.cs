@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Numerics;
 using System.Threading.Tasks;
 using ECS.Patron;
 using FlockingECS.Component;
@@ -14,6 +15,13 @@ namespace FlockingECS.System
         private IEnumerable<uint> queriedEntities;
         private PositionComponent<TVector> targetPosition;
 
+        public DirectionSystem(PositionComponent<TVector> target)
+        {
+            targetPosition = new PositionComponent<TVector>(typeof(TVector) == typeof(Vector3)
+                ? (TVector)(object)new Vector3(5, 5, 5)
+                : (TVector)(object)new Vector2(0, 0));
+        }
+
         public override void Initialize()
         {
             parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 32 };
@@ -23,10 +31,8 @@ namespace FlockingECS.System
         {
             positionComponents ??= ECSManager.GetComponents<PositionComponent<TVector>>();
             flockComponents ??= ECSManager.GetComponents<FlockComponent<TVector>>();
-            queriedEntities ??= ECSManager.GetEntitiesWithComponentTypes(typeof(PositionComponent<TVector>), typeof(FlockComponent<TVector>));
-
-            // TODO FIX THIS
-            targetPosition = ECSManager.GetComponent<PositionComponent<TVector>>(0);
+            queriedEntities ??= ECSManager.GetEntitiesWithComponentTypes(typeof(PositionComponent<TVector>),
+                typeof(FlockComponent<TVector>));
         }
 
         protected override void Execute(float deltaTime)
