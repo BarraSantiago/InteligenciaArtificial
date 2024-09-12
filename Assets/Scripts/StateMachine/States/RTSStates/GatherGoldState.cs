@@ -14,9 +14,9 @@ namespace StateMachine.States.RTSStates
             BehaviourActions behaviours = new BehaviourActions();
 
             bool retreat = Convert.ToBoolean(parameters[0]);
-            int? food = Convert.ToInt32( parameters[1]);
-            int? gold = Convert.ToInt32( parameters[2]);
-            int? lastTimeEat = Convert.ToInt32( parameters[3]);
+            int? food = Convert.ToInt32(parameters[1]);
+            int? gold = Convert.ToInt32(parameters[2]);
+            int? lastTimeEat = Convert.ToInt32(parameters[3]);
             int goldPerFood = Convert.ToInt32(parameters[4]);
             int goldLimit = Convert.ToInt32(parameters[5]);
             Node<Vector2> mine = parameters[6] as Node<Vector2>;
@@ -24,7 +24,6 @@ namespace StateMachine.States.RTSStates
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {
                 if (food <= 0) return;
-
 
                 gold++;
                 lastTimeEat++;
@@ -40,10 +39,7 @@ namespace StateMachine.States.RTSStates
                 food++;
                 mine.food--;
             });
-            behaviours.AddMainThreadBehaviours(1, () =>
-            {
-                Debug.Log("gold: " + gold);
-            });
+            behaviours.AddMainThreadBehaviours(1, () => { Debug.Log("gold: " + gold); });
 
             behaviours.SetTransitionBehaviour(() =>
             {

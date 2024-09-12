@@ -24,7 +24,7 @@ namespace FlockingECS.System
             positionComponents ??= ECSManager.GetComponents<PositionComponent<TVector>>();
             flockComponents ??= ECSManager.GetComponents<FlockComponent<TVector>>();
             queriedEntities ??= ECSManager.GetEntitiesWithComponentTypes(typeof(PositionComponent<TVector>),
-                typeof(VelocityComponent<TVector>));
+                typeof(FlockComponent<TVector>));
         }
 
         protected override void Execute(float deltaTime)
@@ -33,7 +33,7 @@ namespace FlockingECS.System
             {
                 var position = positionComponents[entityId];
                 var flock = flockComponents[entityId];
-                var insideRadiusBoids = GetBoidsInsideRadius(position);
+                var insideRadiusBoids = VectorHelper<TVector>.GetBoidsInsideRadius(position, positionComponents);
                 if (insideRadiusBoids.Count == 0) return;
 
                 TVector avg = default;
@@ -51,19 +51,6 @@ namespace FlockingECS.System
 
         protected override void PostExecute(float deltaTime)
         {
-        }
-        
-        private List<PositionComponent<TVector>> GetBoidsInsideRadius(PositionComponent<TVector> boid)
-        {
-            List<PositionComponent<TVector>> insideRadiusBoids = new List<PositionComponent<TVector>>();
-            foreach (var otherBoid in positionComponents.Values)
-            {
-                if (!otherBoid.Equals(boid) && VectorHelper<TVector>.IsWithinRadius(boid.Position, otherBoid.Position))
-                {
-                    insideRadiusBoids.Add(otherBoid);
-                }
-            }
-            return insideRadiusBoids;
         }
     }
 }

@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using ECS.Implementation;
 using FlockingECS.Component;
 using FlockingECS.System;
 using UnityEngine;
-using Vector3 = global::System.Numerics.Vector3;
+using Vector3 = System.Numerics.Vector3;
 
 namespace FlockingECS
 {
@@ -32,7 +31,7 @@ namespace FlockingECS
                 uint entityID = ECSManager.CreateEntity();
                 ECSManager.AddComponent(entityID, new PositionComponent<Vector3>(new Vector3(0, -i, 0)));
                 ECSManager.AddComponent(entityID,
-                    new FlockComponent<Vector3>(new Vector3(), new Vector3(), new Vector3(), new Vector3()));
+                    new FlockComponent<Vector3>(Vector3.Zero, Vector3.Zero, Vector3.Zero, Vector3.Zero));
                 entities.Add(entityID);
             }
 
@@ -77,12 +76,12 @@ namespace FlockingECS
             {
                 PositionComponent<Vector3> position = ECSManager.GetComponent<PositionComponent<Vector3>>(entities[i]);
                 UnityEngine.Vector3 pos = new UnityEngine.Vector3(position.Position.X, position.Position.Y, position.Position.Z);
-    
+                
                 if (float.IsNaN(pos.x) || float.IsNaN(pos.y) || float.IsNaN(pos.z) ||
                     float.IsInfinity(pos.x) || float.IsInfinity(pos.y) || float.IsInfinity(pos.z))
                 {
                     Debug.LogWarning($"Invalid position for entity {entities[i]}: {pos}");
-                    pos = UnityEngine.Vector3.zero; // Or some default valid position
+                    pos = UnityEngine.Vector3.zero;
                 }
     
                 drawMatrix[(i / MAX_OBJS_PER_DRAWCALL)][(i % MAX_OBJS_PER_DRAWCALL)]

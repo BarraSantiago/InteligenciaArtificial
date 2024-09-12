@@ -36,8 +36,8 @@ namespace StateMachine.Agents.RTS
         public Node<Vector2> targetNode;
         
         protected int? Food = (3);
-        private int? _currentGold = (0);
-        private int? _lastTimeEat = (0);
+        private int? _currentGold = 0;
+        private int? _lastTimeEat = 0;
         protected FSM<Behaviours, Flags> _fsm;
         protected AStarPathfinder<Node<Vector2>> _pathfinder;
         protected List<Node<Vector2>> _path;

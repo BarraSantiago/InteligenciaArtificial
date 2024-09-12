@@ -19,6 +19,7 @@ namespace Utils
                 var v = (Vector3)(object)vector;
                 return (TVector)(object)(v * scalar);
             }
+
             throw new InvalidOperationException("Unsupported vector type");
         }
 
@@ -37,24 +38,30 @@ namespace Utils
                 var vb = (Vector3)(object)b;
                 return (TVector)(object)(va - vb);
             }
+
             throw new InvalidOperationException("Unsupported vector type");
         }
 
-        public static TVector AddVectors(TVector a, TVector b)
+        public static TVector AddVectors(TVector a, TVector b, TVector c = default, TVector d = default)
         {
             var type = typeof(TVector);
             if (type == typeof(Vector2))
             {
                 var va = (Vector2)(object)a;
                 var vb = (Vector2)(object)b;
-                return (TVector)(object)(va + vb);
+                var vc = c != null ? (Vector2)(object)c : Vector2.Zero;
+                var vd = d != null ? (Vector2)(object)d : Vector2.Zero;
+                return (TVector)(object)(va + vb + vc + vd);
             }
             else if (type == typeof(Vector3))
             {
                 var va = (Vector3)(object)a;
                 var vb = (Vector3)(object)b;
-                return (TVector)(object)(va + vb);
+                var vc = c != null ? (Vector3)(object)c : Vector3.Zero;
+                var vd = d != null ? (Vector3)(object)d : Vector3.Zero;
+                return (TVector)(object)(va + vb + vc + vd);
             }
+
             throw new InvalidOperationException("Unsupported vector type");
         }
 
@@ -71,6 +78,7 @@ namespace Utils
                 var v = (Vector3)(object)vector;
                 return (TVector)(object)(v / scalar);
             }
+
             throw new InvalidOperationException("Unsupported vector type");
         }
 
@@ -80,17 +88,27 @@ namespace Utils
             if (type == typeof(Vector2))
             {
                 var v = (Vector2)(object)vector;
+                if (v.Length() == 0)
+                {
+                    return (TVector)(object)Vector2.Zero;
+                }
                 return (TVector)(object)Vector2.Normalize(v);
             }
             else if (type == typeof(Vector3))
             {
                 var v = (Vector3)(object)vector;
+                if (v.Length() == 0)
+                {
+                    return (TVector)(object)Vector3.Zero;
+                }
                 return (TVector)(object)Vector3.Normalize(v);
             }
+
             throw new InvalidOperationException("Unsupported vector type");
         }
-
-        public static List<PositionComponent<TVector>> GetBoidsInsideRadius(PositionComponent<TVector> boid, IDictionary<uint, PositionComponent<TVector>> positionComponents)
+        
+        public static List<PositionComponent<TVector>> GetBoidsInsideRadius(PositionComponent<TVector> boid,
+            IDictionary<uint, PositionComponent<TVector>> positionComponents)
         {
             List<PositionComponent<TVector>> insideRadiusBoids = new List<PositionComponent<TVector>>();
             foreach (var otherBoid in positionComponents.Values)
@@ -100,6 +118,7 @@ namespace Utils
                     insideRadiusBoids.Add(otherBoid);
                 }
             }
+
             return insideRadiusBoids;
         }
 
@@ -118,7 +137,8 @@ namespace Utils
             {
                 var p1 = (Vector3)(object)position1;
                 var p2 = (Vector3)(object)position2;
-                distanceSquared = (p1.X - p2.X) * (p1.X - p2.X) + (p1.Y - p2.Y) * (p1.Y - p2.Y) + (p1.Z - p2.Z) * (p1.Z - p2.Z);
+                distanceSquared = (p1.X - p2.X) * (p1.X - p2.X) + (p1.Y - p2.Y) * (p1.Y - p2.Y) +
+                                  (p1.Z - p2.Z) * (p1.Z - p2.Z);
             }
 
             double radiusSquared = 3.0;
