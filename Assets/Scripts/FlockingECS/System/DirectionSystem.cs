@@ -15,16 +15,12 @@ namespace FlockingECS.System
         private IEnumerable<uint> queriedEntities;
         private PositionComponent<TVector> targetPosition;
 
-        public DirectionSystem(PositionComponent<TVector> target)
-        {
-            targetPosition = new PositionComponent<TVector>(typeof(TVector) == typeof(Vector3)
-                ? (TVector)(object)new Vector3(5, 5, 5)
-                : (TVector)(object)new Vector2(0, 0));
-        }
-
         public override void Initialize()
         {
             parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 32 };
+            targetPosition = new PositionComponent<TVector>(typeof(TVector) == typeof(Vector3)
+                ? (TVector)(object)new Vector3(5, 5, 5)
+                : (TVector)(object)new Vector2(0, 0));
         }
 
         protected override void PreExecute(float deltaTime)

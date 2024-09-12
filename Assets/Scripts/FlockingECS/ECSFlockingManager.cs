@@ -45,7 +45,7 @@ namespace FlockingECS
         {
             ECSManager.AddSystem(new AlignmentSystem<Vector3>());
             ECSManager.AddSystem(new CohesionSystem<Vector3>());
-            ECSManager.AddSystem(new DirectionSystem<Vector3>(targetPositionComponent));
+            ECSManager.AddSystem(new DirectionSystem<Vector3>());
             ECSManager.AddSystem(new SeparationSystem<Vector3>());
             ECSManager.AddSystem(new MoveSystem<Vector3>());
             ECSManager.InitSystems();
