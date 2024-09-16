@@ -3,6 +3,7 @@ using Game;
 using Pathfinder;
 using StateMachine.States.RTSStates;
 using UnityEngine;
+using VoronoiDiagram;
 using Vector2 = Utils.Vec2Int;
 
 namespace StateMachine.Agents.RTS
@@ -34,6 +35,7 @@ namespace StateMachine.Agents.RTS
         public bool retreat;
         public Node<Vector2> currentNode;
         public Node<Vector2> targetNode;
+        public Voronoi voronoi;
         
         protected int? Food = (3);
         private int? _currentGold = 0;
@@ -54,7 +56,7 @@ namespace StateMachine.Agents.RTS
         {
             _fsm = new FSM<Behaviours, Flags>();
 
-            targetNode = MapGenerator.nodes.Find(x => x.NodeType == NodeType.Mine && x.gold > 0);
+            targetNode = voronoi.GetMineCloser(transform.position);
             _pathfinder = new AStarPathfinder<Node<Vector2>>(MapGenerator.nodes, 0, 0);
             _path = _pathfinder.FindPath(currentNode, targetNode);
 
@@ -109,7 +111,7 @@ namespace StateMachine.Agents.RTS
             _fsm.SetTransition(Behaviours.Walk, Flags.OnTargetLost, Behaviours.Walk,
                 () =>
                 {
-                    targetNode = MapGenerator.nodes.Find(x => x.NodeType == NodeType.Mine && x.gold > 0);
+                    targetNode = voronoi.GetMineCloser(transform.position);
                     Debug.Log("Walk to " + targetNode.GetCoordinate().x + " - " + targetNode.GetCoordinate().y);
                 });
 
@@ -133,7 +135,7 @@ namespace StateMachine.Agents.RTS
             _fsm.SetTransition(Behaviours.Wait, Flags.OnGather, Behaviours.Walk,
                 () =>
                 {
-                    targetNode = MapGenerator.nodes.Find(x => x.NodeType == NodeType.Mine && x.gold > 0);
+                    targetNode = voronoi.GetMineCloser(transform.position);
                     Debug.Log("walk to " + targetNode.GetCoordinate().x + " - " + targetNode.GetCoordinate().y);
                 });
         }

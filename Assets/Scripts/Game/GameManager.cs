@@ -61,36 +61,29 @@ namespace Game
             Vector3 townCenterPosition = new Vector3(graph.nodes[towncenterNode].GetCoordinate().x,
                 graph.nodes[towncenterNode].GetCoordinate().y);
 
-
+            voronoi.Init();
+            voronoi.SetVoronoi(MapGenerator.mines);
+            
             GameObject miner = Instantiate(minerPrefab, townCenterPosition, Quaternion.identity);
             Miner agent = miner.GetComponent<Miner>();
             agent.currentNode = graph.nodes[towncenterNode];
             RTSAgent.townCenter = graph.nodes[towncenterNode];
+            agent.voronoi = voronoi;
             agent.Init();
-            
+            /*
             GameObject caravan = Instantiate(caravanPrefab, townCenterPosition, Quaternion.identity);
             Caravan agent2 = caravan.GetComponent<Caravan>();
             agent2.currentNode = graph.nodes[towncenterNode];
-            agent2.Init();
+            agent2.Init();*/
             //voronoi.Init();
             //voronoi.SetVoronoi(MapGenerator.Vector2s);
         }
 
-        private void OnValidate()
-        {
-            if(!Application.isPlaying) return;
-            
-            Miner agent = FindObjectOfType<Miner>();
-            agent.retreat = validate;
-            Caravan agent2 = FindObjectOfType<Caravan>();
-            agent2.retreat = validate;
-        }
-
-        private void OnDrawGizmos()
+        private void OnDrawGizmos() 
         {
             if (!Application.isPlaying)
                 return;
-            //voronoi.Draw();
+            voronoi.Draw();
 
             foreach (Node<Vec2Int> node in graph.nodes)
             {

@@ -20,31 +20,26 @@ namespace Game
         [SerializeField] private int width;
         [SerializeField] private int height;
         [SerializeField, Tooltip("Distance between map nodes")] private float cellSize;
-
         [SerializeField] private Vector2 originPosition;
 
-        [Header("Path nodes")] [SerializeField]
-        private PathNode_Visible[] pathNodeVisibles;
+        [Header("Path nodes")] 
+        [SerializeField] private PathNode_Visible[] pathNodeVisibles;
 
-        [Header("Obstacles")] [SerializeField] private GameObject obstaclePrefab;
+        [Header("Obstacles")]
+        [SerializeField] private GameObject obstaclePrefab;
         [SerializeField] private int obstaclesQuantity;
 
-        [Header("Gold mines")] [SerializeField]
-        private Vector2 Vector2Prefab;
-
+        [Header("Gold mines")] 
+        [SerializeField] private Vector2 Vector2Prefab;
         [SerializeField] private int Vector2sQuantity;
 
-        [Header("Urban center")] [SerializeField]
-        //private UrbanCenter urbanCenterPrefab;
-
+        [Header("Urban center")] 
+        //[SerializeField] private UrbanCenter urbanCenterPrefab;
         //private Pathfinding pathfinding;
-
         //public Pathfinding Pathfinding => pathfinding;
         public static List<Node<Vec2Int>> mines = new List<Node<Vec2Int>>();
         public static List<Node<Vec2Int>> nodes = new List<Node<Vec2Int>>();
-
         public static List<Vector2> Vector2sBeingUsed = new List<Vector2>();
-
         public static Vector2 MapDimensions;
         public static float CellSize;
         public static Vector2 OriginPosition;
@@ -52,7 +47,7 @@ namespace Game
         public override void Awake()
         {
             base.Awake();
-
+            AStarPathfinder<Node<Vec2Int>>.CellSize = (int)cellSize;
             MapDimensions = new Vector2Int(width, height);
             CellSize = cellSize;
             OriginPosition = originPosition;

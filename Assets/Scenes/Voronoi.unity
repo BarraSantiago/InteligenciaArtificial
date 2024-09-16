@@ -132,7 +132,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 386067825}
-  - component: {fileID: 386067824}
+  - component: {fileID: 386067826}
+  - component: {fileID: 386067828}
+  - component: {fileID: 386067827}
   m_Layer: 0
   m_Name: Voronoi
   m_TagString: Untagged
@@ -140,26 +142,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &386067824
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 386067823}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8d3c14463e91b3d4ead1d5e130f85008, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  boundingBox:
-    serializedVersion: 2
-    x: -5
-    y: -5
-    width: 10
-    height: 10
-  lineMaterial: {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
-  pointRadius: 0.3
 --- !u!4 &386067825
 Transform:
   m_ObjectHideFlags: 0
@@ -175,6 +157,58 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &386067826
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 386067823}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b93a6e2b02fc4f1ab549c01014216836, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pointCount: 5
+  width: 10
+  height: 10
+  lineColor: {r: 1, g: 1, b: 1, a: 1}
+  pointColor: {r: 1, g: 0, b: 0, a: 1}
+--- !u!114 &386067827
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 386067823}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea23d70321c643cd916ab6794d4e7f34, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mapWidth: 15
+  mapHeight: 15
+  minesQuantity: 5
+  nodesSize: 1
+  minerPrefab: {fileID: 2785322424147078408, guid: 40cb8ae62e1a2ed4e857f1bc1d348a61, type: 3}
+  caravanPrefab: {fileID: 0}
+  minersQuantity: 0
+  cartsQuantity: 0
+  graphView: {fileID: 0}
+  voronoi: {fileID: 386067828}
+  validate: 0
+--- !u!114 &386067828
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 386067823}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ff007f61ad29a646937a4548f398f49, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &478465509
 GameObject:
   m_ObjectHideFlags: 0
