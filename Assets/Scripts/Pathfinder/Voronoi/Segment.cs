@@ -22,7 +22,7 @@ namespace VoronoiDiagram
             this.origin = origin;
             this.final = final;
 
-            // Mediatriz: la lÃ­nea perpendicular que pasa por el punto medio:
+            // Mediatriz: la línea perpendicular que pasa por el punto medio:
             // 1. Sumamos la coordenada X del origen y final
             // 2. Dividimos para obtener la coordenada X de la mediatriz
             // 3. Repetimos para las coordenadas Y

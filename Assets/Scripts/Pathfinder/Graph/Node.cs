@@ -16,6 +16,7 @@ namespace Pathfinder
         private Coordinate coordinate;
         public int food;
         public int gold;
+        public int zone;
     
         public void SetCoordinate(Coordinate coordinate)
         {

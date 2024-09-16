@@ -9,6 +9,8 @@ namespace Pathfinder
 {
     public class AStarPathfinder<NodeType> : Pathfinder<NodeType> where NodeType : INode, new()
     {
+        public static int CellSize;
+
         public AStarPathfinder(ICollection<NodeType> graph, int minCost = -1, int maxCost = 3)
         {
             this.Graph = graph;
@@ -36,7 +38,7 @@ namespace Pathfinder
             {
                 return int.MaxValue;
             }
-            
+
             float distance = 0;
             Node<Vector2> nodeA = A as Node<Vector2>;
             Node<Vector2> nodeB = B as Node<Vector2>;
@@ -62,11 +64,11 @@ namespace Pathfinder
                 var neighborCoor = neighborNode.GetCoordinate();
 
                 if ((Mathf.Approximately(neighborCoor.x, nodeCoor.x) &&
-                     Mathf.Approximately(Math.Abs(neighborCoor.y - nodeCoor.y), 1)) ||
+                     Mathf.Approximately(Math.Abs(neighborCoor.y - nodeCoor.y), CellSize)) ||
                     (Mathf.Approximately(neighborCoor.y, nodeCoor.y) &&
-                     Mathf.Approximately(Math.Abs(neighborCoor.x - nodeCoor.y), 1)) ||
-                    (Mathf.Approximately(Math.Abs(neighborCoor.y - nodeCoor.y), 1) &&
-                     Mathf.Approximately(Math.Abs(neighborCoor.x - nodeCoor.x), 1)))
+                     Mathf.Approximately(Math.Abs(neighborCoor.x - nodeCoor.y), CellSize)) ||
+                    (Mathf.Approximately(Math.Abs(neighborCoor.y - nodeCoor.y), CellSize) &&
+                     Mathf.Approximately(Math.Abs(neighborCoor.x - nodeCoor.x), CellSize)))
                 {
                     neighbors.Add(neighbor);
                 }
@@ -108,13 +110,15 @@ namespace Pathfinder
             {
                 return false;
             }
+
             var nodeA = A as Node<Vector2>;
             var nodeB = B as Node<Vector2>;
-            
+
             if (nodeA == null || nodeB == null)
             {
                 return false;
             }
+
             return Mathf.Approximately(nodeA.GetCoordinate().x, nodeB.GetCoordinate().x) &&
                    Mathf.Approximately(nodeA.GetCoordinate().y, nodeB.GetCoordinate().y);
         }

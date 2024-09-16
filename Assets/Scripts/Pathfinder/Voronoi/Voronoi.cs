@@ -29,10 +29,8 @@ namespace VoronoiDiagram
             limits.Add(new Limit(new Vector2(0f, 0f) + offset, DIRECTION.LEFT));
         }
 
-        /*
-        public void SetVoronoi(List<Node<System.Numerics.Vector2>> goldMines)
+        public void SetVoronoi(List<Node<Vec2Int>> goldMines)
         {
-            limits.Clear();
             sectors.Clear();
             if (goldMines.Count <= 0) return;
 
@@ -54,7 +52,8 @@ namespace VoronoiDiagram
                 {
                     // Agrego los segmentos entre cada sector (menos entre si mismo)
                     if (i == j) continue;
-                    sectors[i].AddSegment(goldMines[i].GetCoordinate(), goldMines[j].GetCoordinate());
+                    sectors[i].AddSegment(new Vector2(goldMines[i].GetCoordinate().x, goldMines[i].GetCoordinate().y),
+                        new Vector2(goldMines[j].GetCoordinate().x, goldMines[j].GetCoordinate().y));
                 }
             }
 
@@ -65,7 +64,7 @@ namespace VoronoiDiagram
             }
         }
 
-        public Node<Vector2> GetMineCloser(Vector3 agentPosition)
+        public Node<Vec2Int> GetMineCloser(Vector3 agentPosition)
         {
             // Calculo que mina esta mas cerca a x position
             if (sectors != null)
@@ -90,6 +89,6 @@ namespace VoronoiDiagram
             {
                 sectors[i].Draw();
             }
-        }*/
+        }
     }
 }

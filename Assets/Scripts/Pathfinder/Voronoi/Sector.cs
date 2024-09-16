@@ -10,17 +10,16 @@ namespace VoronoiDiagram
 {
     public class Sector
     {
-        /*
-        private Node<System.Numerics.Vector2> mine;
+        private Node<Vec2Int> mine;
         private Color color;
         private List<Segment> segments = new List<Segment>();
-        private List<System.Numerics.Vector2> intersections = new List<System.Numerics.Vector2>();
-        private List<Node<System.Numerics.Vector2>> nodesInsideSector = new List<Node<System.Numerics.Vector2>>();
+        private List<Vector2> intersections = new List<Vector2>();
+        private List<Node<Vec2Int>> nodesInsideSector = new List<Node<Vec2Int>>();
         private Vector3[] points;
 
-        public Node<System.Numerics.Vector2> Mine { get => mine; }
+        public Node<Vec2Int> Mine { get => mine; }
 
-        public Sector(Node<System.Numerics.Vector2> mine)
+        public Sector(Node<Vec2Int> mine)
         {
             this.mine = mine;
             //color = Random.ColorHSV();
@@ -33,13 +32,13 @@ namespace VoronoiDiagram
             // Calculo los segmentos con los limites del mapa
             for (int i = 0; i < limits.Count; i++)
             {
-                System.Numerics.Vector2 origin = mine.GetCoordinate();
-                System.Numerics.Vector2 final = limits[i].GetMapLimitPosition(origin); // Obtengo la posicion final del segmento
+                Vector2 origin = new Vector2(mine.GetCoordinate().x, mine.GetCoordinate().y); // Obtengo la posicion de la mina
+                Vector2 final = limits[i].GetMapLimitPosition(origin); // Obtengo la posicion final del segmento
                 segments.Add(new Segment(origin, final));
             }
         }
 
-        public void AddSegment(System.Numerics.Vector2 origin, System.Numerics.Vector2 final)
+        public void AddSegment(Vector2 origin, Vector2 final)
         {
             segments.Add(new Segment(origin, final));
         }
@@ -136,16 +135,16 @@ namespace VoronoiDiagram
                    B2 = p3.y - p4.y
                    C1 = p1.x * p2.y - p1.y * p2.x
                    C2 = p3.x * p4.y - p3.y * p4.x 
-                
+                */
                 intersection.x = ((p1.x * p2.y - p1.y * p2.x) * (p3.x - p4.x) - (p1.x - p2.x) * (p3.x * p4.y - p3.y * p4.x)) / ((p1.x - p2.x) * (p3.y - p4.y) - (p1.y - p2.y) * (p3.x - p4.x));
                 intersection.y = ((p1.x * p2.y - p1.y * p2.x) * (p3.y - p4.y) - (p1.y - p2.y) * (p3.x * p4.y - p3.y * p4.x)) / ((p1.x - p2.x) * (p3.y - p4.y) - (p1.y - p2.y) * (p3.x - p4.x));
                 return intersection;
             }
         }
 
-        private bool CheckIfHaveAnotherPositionCloser(System.Numerics.Vector2 intersectionPoint, System.Numerics.Vector2 pointEnd, float maxDistance)
+        private bool CheckIfHaveAnotherPositionCloser(Vector2 intersectionPoint, Vector2 pointEnd, float maxDistance)
         {
-            return (System.Numerics.Vector2.Distance(intersectionPoint, pointEnd) < maxDistance);
+            return (Vector2.Distance(intersectionPoint, pointEnd) < maxDistance);
         }
 
         private void SortIntersections()
@@ -218,7 +217,7 @@ namespace VoronoiDiagram
             bool inside = false;
 
             // Inicializo "point" con el ultimo punto (^1) de la matriz "points"
-            System.Numerics.Vector2 point = points[^1];
+            Vector2 point = points[^1];
 
             for (int i = 0; i < points.Length; i++)
             {
@@ -241,14 +240,13 @@ namespace VoronoiDiagram
             return inside;
         }
 
-        /*
-        public List<Node<Vector2>> GetNodesInSector(List<Node<Vector2>> allNodes)
+        public List<Node<Vec2Int>> GetNodesInSector(List<Node<Vec2Int>> allNodes)
         {
-            List<Node<Vector2>> nodesInSector = new List<Node<Vector2>>();
+            List<Node<Vec2Int>> nodesInSector = new List<Node<Vec2Int>>();
 
-            foreach (Node<Vector2> node in allNodes)
+            foreach (Node<Vec2Int> node in allNodes)
             {
-                Vector3 nodePosition = MapGenerator.Pathfinding.GetGrid().GetWorldPosition(node.x, node.y);
+                Vector3 nodePosition = new Vector3( node.GetCoordinate().x, node.GetCoordinate().y); 
 
                 if (CheckPointInSector(nodePosition))
                 {
@@ -258,21 +256,20 @@ namespace VoronoiDiagram
 
             return nodesInSector;
         }
-        */
-        /*
-        public int CalculateTotalWeight(List<Node<Vector2>> nodesInSector)
+
+        public int CalculateTotalWeight(List<Node<Vec2Int>> nodesInSector)
         {
             int totalWeight = 0;
 
-            foreach (Node<Vector2> node in nodesInSector)
+            foreach (Node<Vec2Int> node in nodesInSector)
             {
-                totalWeight += node.GetNode<Vector2>Cost();
+                // TODO totalWeight += node.GetPathNodeCost();
+                totalWeight += 1;
             }
 
             return totalWeight;
         }
-        */
-        /*
+
         public void Draw()
         {
             Handles.color = color;
@@ -280,7 +277,6 @@ namespace VoronoiDiagram
 
             Handles.color = Color.black;
             Handles.DrawPolyLine(points);
-        }*/
-
+        }
     }
 }
