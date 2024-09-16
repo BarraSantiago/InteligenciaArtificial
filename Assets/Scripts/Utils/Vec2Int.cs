@@ -112,21 +112,6 @@ namespace Utils
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(Vec2Int other) => this.x == other.x && this.y == other.y;
         
-        /// <summary>
-        ///   <para>Returns a formatted string for this vector.</para>
-        /// </summary>
-        /// <param name="format">A numeric format string.</param>
-        /// <param name="formatProvider">An object that specifies culture-specific formatting.</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override string ToString() => this.ToString((string) null, (IFormatProvider) null);
-
-        /// <summary>
-        ///   <para>Returns a formatted string for this vector.</para>
-        /// </summary>
-        /// <param name="format">A numeric format string.</param>
-        /// <param name="formatProvider">An object that specifies culture-specific formatting.</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string ToString(string format, IFormatProvider formatProvider) => this.ToString(format, (IFormatProvider) null);
-        
+        public override string ToString() => $"({this.x}, {this.y})";
     }
 }
