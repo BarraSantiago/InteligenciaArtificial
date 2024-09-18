@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using Pathfinder;
-using Toolbox;
 using UnityEngine;
 using Utils;
 
 namespace Game
 {
-    public class MapGenerator : MonoBehaviourSingleton<MapGenerator>
+    public class MapGenerator<TCoordinate> 
+        where TCoordinate : ICoordinate<TCoordinate>
     {
         [Serializable]
         public class PathNode_Visible
         {
-            public Node<Vector2> pathNodeType;
+            public Node<TCoordinate> pathNodeType;
             public GameObject prefab;
         }
 
@@ -20,7 +20,7 @@ namespace Game
         [SerializeField] private int width;
         [SerializeField] private int height;
         [SerializeField, Tooltip("Distance between map nodes")] private float cellSize;
-        [SerializeField] private Vector2 originPosition;
+        [SerializeField] private TCoordinate originPosition;
 
         [Header("Path nodes")] 
         [SerializeField] private PathNode_Visible[] pathNodeVisibles;
@@ -30,31 +30,30 @@ namespace Game
         [SerializeField] private int obstaclesQuantity;
 
         [Header("Gold mines")] 
-        [SerializeField] private Vector2 Vector2Prefab;
-        [SerializeField] private int Vector2sQuantity;
+        [SerializeField] private TCoordinate TCoordinatePrefab;
+        [SerializeField] private int TCoordinatesQuantity;
 
         [Header("Urban center")] 
         //[SerializeField] private UrbanCenter urbanCenterPrefab;
         //private Pathfinding pathfinding;
         //public Pathfinding Pathfinding => pathfinding;
-        public static List<Node<Vec2Int>> mines = new List<Node<Vec2Int>>();
-        public static List<Node<Vec2Int>> nodes = new List<Node<Vec2Int>>();
-        public static List<Vector2> Vector2sBeingUsed = new List<Vector2>();
-        public static Vector2 MapDimensions;
+        public static List<Node<TCoordinate>> mines = new List<Node<TCoordinate>>();
+        public static List<Node<TCoordinate>> nodes = new List<Node<TCoordinate>>();
+        public static List<TCoordinate> TCoordinatesBeingUsed = new List<TCoordinate>();
+        public static TCoordinate MapDimensions;
         public static float CellSize;
-        public static Vector2 OriginPosition;
+        public static TCoordinate OriginPosition;
 
-        public override void Awake()
+        public void Awake()
         {
-            base.Awake();
             AStarPathfinder<Node<Vec2Int>>.CellSize = (int)cellSize;
-            MapDimensions = new Vector2Int(width, height);
+            MapDimensions.SetCoordinate(width, height);
             CellSize = cellSize;
             OriginPosition = originPosition;
 
             //pathfinding = new Pathfinding(width, height, cellSize, originPosition);
             CreateObstacles();
-            CreateVector2s();
+            CreateTCoordinates();
             //CreateUrbanCenter();
 
             /*
@@ -62,7 +61,7 @@ namespace Game
             {
                 for (int y = 0; y < height; y++)
                 {
-                    Vector2 position = pathfinding.GetGrid().GetWorldPosition(x, y) + (Vector3.one * (cellSize / 2));
+                    TCoordinate position = pathfinding.GetGrid().GetWorldPosition(x, y) + (Vector3.one * (cellSize / 2));
 
                     for (int i = 0; i < pathNodeVisibles.Length; i++)
                     {
@@ -90,14 +89,14 @@ namespace Game
             }
         }
 
-        private void CreateVector2s()
+        private void CreateTCoordinates()
         {
-            if (Vector2sQuantity <= 0) return;
+            if (TCoordinatesQuantity <= 0) return;
 
-            for (int i = 0; i < Vector2sQuantity; i++)
+            for (int i = 0; i < TCoordinatesQuantity; i++)
             {
-                //GameObject GO = CreateEntity(Vector2Prefab.gameObject);
-                //Vector2s.Add(GO.GetComponent<Vector2>());
+                //GameObject GO = CreateEntity(TCoordinatePrefab.gameObject);
+                //TCoordinates.Add(GO.GetComponent<TCoordinate>());
             }
         }
 
@@ -109,7 +108,7 @@ namespace Game
         /*
         private GameObject CreateEntity(GameObject buildingPrefab, bool walkable = true)
         {
-            Vector2Int coords;
+            TCoordinateInt coords;
 
             do
             {
@@ -117,7 +116,7 @@ namespace Game
             } while (!pathfinding.CheckAvailableNode(coords.x, coords.y)); // Find an available node
 
             // Create building
-            Vector2 position = pathfinding.GetGrid().GetWorldPosition(coords.x, coords.y) +
+            TCoordinate position = pathfinding.GetGrid().GetWorldPosition(coords.x, coords.y) +
                                (Vector3.one * (cellSize / 2));
             GameObject GO = Instantiate(buildingPrefab, position, Quaternion.identity, transform);
             if (!walkable)
@@ -126,9 +125,9 @@ namespace Game
             return GO;
         }*/
 
-        public void RemoveEmptyMine(Node<Vec2Int> Vector2)
+        public void RemoveEmptyMine(Node<TCoordinate> coordinate)
         {
-            mines.Remove(Vector2);
+            mines.Remove(coordinate);
         }
     }
 }

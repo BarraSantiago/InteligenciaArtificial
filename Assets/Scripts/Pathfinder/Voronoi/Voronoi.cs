@@ -6,7 +6,7 @@ using Pathfinder;
 namespace VoronoiDiagram
 {
     public class Voronoi<TCoordinate>
-        where TCoordinate : NodeVoronoi, IEquatable<TCoordinate>, ICoordinate<TCoordinate>, new()
+        where TCoordinate : IEquatable<TCoordinate>, ICoordinate<TCoordinate>, new()
     {
         private List<Limit<TCoordinate>> limits = new List<Limit<TCoordinate>>();
         private List<Sector<TCoordinate>> sectors = new List<Sector<TCoordinate>>();
@@ -20,9 +20,10 @@ namespace VoronoiDiagram
         {
             // Calculo los limites del mapa con sus dimensiones, distancia entre nodos y punto de origen
             TCoordinate mapSize = new TCoordinate();
-            mapSize.SetCoordinate(MapGenerator.MapDimensions * MapGenerator.CellSize);
+            mapSize.SetCoordinate(MapGenerator<TCoordinate>.MapDimensions);
+            mapSize.Multiply(MapGenerator<TCoordinate>.CellSize);
             TCoordinate offset = new TCoordinate();
-            offset.SetCoordinate(MapGenerator.OriginPosition);
+            offset.SetCoordinate(MapGenerator<TCoordinate>.OriginPosition);
 
             TCoordinate coordinate = new TCoordinate();
             

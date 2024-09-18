@@ -33,7 +33,7 @@ namespace Pathfinder
         void Perpendicular();
     }
 
-    public class NodeVoronoi : ICoordinate<Vector2>
+    public class NodeVoronoi : ICoordinate<Vector2>, IEquatable<NodeVoronoi>, ICoordinate<NodeVoronoi>
     {
         private Vector2 coordinate;
 
@@ -45,6 +45,11 @@ namespace Pathfinder
         public NodeVoronoi(int x, int y)
         {
             coordinate = new Vector2(x, y);
+        }
+
+        public NodeVoronoi()
+        {
+            coordinate = Vector2.zero;
         }
 
         public Vector2 Add(Vector2 a, Vector2 b)
@@ -65,6 +70,36 @@ namespace Pathfinder
         public void Subtract(Vector2 a)
         {
             coordinate -= a;
+        }
+
+        public NodeVoronoi Add(NodeVoronoi a, NodeVoronoi b)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Add(NodeVoronoi a)
+        {
+            throw new NotImplementedException();
+        }
+
+        public NodeVoronoi Subtract(NodeVoronoi a, NodeVoronoi b)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Subtract(NodeVoronoi a)
+        {
+            throw new NotImplementedException();
+        }
+
+        NodeVoronoi ICoordinate<NodeVoronoi>.Multiply(float b)
+        {
+            throw new NotImplementedException();
+        }
+
+        public NodeVoronoi Abs(NodeVoronoi a)
+        {
+            throw new NotImplementedException();
         }
 
         public Vector2 Multiply(float b)
@@ -95,6 +130,41 @@ namespace Pathfinder
         public void SetY(float y)
         {
             coordinate.y = y;
+        }
+
+        public float Distance(NodeVoronoi a, NodeVoronoi b)
+        {
+            throw new NotImplementedException();
+        }
+
+        public float Distance(NodeVoronoi b)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool IsParallel(NodeVoronoi p1, NodeVoronoi p2, NodeVoronoi p3, NodeVoronoi p4)
+        {
+            throw new NotImplementedException();
+        }
+
+        public NodeVoronoi CalculateIntersection(NodeVoronoi p1, NodeVoronoi p2, NodeVoronoi p3, NodeVoronoi p4)
+        {
+            throw new NotImplementedException();
+        }
+
+        public float GetMagnitude(NodeVoronoi a)
+        {
+            throw new NotImplementedException();
+        }
+
+        public NodeVoronoi CalculateCenter(List<IntersectionPoint<NodeVoronoi>> points)
+        {
+            throw new NotImplementedException();
+        }
+
+        public float CalculateAngle(NodeVoronoi pos, NodeVoronoi center)
+        {
+            throw new NotImplementedException();
         }
 
         public float Distance(Vector2 a, Vector2 b)
@@ -157,6 +227,11 @@ namespace Pathfinder
             this.coordinate = new Vector2(x, y);
         }
 
+        public void SetCoordinate(NodeVoronoi coordinate)
+        {
+            throw new NotImplementedException();
+        }
+
         public void SetCoordinate(Vector2 coordinate)
         {
             this.coordinate = coordinate;
@@ -175,6 +250,11 @@ namespace Pathfinder
         public bool Equals(Vector2 other)
         {
             return coordinate.Equals(other);
+        }
+
+        public bool Equals(NodeVoronoi other)
+        {
+            return coordinate.Equals(other.coordinate);
         }
     }
 }

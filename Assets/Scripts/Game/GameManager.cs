@@ -18,47 +18,48 @@ namespace Game
         [SerializeField] private float nodesSize;
         [SerializeField] private Vector2 originPosition;
 
-        [Header("Units Config")] [SerializeField]
-        private GameObject minerPrefab;
-
+        [Header("Units Config")]
+        [SerializeField] private GameObject minerPrefab;
         [SerializeField] private GameObject caravanPrefab;
         [SerializeField] private int minersQuantity;
         [SerializeField] private int cartsQuantity;
 
-        [Header("Setup")] [SerializeField] private GraphView graphView;
-        [SerializeField] private Voronoi voronoi;
+        [Header("Setup")]
+        [SerializeField] private GraphView graphView;
+        [SerializeField] private Voronoi<NodeVoronoi> voronoi;
         [SerializeField] private bool validate;
-        private Vector2IntGraph<Node<Vec2Int>> graph;
-
+        private Vector2IntGraph<NodeVoronoi> graph;
+        
+        
         private void Start()
         {
             if (!Application.isPlaying)
                 return;
 
-            MapGenerator.CellSize = nodesSize;
-            MapGenerator.MapDimensions = new Vector2Int(mapWidth, mapHeight);
-            MapGenerator.OriginPosition = originPosition;
+            MapGenerator<NodeVoronoi>.CellSize = nodesSize;
+            MapGenerator<NodeVoronoi>.MapDimensions = new NodeVoronoi(mapWidth, mapHeight);
+            MapGenerator<NodeVoronoi>.OriginPosition = new NodeVoronoi(originPosition);
 
-            graph = new Vector2IntGraph<Node<Vec2Int>>(mapWidth, mapHeight);
+            graph = new Vector2IntGraph<NodeVoronoi>(mapWidth, mapHeight);
 
             for (int i = 0; i < minesQuantity; i++)
             {
-                Node<Vec2Int> node = graph.nodes[Random.Range(0, graph.nodes.Count)];
+                Node<NodeVoronoi> node = graph.nodes[Random.Range(0, graph.nodes.Count)];
                 node.NodeType = NodeType.Mine;
                 node.gold = 100;
-                MapGenerator.mines.Add(node);
+                MapGenerator<NodeVoronoi>.mines.Add(node);
             }
             
             int towncenterNode = Random.Range(0, graph.nodes.Count);
             graph.nodes[towncenterNode].NodeType = NodeType.TownCenter;
 
-            MapGenerator.nodes = graph.nodes;
+            MapGenerator<NodeVoronoi>.nodes = graph.nodes;
 
             Vector3 townCenterPosition = new Vector3(graph.nodes[towncenterNode].GetCoordinate().x,
                 graph.nodes[towncenterNode].GetCoordinate().y);
 
             voronoi.Init();
-            voronoi.SetVoronoi(MapGenerator.mines);
+            voronoi.SetVoronoi(MapGenerator<NodeVoronoi>.mines);
 
             GameObject miner = Instantiate(minerPrefab, townCenterPosition, Quaternion.identity);
             Miner agent = miner.GetComponent<Miner>();

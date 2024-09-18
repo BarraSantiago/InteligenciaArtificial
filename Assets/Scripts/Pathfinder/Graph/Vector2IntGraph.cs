@@ -5,7 +5,7 @@ using Utils;
 
 namespace Pathfinder
 {
-    public class Vector2IntGraph<NodeType> where NodeType : INode<Vec2Int>, new()
+    public class Vector2IntGraph<NodeType> where NodeType : ICoordinate<NodeType>, new()
     {
         public List<NodeType> nodes = new List<NodeType>();
 
@@ -16,7 +16,7 @@ namespace Pathfinder
                 for (int j = 0; j < y; j++)
                 {
                     NodeType node = new NodeType();
-                    (node).SetCoordinate(new Vec2Int(i, j));
+                    (node).SetCoordinate(i, j);
                     nodes.Add(node);
                 }
             }
@@ -29,7 +29,7 @@ namespace Pathfinder
                 for (int j = 0; j < mapSize.y; j++)
                 {
                     NodeType node = new NodeType();
-                    (node).SetCoordinate(new Vec2Int(i, j));
+                    (node).SetCoordinate(i, j);
                     nodes.Add(node);
                 }
             }
