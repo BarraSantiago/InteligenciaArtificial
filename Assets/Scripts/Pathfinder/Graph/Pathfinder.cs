@@ -32,16 +32,6 @@ namespace Pathfinder
 
             openList.Add(startNode);
 
-            foreach (var node in nodes.Keys.ToList())
-            {
-                if (NodesEquals(startNode, node)) continue;
-
-                var nodeData = nodes[node];
-                nodes.Remove(node);
-                nodes[startNode] = nodeData;
-                break;
-            }
-
             while (openList.Count > 0)
             {
                 NodeType currentNode = openList[0];
@@ -76,8 +66,7 @@ namespace Pathfinder
                     aproxAcumulativeCost += nodes[currentNode].AcumulativeCost;
                     aproxAcumulativeCost += MoveToNeighborCost(currentNode, neighbor);
 
-                    if (openList.Contains(neighbor) &&
-                        aproxAcumulativeCost >= nodes[currentNode].AcumulativeCost) continue;
+                    if (openList.Contains(neighbor) && aproxAcumulativeCost >= nodes[neighbor].AcumulativeCost) continue;
 
                     nodes[neighbor] = (currentNode, aproxAcumulativeCost, Distance(neighbor, destinationNode));
 

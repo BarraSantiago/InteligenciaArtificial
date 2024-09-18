@@ -24,9 +24,9 @@ namespace VoronoiDiagram
         public Vector2 GetMapLimitPosition(Vector2 position)
         {
             // Calculo de la distancia al limite:
-            // 1. Calculo la distancia entre "position" y el origen del lÌmite
+            // 1. Calculo la distancia entre "position" y el origen del l√≠mite
             // 2. Tomo el valor absoluto para asegurarme de tener una distancia positiva
-            // 3. Multiplico esta distancia por 2 para extender el lÌmite m·s all· de la distancia original
+            // 3. Multiplico esta distancia por 2 para extender el l√≠mite m√°s all√° de la distancia original
             Vector2 distance = new Vector2(Mathf.Abs(position.x - origin.x) * 2f, Mathf.Abs(position.y - origin.y) * 2f);
 
             switch (direction)
