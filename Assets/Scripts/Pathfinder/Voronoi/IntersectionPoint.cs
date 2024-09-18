@@ -1,16 +1,19 @@
+using System;
+using Pathfinder;
 using UnityEngine;
 
 namespace VoronoiDiagram
 {
-    public class IntersectionPoint
+    public class IntersectionPoint<TCoordinate> 
+        where TCoordinate : ICoordinate<TCoordinate>, IEquatable<TCoordinate>
     {
-        private Vector2 position;
+        private TCoordinate position;
         private float angle;
 
-        public Vector2 Position { get => position; }
+        public TCoordinate Position { get => position; }
         public float Angle { get => angle; set => angle = value; }
 
-        public IntersectionPoint(Vector2 position)
+        public IntersectionPoint(TCoordinate position)
         {
             this.position = position;
             angle = 0f;

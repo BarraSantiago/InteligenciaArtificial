@@ -1,36 +1,38 @@
 using System.Collections.Generic;
+using Pathfinder;
 using UnityEngine;
 
 namespace VoronoiDiagram
 {
-    public class Segment
+    public class Segment<TCoordinate> where TCoordinate : ICoordinate<TCoordinate>
     {
-        private Vector2 origin;
-        private Vector2 final;
-        private Vector2 direction;
-        private Vector2 mediatrix;
-        private List<Vector2> intersections = new List<Vector2>();
+        private TCoordinate origin;
+        private TCoordinate final;
+        private TCoordinate direction;
+        private TCoordinate mediatrix;
+        private List<TCoordinate> intersections = new List<TCoordinate>();
 
-        public Vector2 Origin { get => origin; }
-        public Vector2 Final { get => final; }
-        public Vector2 Mediatrix { get => mediatrix; }
-        public Vector2 Direction { get => direction; }
-        public List<Vector2> Intersections { get => intersections; }
+        public TCoordinate Origin { get => origin; }
+        public TCoordinate Final { get => final; }
+        public TCoordinate Mediatrix { get => mediatrix; }
+        public TCoordinate Direction { get => direction; }
+        public List<TCoordinate> Intersections { get => intersections; }
 
-        public Segment(Vector2 origin, Vector2 final)
+        public Segment(TCoordinate origin, TCoordinate final)
         {
             this.origin = origin;
             this.final = final;
 
-            // Mediatriz: la línea perpendicular que pasa por el punto medio:
+            // Mediatriz: la lÃ­nea perpendicular que pasa por el punto medio:
             // 1. Sumamos la coordenada X del origen y final
             // 2. Dividimos para obtener la coordenada X de la mediatriz
             // 3. Repetimos para las coordenadas Y
-            mediatrix = new Vector2((origin.x + final.x) / 2, (origin.y + final.y) / 2);
+            mediatrix.SetCoordinate((origin.GetX() + final.GetX()) / 2, (origin.GetY() + final.GetY()) / 2); 
 
             // Calculo la direccion del segmento:
             // 1. Calculo el vector perpendicular al vector que va del origen al final
-            direction = Vector2.Perpendicular(new Vector2(final.x - origin.x, final.y - origin.y));
+            direction.SetCoordinate(final.GetX() - origin.GetX(), final.GetY() - origin.GetY());
+            direction.Perpendicular();
         }
     }
 }

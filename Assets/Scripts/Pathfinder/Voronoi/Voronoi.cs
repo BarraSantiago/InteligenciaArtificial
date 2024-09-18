@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Game;
 using UnityEngine;
@@ -6,10 +7,11 @@ using Utils;
 
 namespace VoronoiDiagram
 {
-    public class Voronoi : MonoBehaviour
+    public class Voronoi<TCoordinate>
+        where TCoordinate : NodeVoronoi, IEquatable<TCoordinate>, ICoordinate<TCoordinate>
     {
         private List<Limit> limits = new List<Limit>();
-        private List<Sector> sectors = new List<Sector>();
+        private List<Sector<TCoordinate>> sectors = new List<Sector<TCoordinate>>();
 
         public void Init()
         {
@@ -29,7 +31,7 @@ namespace VoronoiDiagram
             limits.Add(new Limit(new Vector2(0f, 0f) + offset, DIRECTION.LEFT));
         }
 
-        public void SetVoronoi(List<Node<Vec2Int>> goldMines)
+        public void SetVoronoi(List<Node<TCoordinate>> goldMines)
         {
             sectors.Clear();
             if (goldMines.Count <= 0) return;
