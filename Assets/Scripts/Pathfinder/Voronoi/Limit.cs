@@ -1,3 +1,4 @@
+using Pathfinder;
 using UnityEngine;
 
 namespace VoronoiDiagram
@@ -10,7 +11,7 @@ namespace VoronoiDiagram
         LEFT
     }
 
-    public class Limit<TCoordinate>
+    public class Limit<TCoordinate> where TCoordinate : ICoordinate<TCoordinate>, new()
     {
         private TCoordinate origin;
         private DIRECTION direction;
@@ -27,21 +28,23 @@ namespace VoronoiDiagram
             // 1. Calculo la distancia entre "position" y el origen del límite
             // 2. Tomo el valor absoluto para asegurarme de tener una distancia positiva
             // 3. Multiplico esta distancia por 2 para extender el límite más allá de la distancia original
-            TCoordinate distance = new TCoordinate(Mathf.Abs(position.x - origin.x) * 2f, Mathf.Abs(position.y - origin.y) * 2f);
+            TCoordinate distance = new TCoordinate();
+            distance.SetCoordinate(Mathf.Abs(position.GetX() - origin.GetX()) * 2f,
+                Mathf.Abs(position.GetY() - origin.GetY()) * 2f);
 
             switch (direction)
             {
                 case DIRECTION.LEFT:
-                    position.x -= distance.x;
+                    position.SetX(position.GetX() - distance.GetX());
                     break;
                 case DIRECTION.UP:
-                    position.y += distance.y;
+                    position.SetY(position.GetY() + distance.GetY());
                     break;
                 case DIRECTION.RIGHT:
-                    position.x += distance.x;
+                    position.SetX(position.GetX() + distance.GetX());
                     break;
                 case DIRECTION.DOWN:
-                    position.y -= distance.y;
+                    position.SetY(position.GetY() - distance.GetY());
                     break;
             }
 

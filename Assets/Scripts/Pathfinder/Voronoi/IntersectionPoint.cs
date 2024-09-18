@@ -5,7 +5,7 @@ using UnityEngine;
 namespace VoronoiDiagram
 {
     public class IntersectionPoint<TCoordinate> 
-        where TCoordinate : ICoordinate<TCoordinate>, IEquatable<TCoordinate>
+        where TCoordinate : IEquatable<TCoordinate>
     {
         private TCoordinate position;
         private float angle;

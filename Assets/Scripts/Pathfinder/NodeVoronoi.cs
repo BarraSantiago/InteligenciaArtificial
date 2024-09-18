@@ -6,11 +6,12 @@ using VoronoiDiagram;
 
 namespace Pathfinder
 {
-    public interface ICoordinate<T> : IEquatable<T> where T : ICoordinate<T>
+    public interface ICoordinate<T> : IEquatable<T> where T : IEquatable<T>
     {
         T Add(T a, T b);
         void Add(T a);
         T Subtract(T a, T b);
+        void Subtract(T a);
         T Multiply(float b);
         T Abs(T a);
         float GetX();
@@ -59,6 +60,11 @@ namespace Pathfinder
         public Vector2 Subtract(Vector2 a, Vector2 b)
         {
             return a - b;
+        }
+
+        public void Subtract(Vector2 a)
+        {
+            coordinate -= a;
         }
 
         public Vector2 Multiply(float b)

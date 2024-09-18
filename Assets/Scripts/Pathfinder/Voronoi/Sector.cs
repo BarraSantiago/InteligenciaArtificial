@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Game;
-using UnityEngine;
-using UnityEditor;
 using Pathfinder;
 using Utils;
 
@@ -13,7 +11,7 @@ namespace VoronoiDiagram
         where TCoordinate : IEquatable<TCoordinate>, ICoordinate<TCoordinate>, new()
     {
         private Node<TCoordinate> mine;
-        private Color color;
+        //private Color color;
         private List<Segment<TCoordinate>> segments = new List<Segment<TCoordinate>>();
         private List<TCoordinate> intersections = new List<TCoordinate>();
         private List<Node<TCoordinate>> nodesInsideSector = new List<Node<TCoordinate>>();
@@ -30,7 +28,7 @@ namespace VoronoiDiagram
             WrongPoint.SetCoordinate(-1, -1);
             this.mine = mine;
             //color = Random.ColorHSV();
-            color.a = 0.2f;
+            //color.a = 0.2f;
         }
 
         #region SEGMENTS
@@ -209,14 +207,14 @@ namespace VoronoiDiagram
             for (int i = 0; i < intersectionPoints.Count; i++)
             {
                 TCoordinate pos = intersectionPoints[i].Position;
-                intersectionPoints[i].Angle = Mathf.Acos((pos.GetX() - center.GetX()) /
-                                                         Mathf.Sqrt(Mathf.Pow(pos.GetX() - center.GetX(), 2f) +
-                                                                    Mathf.Pow(pos.GetY() - center.GetY(), 2f)));
+                intersectionPoints[i].Angle = (float)Math.Acos((pos.GetX() - center.GetX()) /
+                                                               Math.Sqrt(Math.Pow(pos.GetX() - center.GetX(), 2f) +
+                                                                         Math.Pow(pos.GetY() - center.GetY(), 2f)));
 
                 // Si la coordenada Y de la interseccion es mayor que la coordenada Y del centro, ajusto el angulo para
                 // garantizar que este en el rango correct (0 a 2pi radianes)
                 if (pos.GetY() > center.GetY())
-                    intersectionPoints[i].Angle = Mathf.PI + Mathf.PI - intersectionPoints[i].Angle;
+                    intersectionPoints[i].Angle = (float)(Math.PI + Math.PI - intersectionPoints[i].Angle);
             }
 
             // Ordeno las interseccion en funcion de sus angulos (ascendente, en sentido anti-horario)
@@ -306,11 +304,12 @@ namespace VoronoiDiagram
 
         public void Draw()
         {
+            /*
             Handles.color = color;
             Handles.DrawAAConvexPolygon(points.ToArray());
 
             Handles.color = Color.black;
-            Handles.DrawPolyLine(points.ToArray());
+            Handles.DrawPolyLine(points.ToArray());*/
         }
     }
 }
