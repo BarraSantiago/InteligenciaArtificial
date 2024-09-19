@@ -6,8 +6,7 @@ using Utils;
 
 namespace Game
 {
-    public class MapGenerator<TCoordinate> 
-        where TCoordinate : ICoordinate<TCoordinate>
+    public class MapGenerator<TCoordinate> where TCoordinate : ICoordinate<TCoordinate>, IEquatable<TCoordinate>
     {
         [Serializable]
         public class PathNode_Visible
@@ -46,7 +45,6 @@ namespace Game
 
         public void Awake()
         {
-            AStarPathfinder<Node<Vec2Int>>.CellSize = (int)cellSize;
             MapDimensions.SetCoordinate(width, height);
             CellSize = cellSize;
             OriginPosition = originPosition;

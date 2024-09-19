@@ -1,6 +1,4 @@
 using System;
-using Pathfinder;
-using UnityEngine;
 
 namespace VoronoiDiagram
 {

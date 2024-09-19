@@ -1,5 +1,5 @@
+using System;
 using Pathfinder;
-using UnityEngine;
 
 namespace VoronoiDiagram
 {
@@ -29,8 +29,8 @@ namespace VoronoiDiagram
             // 2. Tomo el valor absoluto para asegurarme de tener una distancia positiva
             // 3. Multiplico esta distancia por 2 para extender el límite más allá de la distancia original
             TCoordinate distance = new TCoordinate();
-            distance.SetCoordinate(Mathf.Abs(position.GetX() - origin.GetX()) * 2f,
-                Mathf.Abs(position.GetY() - origin.GetY()) * 2f);
+            distance.SetCoordinate(Math.Abs(position.GetX() - origin.GetX()) * 2f,
+                Math.Abs(position.GetY() - origin.GetY()) * 2f);
 
             switch (direction)
             {

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Utils;
 using VoronoiDiagram;
 
 namespace Pathfinder
@@ -23,12 +22,12 @@ namespace Pathfinder
         bool IsParallel(T p1, T p2, T p3, T p4);
         T CalculateIntersection(T p1, T p2, T p3, T p4);
         float GetMagnitude(T a);
+        float GetMagnitude();
         T CalculateCenter(List<IntersectionPoint<T>> points);
         float CalculateAngle(T pos, T center);
-        
+        T GetCoordinate();
         void SetCoordinate(float x, float y);
         void SetCoordinate(T coordinate);
-
         void Zero();
         void Perpendicular();
     }
@@ -167,6 +166,11 @@ namespace Pathfinder
             throw new NotImplementedException();
         }
 
+        public NodeVoronoi GetCoordinate()
+        {
+            throw new NotImplementedException();
+        }
+
         public float Distance(Vector2 a, Vector2 b)
         {
             return Vector2.Distance(a, b);
@@ -206,6 +210,11 @@ namespace Pathfinder
             return a.magnitude;
         }
 
+        public float GetMagnitude()
+        {
+            return coordinate.magnitude;
+        }
+
         public Vector2 CalculateCenter(List<IntersectionPoint<Vector2>> points)
         {
             Vector2 sum = Vector2.zero;
@@ -220,6 +229,11 @@ namespace Pathfinder
         public float CalculateAngle(Vector2 pos, Vector2 center)
         {
             return Mathf.Atan2(pos.y - center.y, pos.x - center.x);
+        }
+
+        Vector2 ICoordinate<Vector2>.GetCoordinate()
+        {
+            return coordinate;
         }
 
         public void SetCoordinate(float x, float y)

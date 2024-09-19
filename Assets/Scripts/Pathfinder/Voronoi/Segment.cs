@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Pathfinder;
-using UnityEngine;
 
 namespace VoronoiDiagram
 {

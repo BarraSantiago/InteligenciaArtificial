@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Game;
 using Pathfinder;
-using Utils;
 
 namespace VoronoiDiagram
 {
@@ -125,12 +124,12 @@ namespace VoronoiDiagram
             // Calculo p2 extendiendo el segmento en su direccion por la longitud
             TCoordinate p2 = new TCoordinate();
             p2.SetCoordinate(seg1.Mediatrix);
-            p2.Add(seg1.Direction.Multiply(MapGenerator.MapDimensions.magnitude));
+            p2.Add(seg1.Direction.Multiply(MapGenerator<TCoordinate>.MapDimensions.GetMagnitude()));
 
             TCoordinate p3 = seg2.Mediatrix;
             TCoordinate p4 = new TCoordinate();
             p4.SetCoordinate(seg2.Mediatrix);
-            p4.Add(seg2.Direction.Multiply(MapGenerator.MapDimensions.magnitude)); // (Magnitud es la longitud del vector)
+            p4.Add(seg2.Direction.Multiply(MapGenerator<TCoordinate>.MapDimensions.GetMagnitude())); // (Magnitud es la longitud del vector)
 
             // Chequeo si los dos segmentos son paralelos, si es asi no hay interseccion
             if (((p1.GetX() - p2.GetX()) * (p3.GetY() - p4.GetY()) -

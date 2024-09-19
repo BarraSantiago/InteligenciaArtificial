@@ -28,8 +28,8 @@ namespace Game
         [SerializeField] private GraphView graphView;
         [SerializeField] private Voronoi<NodeVoronoi> voronoi;
         [SerializeField] private bool validate;
-        private Vector2IntGraph<NodeVoronoi> graph;
         
+        private Vector2IntGraph<Node<NodeVoronoi>> graph;
         
         private void Start()
         {
@@ -40,7 +40,7 @@ namespace Game
             MapGenerator<NodeVoronoi>.MapDimensions = new NodeVoronoi(mapWidth, mapHeight);
             MapGenerator<NodeVoronoi>.OriginPosition = new NodeVoronoi(originPosition);
 
-            graph = new Vector2IntGraph<NodeVoronoi>(mapWidth, mapHeight);
+            graph = new Vector2IntGraph<NodeVoronoi>(mapWidth, mapHeight, nodesSize);
 
             for (int i = 0; i < minesQuantity; i++)
             {

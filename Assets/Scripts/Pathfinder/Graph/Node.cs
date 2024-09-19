@@ -17,7 +17,7 @@ namespace Pathfinder
         public int food;
         public int gold;
         public int zone;
-    
+
         public void SetCoordinate(Coordinate coordinate)
         {
             this.coordinate = coordinate;
@@ -32,7 +32,9 @@ namespace Pathfinder
         {
             return false;
         }
-        
+
+        public ICollection<INode> GetNeighbors { get; set; }
+
         public bool EqualsTo(INode<Coordinate> other)
         {
             return coordinate.Equals(other.GetCoordinate());
