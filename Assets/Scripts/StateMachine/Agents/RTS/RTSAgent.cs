@@ -4,7 +4,6 @@ using Pathfinder;
 using StateMachine.States.RTSStates;
 using UnityEngine;
 using VoronoiDiagram;
-using Vector2 = Utils.Vec2Int;
 
 namespace StateMachine.Agents.RTS
 {
@@ -35,7 +34,7 @@ namespace StateMachine.Agents.RTS
         public bool retreat;
         public Node<Vector2> currentNode;
         public Node<Vector2> targetNode;
-        public Voronoi voronoi;
+        public Voronoi<> voronoi;
         
         protected int? Food = (3);
         private int? _currentGold = 0;

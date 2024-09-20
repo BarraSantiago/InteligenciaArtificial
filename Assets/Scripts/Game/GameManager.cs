@@ -1,4 +1,5 @@
-﻿using Pathfinder;
+﻿using System.Collections.Generic;
+using Pathfinder;
 using StateMachine.Agents.RTS;
 using UnityEngine;
 using Utils;
@@ -17,19 +18,19 @@ namespace Game
         [SerializeField] private float nodesSize;
         [SerializeField] private Vector2 originPosition;
 
-        [Header("Units Config")]
-        [SerializeField] private GameObject minerPrefab;
+        [Header("Units Config")] [SerializeField]
+        private GameObject minerPrefab;
+
         [SerializeField] private GameObject caravanPrefab;
         [SerializeField] private int minersQuantity;
         [SerializeField] private int cartsQuantity;
 
-        [Header("Setup")]
-        [SerializeField] private GraphView graphView;
+        [Header("Setup")] [SerializeField] private GraphView graphView;
         [SerializeField] private Voronoi<NodeVoronoi, Vector2> voronoi;
         [SerializeField] private bool validate;
-        
+
         private Graph<Node<Vector2>, NodeVoronoi, Vector2> graph;
-        
+
         private void Start()
         {
             if (!Application.isPlaying)
@@ -48,7 +49,7 @@ namespace Game
                 node.gold = 100;
                 MapGenerator<NodeVoronoi, Vector2>.mines.Add(node);
             }
-            
+
             int towncenterNode = Random.Range(0, graph.coordNodes.Count);
             graph.nodesType[towncenterNode].NodeType = NodeType.TownCenter;
 
@@ -58,12 +59,16 @@ namespace Game
                 graph.coordNodes[towncenterNode].GetCoordinate().y);
 
             voronoi.Init();
-            voronoi.SetVoronoi(MapGenerator<NodeVoronoi, Vector2>.mines);
-
+            List<NodeVoronoi> voronoiNodes = new List<NodeVoronoi>();
+            for (int i = 0; i < MapGenerator<NodeVoronoi, Vector2>.mines.Count; i++)
+            {
+                voronoiNodes.Add(graph.coordNodes.Find((node => node.GetCoordinate() == MapGenerator<NodeVoronoi, Vector2>.mines[i].GetCoordinate())));
+            }
+            
             GameObject miner = Instantiate(minerPrefab, townCenterPosition, Quaternion.identity);
             Miner agent = miner.GetComponent<Miner>();
-            agent.currentNode = graph.coordNodes[towncenterNode];
-            RTSAgent.townCenter = graph.coordNodes[towncenterNode];
+            agent.currentNode = graph.nodesType[towncenterNode];
+            RTSAgent.townCenter = graph.nodesType[towncenterNode];
             agent.voronoi = voronoi;
             agent.Init();
             /*
