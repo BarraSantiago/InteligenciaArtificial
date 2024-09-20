@@ -1,29 +1,27 @@
 using System;
 using System.Collections.Generic;
-using Pathfinder;
 
-namespace VoronoiDiagram
+namespace Pathfinder.Voronoi
 {
-    public class Segment<TCoordinate, CoordinateType> 
-        where TCoordinate : ICoordinate<CoordinateType>, new()
-        where CoordinateType : IEquatable<CoordinateType>
+    public class Segment<TCoordinate, TCoordinateType> 
+        where TCoordinate : ICoordinate<TCoordinateType>, new()
+        where TCoordinateType : IEquatable<TCoordinateType>
     {
-        private TCoordinate origin;
-        private TCoordinate final;
-        private TCoordinate direction;
-        private TCoordinate mediatrix;
-        private List<TCoordinate> intersections = new List<TCoordinate>();
+        private readonly TCoordinate direction;
+        private readonly TCoordinate mediatrix;
 
-        public TCoordinate Origin { get => origin; }
-        public TCoordinate Final { get => final; }
-        public TCoordinate Mediatrix { get => mediatrix; }
-        public TCoordinate Direction { get => direction; }
-        public List<TCoordinate> Intersections { get => intersections; }
+        public TCoordinate Origin { get; }
+
+        public TCoordinate Final { get; }
+
+        public TCoordinate Mediatrix => mediatrix;
+        public TCoordinate Direction => direction;
+        public List<TCoordinate> Intersections { get; } = new List<TCoordinate>();
 
         public Segment(TCoordinate origin, TCoordinate final)
         {
-            this.origin = origin;
-            this.final = final;
+            this.Origin = origin;
+            this.Final = final;
 
             // Mediatriz: la línea perpendicular que pasa por el punto medio:
             // 1. Sumamos la coordenada X del origen y final

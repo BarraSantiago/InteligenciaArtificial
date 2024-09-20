@@ -1,7 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Pathfinder;
 using Pathfinder.Graph;
+using Pathfinder.Voronoi;
 using StateMachine.Agents.RTS;
+using UnityEditor;
 using UnityEngine;
 using Utils;
 using VoronoiDiagram;
@@ -31,12 +34,13 @@ namespace Game
         public static Graph<Node<Vector2>, NodeVoronoi, Vector2> graph;
 
         private Voronoi<NodeVoronoi, Vector2> voronoi;
-        
+        private Color color;
         private void Start()
         {
             if (!Application.isPlaying)
                 return;
             
+            color.a = 0.2f;
             graph = new Vector2Graph(mapWidth, mapHeight, nodesSize);
             
             voronoi = new Voronoi<NodeVoronoi, Vector2>();
@@ -87,7 +91,18 @@ namespace Game
         {
             if (!Application.isPlaying)
                 return;
-            voronoi.Draw();
+            foreach (var sector in voronoi.SectorsToDraw())
+            {
+                Handles.color = color;
+                List<Vector3> list = new List<Vector3>();
+                foreach (var nodeVoronoi in sector.PointsToDraw()) list.Add(new Vector3(nodeVoronoi.GetX(), nodeVoronoi.GetY()));
+                Handles.DrawAAConvexPolygon(list.ToArray());
+
+                Handles.color = Color.black;
+                Handles.DrawPolyLine(list.ToArray());
+            }
+
+            voronoi.SectorsToDraw();
 
             foreach (var node in graph.NodesType)
             {

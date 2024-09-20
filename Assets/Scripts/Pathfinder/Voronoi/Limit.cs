@@ -1,24 +1,23 @@
 using System;
-using Pathfinder;
 
-namespace VoronoiDiagram
+namespace Pathfinder.Voronoi
 {
-    public enum DIRECTION
+    public enum Direction
     {
-        UP,
-        RIGHT,
-        DOWN,
-        LEFT
+        Up,
+        Right,
+        Down,
+        Left
     }
 
-    public class Limit<TCoordinate, CoordinateType> 
-        where TCoordinate : ICoordinate<CoordinateType>, new()
-        where CoordinateType : IEquatable<CoordinateType>
+    public class Limit<TCoordinate, TCoordinateType> 
+        where TCoordinate : ICoordinate<TCoordinateType>, new()
+        where TCoordinateType : IEquatable<TCoordinateType>
     {
         private TCoordinate origin;
-        private DIRECTION direction;
+        private readonly Direction direction;
 
-        public Limit(TCoordinate origin, DIRECTION direction)
+        public Limit(TCoordinate origin, Direction direction)
         {
             this.origin = origin;
             this.direction = direction;
@@ -36,16 +35,16 @@ namespace VoronoiDiagram
 
             switch (direction)
             {
-                case DIRECTION.LEFT:
+                case Direction.Left:
                     limit.SetX(position.GetX() - distance.GetX());
                     break;
-                case DIRECTION.UP:
+                case Direction.Up:
                     limit.SetY(position.GetY() + distance.GetY());
                     break;
-                case DIRECTION.RIGHT:
+                case Direction.Right:
                     limit.SetX(position.GetX() + distance.GetX());
                     break;
-                case DIRECTION.DOWN:
+                case Direction.Down:
                     limit.SetY(position.GetY() - distance.GetY());
                     break;
             }
