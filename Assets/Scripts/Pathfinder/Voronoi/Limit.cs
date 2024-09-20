@@ -31,26 +31,26 @@ namespace VoronoiDiagram
             // 2. Tomo el valor absoluto para asegurarme de tener una distancia positiva
             // 3. Multiplico esta distancia por 2 para extender el límite más allá de la distancia original
             TCoordinate distance = new TCoordinate();
-            distance.SetCoordinate(Math.Abs(position.GetX() - origin.GetX()) * 2f,
-                Math.Abs(position.GetY() - origin.GetY()) * 2f);
+            distance.SetCoordinate(Math.Abs(position.GetX() - origin.GetX()) * 2f, Math.Abs(position.GetY() - origin.GetY()) * 2f);
+            TCoordinate limit = new TCoordinate();
 
             switch (direction)
             {
                 case DIRECTION.LEFT:
-                    position.SetX(position.GetX() - distance.GetX());
+                    limit.SetX(position.GetX() - distance.GetX());
                     break;
                 case DIRECTION.UP:
-                    position.SetY(position.GetY() + distance.GetY());
+                    limit.SetY(position.GetY() + distance.GetY());
                     break;
                 case DIRECTION.RIGHT:
-                    position.SetX(position.GetX() + distance.GetX());
+                    limit.SetX(position.GetX() + distance.GetX());
                     break;
                 case DIRECTION.DOWN:
-                    position.SetY(position.GetY() - distance.GetY());
+                    limit.SetY(position.GetY() - distance.GetY());
                     break;
             }
 
-            return position;
+            return limit;
         }
     }
 }

@@ -6,25 +6,25 @@ using Pathfinder;
 
 namespace VoronoiDiagram
 {
-    public class Sector<TCoordinate, CoordinateType>
-        where TCoordinate : IEquatable<TCoordinate>, ICoordinate<CoordinateType>, new()
-        where CoordinateType : IEquatable<CoordinateType>
+    public class Sector<TCoordinate, TCoordinateType>
+        where TCoordinate : IEquatable<TCoordinate>, ICoordinate<TCoordinateType>, new()
+        where TCoordinateType : IEquatable<TCoordinateType>
     {
-        private Node<CoordinateType> mine;
+        private Node<TCoordinateType> mine;
 
         //private Color color;
-        private List<Segment<TCoordinate, CoordinateType>> segments = new List<Segment<TCoordinate, CoordinateType>>();
+        private List<Segment<TCoordinate, TCoordinateType>> segments = new List<Segment<TCoordinate, TCoordinateType>>();
         private List<TCoordinate> intersections = new List<TCoordinate>();
         private List<Node<TCoordinate>> nodesInsideSector = new List<Node<TCoordinate>>();
         private List<TCoordinate> points;
         private static TCoordinate WrongPoint;
 
-        public Node<CoordinateType> Mine
+        public Node<TCoordinateType> Mine
         {
             get => mine;
         }
 
-        public Sector(Node<CoordinateType> mine)
+        public Sector(Node<TCoordinateType> mine)
         {
             WrongPoint = new TCoordinate();
             WrongPoint.SetCoordinate(-1, -1);
@@ -35,7 +35,7 @@ namespace VoronoiDiagram
 
         #region SEGMENTS
 
-        public void AddSegmentLimits(List<Limit<TCoordinate, CoordinateType>> limits)
+        public void AddSegmentLimits(List<Limit<TCoordinate, TCoordinateType>> limits)
         {
             // Calculo los segmentos con los limites del mapa
             for (int i = 0; i < limits.Count; i++)
@@ -43,13 +43,13 @@ namespace VoronoiDiagram
                 TCoordinate origin = new TCoordinate();
                 origin.SetCoordinate(mine.GetCoordinate()); // Obtengo la posicion de la mina
                 TCoordinate final = limits[i].GetMapLimitPosition(origin); // Obtengo la posicion final del segmento
-                segments.Add(new Segment<TCoordinate, CoordinateType>(origin, final));
+                segments.Add(new Segment<TCoordinate, TCoordinateType>(origin, final));
             }
         }
 
         public void AddSegment(TCoordinate origin, TCoordinate final)
         {
-            segments.Add(new Segment<TCoordinate, CoordinateType>(origin, final));
+            segments.Add(new Segment<TCoordinate, TCoordinateType>(origin, final));
         }
 
         #endregion
@@ -115,7 +115,9 @@ namespace VoronoiDiagram
             SetPointsInSector();
         }
 
-        public TCoordinate GetIntersection(Segment<TCoordinate, CoordinateType> seg1, Segment<TCoordinate, CoordinateType> seg2) // Calculo la interseccion entre 2 segmentos definidos por 4 puntos
+        
+        // Calculo la interseccion entre 2 segmentos definidos por 4 puntos
+        public TCoordinate GetIntersection(Segment<TCoordinate, TCoordinateType> seg1, Segment<TCoordinate, TCoordinateType> seg2)
         {
             TCoordinate intersection = new TCoordinate();
             intersection.Zero();
@@ -125,17 +127,17 @@ namespace VoronoiDiagram
             // Calculo p2 extendiendo el segmento en su direccion por la longitud
             TCoordinate p2 = new TCoordinate();
             p2.SetCoordinate(seg1.Mediatrix.GetCoordinate());
-            p2.Add(seg1.Direction.Multiply(MapGenerator<TCoordinate, CoordinateType>.MapDimensions.GetMagnitude()));
+            p2.Add(seg1.Direction.Multiply(MapGenerator<TCoordinate, TCoordinateType>.MapDimensions.GetMagnitude()));
 
             TCoordinate p3 = seg2.Mediatrix;
             TCoordinate p4 = new TCoordinate();
             p4.SetCoordinate(seg2.Mediatrix.GetCoordinate());
-            p4.Add(seg2.Direction.Multiply(MapGenerator<TCoordinate,CoordinateType>.MapDimensions
+            p4.Add(seg2.Direction.Multiply(MapGenerator<TCoordinate,TCoordinateType>.MapDimensions
                 .GetMagnitude())); // (Magnitud es la longitud del vector)
 
             // Chequeo si los dos segmentos son paralelos, si es asi no hay interseccion
-            if (((p1.GetX() - p2.GetX()) * (p3.GetY() - p4.GetY()) -
-                 (p1.GetY() - p2.GetY()) * (p3.GetX() - p4.GetX())) == 0)
+            if (Approximately((p1.GetX() - p2.GetX()) * (p3.GetY() - p4.GetY()) -
+                 (p1.GetY() - p2.GetY()) * (p3.GetX() - p4.GetX()), 0))
             {
                 return WrongPoint;
             }
@@ -170,6 +172,11 @@ namespace VoronoiDiagram
             }
         }
 
+        public bool Approximately(float a, float b)
+        {
+            return Math.Abs(a - b) < 1e-6f;
+        }
+        
         private bool CheckIfHaveAnotherPositionCloser(TCoordinate intersectionPoint, TCoordinate pointEnd,
             float maxDistance)
         {
@@ -243,8 +250,7 @@ namespace VoronoiDiagram
 
         #endregion
 
-        public bool
-            CheckPointInSector(TCoordinate position) // Calculo si "position" esta dentro de un sector del diagrama
+        public bool CheckPointInSector(TCoordinate position) // Calculo si "position" esta dentro de un sector del diagrama
         {
             if (points == null) return false;
 

@@ -16,8 +16,8 @@ namespace StateMachine.States.RTSStates
         {
             BehaviourActions behaviours = new BehaviourActions();
 
-            Node<Vector2> currentNode = (Node<Vector2>)parameters[0];
-            Node<Vector2> targetNode = (Node<Vector2>)parameters[1];
+            Node<Vector2> currentNode = parameters[0] as Node<Vector2>;
+            Node<Vector2> targetNode = parameters[1] as Node<Vector2>;
             float speed = Convert.ToSingle(parameters[2]);
             bool retreat = (bool)parameters[3];
             Transform position = (Transform)parameters[4];
