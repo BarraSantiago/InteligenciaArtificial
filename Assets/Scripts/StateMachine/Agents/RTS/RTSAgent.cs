@@ -113,7 +113,7 @@ namespace StateMachine.Agents.RTS
                 {
                     Vector2 position = transform.position;
                     targetNode =
-                        voronoi.GetMineCloser(GameManager.graph.coordNodes.Find((nodeVoronoi =>
+                        voronoi.GetMineCloser(GameManager.graph.CoordNodes.Find((nodeVoronoi =>
                             nodeVoronoi.GetCoordinate() == position)));
                     Debug.Log("Walk to " + targetNode.GetCoordinate().x + " - " + targetNode.GetCoordinate().y);
                 });
@@ -140,7 +140,7 @@ namespace StateMachine.Agents.RTS
                 {
                     Vector2 position = transform.position;
                     targetNode =
-                        voronoi.GetMineCloser(GameManager.graph.coordNodes.Find((nodeVoronoi =>
+                        voronoi.GetMineCloser(GameManager.graph.CoordNodes.Find((nodeVoronoi =>
                             nodeVoronoi.GetCoordinate() == position)));
                     Debug.Log("walk to " + targetNode.GetCoordinate().x + " - " + targetNode.GetCoordinate().y);
                 });

@@ -17,7 +17,7 @@ namespace VoronoiDiagram
         private List<TCoordinate> intersections = new List<TCoordinate>();
         private List<Node<TCoordinate>> nodesInsideSector = new List<Node<TCoordinate>>();
         private List<TCoordinate> points;
-        private static readonly TCoordinate WrongPoint;
+        private static TCoordinate WrongPoint;
 
         public Node<CoordinateType> Mine
         {
@@ -26,6 +26,7 @@ namespace VoronoiDiagram
 
         public Sector(Node<CoordinateType> mine)
         {
+            WrongPoint = new TCoordinate();
             WrongPoint.SetCoordinate(-1, -1);
             this.mine = mine;
             //color = Random.ColorHSV();

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,11 +10,12 @@ namespace Pathfinder
         public int cost;
     }
 
-    public abstract class Pathfinder<NodeType> where NodeType : INode
+    public abstract class Pathfinder<NodeType, TCoordinateType> 
+        where NodeType : INode<TCoordinateType>
+        where TCoordinateType : IEquatable<TCoordinateType>
     {
         protected ICollection<NodeType> Graph;
-
-
+        
         public Dictionary<NodeType, List<Transition<NodeType>>> transitions =
             new Dictionary<NodeType, List<Transition<NodeType>>>();
 
@@ -66,7 +68,8 @@ namespace Pathfinder
                     aproxAcumulativeCost += nodes[currentNode].AcumulativeCost;
                     aproxAcumulativeCost += MoveToNeighborCost(currentNode, neighbor);
 
-                    if (openList.Contains(neighbor) && aproxAcumulativeCost >= nodes[neighbor].AcumulativeCost) continue;
+                    if (openList.Contains(neighbor) && aproxAcumulativeCost >= nodes[neighbor].AcumulativeCost)
+                        continue;
 
                     nodes[neighbor] = (currentNode, aproxAcumulativeCost, Distance(neighbor, destinationNode));
 
@@ -100,7 +103,7 @@ namespace Pathfinder
             }
         }
 
-        protected abstract ICollection<NodeType> GetNeighbors(NodeType node);
+        protected abstract ICollection<INode<TCoordinateType>> GetNeighbors(NodeType node);
 
         protected abstract int Distance(NodeType A, NodeType B);
 

@@ -76,7 +76,7 @@ namespace Pathfinder
 
         public Vector2 GetCoordinate()
         {
-            throw new NotImplementedException();
+            return coordinate;
         }
 
         public float Distance(Vector2 b)

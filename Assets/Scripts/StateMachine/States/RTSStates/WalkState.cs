@@ -22,7 +22,7 @@ namespace StateMachine.States.RTSStates
             bool retreat = (bool)parameters[3];
             Transform position = (Transform)parameters[4];
             List<Node<Vector2>> path = (List<Node<Vector2>>)parameters[5];
-            Pathfinder<Node<Vector2>> pathfinder = parameters[6] as Pathfinder<Node<Vector2>>;
+            Pathfinder<Node<Vector2>, Vector2> pathfinder = parameters[6] as Pathfinder<Node<Vector2>, Vector2>;
 
 
             behaviours.AddMultiThreadableBehaviours(0, () =>

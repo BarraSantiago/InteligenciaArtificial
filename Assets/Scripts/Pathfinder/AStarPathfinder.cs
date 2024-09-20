@@ -6,7 +6,7 @@ using Vector2 = Utils.Vec2Int;
 
 namespace Pathfinder
 {
-    public class AStarPathfinder<NodeType, CoordinateType> : Pathfinder<NodeType>
+    public class AStarPathfinder<NodeType, CoordinateType> : Pathfinder<NodeType, CoordinateType>
         where NodeType : INode, INode<CoordinateType>, new()
         where CoordinateType : IEquatable<CoordinateType>
     {
@@ -48,9 +48,9 @@ namespace Pathfinder
             return (int)distance;
         }
 
-        protected override ICollection<NodeType> GetNeighbors(NodeType node)
+        protected override ICollection<INode<CoordinateType>> GetNeighbors(NodeType node)
         {
-            return (ICollection<NodeType>)node.GetNeighbors;
+            return node.GetNeighbors();
         }
 
         public bool Approximately(float a, float b)

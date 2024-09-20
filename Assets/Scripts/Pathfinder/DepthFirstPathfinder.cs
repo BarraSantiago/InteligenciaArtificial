@@ -5,7 +5,10 @@ using Utils;
 
 namespace Pathfinder
 {
-    public class DepthFirstPathfinder<NodeType> : Pathfinder<NodeType> where NodeType : INode, new()
+    public class DepthFirstPathfinder<NodeType,TCoordinateType> : Pathfinder<NodeType,TCoordinateType> 
+        where NodeType : INode<TCoordinateType>, new()
+        where TCoordinateType : IEquatable<TCoordinateType>
+
     {
         public DepthFirstPathfinder(ICollection<NodeType> graph)
         {
@@ -24,28 +27,9 @@ namespace Pathfinder
             return distance;
         }
 
-        protected override ICollection<NodeType> GetNeighbors(NodeType node)
+        protected override ICollection<INode<TCoordinateType>> GetNeighbors(NodeType node)
         {
-            List<NodeType> neighbors = new List<NodeType>();
-
-            Node<Vec2Int> a = node as Node<Vec2Int>;
-
-            var nodeCoor = a.GetCoordinate();
-
-            Graph.ToList().ForEach(neighbor =>
-            {
-                var neighborNode = neighbor as Node<Vec2Int>;
-
-                var neighborCoor = neighborNode.GetCoordinate();
-
-                if ((neighborCoor.x == nodeCoor.x && Math.Abs(neighborCoor.y - nodeCoor.y) == 1) ||
-                    (neighborCoor.y == nodeCoor.y && Math.Abs(neighborCoor.x - nodeCoor.x) == 1))
-                {
-                    neighbors.Add(neighbor);
-                }
-            });
-
-            return neighbors;
+            return node.GetNeighbors();
         }
 
         protected override bool IsBlocked(NodeType node)

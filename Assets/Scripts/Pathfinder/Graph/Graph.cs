@@ -1,21 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Pathfinder
+namespace Pathfinder.Graph
 {
-    public interface CoordXY
-    {
-        float X { get; set; }
-        float Y { get; set; }
-    }
 
-    public abstract class Graph<NodeType, CoordinateNode, CoordinateType>
-        where NodeType : INode, INode<CoordinateType>, new()
-        where CoordinateNode : ICoordinate<CoordinateType>, new()
-        where CoordinateType : IEquatable<CoordinateType>, new()
+    public abstract class Graph<TNodeType, TCoordinateNode, TCoordinateType>
+        where TNodeType : INode<TCoordinateType>, new()
+        where TCoordinateNode : ICoordinate<TCoordinateType>, new()
+        where TCoordinateType : IEquatable<TCoordinateType>, new()
     {
-        public List<CoordinateNode> coordNodes = new List<CoordinateNode>();
-        public List<NodeType> nodesType = new List<NodeType>();
+        public readonly List<TCoordinateNode> CoordNodes = new List<TCoordinateNode>();
+        public readonly List<TNodeType> NodesType = new List<TNodeType>();
 
         public Graph(int x, int y, float cellSize)
         {
@@ -28,26 +23,25 @@ namespace Pathfinder
 
         private void AddNeighbors(float cellSize)
         {
-            ICollection<NodeType> neighbors = new List<NodeType>();
+            List<INode<TCoordinateType>> neighbors = new List<INode<TCoordinateType>>();
 
-            for (int i = 0; i < coordNodes.Count; i++)
+            for (int i = 0; i < CoordNodes.Count; i++)
             {
                 neighbors.Clear();
-                for (int j = 0; j < coordNodes.Count; j++)
+                for (int j = 0; j < CoordNodes.Count; j++)
                 {
                     if (i == j) continue;
-                    if ((Approximately(coordNodes[i].GetX(), coordNodes[j].GetX()) &&
-                         Approximately(Math.Abs(coordNodes[i].GetY() - coordNodes[j].GetY()), cellSize)) ||
-                        (Approximately(coordNodes[i].GetY(), coordNodes[j].GetY()) &&
-                         Approximately(Math.Abs(coordNodes[i].GetX() - coordNodes[j].GetY()), cellSize)) ||
-                        (Approximately(Math.Abs(coordNodes[i].GetY() - coordNodes[j].GetY()), cellSize) &&
-                         Approximately(Math.Abs(coordNodes[i].GetX() - coordNodes[j].GetX()), cellSize)))
+                    if ((Approximately(CoordNodes[i].GetX(), CoordNodes[j].GetX()) &&
+                         Approximately(Math.Abs(CoordNodes[i].GetY() - CoordNodes[j].GetY()), cellSize)) ||
+                        (Approximately(CoordNodes[i].GetY(), CoordNodes[j].GetY()) &&
+                         Approximately(Math.Abs(CoordNodes[i].GetX() - CoordNodes[j].GetY()), cellSize)) ||
+                        (Approximately(Math.Abs(CoordNodes[i].GetY() - CoordNodes[j].GetY()), cellSize) &&
+                         Approximately(Math.Abs(CoordNodes[i].GetX() - CoordNodes[j].GetX()), cellSize)))
                     {
-                        neighbors.Add(nodesType[j]);
+                        neighbors.Add(NodesType[j]);
                     }
                 }
-
-                nodesType[i].GetNeighbors = (ICollection<INode>)neighbors;
+                NodesType[i].SetNeighbors(neighbors);
             }
         }
 

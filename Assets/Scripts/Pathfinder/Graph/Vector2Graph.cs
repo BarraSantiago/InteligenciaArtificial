@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Pathfinder.Graph;
+using UnityEngine;
 
 namespace Pathfinder
 {
@@ -16,11 +17,11 @@ namespace Pathfinder
                 {
                     NodeVoronoi node = new NodeVoronoi();
                     (node).SetCoordinate(i * cellSize, j * cellSize);
-                    coordNodes.Add(node);
+                    CoordNodes.Add(node);
 
                     Node<Vector2> nodeType = new Node<Vector2>();
                     nodeType.SetCoordinate(new Vector2(i*cellSize, j*cellSize));
-                    nodesType.Add(nodeType);
+                    NodesType.Add(nodeType);
                 }
             }
         }
