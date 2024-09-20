@@ -17,5 +17,7 @@ namespace Pathfinder
         public Coordinate GetCoordinate();
         
         public ICollection<INode> GetNeighbors { get; set; }
+        void SetNeighbors(ICollection<INode> neighbors);
+
     }
 }

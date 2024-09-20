@@ -29,13 +29,13 @@ namespace Game
         [SerializeField] private Voronoi<NodeVoronoi, Vector2> voronoi;
         [SerializeField] private bool validate;
 
-        private Graph<Node<Vector2>, NodeVoronoi, Vector2> graph;
+        public static Graph<Node<Vector2>, NodeVoronoi, Vector2> graph;
 
         private void Start()
         {
             if (!Application.isPlaying)
                 return;
-
+            voronoi = new Voronoi<NodeVoronoi, Vector2>();
             MapGenerator<NodeVoronoi, Vector2>.CellSize = nodesSize;
             MapGenerator<NodeVoronoi, Vector2>.MapDimensions = new NodeVoronoi(mapWidth, mapHeight);
             MapGenerator<NodeVoronoi, Vector2>.OriginPosition = new NodeVoronoi(originPosition);
@@ -77,7 +77,7 @@ namespace Game
             agent2.currentNode = graph.nodes[towncenterNode];
             agent2.Init();*/
             //voronoi.Init();
-            //voronoi.SetVoronoi(MapGenerator.Vector2s);
+            voronoi.SetVoronoi(voronoiNodes);
         }
 
         private void OnDrawGizmos()
@@ -86,7 +86,7 @@ namespace Game
                 return;
             voronoi.Draw();
 
-            foreach (Node<Vec2Int> node in graph.coordNodes)
+            foreach (var node in graph.nodesType)
             {
                 Gizmos.color = node.NodeType switch
                 {

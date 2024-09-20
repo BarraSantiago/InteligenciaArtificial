@@ -132,7 +132,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 386067825}
-  - component: {fileID: 386067828}
   - component: {fileID: 386067827}
   m_Layer: 0
   m_Name: Voronoi
@@ -178,20 +177,7 @@ MonoBehaviour:
   minersQuantity: 0
   cartsQuantity: 0
   graphView: {fileID: 0}
-  voronoi: {fileID: 386067828}
   validate: 0
---- !u!114 &386067828
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 386067823}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ff007f61ad29a646937a4548f398f49, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &478465509
 GameObject:
   m_ObjectHideFlags: 0

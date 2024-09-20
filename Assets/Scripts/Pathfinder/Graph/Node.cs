@@ -16,6 +16,7 @@ namespace Pathfinder
     {
         public NodeType NodeType { get; set; }
         private Coordinate coordinate;
+        public ICollection<INode> neighbors;
         public int food;
         public int gold;
         public int zone;
@@ -36,6 +37,10 @@ namespace Pathfinder
         }
 
         public ICollection<INode> GetNeighbors { get; set; }
+        public void SetNeighbors(ICollection<INode> neighbors)
+        {
+            this.neighbors = neighbors;
+        }
 
         public bool EqualsTo(INode<Coordinate> other)
         {

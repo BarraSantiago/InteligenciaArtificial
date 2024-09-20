@@ -31,7 +31,13 @@ namespace StateMachine.Agents.RTS
         protected override void GetFoodTransitions()
         {
             _fsm.SetTransition(Behaviours.GatherResources, Flags.OnFull, Behaviours.Walk,
-                () => { targetNode = MapGenerator.nodes.Find(x => x.NodeType == NodeType.Mine && x.gold > 0); });
+                () =>
+                {
+                    Vector2 position = transform.position;
+                    targetNode =
+                        voronoi.GetMineCloser(GameManager.graph.coordNodes.Find((nodeVoronoi =>
+                            nodeVoronoi.GetCoordinate() == position)));
+                });
         }
 
         protected override void WalkTransitions()
@@ -47,7 +53,10 @@ namespace StateMachine.Agents.RTS
             _fsm.SetTransition(Behaviours.Walk, Flags.OnTargetLost, Behaviours.Walk,
                 () =>
                 {
-                    targetNode = MapGenerator.nodes.Find(x => x.NodeType == NodeType.Mine && x.gold > 0);
+                    Vector2 position = transform.position;
+                    targetNode =
+                        voronoi.GetMineCloser(GameManager.graph.coordNodes.Find((nodeVoronoi =>
+                            nodeVoronoi.GetCoordinate() == position)));
                     Debug.Log("Walk to " + targetNode.GetCoordinate().x + " - " + targetNode.GetCoordinate().y);
                 });
             _fsm.SetTransition(Behaviours.Walk, Flags.OnGather, Behaviours.Deliver,
