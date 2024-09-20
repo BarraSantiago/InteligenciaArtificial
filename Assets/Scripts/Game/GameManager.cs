@@ -46,13 +46,25 @@ namespace Game
             MapGenerator<NodeVoronoi, Vector2>.OriginPosition = new NodeVoronoi(originPosition);
 
 
-            for (int i = 0; i < minesQuantity; i++)
-            {
-                Node<Vector2> node = graph.NodesType[Random.Range(0, graph.CoordNodes.Count)];
-                node.NodeType = NodeType.Mine;
-                node.gold = 100;
-                MapGenerator<NodeVoronoi, Vector2>.mines.Add(node);
-            }
+            //for (int i = 0; i < minesQuantity; i++)
+            //{
+            //    Node<Vector2> node = graph.NodesType[Random.Range(0, graph.CoordNodes.Count)];
+            //    node.NodeType = NodeType.Mine;
+            //    node.gold = 100;
+            //    MapGenerator<NodeVoronoi, Vector2>.mines.Add(node);
+            //}
+            Node<Vector2> node1 = graph.NodesType[69];
+            node1.NodeType = NodeType.Mine;
+            node1.gold = 100;
+            MapGenerator<NodeVoronoi, Vector2>.mines.Add(node1);
+            Node<Vector2> node2 = graph.NodesType[4];
+            node2.NodeType = NodeType.Mine;
+            node2.gold = 100;
+            MapGenerator<NodeVoronoi, Vector2>.mines.Add(node2);
+            Node<Vector2> node3 = graph.NodesType[85];
+            node3.NodeType = NodeType.Mine;
+            node3.gold = 100;
+            MapGenerator<NodeVoronoi, Vector2>.mines.Add(node3);
 
             int towncenterNode = Random.Range(0, graph.CoordNodes.Count);
             graph.NodesType[towncenterNode].NodeType = NodeType.TownCenter;

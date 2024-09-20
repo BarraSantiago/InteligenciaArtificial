@@ -111,12 +111,20 @@ namespace Pathfinder.Voronoi
         // Calculo la interseccion entre 2 segmentos definidos por 4 puntos
         private TCoordinate GetIntersection(Segment<TCoordinate, TCoordinateType> seg1, Segment<TCoordinate, TCoordinateType> seg2)
         {
+            
+            
+            /*
+            Vector2 p1 = seg1.Mediatrix;
+            Vector2 p2 = seg1.Mediatrix + seg1.Direction * MapGenerator.MapDimensions.magnitude; 
+
+            Vector2 p3 = seg2.Mediatrix;
+            Vector2 p4 = seg2.Mediatrix + seg2.Direction * MapGenerator.MapDimensions.magnitude;
+             */
+            
             TCoordinate intersection = new TCoordinate();
             intersection.Zero();
 
-            // Punto medio de seg1
             TCoordinate p1 = seg1.Mediatrix;
-            // Calculo p2 extendiendo el segmento en su direccion por la longitud
             TCoordinate p2 = new TCoordinate();
             p2.SetCoordinate(seg1.Mediatrix.GetCoordinate());
             p2.Add(seg1.Direction.Multiply(MapGenerator<TCoordinate, TCoordinateType>.MapDimensions.GetMagnitude()));
@@ -124,8 +132,7 @@ namespace Pathfinder.Voronoi
             TCoordinate p3 = seg2.Mediatrix;
             TCoordinate p4 = new TCoordinate();
             p4.SetCoordinate(seg2.Mediatrix.GetCoordinate());
-            p4.Add(seg2.Direction.Multiply(MapGenerator<TCoordinate,TCoordinateType>.MapDimensions
-                .GetMagnitude())); // (Magnitud es la longitud del vector)
+            p4.Add(seg2.Direction.Multiply(MapGenerator<TCoordinate,TCoordinateType>.MapDimensions.GetMagnitude()));
 
             // Chequeo si los dos segmentos son paralelos, si es asi no hay interseccion
             if (Approximately((p1.GetX() - p2.GetX()) * (p3.GetY() - p4.GetY()) -

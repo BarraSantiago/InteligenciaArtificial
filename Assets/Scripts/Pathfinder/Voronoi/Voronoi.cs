@@ -26,23 +26,26 @@ namespace Pathfinder.Voronoi
             TCoordinate offset = new TCoordinate();
             offset.SetCoordinate(MapGenerator<TCoordinate, TCoordinateType>.OriginPosition.GetCoordinate());
 
-            TCoordinate coordinate = new TCoordinate();
             
-            coordinate.SetCoordinate(0, mapSize.GetY());
-            coordinate.Add(offset.GetCoordinate());
-            limits.Add(new Limit<TCoordinate, TCoordinateType>(coordinate, Direction.Up));
+            TCoordinate coordinateUp = new TCoordinate();
+            coordinateUp.SetCoordinate(0, mapSize.GetY());
+            coordinateUp.Add(offset.GetCoordinate());
+            limits.Add(new Limit<TCoordinate, TCoordinateType>(coordinateUp, Direction.Up));
             
-            coordinate.SetCoordinate(mapSize.GetX(), 0f);
-            coordinate.Add(offset.GetCoordinate());
-            limits.Add(new Limit<TCoordinate, TCoordinateType>(coordinate, Direction.Down));
+            TCoordinate coordinateDown = new TCoordinate();
+            coordinateDown.SetCoordinate(mapSize.GetX(), 0f);
+            coordinateDown.Add(offset.GetCoordinate());
+            limits.Add(new Limit<TCoordinate, TCoordinateType>(coordinateDown, Direction.Down));
             
-            coordinate.SetCoordinate(mapSize.GetX(), mapSize.GetY());
-            coordinate.Add(offset.GetCoordinate());
-            limits.Add(new Limit<TCoordinate, TCoordinateType>(coordinate, Direction.Right));
+            TCoordinate coordinateRight = new TCoordinate();
+            coordinateRight.SetCoordinate(mapSize.GetX(), mapSize.GetY());
+            coordinateRight.Add(offset.GetCoordinate());
+            limits.Add(new Limit<TCoordinate, TCoordinateType>(coordinateRight, Direction.Right));
             
-            coordinate.SetCoordinate(0, 0);
-            coordinate.Add(offset.GetCoordinate());
-            limits.Add(new Limit<TCoordinate, TCoordinateType>(coordinate, Direction.Left));
+            TCoordinate coordinateLeft = new TCoordinate();
+            coordinateLeft.SetCoordinate(0, 0);
+            coordinateLeft.Add(offset.GetCoordinate());
+            limits.Add(new Limit<TCoordinate, TCoordinateType>(coordinateLeft, Direction.Left));
         }
 
         public void SetVoronoi(List<TCoordinate> goldMines)
