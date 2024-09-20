@@ -32,6 +32,7 @@ namespace Pathfinder.Voronoi
             TCoordinate distance = new TCoordinate();
             distance.SetCoordinate(Math.Abs(position.GetX() - origin.GetX()) * 2f, Math.Abs(position.GetY() - origin.GetY()) * 2f);
             TCoordinate limit = new TCoordinate();
+            limit.SetCoordinate(position.GetCoordinate());
 
             switch (direction)
             {
