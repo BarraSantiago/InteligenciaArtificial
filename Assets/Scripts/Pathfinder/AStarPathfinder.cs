@@ -6,7 +6,9 @@ using Vector2 = Utils.Vec2Int;
 
 namespace Pathfinder
 {
-    public class AStarPathfinder<NodeType> : Pathfinder<NodeType> where NodeType : INode, new()
+    public class AStarPathfinder<NodeType, CoordinateType> : Pathfinder<NodeType>
+        where NodeType : INode, INode<CoordinateType>, new()
+        where CoordinateType : IEquatable<CoordinateType>
     {
         public AStarPathfinder(ICollection<NodeType> graph, int minCost = -1, int maxCost = 3)
         {
@@ -50,10 +52,12 @@ namespace Pathfinder
         {
             return (ICollection<NodeType>)node.GetNeighbors;
         }
+
         public bool Approximately(float a, float b)
         {
             return Math.Abs(a - b) < 1e-6f;
         }
+
         protected override bool IsBlocked(NodeType node)
         {
             return node.IsBlocked();

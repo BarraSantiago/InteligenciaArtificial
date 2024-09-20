@@ -1,9 +1,12 @@
+using System;
 using System.Collections.Generic;
 using Pathfinder;
 
 namespace VoronoiDiagram
 {
-    public class Segment<TCoordinate> where TCoordinate : ICoordinate<TCoordinate>
+    public class Segment<TCoordinate, CoordinateType> 
+        where TCoordinate : ICoordinate<CoordinateType>
+        where CoordinateType : IEquatable<CoordinateType>
     {
         private TCoordinate origin;
         private TCoordinate final;

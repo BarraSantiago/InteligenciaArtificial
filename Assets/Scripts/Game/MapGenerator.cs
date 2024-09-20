@@ -6,7 +6,9 @@ using Utils;
 
 namespace Game
 {
-    public class MapGenerator<TCoordinate> where TCoordinate : ICoordinate<TCoordinate>, IEquatable<TCoordinate>
+    public class MapGenerator<TCoordinate, CoordinateType> 
+        where TCoordinate : ICoordinate<CoordinateType>, IEquatable<TCoordinate>
+        where CoordinateType : IEquatable<CoordinateType>
     {
         [Serializable]
         public class PathNode_Visible
@@ -36,8 +38,8 @@ namespace Game
         //[SerializeField] private UrbanCenter urbanCenterPrefab;
         //private Pathfinding pathfinding;
         //public Pathfinding Pathfinding => pathfinding;
-        public static List<Node<TCoordinate>> mines = new List<Node<TCoordinate>>();
-        public static List<Node<TCoordinate>> nodes = new List<Node<TCoordinate>>();
+        public static List<Node<CoordinateType>> mines = new List<Node<CoordinateType>>();
+        public static List<Node<CoordinateType>> nodes = new List<Node<CoordinateType>>();
         public static List<TCoordinate> TCoordinatesBeingUsed = new List<TCoordinate>();
         public static TCoordinate MapDimensions;
         public static float CellSize;
@@ -123,7 +125,7 @@ namespace Game
             return GO;
         }*/
 
-        public void RemoveEmptyMine(Node<TCoordinate> coordinate)
+        public void RemoveEmptyMine(Node<CoordinateType> coordinate)
         {
             mines.Remove(coordinate);
         }

@@ -11,7 +11,9 @@ namespace VoronoiDiagram
         LEFT
     }
 
-    public class Limit<TCoordinate> where TCoordinate : ICoordinate<TCoordinate>, new()
+    public class Limit<TCoordinate, CoordinateType> 
+        where TCoordinate : ICoordinate<CoordinateType>, new()
+        where CoordinateType : IEquatable<CoordinateType>
     {
         private TCoordinate origin;
         private DIRECTION direction;

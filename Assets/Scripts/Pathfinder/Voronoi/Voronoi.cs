@@ -5,11 +5,12 @@ using Pathfinder;
 
 namespace VoronoiDiagram
 {
-    public class Voronoi<TCoordinate>
-        where TCoordinate : IEquatable<TCoordinate>, ICoordinate<TCoordinate>, new()
+    public class Voronoi<TCoordinate, CoordinateType>
+        where TCoordinate : IEquatable<TCoordinate>, ICoordinate<CoordinateType>, new()
+        where CoordinateType : IEquatable<CoordinateType>
     {
-        private List<Limit<TCoordinate>> limits = new List<Limit<TCoordinate>>();
-        private List<Sector<TCoordinate>> sectors = new List<Sector<TCoordinate>>();
+        private List<Limit<TCoordinate, CoordinateType>> limits = new List<Limit<TCoordinate,CoordinateType>>();
+        private List<Sector<TCoordinate,CoordinateType>> sectors = new List<Sector<TCoordinate,CoordinateType>>();
 
         public void Init()
         {
@@ -20,31 +21,31 @@ namespace VoronoiDiagram
         {
             // Calculo los limites del mapa con sus dimensiones, distancia entre nodos y punto de origen
             TCoordinate mapSize = new TCoordinate();
-            mapSize.SetCoordinate(MapGenerator<TCoordinate>.MapDimensions);
-            mapSize.Multiply(MapGenerator<TCoordinate>.CellSize);
+            mapSize.SetCoordinate(MapGenerator<TCoordinate, CoordinateType>.MapDimensions.GetCoordinate());
+            mapSize.Multiply(MapGenerator<TCoordinate, CoordinateType>.CellSize);
             TCoordinate offset = new TCoordinate();
-            offset.SetCoordinate(MapGenerator<TCoordinate>.OriginPosition);
+            offset.SetCoordinate(MapGenerator<TCoordinate, CoordinateType>.OriginPosition.GetCoordinate());
 
             TCoordinate coordinate = new TCoordinate();
             
             coordinate.SetCoordinate(0, mapSize.GetY());
-            coordinate.Add(offset);
-            limits.Add(new Limit<TCoordinate>(coordinate, DIRECTION.UP));
+            coordinate.Add(offset.GetCoordinate());
+            limits.Add(new Limit<TCoordinate, CoordinateType>(coordinate, DIRECTION.UP));
             
             coordinate.SetCoordinate(mapSize.GetX(), 0f);
-            coordinate.Add(offset);
-            limits.Add(new Limit<TCoordinate>(coordinate, DIRECTION.DOWN));
+            coordinate.Add(offset.GetCoordinate());
+            limits.Add(new Limit<TCoordinate, CoordinateType>(coordinate, DIRECTION.DOWN));
             
             coordinate.SetCoordinate(mapSize.GetX(), mapSize.GetY());
-            coordinate.Add(offset);
-            limits.Add(new Limit<TCoordinate>(coordinate, DIRECTION.RIGHT));
+            coordinate.Add(offset.GetCoordinate());
+            limits.Add(new Limit<TCoordinate, CoordinateType>(coordinate, DIRECTION.RIGHT));
             
             coordinate.SetCoordinate(0, 0);
-            coordinate.Add(offset);
-            limits.Add(new Limit<TCoordinate>(coordinate, DIRECTION.LEFT));
+            coordinate.Add(offset.GetCoordinate());
+            limits.Add(new Limit<TCoordinate, CoordinateType>(coordinate, DIRECTION.LEFT));
         }
 
-        public void SetVoronoi(List<Node<TCoordinate>> goldMines)
+        public void SetVoronoi(List<TCoordinate> goldMines)
         {
             sectors.Clear();
             if (goldMines.Count <= 0) return;
@@ -52,7 +53,9 @@ namespace VoronoiDiagram
             for (int i = 0; i < goldMines.Count; i++)
             {
                 // Agrego las minas de oro como sectores
-                sectors.Add(new Sector<TCoordinate>(goldMines[i]));
+                Node<CoordinateType> node = new Node<CoordinateType>();
+                node.SetCoordinate(goldMines[i].GetCoordinate());
+                sectors.Add(new Sector<TCoordinate, CoordinateType>(node));
             }
 
             for (int i = 0; i < sectors.Count; i++)
@@ -67,7 +70,7 @@ namespace VoronoiDiagram
                 {
                     // Agrego los segmentos entre cada sector (menos entre si mismo)
                     if (i == j) continue;
-                    sectors[i].AddSegment(goldMines[i].GetCoordinate(), goldMines[j].GetCoordinate());
+                    sectors[i].AddSegment(goldMines[i], goldMines[j]);
                 }
             }
 
@@ -78,7 +81,7 @@ namespace VoronoiDiagram
             }
         }
 
-        public Node<TCoordinate> GetMineCloser(TCoordinate agentPosition)
+        public Node<CoordinateType> GetMineCloser(TCoordinate agentPosition)
         {
             // Calculo que mina esta mas cerca a x position
             if (sectors != null)

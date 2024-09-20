@@ -1,5 +1,4 @@
-﻿using System;
-using Pathfinder;
+﻿using Pathfinder;
 using StateMachine.Agents.RTS;
 using UnityEngine;
 using Utils;
@@ -26,45 +25,45 @@ namespace Game
 
         [Header("Setup")]
         [SerializeField] private GraphView graphView;
-        [SerializeField] private Voronoi<NodeVoronoi> voronoi;
+        [SerializeField] private Voronoi<NodeVoronoi, Vector2> voronoi;
         [SerializeField] private bool validate;
         
-        private Vector2IntGraph<Node<NodeVoronoi>> graph;
+        private Graph<Node<Vector2>, NodeVoronoi, Vector2> graph;
         
         private void Start()
         {
             if (!Application.isPlaying)
                 return;
 
-            MapGenerator<NodeVoronoi>.CellSize = nodesSize;
-            MapGenerator<NodeVoronoi>.MapDimensions = new NodeVoronoi(mapWidth, mapHeight);
-            MapGenerator<NodeVoronoi>.OriginPosition = new NodeVoronoi(originPosition);
+            MapGenerator<NodeVoronoi, Vector2>.CellSize = nodesSize;
+            MapGenerator<NodeVoronoi, Vector2>.MapDimensions = new NodeVoronoi(mapWidth, mapHeight);
+            MapGenerator<NodeVoronoi, Vector2>.OriginPosition = new NodeVoronoi(originPosition);
 
-            graph = new Vector2IntGraph<NodeVoronoi>(mapWidth, mapHeight, nodesSize);
+            graph = new Vector2Graph(mapWidth, mapHeight, nodesSize);
 
             for (int i = 0; i < minesQuantity; i++)
             {
-                Node<NodeVoronoi> node = graph.nodes[Random.Range(0, graph.nodes.Count)];
+                Node<Vector2> node = graph.nodesType[Random.Range(0, graph.coordNodes.Count)];
                 node.NodeType = NodeType.Mine;
                 node.gold = 100;
-                MapGenerator<NodeVoronoi>.mines.Add(node);
+                MapGenerator<NodeVoronoi, Vector2>.mines.Add(node);
             }
             
-            int towncenterNode = Random.Range(0, graph.nodes.Count);
-            graph.nodes[towncenterNode].NodeType = NodeType.TownCenter;
+            int towncenterNode = Random.Range(0, graph.coordNodes.Count);
+            graph.nodesType[towncenterNode].NodeType = NodeType.TownCenter;
 
-            MapGenerator<NodeVoronoi>.nodes = graph.nodes;
+            MapGenerator<NodeVoronoi, Vector2>.nodes = graph.nodesType;
 
-            Vector3 townCenterPosition = new Vector3(graph.nodes[towncenterNode].GetCoordinate().x,
-                graph.nodes[towncenterNode].GetCoordinate().y);
+            Vector3 townCenterPosition = new Vector3(graph.coordNodes[towncenterNode].GetCoordinate().x,
+                graph.coordNodes[towncenterNode].GetCoordinate().y);
 
             voronoi.Init();
-            voronoi.SetVoronoi(MapGenerator<NodeVoronoi>.mines);
+            voronoi.SetVoronoi(MapGenerator<NodeVoronoi, Vector2>.mines);
 
             GameObject miner = Instantiate(minerPrefab, townCenterPosition, Quaternion.identity);
             Miner agent = miner.GetComponent<Miner>();
-            agent.currentNode = graph.nodes[towncenterNode];
-            RTSAgent.townCenter = graph.nodes[towncenterNode];
+            agent.currentNode = graph.coordNodes[towncenterNode];
+            RTSAgent.townCenter = graph.coordNodes[towncenterNode];
             agent.voronoi = voronoi;
             agent.Init();
             /*
@@ -82,7 +81,7 @@ namespace Game
                 return;
             voronoi.Draw();
 
-            foreach (Node<Vec2Int> node in graph.nodes)
+            foreach (Node<Vec2Int> node in graph.coordNodes)
             {
                 Gizmos.color = node.NodeType switch
                 {
