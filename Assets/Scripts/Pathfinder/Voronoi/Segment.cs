@@ -16,7 +16,7 @@ namespace Pathfinder.Voronoi
 
         public TCoordinate Mediatrix => mediatrix;
         public TCoordinate Direction => direction;
-        public List<TCoordinate> Intersections { get; } = new List<TCoordinate>();
+        public List<TCoordinate> Intersections { get; } = new();
 
         public Segment(TCoordinate origin, TCoordinate final)
         {

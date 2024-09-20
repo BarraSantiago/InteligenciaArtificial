@@ -1,13 +1,10 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Pathfinder;
 using Pathfinder.Graph;
 using Pathfinder.Voronoi;
 using StateMachine.Agents.RTS;
 using UnityEditor;
 using UnityEngine;
-using Utils;
-using VoronoiDiagram;
 using Random = UnityEngine.Random;
 
 namespace Game

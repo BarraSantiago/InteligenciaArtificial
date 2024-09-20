@@ -10,21 +10,19 @@ namespace Pathfinder.Voronoi
         where TCoordinate : IEquatable<TCoordinate>, ICoordinate<TCoordinateType>, new()
         where TCoordinateType : IEquatable<TCoordinateType>
     {
-        private readonly Node<TCoordinateType> mine;
-
-        private readonly List<Segment<TCoordinate, TCoordinateType>> segments = new List<Segment<TCoordinate, TCoordinateType>>();
-        private readonly List<TCoordinate> intersections = new List<TCoordinate>();
-        private List<Node<TCoordinate>> nodesInsideSector = new List<Node<TCoordinate>>();
+        private readonly List<Segment<TCoordinate, TCoordinateType>> segments = new();
+        private readonly List<TCoordinate> intersections = new();
+        private List<Node<TCoordinate>> nodesInsideSector = new();
         private List<TCoordinate> points;
         private static TCoordinate _wrongPoint;
 
-        public Node<TCoordinateType> Mine => mine;
+        public Node<TCoordinateType> Mine { get; }
 
         public Sector(Node<TCoordinateType> mine)
         {
             _wrongPoint = new TCoordinate();
             _wrongPoint.SetCoordinate(-1, -1);
-            this.mine = mine;
+            this.Mine = mine;
         }
 
         #region SEGMENTS
@@ -35,7 +33,7 @@ namespace Pathfinder.Voronoi
             foreach (var limit in limits)
             {
                 TCoordinate origin = new TCoordinate();
-                origin.SetCoordinate(mine.GetCoordinate()); // Obtengo la posicion de la mina
+                origin.SetCoordinate(Mine.GetCoordinate()); // Obtengo la posicion de la mina
                 TCoordinate final = limit.GetMapLimitPosition(origin); // Obtengo la posicion final del segmento
                 segments.Add(new Segment<TCoordinate, TCoordinateType>(origin, final));
             }

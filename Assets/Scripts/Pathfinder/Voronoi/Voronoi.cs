@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Game;
-using VoronoiDiagram;
 
 namespace Pathfinder.Voronoi
 {
@@ -9,8 +9,8 @@ namespace Pathfinder.Voronoi
         where TCoordinate : IEquatable<TCoordinate>, ICoordinate<TCoordinateType>, new()
         where TCoordinateType : IEquatable<TCoordinateType>
     {
-        private List<Limit<TCoordinate, TCoordinateType>> limits = new List<Limit<TCoordinate,TCoordinateType>>();
-        private List<Sector<TCoordinate,TCoordinateType>> sectors = new List<Sector<TCoordinate,TCoordinateType>>();
+        private readonly List<Limit<TCoordinate, TCoordinateType>> limits = new();
+        private readonly List<Sector<TCoordinate,TCoordinateType>> sectors = new();
 
         public void Init()
         {
@@ -50,18 +50,18 @@ namespace Pathfinder.Voronoi
             sectors.Clear();
             if (goldMines.Count <= 0) return;
 
-            for (int i = 0; i < goldMines.Count; i++)
+            foreach (var mine in goldMines)
             {
                 // Agrego las minas de oro como sectores
                 Node<TCoordinateType> node = new Node<TCoordinateType>();
-                node.SetCoordinate(goldMines[i].GetCoordinate());
+                node.SetCoordinate(mine.GetCoordinate());
                 sectors.Add(new Sector<TCoordinate, TCoordinateType>(node));
             }
 
-            for (int i = 0; i < sectors.Count; i++)
+            foreach (var sector in sectors)
             {
                 // Agrego los limites a cada sector
-                sectors[i].AddSegmentLimits(limits);
+                sector.AddSegmentLimits(limits);
             }
 
             for (int i = 0; i < goldMines.Count; i++)
@@ -74,28 +74,18 @@ namespace Pathfinder.Voronoi
                 }
             }
 
-            for (int i = 0; i < sectors.Count; i++)
+            foreach (var sector in sectors)
             {
                 // Calculo las intersecciones
-                sectors[i].SetIntersections();
+                sector.SetIntersections();
             }
         }
 
         public Node<TCoordinateType> GetMineCloser(TCoordinate agentPosition)
         {
             // Calculo que mina esta mas cerca a x position
-            if (sectors != null)
-            {
-                for (int i = 0; i < sectors.Count; i++)
-                {
-                    if (sectors[i].CheckPointInSector(agentPosition))
-                    {
-                        return sectors[i].Mine;
-                    }
-                }
-            }
-
-            return null;
+            return sectors != null ? (from sector in sectors 
+                where sector.CheckPointInSector(agentPosition) select sector.Mine).FirstOrDefault() : null;
         }
 
         public List<Sector<TCoordinate,TCoordinateType>> SectorsToDraw()
