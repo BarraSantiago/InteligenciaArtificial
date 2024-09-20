@@ -41,13 +41,26 @@ namespace Game
 
             graph = new Vector2IntGraph<Node<Vec2Int>>(mapWidth, mapHeight);
 
-            for (int i = 0; i < minesQuantity; i++)
-            {
-                Node<Vec2Int> node = graph.nodes[Random.Range(0, graph.nodes.Count)];
-                node.NodeType = NodeType.Mine;
-                node.gold = 100;
-                MapGenerator.mines.Add(node);
-            }
+            //for (int i = 0; i < minesQuantity; i++)
+            //{
+            //    Node<Vec2Int> node = graph.nodes[Random.Range(0, graph.nodes.Count)];
+            //    node.NodeType = NodeType.Mine;
+            //    node.gold = 100;
+            //    MapGenerator.mines.Add(node);
+            //}
+            Node<Vec2Int> node1 = graph.nodes[69];
+            node1.NodeType = NodeType.Mine;
+            node1.gold = 100;
+            MapGenerator.mines.Add(node1);
+            Node<Vec2Int> node2 = graph.nodes[4];
+            node2.NodeType = NodeType.Mine;
+            node2.gold = 100;
+            MapGenerator.mines.Add(node2);
+            Node<Vec2Int> node3 = graph.nodes[85];
+            node3.NodeType = NodeType.Mine;
+            node3.gold = 100;
+            MapGenerator.mines.Add(node3);
+            
             
             int towncenterNode = Random.Range(0, graph.nodes.Count);
             graph.nodes[towncenterNode].NodeType = NodeType.TownCenter;
