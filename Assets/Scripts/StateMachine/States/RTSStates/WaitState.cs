@@ -16,26 +16,18 @@ namespace StateMachine.States.RTSStates
             int? food = Convert.ToInt32(parameters[1]);
             int? gold = Convert.ToInt32(parameters[2]);
             Node<Vector2> currentNode = (Node<Vector2>)parameters[3];
-
+            Action OnWait = parameters[4] as Action;
 
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {
-                if (currentNode.NodeType == NodeType.Mine && currentNode.food > 0)
-                {
-                    if (food > 1) return;
-                    food++;
-                    currentNode.food--;
-                }
-
-                if (currentNode.NodeType != NodeType.TownCenter || gold < 15) return;
-
-                currentNode.gold += (int)gold;
-                gold = 0;
+                OnWait?.Invoke();
             });
 
             behaviours.SetTransitionBehaviour(() =>
             {
-                if (food > 0 && !retreat) OnFlag?.Invoke(RTSAgent.Flags.OnGather);
+                if(retreat) return;
+                if (food > 0 && currentNode.NodeType == NodeType.Mine) OnFlag?.Invoke(RTSAgent.Flags.OnGather);
+                if (gold <= 0 && currentNode.NodeType == NodeType.TownCenter) OnFlag?.Invoke(RTSAgent.Flags.OnGather);
             });
 
             return behaviours;

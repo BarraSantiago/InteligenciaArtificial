@@ -9,7 +9,7 @@ namespace StateMachine.States.RTSStates
 {
     public class WalkState : State
     {
-        private int? i = (0);
+        private int i = (0);
 
         public override BehaviourActions GetTickBehaviour(params object[] parameters)
         {
@@ -17,41 +17,23 @@ namespace StateMachine.States.RTSStates
 
             Node<Vector2> currentNode = parameters[0] as Node<Vector2>;
             Node<Vector2> targetNode = parameters[1] as Node<Vector2>;
-            float speed = Convert.ToSingle(parameters[2]);
-            bool retreat = (bool)parameters[3];
-            Transform position = (Transform)parameters[4];
-            List<Node<Vector2>> path = (List<Node<Vector2>>)parameters[5];
-            Pathfinder<Node<Vector2>, Vector2, NodeVoronoi> pathfinder = parameters[6] as Pathfinder<Node<Vector2>, Vector2, NodeVoronoi>;
-
-
+            bool retreat = (bool)parameters[2];
+            Transform position = (Transform)parameters[3];
+            Action onMove = parameters[4] as Action;
+            
             behaviours.AddMainThreadBehaviours(0, () =>
             {
-                if (currentNode == null || targetNode == null || pathfinder == null)
-                {
-                    return;
-                }
-
-                if (currentNode.Equals(targetNode)) return;
-
-                if ((path is null || i >= path.Count) && !currentNode.Equals(targetNode))
-                {
-                    path = pathfinder.FindPath(currentNode, targetNode);
-                }
-
-                if (path.Count <= 0 || i >= path.Count) return;
-
-                currentNode = path[(int)i];
-                i++;
+                onMove?.Invoke();
             });
 
             behaviours.AddMainThreadBehaviours(1, () =>
             {
-                if (currentNode == null || targetNode == null || pathfinder == null)
+                if (currentNode == null || targetNode == null)
                 {
                     Debug.LogError("One or more required parameters are null.");
                     return;
                 }
-                
+
                 position.position = new Vector3(currentNode.GetCoordinate().x, currentNode.GetCoordinate().y);
             });
 
@@ -65,8 +47,7 @@ namespace StateMachine.States.RTSStates
                 }
 
 
-                if (currentNode == null || targetNode == null || pathfinder == null ||
-                    targetNode.NodeType == NodeType.Mine && targetNode.gold <= 0)
+                if (currentNode == null || targetNode == null || targetNode.NodeType == NodeType.Mine && targetNode.gold <= 0)
                 {
                     OnFlag?.Invoke(RTSAgent.Flags.OnTargetLost);
                     i = 0;
@@ -98,7 +79,20 @@ namespace StateMachine.States.RTSStates
 
         public override BehaviourActions GetOnEnterBehaviour(params object[] parameters)
         {
-            return default;
+            BehaviourActions behaviours = new BehaviourActions();
+
+            Node<Vector2> currentNode = parameters[0] as Node<Vector2>;
+            Node<Vector2> targetNode = parameters[1] as Node<Vector2>;
+            List<Node<Vector2>> path = (List<Node<Vector2>>)parameters[2];
+            Pathfinder<Node<Vector2>, Vector2, NodeVoronoi> pathfinder =
+                parameters[3] as Pathfinder<Node<Vector2>, Vector2, NodeVoronoi>;
+
+            behaviours.AddMultiThreadableBehaviours(0, () =>
+            {
+                path = pathfinder.FindPath(currentNode, targetNode);
+            });
+
+            return behaviours;
         }
 
         public override BehaviourActions GetOnExitBehaviour(params object[] parameters)

@@ -22,7 +22,7 @@ namespace StateMachine.States.RTSStates
 
             behaviours.AddMainThreadBehaviours(1, () =>
             {
-                Debug.Log("food: " + onGatherFood);
+                Debug.Log("food: " + food);
             });
 
             behaviours.SetTransitionBehaviour(() =>

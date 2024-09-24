@@ -57,6 +57,8 @@ namespace StateMachine.Agents.RTS
                 () =>
                 {
                     targetNode = townCenter;
+                    _path = _pathfinder.FindPath(currentNode, targetNode);
+                    pathNodeId = 0;
                     Debug.Log("Gold full. Walk to " + targetNode.GetCoordinate().x + " - " + targetNode.GetCoordinate().y);
                 });
         }
