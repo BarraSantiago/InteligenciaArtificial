@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Numerics;
 using Pathfinder;
 using StateMachine.Agents.RTS;
 using States;
-using Utils;
+using UnityEngine;
 
 namespace StateMachine.States.RTSStates
 {
@@ -16,7 +15,7 @@ namespace StateMachine.States.RTSStates
             bool retreat = (bool)parameters[0];
             int? food = Convert.ToInt32(parameters[1]);
             int? gold = Convert.ToInt32(parameters[2]);
-            Node<Vec2Int> currentNode = (Node<Vec2Int>)parameters[3];
+            Node<Vector2> currentNode = (Node<Vector2>)parameters[3];
 
 
             behaviours.AddMultiThreadableBehaviours(0, () =>

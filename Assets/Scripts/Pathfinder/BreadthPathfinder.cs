@@ -1,28 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
-using Utils;
+using UnityEngine;
 
 namespace Pathfinder
 {
-    public class BreadthPathfinder<NodeType, TCoordinateType> : Pathfinder<NodeType,TCoordinateType> 
+    public class BreadthPathfinder<NodeType, TCoordinateType, TCoordinate> : Pathfinder<NodeType,TCoordinateType, TCoordinate> 
         where NodeType : INode<TCoordinateType>, new()
         where TCoordinateType : IEquatable<TCoordinateType>
+        where TCoordinate : ICoordinate<TCoordinateType>, new()
     {
         
         public BreadthPathfinder(ICollection<NodeType> graph)
         {
             this.Graph = graph;
         }
-        protected override int Distance(NodeType A, NodeType B)
+        protected override int Distance(TCoordinate A, TCoordinate B)
         {
-            int distance = 0;
-            Node<Vec2Int> nodeA = A as Node<Vec2Int>;
-            Node<Vec2Int> nodeB = B as Node<Vec2Int>;
+            float distance = 0;
+            Node<Vector2> nodeA = A as Node<Vector2>;
+            Node<Vector2> nodeB = B as Node<Vector2>;
         
             distance += Math.Abs(nodeA.GetCoordinate().x - nodeB.GetCoordinate().x);
             distance += Math.Abs(nodeA.GetCoordinate().y - nodeB.GetCoordinate().y);
 
-            return distance;
+            return (int)distance;
         }
 
         protected override ICollection<INode<TCoordinateType>> GetNeighbors(NodeType node)

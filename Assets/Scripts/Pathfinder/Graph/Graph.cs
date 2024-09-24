@@ -31,20 +31,21 @@ namespace Pathfinder.Graph
                 for (int j = 0; j < CoordNodes.Count; j++)
                 {
                     if (i == j) continue;
-                    if ((Approximately(CoordNodes[i].GetX(), CoordNodes[j].GetX()) &&
+
+                    bool isNeighbor = 
+                        (Approximately(CoordNodes[i].GetX(), CoordNodes[j].GetX()) && 
                          Approximately(Math.Abs(CoordNodes[i].GetY() - CoordNodes[j].GetY()), cellSize)) ||
-                        (Approximately(CoordNodes[i].GetY(), CoordNodes[j].GetY()) &&
-                         Approximately(Math.Abs(CoordNodes[i].GetX() - CoordNodes[j].GetY()), cellSize)) ||
-                        (Approximately(Math.Abs(CoordNodes[i].GetY() - CoordNodes[j].GetY()), cellSize) &&
-                         Approximately(Math.Abs(CoordNodes[i].GetX() - CoordNodes[j].GetX()), cellSize)))
+                        (Approximately(CoordNodes[i].GetY(), CoordNodes[j].GetY()) && 
+                         Approximately(Math.Abs(CoordNodes[i].GetX() - CoordNodes[j].GetX()), cellSize));
+
+                    if (isNeighbor)
                     {
                         neighbors.Add(NodesType[j]);
                     }
                 }
-                NodesType[i].SetNeighbors(neighbors);
+                NodesType[i].SetNeighbors(new List<INode<TCoordinateType>>(neighbors));
             }
         }
-
         public bool Approximately(float a, float b)
         {
             return Math.Abs(a - b) < 1e-6f;

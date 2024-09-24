@@ -3,7 +3,6 @@ using Pathfinder;
 using StateMachine.Agents.RTS;
 using States;
 using UnityEngine;
-using Vector2 = Utils.Vec2Int;
 
 namespace StateMachine.States.RTSStates
 {

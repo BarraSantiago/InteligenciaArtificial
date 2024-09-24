@@ -40,7 +40,7 @@ namespace StateMachine.Agents.RTS
         private int? _currentGold = 0;
         private int? _lastTimeEat = 0;
         protected FSM<Behaviours, Flags> _fsm;
-        protected AStarPathfinder<Node<Vector2>, Vector2> _pathfinder;
+        protected AStarPathfinder<Node<Vector2>, Vector2, NodeVoronoi> _pathfinder;
         protected List<Node<Vector2>> _path;
         private const int GoldPerFood = 3;
         private const int GoldLimit = 15;
@@ -55,9 +55,7 @@ namespace StateMachine.Agents.RTS
         {
             _fsm = new FSM<Behaviours, Flags>();
 
-            //targetNode = voronoi.GetMineCloser(transform.position);
-            _pathfinder = new AStarPathfinder<Node<Vector2>, Vector2>(MapGenerator<NodeVoronoi, Vector2>.nodes, 0, 0);
-            _path = _pathfinder.FindPath(currentNode, targetNode);
+            _pathfinder = new AStarPathfinder<Node<Vector2>, Vector2, NodeVoronoi>(MapGenerator<NodeVoronoi, Vector2>.nodes, 0, 0);
 
             FsmBehaviours();
 
@@ -112,9 +110,9 @@ namespace StateMachine.Agents.RTS
                 () =>
                 {
                     Vector2 position = transform.position;
-                    targetNode =
-                        voronoi.GetMineCloser(GameManager.graph.CoordNodes.Find((nodeVoronoi =>
-                            nodeVoronoi.GetCoordinate() == position)));
+                    Node<Vector2> target = voronoi.GetMineCloser(GameManager.graph.CoordNodes.Find((nodeVoronoi =>
+                        nodeVoronoi.GetCoordinate() == position)));
+                    targetNode = GameManager.graph.NodesType.Find((node => node.GetCoordinate() == target.GetCoordinate()));
                     Debug.Log("Walk to " + targetNode.GetCoordinate().x + " - " + targetNode.GetCoordinate().y);
                 });
 

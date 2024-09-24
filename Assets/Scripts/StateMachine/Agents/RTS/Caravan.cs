@@ -46,8 +46,7 @@ namespace StateMachine.Agents.RTS
                 () =>
                 {
                     targetNode = townCenter;
-                    Debug.Log("Retreat. Walk to " + targetNode.GetCoordinate().x + " - " +
-                              targetNode.GetCoordinate().y);
+                    Debug.Log("Retreat. Walk to " + targetNode.GetCoordinate().x + " - " + targetNode.GetCoordinate().y);
                 });
 
             _fsm.SetTransition(Behaviours.Walk, Flags.OnTargetLost, Behaviours.Walk,
@@ -71,7 +70,6 @@ namespace StateMachine.Agents.RTS
                 () =>
                 {
                     targetNode = townCenter;
-                    _path = _pathfinder.FindPath(currentNode, targetNode);
                     Debug.Log("To town center");
                 });
         }

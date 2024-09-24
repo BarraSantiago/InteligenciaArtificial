@@ -4,7 +4,6 @@ using Pathfinder;
 using StateMachine.Agents.RTS;
 using States;
 using UnityEngine;
-using Vector2 = Utils.Vec2Int;
 
 namespace StateMachine.States.RTSStates
 {
@@ -22,10 +21,10 @@ namespace StateMachine.States.RTSStates
             bool retreat = (bool)parameters[3];
             Transform position = (Transform)parameters[4];
             List<Node<Vector2>> path = (List<Node<Vector2>>)parameters[5];
-            Pathfinder<Node<Vector2>, Vector2> pathfinder = parameters[6] as Pathfinder<Node<Vector2>, Vector2>;
+            Pathfinder<Node<Vector2>, Vector2, NodeVoronoi> pathfinder = parameters[6] as Pathfinder<Node<Vector2>, Vector2, NodeVoronoi>;
 
 
-            behaviours.AddMultiThreadableBehaviours(0, () =>
+            behaviours.AddMainThreadBehaviours(0, () =>
             {
                 if (currentNode == null || targetNode == null || pathfinder == null)
                 {
@@ -85,6 +84,7 @@ namespace StateMachine.States.RTSStates
                         OnFlag?.Invoke(RTSAgent.Flags.OnWait);
                         break;
                     case NodeType.Empty:
+                        break;
                     case NodeType.Blocked:
                     default:
                         throw new ArgumentOutOfRangeException();

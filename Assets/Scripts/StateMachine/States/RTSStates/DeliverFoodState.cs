@@ -2,7 +2,7 @@ using System;
 using Pathfinder;
 using StateMachine.Agents.RTS;
 using States;
-using Utils;
+using UnityEngine;
 
 namespace StateMachine.States.RTSStates
 {
@@ -12,7 +12,7 @@ namespace StateMachine.States.RTSStates
         {
             BehaviourActions behaviours = new BehaviourActions();
             int? food = Convert.ToInt32(parameters[0]);
-            Node<Vec2Int> node = parameters[1] as Node<Vec2Int>;
+            Node<Vector2> node = parameters[1] as Node<Vector2>;
 
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {

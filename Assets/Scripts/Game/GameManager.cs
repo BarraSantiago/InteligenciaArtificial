@@ -24,12 +24,9 @@ namespace Game
         [SerializeField] private int minersQuantity;
         [SerializeField] private int cartsQuantity;
 
-        [Header("Setup")] 
-        [SerializeField] private GraphView graphView;
-        [SerializeField] private bool validate;
 
         public static Graph<Node<Vector2>, NodeVoronoi, Vector2> graph;
-
+        
         private Voronoi<NodeVoronoi, Vector2> voronoi;
         private Color color;
         private void Start()
@@ -48,7 +45,8 @@ namespace Game
 
             for (int i = 0; i < minesQuantity; i++)
             {
-                Node<Vector2> node = graph.NodesType[Random.Range(0, graph.CoordNodes.Count)];
+                int rand = Random.Range(0, graph.CoordNodes.Count);
+                Node<Vector2> node = graph.NodesType[rand];
                 node.NodeType = NodeType.Mine;
                 node.gold = 100;
                 MapGenerator<NodeVoronoi, Vector2>.mines.Add(node);

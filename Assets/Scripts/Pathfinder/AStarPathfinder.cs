@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
-using Vector2 = Utils.Vec2Int;
 
 namespace Pathfinder
 {
-    public class AStarPathfinder<NodeType, CoordinateType> : Pathfinder<NodeType, CoordinateType>
+    public class AStarPathfinder<NodeType, CoordinateType, TCoordinate> : Pathfinder<NodeType, CoordinateType, TCoordinate>
         where NodeType : INode, INode<CoordinateType>, new()
         where CoordinateType : IEquatable<CoordinateType>
+        where TCoordinate : ICoordinate<CoordinateType>, new()
     {
         public AStarPathfinder(ICollection<NodeType> graph, int minCost = -1, int maxCost = 3)
         {
@@ -31,7 +31,7 @@ namespace Pathfinder
             });
         }
 
-        protected override int Distance(NodeType A, NodeType B)
+        protected override int Distance(TCoordinate A, TCoordinate B)
         {
             if (A == null || B == null)
             {
@@ -39,11 +39,9 @@ namespace Pathfinder
             }
 
             float distance = 0;
-            Node<Vector2> nodeA = A as Node<Vector2>;
-            Node<Vector2> nodeB = B as Node<Vector2>;
 
-            distance += Math.Abs(nodeA.GetCoordinate().x - nodeB.GetCoordinate().x);
-            distance += Math.Abs(nodeA.GetCoordinate().y - nodeB.GetCoordinate().y);
+            distance += Math.Abs(A.GetX() - B.GetX());
+            distance += Math.Abs(A.GetY() - B.GetY());
 
             return (int)distance;
         }
@@ -90,18 +88,9 @@ namespace Pathfinder
             if (A == null || B == null)
             {
                 return false;
-            }
-
-            var nodeA = A as Node<Vector2>;
-            var nodeB = B as Node<Vector2>;
-
-            if (nodeA == null || nodeB == null)
-            {
-                return false;
-            }
-
-            return Approximately(nodeA.GetCoordinate().x, nodeB.GetCoordinate().x) &&
-                   Approximately(nodeA.GetCoordinate().y, nodeB.GetCoordinate().y);
+            } 
+            
+            return A.Equals(B);
         }
     }
 }
