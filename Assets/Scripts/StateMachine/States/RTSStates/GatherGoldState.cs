@@ -8,6 +8,7 @@ namespace StateMachine.States.RTSStates
 {
     public class GatherGoldState : State
     {
+        private Action<int> Onmine;
         public override BehaviourActions GetTickBehaviour(params object[] parameters)
         {
             BehaviourActions behaviours = new BehaviourActions();
@@ -15,28 +16,13 @@ namespace StateMachine.States.RTSStates
             bool retreat = Convert.ToBoolean(parameters[0]);
             int? food = Convert.ToInt32(parameters[1]);
             int? gold = Convert.ToInt32(parameters[2]);
-            int? lastTimeEat = Convert.ToInt32(parameters[3]);
-            int goldPerFood = Convert.ToInt32(parameters[4]);
-            int goldLimit = Convert.ToInt32(parameters[5]);
-            Node<Vector2> mine = parameters[6] as Node<Vector2>;
-
+            int goldLimit = Convert.ToInt32(parameters[3]);
+            Action OnMine = parameters[4] as Action;
+            
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {
-                if (food <= 0) return;
-
-                gold++;
-                lastTimeEat++;
-                mine.gold--;
-
-                if (lastTimeEat < goldPerFood) return;
-
-                food--;
-                lastTimeEat = 0;
-
-                if (food > 0 || mine.food <= 0) return;
-
-                food++;
-                mine.food--;
+                OnMine?.Invoke();
+                
             });
             behaviours.AddMainThreadBehaviours(1, () => { Debug.Log("gold: " + gold); });
 

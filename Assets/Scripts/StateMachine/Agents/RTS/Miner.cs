@@ -1,14 +1,37 @@
-﻿using StateMachine.States.RTSStates;
+﻿using System;
+using StateMachine.States.RTSStates;
 using UnityEngine;
 
 namespace StateMachine.Agents.RTS
 {
     public class Miner : RTSAgent
     {
+        public Action OnMine;
         public override void Init()
         {
             base.Init();
             _fsm.ForceTransition(Behaviours.Walk);
+            OnMine += Mine;
+        }
+
+        private void Mine()
+        {
+            if (Food <= 0) return;
+
+            _currentGold++;
+                
+            _lastTimeEat++;
+            currentNode.gold--;
+
+            if (_lastTimeEat < GoldPerFood) return;
+
+            Food--;
+            _lastTimeEat = 0;
+
+            if (Food > 0 || currentNode.food <= 0) return;
+
+            Food++;
+            currentNode.food--;
         }
 
         protected override void FsmTransitions()
@@ -36,6 +59,11 @@ namespace StateMachine.Agents.RTS
                     targetNode = townCenter;
                     Debug.Log("Gold full. Walk to " + targetNode.GetCoordinate().x + " - " + targetNode.GetCoordinate().y);
                 });
+        }
+        
+        protected override object[] GatherTickParameters()
+        {
+            return new object[] {false, Food, _currentGold, GoldLimit, OnMine};
         }
 
         protected override void WalkTransitions()
