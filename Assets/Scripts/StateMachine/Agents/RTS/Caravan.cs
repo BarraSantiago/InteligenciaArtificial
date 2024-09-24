@@ -1,5 +1,6 @@
 using System;
 using Game;
+using Pathfinder;
 using StateMachine.States.RTSStates;
 using UnityEngine;
 
@@ -52,8 +53,9 @@ namespace StateMachine.Agents.RTS
                 () =>
                 {
                     Vector2 position = transform.position;
-                    targetNode = voronoi.GetMineCloser(GameManager.graph.CoordNodes.Find((nodeVoronoi =>
+                    Node<Vector2> target = voronoi.GetMineCloser(GameManager.graph.CoordNodes.Find((nodeVoronoi =>
                         nodeVoronoi.GetCoordinate() == position)));
+                    targetNode = GameManager.graph.NodesType.Find((node => node.GetCoordinate() == target.GetCoordinate()));
                 });
             _fsm.SetTransition(Behaviours.GatherResources, Flags.OnRetreat, Behaviours.Walk,
                 () =>
@@ -78,8 +80,9 @@ namespace StateMachine.Agents.RTS
                 () =>
                 {
                     Vector2 position = transform.position;
-                    targetNode = voronoi.GetMineCloser(GameManager.graph.CoordNodes.Find((nodeVoronoi =>
-                            nodeVoronoi.GetCoordinate() == position)));
+                    Node<Vector2> target = voronoi.GetMineCloser(GameManager.graph.CoordNodes.Find((nodeVoronoi =>
+                        nodeVoronoi.GetCoordinate() == position)));
+                    targetNode = GameManager.graph.NodesType.Find((node => node.GetCoordinate() == target.GetCoordinate()));
                     Debug.Log("Walk to " + targetNode.GetCoordinate().x + " - " + targetNode.GetCoordinate().y);
                 });
             _fsm.SetTransition(Behaviours.Walk, Flags.OnGather, Behaviours.Deliver,
