@@ -73,11 +73,12 @@ namespace Game
             RTSAgent.townCenter = graph.NodesType[towncenterNode];
             agent.voronoi = voronoi;
             agent.Init();
-            /*
+            
             GameObject caravan = Instantiate(caravanPrefab, townCenterPosition, Quaternion.identity);
             Caravan agent2 = caravan.GetComponent<Caravan>();
-            agent2.currentNode = graph.nodes[towncenterNode];
-            agent2.Init();*/
+            agent2.currentNode = graph.NodesType[towncenterNode];
+            agent2.voronoi = voronoi;
+            agent2.Init();
             //voronoi.Init();
             voronoi.SetVoronoi(voronoiNodes);
         }

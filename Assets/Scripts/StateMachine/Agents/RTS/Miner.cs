@@ -6,12 +6,12 @@ namespace StateMachine.Agents.RTS
 {
     public class Miner : RTSAgent
     {
-        public Action OnMine;
+        private Action onMine;
         public override void Init()
         {
             base.Init();
             _fsm.ForceTransition(Behaviours.Walk);
-            OnMine += Mine;
+            onMine += Mine;
         }
 
         private void Mine()
@@ -63,7 +63,7 @@ namespace StateMachine.Agents.RTS
         
         protected override object[] GatherTickParameters()
         {
-            return new object[] {false, Food, _currentGold, GoldLimit, OnMine};
+            return new object[] {false, Food, _currentGold, GoldLimit, onMine};
         }
 
         protected override void WalkTransitions()

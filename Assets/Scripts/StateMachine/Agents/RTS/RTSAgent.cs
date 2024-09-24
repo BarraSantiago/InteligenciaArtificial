@@ -118,8 +118,7 @@ namespace StateMachine.Agents.RTS
                     Vector2 position = transform.position;
                     Node<Vector2> target = voronoi.GetMineCloser(GameManager.graph.CoordNodes.Find((nodeVoronoi =>
                         nodeVoronoi.GetCoordinate() == position)));
-                    targetNode =
-                        GameManager.graph.NodesType.Find((node => node.GetCoordinate() == target.GetCoordinate()));
+                    targetNode = GameManager.graph.NodesType.Find((node => node.GetCoordinate() == target.GetCoordinate()));
                     Debug.Log("Walk to " + targetNode.GetCoordinate().x + " - " + targetNode.GetCoordinate().y);
                 });
 
@@ -162,7 +161,7 @@ namespace StateMachine.Agents.RTS
             return;
         }
 
-        protected virtual object[] GetFoodEnterParameters()
+        protected virtual object[] GetFoodTickParameters()
         {
             object[] objects = { Food, FoodLimit };
             return objects;
