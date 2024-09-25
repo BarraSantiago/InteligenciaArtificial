@@ -8,7 +8,9 @@ namespace Pathfinder
         Empty,
         Blocked,
         Mine,
-        TownCenter
+        TownCenter,
+        Forest,
+        Gravel
     }
 
     public class Node<Coordinate> : INode, INode<Coordinate>, IEquatable<INode<Coordinate>>
@@ -19,7 +21,6 @@ namespace Pathfinder
         public ICollection<INode<Coordinate>> neighbors;
         public int food;
         public int gold;
-        public int zone;
 
         public void SetCoordinate(Coordinate coordinate)
         {
@@ -44,6 +45,11 @@ namespace Pathfinder
         public ICollection<INode<Coordinate>> GetNeighbors()
         {
             return neighbors as ICollection<INode<Coordinate>>;
+        }
+
+        public NodeType GetNodeType()
+        {
+            return NodeType;
         }
 
         public bool EqualsTo(INode<Coordinate> other)

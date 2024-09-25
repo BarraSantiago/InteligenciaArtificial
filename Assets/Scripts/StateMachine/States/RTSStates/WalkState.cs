@@ -81,10 +81,11 @@ namespace StateMachine.States.RTSStates
             List<Node<Vector2>> path = (List<Node<Vector2>>)parameters[2];
             Pathfinder<Node<Vector2>, Vector2, NodeVoronoi> pathfinder =
                 parameters[3] as Pathfinder<Node<Vector2>, Vector2, NodeVoronoi>;
+            RTSAgent.AgentTypes type = (RTSAgent.AgentTypes)parameters[4];
 
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {
-                path = pathfinder.FindPath(currentNode, targetNode);
+                if(currentNode != null && targetNode != null) path = pathfinder.FindPath(currentNode, targetNode, type);
             });
 
             return behaviours;

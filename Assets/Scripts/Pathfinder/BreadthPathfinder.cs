@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using StateMachine.Agents.RTS;
 using UnityEngine;
 
 namespace Pathfinder
@@ -36,7 +37,7 @@ namespace Pathfinder
             return false;
         }
 
-        protected override int MoveToNeighborCost(NodeType A, NodeType B)
+        protected override int MoveToNeighborCost(NodeType A, NodeType B, RTSAgent.AgentTypes type)
         {
             return 0;
         }

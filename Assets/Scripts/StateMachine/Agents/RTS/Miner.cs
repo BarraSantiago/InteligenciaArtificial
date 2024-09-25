@@ -17,6 +17,7 @@ namespace StateMachine.Agents.RTS
         public override void Init()
         {
             base.Init();
+            AgentType = AgentTypes.Miner;
             Fsm.ForceTransition(Behaviours.Walk);
             onMine += Mine;
         }
@@ -45,13 +46,15 @@ namespace StateMachine.Agents.RTS
                 {
                     TargetNode = GetTarget(NodeType.TownCenter);
                     
+                    if(TargetNode == null) return;
+                    
                     Debug.Log("Gold full. Walk to " + TargetNode.GetCoordinate().x + " - " + TargetNode.GetCoordinate().y);
                 });
             Fsm.SetTransition(Behaviours.GatherResources, Flags.OnTargetLost, Behaviours.Walk,
                 () =>
                 {
                     TargetNode = GetTarget();
-                    
+                    if(TargetNode == null) return;
                     Debug.Log("Mine empty. Walk to " + TargetNode.GetCoordinate().x + " - " + TargetNode.GetCoordinate().y);
                 });
         }

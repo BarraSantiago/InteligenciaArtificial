@@ -19,6 +19,8 @@ namespace Pathfinder
         public void SetNeighbors(ICollection<INode<Coordinate>> neighbors);
         
         public ICollection<INode<Coordinate>> GetNeighbors();
+        
+        public NodeType GetNodeType();
 
     }
 }

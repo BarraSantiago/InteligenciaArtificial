@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using StateMachine.Agents.RTS;
 
 namespace Pathfinder
 {
@@ -17,10 +18,7 @@ namespace Pathfinder
     {
         protected ICollection<TNodeType> Graph;
 
-        public Dictionary<TNodeType, List<Transition<TNodeType>>> transitions =
-            new Dictionary<TNodeType, List<Transition<TNodeType>>>();
-
-        public List<TNodeType> FindPath(TNodeType startNode, TNodeType destinationNode)
+        public List<TNodeType> FindPath(TNodeType startNode, TNodeType destinationNode, RTSAgent.AgentTypes agentType)
         {
             Dictionary<TNodeType, (TNodeType Parent, int AcumulativeCost, int Heuristic)> nodes =
                 new Dictionary<TNodeType, (TNodeType Parent, int AcumulativeCost, int Heuristic)>();
@@ -69,7 +67,7 @@ namespace Pathfinder
                     int aproxAcumulativeCost = 0;
 
                     aproxAcumulativeCost += nodes[currentNode].AcumulativeCost;
-                    aproxAcumulativeCost += MoveToNeighborCost(currentNode, neighbor);
+                    aproxAcumulativeCost += MoveToNeighborCost(currentNode, neighbor, agentType);
 
                     if (openList.Contains(neighbor) && aproxAcumulativeCost >= nodes[neighbor].AcumulativeCost)
                         continue;
@@ -115,7 +113,7 @@ namespace Pathfinder
 
         protected abstract bool NodesEquals(TNodeType A, TNodeType B);
 
-        protected abstract int MoveToNeighborCost(TNodeType A, TNodeType B);
+        protected abstract int MoveToNeighborCost(TNodeType A, TNodeType B, RTSAgent.AgentTypes type);
 
         protected abstract bool IsBlocked(TNodeType node);
     }

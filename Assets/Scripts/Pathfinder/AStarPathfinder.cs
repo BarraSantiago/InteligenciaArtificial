@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
+using StateMachine.Agents.RTS;
 
 namespace Pathfinder
 {
@@ -10,25 +9,9 @@ namespace Pathfinder
         where CoordinateType : IEquatable<CoordinateType>
         where TCoordinate : ICoordinate<CoordinateType>, new()
     {
-        public AStarPathfinder(ICollection<NodeType> graph, int minCost = -1, int maxCost = 3)
+        public AStarPathfinder(ICollection<NodeType> graph)
         {
             this.Graph = graph;
-
-            graph.ToList().ForEach(node =>
-            {
-                List<Transition<NodeType>> transitionsList = new List<Transition<NodeType>>();
-
-                List<NodeType> neighbors = GetNeighbors(node) as List<NodeType>;
-                neighbors?.ForEach(neighbor =>
-                {
-                    transitionsList.Add(new Transition<NodeType>
-                    {
-                        to = neighbor,
-                        cost = minCost == 0 && maxCost == 0 ? 0 : RandomNumberGenerator.GetInt32(minCost, maxCost),
-                    });
-                });
-                transitions.Add(node, transitionsList);
-            });
         }
 
         protected override int Distance(TCoordinate A, TCoordinate B)
@@ -50,18 +33,13 @@ namespace Pathfinder
         {
             return node.GetNeighbors();
         }
-
-        public bool Approximately(float a, float b)
-        {
-            return Math.Abs(a - b) < 1e-6f;
-        }
-
+        
         protected override bool IsBlocked(NodeType node)
         {
-            return node.IsBlocked();
+            return node.GetNodeType() == Pathfinder.NodeType.Blocked;
         }
 
-        protected override int MoveToNeighborCost(NodeType A, NodeType B)
+        protected override int MoveToNeighborCost(NodeType A, NodeType B, RTSAgent.AgentTypes type)
         {
             if (!GetNeighbors(A).Contains(B))
             {
@@ -70,15 +48,18 @@ namespace Pathfinder
 
             int cost = 0;
 
-            transitions.TryGetValue(A, out List<Transition<NodeType>> transition);
-
-            transition?.ForEach(t =>
+            switch (type)
             {
-                if (NodesEquals(t.to, B))
-                {
-                    cost = t.cost;
-                }
-            });
+                case RTSAgent.AgentTypes.Miner:
+                    if (B.GetNodeType() == Pathfinder.NodeType.Gravel) cost += 2;
+                    break;
+                case RTSAgent.AgentTypes.Caravan:
+                    if (B.GetNodeType() == Pathfinder.NodeType.Gravel) cost += 1;
+                    break;
+                default:
+                cost = 0;
+                    break;
+            }
 
             return cost;
         }
