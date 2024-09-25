@@ -38,7 +38,7 @@ namespace StateMachine.States.RTSStates
 
             behaviours.SetTransitionBehaviour(() =>
             {
-                if (retreat && targetNode is null || targetNode.NodeType != NodeType.TownCenter)
+                if (retreat && (targetNode is null || targetNode.NodeType != NodeType.TownCenter))
                 {
                     OnFlag?.Invoke(RTSAgent.Flags.OnRetreat);
                     return;
