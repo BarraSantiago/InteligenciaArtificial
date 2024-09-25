@@ -18,6 +18,7 @@ namespace StateMachine.States.RTSStates
             int? gold = Convert.ToInt32(parameters[2]);
             int goldLimit = Convert.ToInt32(parameters[3]);
             Action OnMine = parameters[4] as Action;
+            Node<Vector2> currentNode = parameters[5] as Node<Vector2>;
             
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {
@@ -31,6 +32,7 @@ namespace StateMachine.States.RTSStates
                 if (retreat) OnFlag?.Invoke(RTSAgent.Flags.OnRetreat);
                 if (food <= 0) OnFlag?.Invoke(RTSAgent.Flags.OnHunger);
                 if (gold >= goldLimit) OnFlag?.Invoke(RTSAgent.Flags.OnFull);
+                if(currentNode.gold <= 0) OnFlag?.Invoke(RTSAgent.Flags.OnTargetLost);
             });
 
             return behaviours;

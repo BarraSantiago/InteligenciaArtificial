@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Pathfinder;
 using Pathfinder.Graph;
 using Pathfinder.Voronoi;
@@ -87,8 +86,12 @@ namespace Game
 
         private void RemakeVoronoi()
         {
-            List<NodeVoronoi> voronoiNodes = MapGenerator<NodeVoronoi, Vector2>.mines.Select(t => 
-                graph.CoordNodes.Find(node => node.GetCoordinate() == t.GetCoordinate() && t.gold > 0)).ToList();
+            List<NodeVoronoi> voronoiNodes = new List<NodeVoronoi>();
+            foreach (var mine in MapGenerator<NodeVoronoi, Vector2>.mines)
+            {
+                if(mine.gold > 0)
+                    voronoiNodes.Add(graph.CoordNodes.Find(node => node.GetCoordinate() == mine.GetCoordinate()));
+            }
             voronoi.SetVoronoi(voronoiNodes);
         }
 

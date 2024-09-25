@@ -169,6 +169,16 @@ namespace StateMachine.Agents.RTS
 
                     Debug.Log("walk to " + TargetNode.GetCoordinate().x + " - " + TargetNode.GetCoordinate().y);
                 });
+            _fsm.SetTransition(Behaviours.Wait, Units.Flags.OnTargetLost, Behaviours.Walk,
+                () =>
+                {
+                    Vector2 position = transform.position;
+                    Node<Vector2> target = voronoi.GetMineCloser(GameManager.graph.CoordNodes.Find(nodeVoronoi =>
+                        nodeVoronoi.GetCoordinate() == position));
+                    TargetNode = MapGenerator<NodeVoronoi, Vector2>.nodes.Find(node => node.GetCoordinate() == target.GetCoordinate());
+
+                    Debug.Log("walk to " + TargetNode.GetCoordinate().x + " - " + TargetNode.GetCoordinate().y);
+                });
         }
 
         protected virtual object[] WaitTickParameters()

@@ -27,6 +27,7 @@ namespace StateMachine.States.RTSStates
             {
                 if(retreat) return;
                 if (food > 0 && currentNode.NodeType == NodeType.Mine) OnFlag?.Invoke(RTSAgent.Flags.OnGather);
+                if(currentNode.NodeType == NodeType.Mine && currentNode.gold <= 0) OnFlag?.Invoke(RTSAgent.Flags.OnTargetLost);
                 if (gold <= 0 && currentNode.NodeType == NodeType.TownCenter) OnFlag?.Invoke(RTSAgent.Flags.OnGather);
             });
 
