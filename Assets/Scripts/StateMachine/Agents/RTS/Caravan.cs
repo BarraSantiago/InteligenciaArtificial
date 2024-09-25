@@ -1,6 +1,7 @@
 using System;
 using Game;
 using Pathfinder;
+using Pathfinder.Graph;
 using StateMachine.States.RTSStates;
 using UnityEngine;
 
@@ -14,7 +15,7 @@ namespace StateMachine.Agents.RTS
         public override void Init()
         {
             base.Init();
-            _fsm.ForceTransition(Behaviours.GatherResources);
+            Fsm.ForceTransition(Behaviours.GatherResources);
             onGather += Gather;
             onDeliver += DeliverFood;
         }
@@ -29,14 +30,14 @@ namespace StateMachine.Agents.RTS
             if (Food <= 0) return;
 
             Food--;
-            currentNode.food++;
+            CurrentNode.food++;
         }
 
         protected override void FsmBehaviours()
         {
             base.FsmBehaviours();
-            _fsm.AddBehaviour<GetFoodState>(Behaviours.GatherResources, GetFoodTickParameters);
-            _fsm.AddBehaviour<DeliverFoodState>(Behaviours.Deliver, DeliverTickParameters);
+            Fsm.AddBehaviour<GetFoodState>(Behaviours.GatherResources, GetFoodTickParameters);
+            Fsm.AddBehaviour<DeliverFoodState>(Behaviours.Deliver, DeliverTickParameters);
         }
 
         protected override void FsmTransitions()
@@ -49,19 +50,19 @@ namespace StateMachine.Agents.RTS
 
         protected override void GetFoodTransitions()
         {
-            _fsm.SetTransition(Behaviours.GatherResources, Flags.OnFull, Behaviours.Walk,
+            Fsm.SetTransition(Behaviours.GatherResources, Flags.OnFull, Behaviours.Walk,
                 () =>
                 {
                     Vector2 position = transform.position;
-                    Node<Vector2> target = voronoi.GetMineCloser(GameManager.graph.CoordNodes.Find((nodeVoronoi =>
+                    Node<Vector2> target = Voronoi.GetMineCloser(GameManager.graph.CoordNodes.Find((nodeVoronoi =>
                         nodeVoronoi.GetCoordinate() == position)));
-                    TargetNode = GameManager.graph.NodesType.Find((node => node.GetCoordinate() == target.GetCoordinate()));
+                    TargetNode = Graph<Node<Vector2>, NodeVoronoi, Vector2>.NodesType.Find(node => node.GetCoordinate() == target.GetCoordinate());
                     Debug.Log("Get Food.");
                 });
-            _fsm.SetTransition(Behaviours.GatherResources, Flags.OnRetreat, Behaviours.Walk,
+            Fsm.SetTransition(Behaviours.GatherResources, Flags.OnRetreat, Behaviours.Walk,
                 () =>
                 {
-                    TargetNode = townCenter;
+                    TargetNode = TownCenter;
                     
                     Debug.Log("Retreat. Walk to " + TargetNode.GetCoordinate().x + " - " +
                               TargetNode.GetCoordinate().y);
@@ -70,28 +71,28 @@ namespace StateMachine.Agents.RTS
 
         protected override void WalkTransitions()
         {
-            _fsm.SetTransition(Behaviours.Walk, Flags.OnRetreat, Behaviours.Walk,
+            Fsm.SetTransition(Behaviours.Walk, Flags.OnRetreat, Behaviours.Walk,
                 () =>
                 {
-                    TargetNode = townCenter;
+                    TargetNode = TownCenter;
                     
                     Debug.Log("Retreat. Walk to " + TargetNode.GetCoordinate().x + " - " +
                               TargetNode.GetCoordinate().y);
                 });
 
-            _fsm.SetTransition(Behaviours.Walk, Flags.OnTargetLost, Behaviours.Walk,
+            Fsm.SetTransition(Behaviours.Walk, Flags.OnTargetLost, Behaviours.Walk,
                 () =>
                 {
                     Vector2 position = transform.position;
-                    Node<Vector2> target = voronoi.GetMineCloser(GameManager.graph.CoordNodes.Find((nodeVoronoi =>
+                    Node<Vector2> target = Voronoi.GetMineCloser(GameManager.graph.CoordNodes.Find((nodeVoronoi =>
                         nodeVoronoi.GetCoordinate() == position)));
-                    TargetNode = GameManager.graph.NodesType.Find((node => node.GetCoordinate() == target.GetCoordinate()));
+                    TargetNode = Graph<Node<Vector2>, NodeVoronoi, Vector2>.NodesType.Find(node => node.GetCoordinate() == target.GetCoordinate());
                     
                     Debug.Log("Walk to " + TargetNode.GetCoordinate().x + " - " + TargetNode.GetCoordinate().y);
                 });
-            _fsm.SetTransition(Behaviours.Walk, Flags.OnGather, Behaviours.Deliver,
+            Fsm.SetTransition(Behaviours.Walk, Flags.OnGather, Behaviours.Deliver,
                 () => Debug.Log("Deliver food"));
-            _fsm.SetTransition(Behaviours.Walk, Flags.OnWait, Behaviours.GatherResources,
+            Fsm.SetTransition(Behaviours.Walk, Flags.OnWait, Behaviours.GatherResources,
                 () => Debug.Log("Deliver food"));
         }
 
@@ -102,22 +103,22 @@ namespace StateMachine.Agents.RTS
 
         protected override object[] GatherTickParameters()
         {
-            return new object[] { retreat, Food, _currentGold, GoldLimit, onGather };
+            return new object[] { retreat, Food, CurrentGold, GoldLimit, onGather };
         }
 
         protected override void DeliverTransitions()
         {
-            _fsm.SetTransition(Behaviours.Deliver, Flags.OnHunger, Behaviours.Walk,
+            Fsm.SetTransition(Behaviours.Deliver, Flags.OnHunger, Behaviours.Walk,
                 () =>
                 {
-                    TargetNode = townCenter;
+                    TargetNode = TownCenter;
                     
                     Debug.Log("To town center");
                 });
-            _fsm.SetTransition(Behaviours.Deliver, Flags.OnRetreat, Behaviours.Walk,
+            Fsm.SetTransition(Behaviours.Deliver, Flags.OnRetreat, Behaviours.Walk,
                 () =>
                 {
-                    TargetNode = townCenter;
+                    TargetNode = TownCenter;
                     
                     Debug.Log("Retreat. Walk to " + TargetNode.GetCoordinate().x + " - " +
                               TargetNode.GetCoordinate().y);

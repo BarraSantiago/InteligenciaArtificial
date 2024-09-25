@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Game;
+using Pathfinder.Graph;
 
 namespace Pathfinder.Voronoi
 {
     public class Voronoi<TCoordinate, TCoordinateType>
         where TCoordinate : IEquatable<TCoordinate>, ICoordinate<TCoordinateType>, new()
-        where TCoordinateType : IEquatable<TCoordinateType>
+        where TCoordinateType : IEquatable<TCoordinateType>, new()
     {
         private readonly List<Limit<TCoordinate, TCoordinateType>> limits = new();
         private readonly List<Sector<TCoordinate,TCoordinateType>> sectors = new();
@@ -21,10 +22,10 @@ namespace Pathfinder.Voronoi
         {
             // Calculo los limites del mapa con sus dimensiones, distancia entre nodos y punto de origen
             TCoordinate mapSize = new TCoordinate();
-            mapSize.SetCoordinate(MapGenerator<TCoordinate, TCoordinateType>.MapDimensions.GetCoordinate());
-            mapSize.Multiply(MapGenerator<TCoordinate, TCoordinateType>.CellSize);
+            mapSize.SetCoordinate(Graph<Node<TCoordinateType>, TCoordinate, TCoordinateType>.MapDimensions.GetCoordinate());
+            mapSize.Multiply(Graph<Node<TCoordinateType>, TCoordinate, TCoordinateType>.CellSize);
             TCoordinate offset = new TCoordinate();
-            offset.SetCoordinate(MapGenerator<TCoordinate, TCoordinateType>.OriginPosition.GetCoordinate());
+            offset.SetCoordinate(Graph<Node<TCoordinateType>, TCoordinate, TCoordinateType>.OriginPosition.GetCoordinate());
 
             
             TCoordinate coordinateUp = new TCoordinate();

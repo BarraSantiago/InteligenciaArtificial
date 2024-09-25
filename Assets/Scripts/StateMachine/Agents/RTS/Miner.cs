@@ -1,6 +1,7 @@
 ﻿using System;
 using Game;
 using Pathfinder;
+using Pathfinder.Graph;
 using StateMachine.States.RTSStates;
 using UnityEngine;
 
@@ -14,29 +15,29 @@ namespace StateMachine.Agents.RTS
         public override void Init()
         {
             base.Init();
-            _fsm.ForceTransition(Behaviours.Walk);
+            Fsm.ForceTransition(Behaviours.Walk);
             onMine += Mine;
         }
 
         private void Mine()
         {
-            if (Food <= 0 || currentNode.gold <= 0) return;
+            if (Food <= 0 || CurrentNode.gold <= 0) return;
 
-            _currentGold++;
+            CurrentGold++;
 
-            _lastTimeEat++;
-            currentNode.gold--;
-            if (currentNode.gold <= 0) OnEmptyMine?.Invoke();
+            LastTimeEat++;
+            CurrentNode.gold--;
+            if (CurrentNode.gold <= 0) OnEmptyMine?.Invoke();
 
-            if (_lastTimeEat < GoldPerFood) return;
+            if (LastTimeEat < GoldPerFood) return;
 
             Food--;
-            _lastTimeEat = 0;
+            LastTimeEat = 0;
 
-            if (Food > 0 || currentNode.food <= 0) return;
+            if (Food > 0 || CurrentNode.food <= 0) return;
 
             Food++;
-            currentNode.food--;
+            CurrentNode.food--;
         }
 
         protected override void FsmTransitions()
@@ -49,29 +50,29 @@ namespace StateMachine.Agents.RTS
         protected override void FsmBehaviours()
         {
             base.FsmBehaviours();
-            _fsm.AddBehaviour<GatherGoldState>(Behaviours.GatherResources, GatherTickParameters);
+            Fsm.AddBehaviour<GatherGoldState>(Behaviours.GatherResources, GatherTickParameters);
         }
 
         protected override void GatherTransitions()
         {
             base.GatherTransitions();
-            _fsm.SetTransition(Behaviours.GatherResources, Flags.OnHunger, Behaviours.Wait,
+            Fsm.SetTransition(Behaviours.GatherResources, Flags.OnHunger, Behaviours.Wait,
                 () => Debug.Log("Wait"));
 
-            _fsm.SetTransition(Behaviours.GatherResources, Flags.OnFull, Behaviours.Walk,
+            Fsm.SetTransition(Behaviours.GatherResources, Flags.OnFull, Behaviours.Walk,
                 () =>
                 {
-                    TargetNode = townCenter;
+                    TargetNode = TownCenter;
 
                     Debug.Log("Gold full. Walk to " + TargetNode.GetCoordinate().x + " - " + TargetNode.GetCoordinate().y);
                 });
-            _fsm.SetTransition(Behaviours.GatherResources, Flags.OnTargetLost, Behaviours.Walk,
+            Fsm.SetTransition(Behaviours.GatherResources, Flags.OnTargetLost, Behaviours.Walk,
                 () =>
                 {
                     Vector2 position = transform.position;
-                    Node<Vector2> target = voronoi.GetMineCloser(GameManager.graph.CoordNodes.Find(nodeVoronoi =>
+                    Node<Vector2> target = Voronoi.GetMineCloser(GameManager.graph.CoordNodes.Find(nodeVoronoi =>
                         nodeVoronoi.GetCoordinate() == position));
-                    TargetNode = MapGenerator<NodeVoronoi, Vector2>.nodes.Find(node => node.GetCoordinate() == target.GetCoordinate());
+                    TargetNode = Graph<Node<Vector2>, NodeVoronoi, Vector2>.NodesType.Find(node => node.GetCoordinate() == target.GetCoordinate());
 
                     Debug.Log("Mine empty. Walk to " + TargetNode.GetCoordinate().x + " - " + TargetNode.GetCoordinate().y);
                 });
@@ -79,13 +80,13 @@ namespace StateMachine.Agents.RTS
 
         protected override object[] GatherTickParameters()
         {
-            return new object[] { false, Food, _currentGold, GoldLimit, onMine, currentNode };
+            return new object[] { false, Food, CurrentGold, GoldLimit, onMine, CurrentNode };
         }
 
         protected override void WalkTransitions()
         {
             base.WalkTransitions();
-            _fsm.SetTransition(Behaviours.Walk, Flags.OnGather, Behaviours.GatherResources,
+            Fsm.SetTransition(Behaviours.Walk, Flags.OnGather, Behaviours.GatherResources,
                 () => Debug.Log("Gather gold"));
         }
     }

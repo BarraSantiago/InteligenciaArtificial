@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Game;
 using Pathfinder;
+using Pathfinder.Graph;
 using Pathfinder.Voronoi;
 using StateMachine.States.RTSStates;
 using UnityEngine;
@@ -29,51 +30,50 @@ namespace StateMachine.Agents.RTS
             Deliver
         }
 
-        public static Node<Vector2> townCenter;
+        public static Node<Vector2> TownCenter;
 
         public bool retreat;
-        public Node<Vector2> currentNode;
+        public Node<Vector2> CurrentNode;
+        public Voronoi<NodeVoronoi, Vector2> Voronoi;
 
-        private Node<Vector2> targetNode;
+        protected FSM<Behaviours, Flags> Fsm;
+        protected AStarPathfinder<Node<Vector2>, Vector2, NodeVoronoi> Pathfinder;
 
+        protected List<Node<Vector2>> Path;
         protected Node<Vector2> TargetNode
         {
             get => targetNode;
             set
             {
                 targetNode = value;
-                _path = _pathfinder.FindPath(currentNode, TargetNode);
-                pathNodeId = 0;
+                Path = Pathfinder.FindPath(CurrentNode, TargetNode);
+                PathNodeId = 0;
             }
         }
 
-        public Voronoi<NodeVoronoi, Vector2> voronoi;
-
-        //private Func<int> gold;
-
         protected Action OnMove;
         protected Action OnWait;
-        protected int? Food = (3);
-        protected int? _currentGold = 0;
-        protected int? _lastTimeEat = 0;
-        protected FSM<Behaviours, Flags> _fsm;
-        protected AStarPathfinder<Node<Vector2>, Vector2, NodeVoronoi> _pathfinder;
-        protected List<Node<Vector2>> _path;
+        
+        protected int Food = 3;
+        protected int CurrentGold = 0;
+        protected int LastTimeEat = 0;
         protected const int GoldPerFood = 3;
         protected const int GoldLimit = 15;
         protected const int FoodLimit = 10;
-        protected int pathNodeId;
+        protected int PathNodeId;
 
+        private Node<Vector2> targetNode;
+        
         private void Update()
         {
-            _fsm.Tick();
+            Fsm.Tick();
         }
 
         public virtual void Init()
         {
-            _fsm = new FSM<Behaviours, Flags>();
+            Fsm = new FSM<Behaviours, Flags>();
 
-            _pathfinder = new AStarPathfinder<Node<Vector2>, Vector2, NodeVoronoi>(MapGenerator<NodeVoronoi, Vector2>.nodes, 0, 0);
+            Pathfinder = new AStarPathfinder<Node<Vector2>, Vector2, NodeVoronoi>(Graph<Node<Vector2>, NodeVoronoi, Vector2>.NodesType, 0, 0);
             
             OnMove += Move;
             OnWait += Wait;
@@ -97,16 +97,16 @@ namespace StateMachine.Agents.RTS
 
         protected virtual void FsmBehaviours()
         {
-            _fsm.AddBehaviour<WaitState>(Behaviours.Wait, WaitTickParameters);
-            _fsm.AddBehaviour<WalkState>(Behaviours.Walk, WalkTickParameters, WalkEnterParameters);
+            Fsm.AddBehaviour<WaitState>(Behaviours.Wait, WaitTickParameters);
+            Fsm.AddBehaviour<WalkState>(Behaviours.Walk, WalkTickParameters, WalkEnterParameters);
         }
 
         protected virtual void GatherTransitions()
         {
-            _fsm.SetTransition(Behaviours.GatherResources, Flags.OnRetreat, Behaviours.Walk,
+            Fsm.SetTransition(Behaviours.GatherResources, Flags.OnRetreat, Behaviours.Walk,
                 () =>
                 {
-                    TargetNode = townCenter;
+                    TargetNode = TownCenter;
                     
                     Debug.Log("Retreat to " + TargetNode.GetCoordinate().x + " - " + TargetNode.GetCoordinate().y);
                 });
@@ -115,67 +115,67 @@ namespace StateMachine.Agents.RTS
 
         protected virtual object[] GatherTickParameters()
         {
-            object[] objects = { retreat, Food, _currentGold, GoldLimit };
+            object[] objects = { retreat, Food, CurrentGold, GoldLimit };
             return objects;
         }
 
 
         protected virtual void WalkTransitions()
         {
-            _fsm.SetTransition(Behaviours.Walk, Flags.OnRetreat, Behaviours.Walk,
+            Fsm.SetTransition(Behaviours.Walk, Flags.OnRetreat, Behaviours.Walk,
                 () =>
                 {
-                    TargetNode = townCenter;
+                    TargetNode = TownCenter;
                    
                     Debug.Log("Retreat. Walk to " + TargetNode.GetCoordinate().x + " - " +
                               TargetNode.GetCoordinate().y);
                 });
 
-            _fsm.SetTransition(Behaviours.Walk, Flags.OnTargetLost, Behaviours.Walk,
+            Fsm.SetTransition(Behaviours.Walk, Flags.OnTargetLost, Behaviours.Walk,
                 () =>
                 {
                     Vector2 position = transform.position;
-                    Node<Vector2> target = voronoi.GetMineCloser(GameManager.graph.CoordNodes.Find(nodeVoronoi =>
+                    Node<Vector2> target = Voronoi.GetMineCloser(GameManager.graph.CoordNodes.Find(nodeVoronoi =>
                         nodeVoronoi.GetCoordinate() == position));
-                    TargetNode = MapGenerator<NodeVoronoi, Vector2>.nodes.Find(node => node.GetCoordinate() == target.GetCoordinate());
+                    TargetNode = Graph<Node<Vector2>, NodeVoronoi, Vector2>.NodesType.Find(node => node.GetCoordinate() == target.GetCoordinate());
                    
                     Debug.Log("Walk to " + TargetNode.GetCoordinate().x + " - " + TargetNode.GetCoordinate().y);
                 });
 
-            _fsm.SetTransition(Behaviours.Walk, Flags.OnWait, Behaviours.Wait, () => Debug.Log("Wait"));
+            Fsm.SetTransition(Behaviours.Walk, Flags.OnWait, Behaviours.Wait, () => Debug.Log("Wait"));
         }
 
         protected virtual object[] WalkTickParameters()
         {
-            object[] objects = { currentNode, TargetNode, retreat, transform, OnMove };
+            object[] objects = { CurrentNode, TargetNode, retreat, transform, OnMove };
             return objects;
         }
 
         protected virtual object[] WalkEnterParameters()
         {
-            object[] objects = { currentNode, TargetNode, _path, _pathfinder };
+            object[] objects = { CurrentNode, TargetNode, Path, Pathfinder };
             return objects;
         }
 
         protected virtual void WaitTransitions()
         {
-            _fsm.SetTransition(Behaviours.Wait, Flags.OnGather, Behaviours.Walk,
+            Fsm.SetTransition(Behaviours.Wait, Flags.OnGather, Behaviours.Walk,
                 () =>
                 {
                     Vector2 position = transform.position;
-                    Node<Vector2> target = voronoi.GetMineCloser(GameManager.graph.CoordNodes.Find(nodeVoronoi =>
+                    Node<Vector2> target = Voronoi.GetMineCloser(GameManager.graph.CoordNodes.Find(nodeVoronoi =>
                         nodeVoronoi.GetCoordinate() == position));
-                    TargetNode = MapGenerator<NodeVoronoi, Vector2>.nodes.Find(node => node.GetCoordinate() == target.GetCoordinate());
+                    TargetNode = Graph<Node<Vector2>, NodeVoronoi, Vector2>.NodesType.Find(node => node.GetCoordinate() == target.GetCoordinate());
 
                     Debug.Log("walk to " + TargetNode.GetCoordinate().x + " - " + TargetNode.GetCoordinate().y);
                 });
-            _fsm.SetTransition(Behaviours.Wait, Units.Flags.OnTargetLost, Behaviours.Walk,
+            Fsm.SetTransition(Behaviours.Wait, Units.Flags.OnTargetLost, Behaviours.Walk,
                 () =>
                 {
                     Vector2 position = transform.position;
-                    Node<Vector2> target = voronoi.GetMineCloser(GameManager.graph.CoordNodes.Find(nodeVoronoi =>
+                    Node<Vector2> target = Voronoi.GetMineCloser(GameManager.graph.CoordNodes.Find(nodeVoronoi =>
                         nodeVoronoi.GetCoordinate() == position));
-                    TargetNode = MapGenerator<NodeVoronoi, Vector2>.nodes.Find(node => node.GetCoordinate() == target.GetCoordinate());
+                    TargetNode = Graph<Node<Vector2>, NodeVoronoi, Vector2>.NodesType.Find(node => node.GetCoordinate() == target.GetCoordinate());
 
                     Debug.Log("walk to " + TargetNode.GetCoordinate().x + " - " + TargetNode.GetCoordinate().y);
                 });
@@ -183,7 +183,7 @@ namespace StateMachine.Agents.RTS
 
         protected virtual object[] WaitTickParameters()
         {
-            object[] objects = { retreat, Food, _currentGold, currentNode, OnWait};
+            object[] objects = { retreat, Food, CurrentGold, CurrentNode, OnWait};
             return objects;
         }
 
@@ -205,33 +205,33 @@ namespace StateMachine.Agents.RTS
         
         private void Move()
         {
-            if (currentNode == null || TargetNode == null)
+            if (CurrentNode == null || TargetNode == null)
             {
                 return;
             }
 
-            if (currentNode.Equals(TargetNode)) return;
+            if (CurrentNode.Equals(TargetNode)) return;
 
-            if (_path.Count <= 0) return;
-            if(pathNodeId > _path.Count) pathNodeId = 0;
+            if (Path.Count <= 0) return;
+            if(PathNodeId > Path.Count) PathNodeId = 0;
 
-            currentNode = _path[pathNodeId];
-            pathNodeId++;
+            CurrentNode = Path[PathNodeId];
+            PathNodeId++;
         }
 
         private void Wait()
         {
-            if (currentNode.NodeType == NodeType.Mine && currentNode.food > 0)
+            if (CurrentNode.NodeType == NodeType.Mine && CurrentNode.food > 0)
             {
                 if (Food > 1) return;
                 Food++;
-                currentNode.food--;
+                CurrentNode.food--;
             }
 
-            if (currentNode.NodeType != NodeType.TownCenter || _currentGold < 1) return;
+            if (CurrentNode.NodeType != NodeType.TownCenter || CurrentGold < 1) return;
 
-            currentNode.gold++;
-            _currentGold--;
+            CurrentNode.gold++;
+            CurrentGold--;
         }
     }
 }

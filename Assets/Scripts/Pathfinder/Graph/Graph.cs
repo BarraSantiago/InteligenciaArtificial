@@ -10,15 +10,24 @@ namespace Pathfinder.Graph
         where TCoordinateType : IEquatable<TCoordinateType>, new()
     {
         public readonly List<TCoordinateNode> CoordNodes = new List<TCoordinateNode>();
-        public readonly List<TNodeType> NodesType = new List<TNodeType>();
+        public static readonly List<TNodeType> NodesType = new List<TNodeType>();
+        public static List<Node<TCoordinateType>> mines = new List<Node<TCoordinateType>>();
 
+        public static TCoordinateNode MapDimensions;
+        public static float CellSize;
+        public static TCoordinateNode OriginPosition;
+        
         public Graph(int x, int y, float cellSize)
         {
+            MapDimensions = new TCoordinateNode();
+            MapDimensions.SetCoordinate(x,y);
+            CellSize = cellSize;
+            
             CreateGraph(x, y, cellSize);
 
             AddNeighbors(cellSize);
         }
-
+        
         public abstract void CreateGraph(int x, int y, float cellSize);
 
         private void AddNeighbors(float cellSize)
