@@ -42,11 +42,10 @@ namespace Pathfinder.Graph
                     if (i == j) continue;
 
                     bool isNeighbor = 
-                        (Approximately(CoordNodes[i].GetX(), CoordNodes[j].GetX()) && 
-                         Approximately(Math.Abs(CoordNodes[i].GetY() - CoordNodes[j].GetY()), cellSize)) ||
-                        (Approximately(CoordNodes[i].GetY(), CoordNodes[j].GetY()) && 
-                         Approximately(Math.Abs(CoordNodes[i].GetX() - CoordNodes[j].GetX()), cellSize));
-
+                        (Approximately(CoordNodes[i].GetX(), CoordNodes[j].GetX()) && Approximately(Math.Abs(CoordNodes[i].GetY() - CoordNodes[j].GetY()), cellSize)) ||
+                        (Approximately(CoordNodes[i].GetY(), CoordNodes[j].GetY()) && Approximately(Math.Abs(CoordNodes[i].GetX() - CoordNodes[j].GetX()), cellSize)) ||
+                        (Approximately(Math.Abs(CoordNodes[i].GetX() - CoordNodes[j].GetX()), cellSize) && Approximately(Math.Abs(CoordNodes[i].GetY() - CoordNodes[j].GetY()), cellSize));
+                    
                     if (isNeighbor)
                     {
                         neighbors.Add(NodesType[j]);
