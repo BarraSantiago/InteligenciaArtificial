@@ -11,6 +11,8 @@ namespace StateMachine.Agents.RTS
     {
         private Action onMine;
         public static Action OnEmptyMine;
+        public static Action<Node<Vector2>> OnReachMine;
+        public static Action<Node<Vector2>> OnLeaveMine;
 
         public override void Init()
         {
@@ -50,7 +52,7 @@ namespace StateMachine.Agents.RTS
         protected override void FsmBehaviours()
         {
             base.FsmBehaviours();
-            Fsm.AddBehaviour<GatherGoldState>(Behaviours.GatherResources, GatherTickParameters);
+            Fsm.AddBehaviour<GatherGoldState>(Behaviours.GatherResources, GatherTickParameters, GatherEnterParameters, GatherLeaveParameters);
         }
 
         protected override void GatherTransitions()
@@ -80,7 +82,17 @@ namespace StateMachine.Agents.RTS
 
         protected override object[] GatherTickParameters()
         {
-            return new object[] { false, Food, CurrentGold, GoldLimit, onMine, CurrentNode };
+            return new object[] { Retreat, Food, CurrentGold, GoldLimit, onMine, CurrentNode };
+        }
+        
+        protected object[] GatherEnterParameters()
+        {
+            return new object[] { OnReachMine, CurrentNode };
+        }
+        
+        protected object[] GatherLeaveParameters()
+        {
+            return new object[] {OnLeaveMine, CurrentNode };
         }
 
         protected override void WalkTransitions()
