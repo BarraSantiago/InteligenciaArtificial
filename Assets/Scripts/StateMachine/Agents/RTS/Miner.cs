@@ -51,7 +51,7 @@ namespace StateMachine.Agents.RTS
                 () =>
                 {
                     TargetNode = GetTarget();
-
+                    
                     Debug.Log("Mine empty. Walk to " + TargetNode.GetCoordinate().x + " - " + TargetNode.GetCoordinate().y);
                 });
         }

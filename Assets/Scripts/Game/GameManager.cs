@@ -136,6 +136,10 @@ namespace Game
         private void RemakeVoronoi()
         {
             List<NodeVoronoi> voronoiNodes = new List<NodeVoronoi>();
+            Graph<Node<Vector2>, NodeVoronoi, Vector2>.NodesType.ForEach(node =>
+            {
+                if (node.NodeType == NodeType.Mine && node.gold <= 0) node.NodeType = NodeType.Empty;
+            });
             foreach (var mine in Graph<Node<Vector2>, NodeVoronoi, Vector2>.mines)
             {
                 if (mine.gold > 0)

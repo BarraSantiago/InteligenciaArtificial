@@ -17,20 +17,39 @@ namespace StateMachine.States.RTSStates
             int? gold = Convert.ToInt32(parameters[2]);
             Node<Vector2> currentNode = (Node<Vector2>)parameters[3];
             Action OnWait = parameters[4] as Action;
-            
-            
-            behaviours.AddMultiThreadableBehaviours(0, () =>
-            {
-                OnWait?.Invoke();
-            });
+
+
+            behaviours.AddMultiThreadableBehaviours(0, () => { OnWait?.Invoke(); });
 
             behaviours.SetTransitionBehaviour(() =>
             {
-                if(retreat && currentNode.NodeType != NodeType.TownCenter) OnFlag?.Invoke(RTSAgent.Flags.OnRetreat);
-                if(retreat) return;
-                if (food > 0 && currentNode.NodeType == NodeType.Mine) OnFlag?.Invoke(RTSAgent.Flags.OnGather);
-                if(currentNode.NodeType == NodeType.Mine && currentNode.gold <= 0) OnFlag?.Invoke(RTSAgent.Flags.OnTargetLost);
-                if (gold <= 0 && currentNode.NodeType == NodeType.TownCenter) OnFlag?.Invoke(RTSAgent.Flags.OnGather);
+                if (retreat)
+                {
+                    if (currentNode.NodeType != NodeType.TownCenter)
+                    {
+                        OnFlag?.Invoke(RTSAgent.Flags.OnRetreat);
+                    }
+                    return;
+                }
+
+                if (currentNode.NodeType == NodeType.Empty || 
+                    (currentNode.NodeType == NodeType.Mine && currentNode.gold <= 0))
+                {
+                    OnFlag?.Invoke(RTSAgent.Flags.OnTargetLost);
+                    return;
+                }
+
+                if (food > 0 && currentNode.NodeType == NodeType.Mine)
+                {
+                    OnFlag?.Invoke(RTSAgent.Flags.OnGather);
+                    return;
+                }
+
+                if (gold <= 0 && currentNode.NodeType == NodeType.TownCenter)
+                {
+                    OnFlag?.Invoke(RTSAgent.Flags.OnGather);
+                    return;
+                }
             });
 
             return behaviours;
@@ -39,29 +58,31 @@ namespace StateMachine.States.RTSStates
         public override BehaviourActions GetOnEnterBehaviour(params object[] parameters)
         {
             BehaviourActions behaviours = new BehaviourActions();
-            
+
             Node<Vector2> currentNode = parameters[0] as Node<Vector2>;
             Action<Node<Vector2>> onReachMine = parameters[1] as Action<Node<Vector2>>;
-            
+
             behaviours.AddMainThreadBehaviours(0, () =>
             {
-                if(currentNode.NodeType == NodeType.Mine) onReachMine?.Invoke(currentNode);
+                if (currentNode.NodeType == NodeType.Mine) onReachMine?.Invoke(currentNode);
             });
-            
-            return behaviours;        }
+
+            return behaviours;
+        }
 
         public override BehaviourActions GetOnExitBehaviour(params object[] parameters)
         {
             BehaviourActions behaviours = new BehaviourActions();
-            
+
             Node<Vector2> currentNode = parameters[0] as Node<Vector2>;
             Action<Node<Vector2>> onLeaveMine = parameters[1] as Action<Node<Vector2>>;
-            
+
             behaviours.AddMainThreadBehaviours(0, () =>
             {
-                if(currentNode.NodeType == NodeType.Mine) onLeaveMine?.Invoke(currentNode);
+                if (currentNode.NodeType == NodeType.Mine) onLeaveMine?.Invoke(currentNode);
             });
-            
-            return behaviours;        }
+
+            return behaviours;
+        }
     }
 }

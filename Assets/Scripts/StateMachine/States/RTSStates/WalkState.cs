@@ -61,6 +61,7 @@ namespace StateMachine.States.RTSStates
                         OnFlag?.Invoke(RTSAgent.Flags.OnWait);
                         break;
                     case NodeType.Empty:
+                        OnFlag?.Invoke(RTSAgent.Flags.OnTargetLost);
                         break;
                     case NodeType.Blocked:
                     default:
