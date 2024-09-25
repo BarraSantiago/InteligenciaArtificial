@@ -20,7 +20,7 @@ namespace StateMachine.States.RTSStates
             Transform position = (Transform)parameters[3];
             Action onMove = parameters[4] as Action;
             
-            behaviours.AddMainThreadBehaviours(0, () =>
+            behaviours.AddMultiThreadableBehaviours(0, () =>
             {
                 onMove?.Invoke();
             });
@@ -29,7 +29,6 @@ namespace StateMachine.States.RTSStates
             {
                 if (currentNode == null || targetNode == null)
                 {
-                    Debug.LogError("One or more required parameters are null.");
                     return;
                 }
 

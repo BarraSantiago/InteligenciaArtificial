@@ -26,6 +26,7 @@ namespace StateMachine.States.RTSStates
 
             behaviours.SetTransitionBehaviour(() =>
             {
+                if(retreat && currentNode.NodeType != NodeType.TownCenter) OnFlag?.Invoke(RTSAgent.Flags.OnRetreat);
                 if(retreat) return;
                 if (food > 0 && currentNode.NodeType == NodeType.Mine) OnFlag?.Invoke(RTSAgent.Flags.OnGather);
                 if(currentNode.NodeType == NodeType.Mine && currentNode.gold <= 0) OnFlag?.Invoke(RTSAgent.Flags.OnTargetLost);
@@ -37,12 +38,30 @@ namespace StateMachine.States.RTSStates
 
         public override BehaviourActions GetOnEnterBehaviour(params object[] parameters)
         {
-            return default;
-        }
+            BehaviourActions behaviours = new BehaviourActions();
+            
+            Node<Vector2> currentNode = parameters[0] as Node<Vector2>;
+            Action<Node<Vector2>> onReachMine = parameters[1] as Action<Node<Vector2>>;
+            
+            behaviours.AddMainThreadBehaviours(0, () =>
+            {
+                if(currentNode.NodeType == NodeType.Mine) onReachMine?.Invoke(currentNode);
+            });
+            
+            return behaviours;        }
 
         public override BehaviourActions GetOnExitBehaviour(params object[] parameters)
         {
-            return default;
-        }
+            BehaviourActions behaviours = new BehaviourActions();
+            
+            Node<Vector2> currentNode = parameters[0] as Node<Vector2>;
+            Action<Node<Vector2>> onLeaveMine = parameters[1] as Action<Node<Vector2>>;
+            
+            behaviours.AddMainThreadBehaviours(0, () =>
+            {
+                if(currentNode.NodeType == NodeType.Mine) onLeaveMine?.Invoke(currentNode);
+            });
+            
+            return behaviours;        }
     }
 }

@@ -22,9 +22,7 @@ namespace StateMachine.States.RTSStates
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {
                 OnMine?.Invoke();
-                
             });
-            behaviours.AddMainThreadBehaviours(1, () => { Debug.Log("gold: " + gold); });
 
             behaviours.SetTransitionBehaviour(() =>
             {

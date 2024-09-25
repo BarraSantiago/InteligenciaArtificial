@@ -78,6 +78,16 @@ namespace StateMachine.Agents.RTS
                 () => Debug.Log("Gather gold"));
         }
         
+        protected override object[] WaitEnterParameters()
+        {
+            return new object[] { CurrentNode, OnReachMine };
+        }
+        
+        protected override object[] WaitExitParameters()
+        {
+            return new object[] { CurrentNode, OnLeaveMine };
+        }
+        
         private void Mine()
         {
             if (Food <= 0 || CurrentNode.gold <= 0) return;

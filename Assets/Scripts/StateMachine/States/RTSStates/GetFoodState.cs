@@ -20,11 +20,6 @@ namespace StateMachine.States.RTSStates
                 onGatherFood?.Invoke();
             });
 
-            behaviours.AddMainThreadBehaviours(1, () =>
-            {
-                Debug.Log("food: " + food);
-            });
-
             behaviours.SetTransitionBehaviour(() =>
             {
                 if (food >= foodLimit) OnFlag?.Invoke(RTSAgent.Flags.OnFull);
