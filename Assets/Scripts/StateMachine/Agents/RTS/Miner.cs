@@ -20,28 +20,7 @@ namespace StateMachine.Agents.RTS
             Fsm.ForceTransition(Behaviours.Walk);
             onMine += Mine;
         }
-
-        private void Mine()
-        {
-            if (Food <= 0 || CurrentNode.gold <= 0) return;
-
-            CurrentGold++;
-
-            LastTimeEat++;
-            CurrentNode.gold--;
-            if (CurrentNode.gold <= 0) OnEmptyMine?.Invoke();
-
-            if (LastTimeEat < GoldPerFood) return;
-
-            Food--;
-            LastTimeEat = 0;
-
-            if (Food > 0 || CurrentNode.food <= 0) return;
-
-            Food++;
-            CurrentNode.food--;
-        }
-
+        
         protected override void FsmTransitions()
         {
             base.FsmTransitions();
@@ -64,17 +43,14 @@ namespace StateMachine.Agents.RTS
             Fsm.SetTransition(Behaviours.GatherResources, Flags.OnFull, Behaviours.Walk,
                 () =>
                 {
-                    TargetNode = TownCenter;
-
+                    TargetNode = GetTarget(NodeType.TownCenter);
+                    
                     Debug.Log("Gold full. Walk to " + TargetNode.GetCoordinate().x + " - " + TargetNode.GetCoordinate().y);
                 });
             Fsm.SetTransition(Behaviours.GatherResources, Flags.OnTargetLost, Behaviours.Walk,
                 () =>
                 {
-                    Vector2 position = transform.position;
-                    Node<Vector2> target = Voronoi.GetMineCloser(GameManager.Graph.CoordNodes.Find(nodeVoronoi =>
-                        nodeVoronoi.GetCoordinate() == position));
-                    TargetNode = Graph<Node<Vector2>, NodeVoronoi, Vector2>.NodesType.Find(node => node.GetCoordinate() == target.GetCoordinate());
+                    TargetNode = GetTarget();
 
                     Debug.Log("Mine empty. Walk to " + TargetNode.GetCoordinate().x + " - " + TargetNode.GetCoordinate().y);
                 });
@@ -100,6 +76,27 @@ namespace StateMachine.Agents.RTS
             base.WalkTransitions();
             Fsm.SetTransition(Behaviours.Walk, Flags.OnGather, Behaviours.GatherResources,
                 () => Debug.Log("Gather gold"));
+        }
+        
+        private void Mine()
+        {
+            if (Food <= 0 || CurrentNode.gold <= 0) return;
+
+            CurrentGold++;
+
+            LastTimeEat++;
+            CurrentNode.gold--;
+            if (CurrentNode.gold <= 0) OnEmptyMine?.Invoke();
+
+            if (LastTimeEat < GoldPerFood) return;
+
+            Food--;
+            LastTimeEat = 0;
+
+            if (Food > 0 || CurrentNode.food <= 0) return;
+
+            Food++;
+            CurrentNode.food--;
         }
     }
 }

@@ -17,7 +17,8 @@ namespace StateMachine.States.RTSStates
             int? gold = Convert.ToInt32(parameters[2]);
             Node<Vector2> currentNode = (Node<Vector2>)parameters[3];
             Action OnWait = parameters[4] as Action;
-
+            
+            
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {
                 OnWait?.Invoke();

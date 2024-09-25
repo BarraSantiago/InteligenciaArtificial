@@ -9,7 +9,6 @@ namespace StateMachine.States.RTSStates
 {
     public class WalkState : State
     {
-        private int i = (0);
 
         public override BehaviourActions GetTickBehaviour(params object[] parameters)
         {
@@ -39,10 +38,9 @@ namespace StateMachine.States.RTSStates
 
             behaviours.SetTransitionBehaviour(() =>
             {
-                if (retreat && targetNode.NodeType != NodeType.TownCenter)
+                if (retreat && targetNode is null || targetNode.NodeType != NodeType.TownCenter)
                 {
                     OnFlag?.Invoke(RTSAgent.Flags.OnRetreat);
-                    i = 0;
                     return;
                 }
 
@@ -50,7 +48,6 @@ namespace StateMachine.States.RTSStates
                 if (currentNode == null || targetNode == null || targetNode.NodeType == NodeType.Mine && targetNode.gold <= 0)
                 {
                     OnFlag?.Invoke(RTSAgent.Flags.OnTargetLost);
-                    i = 0;
                     return;
                 }
 
@@ -70,8 +67,6 @@ namespace StateMachine.States.RTSStates
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
-
-                i = 0;
             });
 
             return behaviours;
