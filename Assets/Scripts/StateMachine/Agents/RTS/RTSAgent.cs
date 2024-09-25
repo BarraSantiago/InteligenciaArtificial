@@ -135,7 +135,7 @@ namespace StateMachine.Agents.RTS
                 () =>
                 {
                     Vector2 position = transform.position;
-                    Node<Vector2> target = Voronoi.GetMineCloser(GameManager.graph.CoordNodes.Find(nodeVoronoi =>
+                    Node<Vector2> target = Voronoi.GetMineCloser(GameManager.Graph.CoordNodes.Find(nodeVoronoi =>
                         nodeVoronoi.GetCoordinate() == position));
                     TargetNode = Graph<Node<Vector2>, NodeVoronoi, Vector2>.NodesType.Find(node => node.GetCoordinate() == target.GetCoordinate());
                    
@@ -163,7 +163,7 @@ namespace StateMachine.Agents.RTS
                 () =>
                 {
                     Vector2 position = transform.position;
-                    Node<Vector2> target = Voronoi.GetMineCloser(GameManager.graph.CoordNodes.Find(nodeVoronoi =>
+                    Node<Vector2> target = Voronoi.GetMineCloser(GameManager.Graph.CoordNodes.Find(nodeVoronoi =>
                         nodeVoronoi.GetCoordinate() == position));
                     TargetNode = Graph<Node<Vector2>, NodeVoronoi, Vector2>.NodesType.Find(node => node.GetCoordinate() == target.GetCoordinate());
 
@@ -173,7 +173,7 @@ namespace StateMachine.Agents.RTS
                 () =>
                 {
                     Vector2 position = transform.position;
-                    Node<Vector2> target = Voronoi.GetMineCloser(GameManager.graph.CoordNodes.Find(nodeVoronoi =>
+                    Node<Vector2> target = Voronoi.GetMineCloser(GameManager.Graph.CoordNodes.Find(nodeVoronoi =>
                         nodeVoronoi.GetCoordinate() == position));
                     TargetNode = Graph<Node<Vector2>, NodeVoronoi, Vector2>.NodesType.Find(node => node.GetCoordinate() == target.GetCoordinate());
 
