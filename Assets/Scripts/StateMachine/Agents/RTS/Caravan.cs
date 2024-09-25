@@ -53,12 +53,13 @@ namespace StateMachine.Agents.RTS
             Fsm.SetTransition(Behaviours.GatherResources, Flags.OnFull, Behaviours.Walk,
                 () =>
                 {
-                    Node<Vector2> target = GameManager.MinesWithMiners[0];
-                    if (target == null)
+                    if (GameManager.MinesWithMiners == null || GameManager.MinesWithMiners[0] == null)
                     {
                         Debug.LogError("No mines with miners.");
                         return;
                     }
+                    
+                    Node<Vector2> target = GameManager.MinesWithMiners[0];
                     
                     TargetNode = Graph<Node<Vector2>, NodeVoronoi, Vector2>.NodesType.Find(node => node.GetCoordinate() == target.GetCoordinate());
                     
@@ -89,12 +90,13 @@ namespace StateMachine.Agents.RTS
             Fsm.SetTransition(Behaviours.Walk, Flags.OnTargetLost, Behaviours.Walk,
                 () =>
                 {
-                    Node<Vector2> target = GameManager.MinesWithMiners[0];
-                    if (target == null)
+                    if (GameManager.MinesWithMiners == null || GameManager.MinesWithMiners[0] == null)
                     {
                         Debug.LogError("No mines with miners.");
                         return;
                     }
+                    Node<Vector2> target = GameManager.MinesWithMiners[0];
+                    
                     TargetNode = Graph<Node<Vector2>, NodeVoronoi, Vector2>.NodesType.Find(node => node.GetCoordinate() == target.GetCoordinate());
                     
                     Debug.Log("Walk to " + TargetNode.GetCoordinate().x + " - " + TargetNode.GetCoordinate().y);
