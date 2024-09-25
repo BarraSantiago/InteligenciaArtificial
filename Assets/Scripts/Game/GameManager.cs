@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Pathfinder;
 using Pathfinder.Graph;
 using Pathfinder.Voronoi;
 using StateMachine.Agents.RTS;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
@@ -38,8 +38,8 @@ namespace Game
         private void Start()
         {
             Miner.OnEmptyMine += RemakeVoronoi;
-            Miner.OnReachMine += (node) => MinesWithMiners.Add(node);
-            Miner.OnLeaveMine += (node) => MinesWithMiners.Remove(node);
+            Miner.OnReachMine += OnReachMine;
+            Miner.OnLeaveMine += OnLeaveMine;
 
             retreatButton.onClick.AddListener(Retreat);
 
@@ -71,6 +71,21 @@ namespace Game
             }
         }
 
+        private void OnReachMine(Node<Vector2> node)
+        {
+            RemoveEmptyNodes();
+            MinesWithMiners.Add(node);
+        }
+
+        private void OnLeaveMine(Node<Vector2> node)
+        {
+            MinesWithMiners.Remove(node);
+            RemoveEmptyNodes();
+        }
+        public void RemoveEmptyNodes()
+        {
+            MinesWithMiners.RemoveAll(node => node.NodeType == NodeType.Empty);
+        }
         private void SetupObstacles()
         {
             for (int i = 0; i < Graph.CoordNodes.Count; i++)
@@ -210,7 +225,7 @@ namespace Game
                     _ => Color.white
                 };
 
-                Gizmos.DrawSphere(new Vector3(node.GetCoordinate().x, node.GetCoordinate().y), nodesSize);
+                Gizmos.DrawSphere(new Vector3(node.GetCoordinate().x, node.GetCoordinate().y), nodesSize/5);
             }
         }
     }
