@@ -1,7 +1,6 @@
-﻿using Pathfinder.Graph;
-using UnityEngine;
+﻿using UnityEngine;
 
-namespace Pathfinder
+namespace Pathfinder.Graph
 {
     public class Vector2Graph : Graph<Node<Vector2>, NodeVoronoi, Vector2>
     {
