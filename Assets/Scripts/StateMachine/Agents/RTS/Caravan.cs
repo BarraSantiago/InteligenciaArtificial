@@ -55,18 +55,16 @@ namespace StateMachine.Agents.RTS
                     Vector2 position = transform.position;
                     Node<Vector2> target = voronoi.GetMineCloser(GameManager.graph.CoordNodes.Find((nodeVoronoi =>
                         nodeVoronoi.GetCoordinate() == position)));
-                    targetNode = GameManager.graph.NodesType.Find((node => node.GetCoordinate() == target.GetCoordinate()));
-                    _path = _pathfinder.FindPath(currentNode, targetNode);
-                    pathNodeId = 0;
+                    TargetNode = GameManager.graph.NodesType.Find((node => node.GetCoordinate() == target.GetCoordinate()));
+                    Debug.Log("Get Food.");
                 });
             _fsm.SetTransition(Behaviours.GatherResources, Flags.OnRetreat, Behaviours.Walk,
                 () =>
                 {
-                    targetNode = townCenter;
-                    _path = _pathfinder.FindPath(currentNode, targetNode);
-                    pathNodeId = 0;
-                    Debug.Log("Retreat. Walk to " + targetNode.GetCoordinate().x + " - " +
-                              targetNode.GetCoordinate().y);
+                    TargetNode = townCenter;
+                    
+                    Debug.Log("Retreat. Walk to " + TargetNode.GetCoordinate().x + " - " +
+                              TargetNode.GetCoordinate().y);
                 });
         }
 
@@ -75,11 +73,10 @@ namespace StateMachine.Agents.RTS
             _fsm.SetTransition(Behaviours.Walk, Flags.OnRetreat, Behaviours.Walk,
                 () =>
                 {
-                    targetNode = townCenter;
-                    _path = _pathfinder.FindPath(currentNode, targetNode);
-                    pathNodeId = 0;
-                    Debug.Log("Retreat. Walk to " + targetNode.GetCoordinate().x + " - " +
-                              targetNode.GetCoordinate().y);
+                    TargetNode = townCenter;
+                    
+                    Debug.Log("Retreat. Walk to " + TargetNode.GetCoordinate().x + " - " +
+                              TargetNode.GetCoordinate().y);
                 });
 
             _fsm.SetTransition(Behaviours.Walk, Flags.OnTargetLost, Behaviours.Walk,
@@ -88,10 +85,9 @@ namespace StateMachine.Agents.RTS
                     Vector2 position = transform.position;
                     Node<Vector2> target = voronoi.GetMineCloser(GameManager.graph.CoordNodes.Find((nodeVoronoi =>
                         nodeVoronoi.GetCoordinate() == position)));
-                    targetNode = GameManager.graph.NodesType.Find((node => node.GetCoordinate() == target.GetCoordinate()));
-                    _path = _pathfinder.FindPath(currentNode, targetNode);
-                    pathNodeId = 0;
-                    Debug.Log("Walk to " + targetNode.GetCoordinate().x + " - " + targetNode.GetCoordinate().y);
+                    TargetNode = GameManager.graph.NodesType.Find((node => node.GetCoordinate() == target.GetCoordinate()));
+                    
+                    Debug.Log("Walk to " + TargetNode.GetCoordinate().x + " - " + TargetNode.GetCoordinate().y);
                 });
             _fsm.SetTransition(Behaviours.Walk, Flags.OnGather, Behaviours.Deliver,
                 () => Debug.Log("Deliver food"));
@@ -114,19 +110,17 @@ namespace StateMachine.Agents.RTS
             _fsm.SetTransition(Behaviours.Deliver, Flags.OnHunger, Behaviours.Walk,
                 () =>
                 {
-                    targetNode = townCenter;
-                    _path = _pathfinder.FindPath(currentNode, targetNode);
-                    pathNodeId = 0;
+                    TargetNode = townCenter;
+                    
                     Debug.Log("To town center");
                 });
             _fsm.SetTransition(Behaviours.Deliver, Flags.OnRetreat, Behaviours.Walk,
                 () =>
                 {
-                    targetNode = townCenter;
-                    _path = _pathfinder.FindPath(currentNode, targetNode);
-                    pathNodeId = 0;
-                    Debug.Log("Retreat. Walk to " + targetNode.GetCoordinate().x + " - " +
-                              targetNode.GetCoordinate().y);
+                    TargetNode = townCenter;
+                    
+                    Debug.Log("Retreat. Walk to " + TargetNode.GetCoordinate().x + " - " +
+                              TargetNode.GetCoordinate().y);
                 });
         }
 

@@ -7,6 +7,7 @@ namespace StateMachine.Agents.RTS
     public class Miner : RTSAgent
     {
         private Action onMine;
+        public static Action OnEmptyMine;
         public override void Init()
         {
             base.Init();
@@ -16,12 +17,13 @@ namespace StateMachine.Agents.RTS
 
         private void Mine()
         {
-            if (Food <= 0) return;
+            if (Food <= 0 || currentNode.gold <= 0) return;
 
             _currentGold++;
                 
             _lastTimeEat++;
             currentNode.gold--;
+            OnEmptyMine?.Invoke();
 
             if (_lastTimeEat < GoldPerFood) return;
 
@@ -56,10 +58,9 @@ namespace StateMachine.Agents.RTS
             _fsm.SetTransition(Behaviours.GatherResources, Flags.OnFull, Behaviours.Walk,
                 () =>
                 {
-                    targetNode = townCenter;
-                    _path = _pathfinder.FindPath(currentNode, targetNode);
-                    pathNodeId = 0;
-                    Debug.Log("Gold full. Walk to " + targetNode.GetCoordinate().x + " - " + targetNode.GetCoordinate().y);
+                    TargetNode = townCenter;
+                    
+                    Debug.Log("Gold full. Walk to " + TargetNode.GetCoordinate().x + " - " + TargetNode.GetCoordinate().y);
                 });
         }
         

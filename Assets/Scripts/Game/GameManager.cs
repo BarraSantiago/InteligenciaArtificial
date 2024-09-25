@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Pathfinder;
 using Pathfinder.Graph;
 using Pathfinder.Voronoi;
@@ -31,6 +32,7 @@ namespace Game
         private Color color;
         private void Start()
         {
+            Miner.OnEmptyMine += RemakeVoronoi;
             if (!Application.isPlaying)
                 return;
             
@@ -55,17 +57,17 @@ namespace Game
             int towncenterNode = Random.Range(0, graph.CoordNodes.Count);
             graph.NodesType[towncenterNode].NodeType = NodeType.TownCenter;
 
-            MapGenerator<NodeVoronoi, Vector2>.nodes = graph.NodesType;
 
             Vector3 townCenterPosition = new Vector3(graph.CoordNodes[towncenterNode].GetCoordinate().x,
                 graph.CoordNodes[towncenterNode].GetCoordinate().y);
 
-            voronoi.Init();
+            MapGenerator<NodeVoronoi, Vector2>.nodes = graph.NodesType;
             List<NodeVoronoi> voronoiNodes = new List<NodeVoronoi>();
             for (int i = 0; i < MapGenerator<NodeVoronoi, Vector2>.mines.Count; i++)
             {
                 voronoiNodes.Add(graph.CoordNodes.Find((node => node.GetCoordinate() == MapGenerator<NodeVoronoi, Vector2>.mines[i].GetCoordinate())));
             }
+            voronoi.Init();
             
             GameObject miner = Instantiate(minerPrefab, townCenterPosition, Quaternion.identity);
             Miner agent = miner.GetComponent<Miner>();
@@ -80,6 +82,13 @@ namespace Game
             agent2.voronoi = voronoi;
             agent2.Init();
             //voronoi.Init();
+            voronoi.SetVoronoi(voronoiNodes);
+        }
+
+        private void RemakeVoronoi()
+        {
+            List<NodeVoronoi> voronoiNodes = MapGenerator<NodeVoronoi, Vector2>.mines.Select(t => 
+                graph.CoordNodes.Find(node => node.GetCoordinate() == t.GetCoordinate() && t.gold > 0)).ToList();
             voronoi.SetVoronoi(voronoiNodes);
         }
 
