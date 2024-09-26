@@ -145,6 +145,7 @@ using GraphType = Graph<Node<Vector2>, NodeVoronoi, Vector2>;
         private void CreateMines()
         {
 
+            AmountSafeChecks();
             if(GraphType.mines.Count > (mapWidth+mapHeight)/MaxMines) return;
             
             for (int i = 0; i < minesQuantity; i++)
@@ -210,6 +211,9 @@ using GraphType = Graph<Node<Vector2>, NodeVoronoi, Vector2>;
             {
                 if (node.NodeType == NodeType.Mine && node.gold <= 0) node.NodeType = NodeType.Empty;
             });
+            
+            GraphType.mines.RemoveAll(node => node.gold <= 0);
+
             
             foreach (var mine in GraphType.mines)
             {
