@@ -30,8 +30,7 @@ namespace FlockingECS
             {
                 uint entityID = ECSManager.CreateEntity();
                 ECSManager.AddComponent(entityID, new PositionComponent<Vector3>(new Vector3(0, -i, 0)));
-                ECSManager.AddComponent(entityID,
-                    new FlockComponent<Vector3>(Vector3.Zero, Vector3.Zero, Vector3.Zero, Vector3.Zero));
+                ECSManager.AddComponent(entityID, new FlockComponent<Vector3>(Vector3.Zero, Vector3.Zero, Vector3.Zero, Vector3.Zero));
                 entities.Add(entityID);
             }
             targetPositionComponent = new PositionComponent<Vector3>(new Vector3(target.transform.position.x, target.transform.position.y, target.transform.position.z));

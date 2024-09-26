@@ -5,12 +5,6 @@ using StateMachine.Agents.RTS;
 
 namespace Pathfinder
 {
-    public struct Transition<NodeType>
-    {
-        public NodeType to;
-        public int cost;
-    }
-
     public abstract class Pathfinder<TNodeType, TCoordinateType, TCoordinate>
         where TNodeType : INode<TCoordinateType>
         where TCoordinateType : IEquatable<TCoordinateType>

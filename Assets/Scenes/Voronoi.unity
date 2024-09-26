@@ -403,16 +403,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea23d70321c643cd916ab6794d4e7f34, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapWidth: 70
-  mapHeight: 70
-  minesQuantity: 9
+  mapWidth: 27
+  mapHeight: 26
+  minesQuantity: 15
   nodesSize: 1
   originPosition: {x: -0.5, y: -0.5}
   retreatButton: {fileID: 1854582343}
   minerPrefab: {fileID: 2785322424147078408, guid: 40cb8ae62e1a2ed4e857f1bc1d348a61, type: 3}
   caravanPrefab: {fileID: 4554709164701513831, guid: f2e723e0f6f769a41b04e83e8a055270, type: 3}
-  minersQuantity: 10
-  caravansQuantity: 3
+  minersQuantity: 1
+  caravansQuantity: 1
 --- !u!1 &478465509
 GameObject:
   m_ObjectHideFlags: 0
