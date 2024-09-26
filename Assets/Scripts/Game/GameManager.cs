@@ -14,8 +14,8 @@ namespace Game
     public class GameManager : MonoBehaviour
     {
         [Header("Map Config")] 
-        [SerializeField] private int mapWidth;
-        [SerializeField] private int mapHeight;
+        [SerializeField, Range(4,150)] private int mapWidth;
+        [SerializeField, Range(4,150)] private int mapHeight;
         [SerializeField] private int minesQuantity;
         [SerializeField] private float nodesSize;
         [SerializeField] private Vector2 originPosition;
@@ -148,10 +148,12 @@ namespace Game
 
         private void AmountSafeChecks()
         {
-            if (minesQuantity <= 0) minesQuantity = 1;
-            if (minesQuantity > Graph.CoordNodes.Count) minesQuantity = Graph.CoordNodes.Count;
-            if (minersQuantity <= 0) minersQuantity = 1;
-            if (caravansQuantity <= 0) caravansQuantity = 1;
+            const int Min = 0;
+            const int Max = 3;
+            if (minesQuantity < Min) minesQuantity = Min;
+            if (minesQuantity > (mapWidth+mapHeight)/Max) minesQuantity = (mapWidth+mapHeight)/Max;
+            if (minersQuantity < Min) minersQuantity = Min;
+            if (caravansQuantity < Min) caravansQuantity = Min;
         }
 
         private void CreateCaravan(Vector3 townCenterPosition, int towncenterNode)
