@@ -20,37 +20,25 @@ namespace Pathfinder
 
         public List<TNodeType> FindPath(TNodeType startNode, TNodeType destinationNode, RTSAgent.AgentTypes agentType)
         {
-            Dictionary<TNodeType, (TNodeType Parent, int AcumulativeCost, int Heuristic)> nodes =
-                new Dictionary<TNodeType, (TNodeType Parent, int AcumulativeCost, int Heuristic)>();
+            var nodes = Graph.ToDictionary(node => node,
+                node => (Parent: default(TNodeType), AcumulativeCost: 0, Heuristic: 0));
 
-            foreach (TNodeType node in Graph)
-            {
-                nodes.Add(node, (default, 0, 0));
-            }
-
-            TCoordinate startCoor = new TCoordinate();
+            var startCoor = new TCoordinate();
             startCoor.SetCoordinate(startNode.GetCoordinate());
-            List<TNodeType> openList = new List<TNodeType>();
-            List<TNodeType> closedList = new List<TNodeType>();
 
-            openList.Add(startNode);
-
+            var openList = new List<TNodeType> { startNode };
+            var closedList = new HashSet<TNodeType>();
+            
             while (openList.Count > 0)
             {
-                TNodeType currentNode = openList[0];
-                int currentIndex = 0;
-
-                for (int i = 1; i < openList.Count; i++)
-                {
-                    if (nodes[openList[i]].AcumulativeCost + nodes[openList[i]].Heuristic >=
-                        nodes[currentNode].AcumulativeCost + nodes[currentNode].Heuristic) continue;
-
-                    currentNode = openList[i];
-                    currentIndex = i;
-                }
-
-                openList.RemoveAt(currentIndex);
+                var currentNode = openList.OrderBy(node => nodes[node].AcumulativeCost + nodes[node].Heuristic).First();
+                openList.Remove(currentNode);
                 closedList.Add(currentNode);
+
+                if (NodesEquals(currentNode, destinationNode))
+                {
+                    return GeneratePath(startNode, destinationNode);
+                }
 
                 if (NodesEquals(currentNode, destinationNode))
                 {
@@ -64,13 +52,10 @@ namespace Pathfinder
                         continue;
                     }
 
-                    int aproxAcumulativeCost = 0;
+                    var aproxAcumulativeCost = nodes[currentNode].AcumulativeCost 
+                                               + MoveToNeighborCost(currentNode, neighbor, agentType);
 
-                    aproxAcumulativeCost += nodes[currentNode].AcumulativeCost;
-                    aproxAcumulativeCost += MoveToNeighborCost(currentNode, neighbor, agentType);
-
-                    if (openList.Contains(neighbor) && aproxAcumulativeCost >= nodes[neighbor].AcumulativeCost)
-                        continue;
+                    if (openList.Contains(neighbor) && aproxAcumulativeCost >= nodes[neighbor].AcumulativeCost) continue;
 
                     TCoordinate neighborCoor = new TCoordinate();
                     neighborCoor.SetCoordinate(neighbor.GetCoordinate());
