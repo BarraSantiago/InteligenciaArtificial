@@ -62,7 +62,7 @@ namespace StateMachine.States.RTSStates
             Node<Vector2> currentNode = parameters[0] as Node<Vector2>;
             Action<Node<Vector2>> onReachMine = parameters[1] as Action<Node<Vector2>>;
 
-            behaviours.AddMainThreadBehaviours(0, () =>
+            behaviours.AddMultiThreadableBehaviours(0, () =>
             {
                 if (currentNode.NodeType == NodeType.Mine) onReachMine?.Invoke(currentNode);
             });
@@ -77,7 +77,7 @@ namespace StateMachine.States.RTSStates
             Node<Vector2> currentNode = parameters[0] as Node<Vector2>;
             Action<Node<Vector2>> onLeaveMine = parameters[1] as Action<Node<Vector2>>;
 
-            behaviours.AddMainThreadBehaviours(0, () =>
+            behaviours.AddMultiThreadableBehaviours(0, () =>
             {
                 if (currentNode.NodeType == NodeType.Mine) onLeaveMine?.Invoke(currentNode);
             });

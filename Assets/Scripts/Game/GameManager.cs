@@ -80,7 +80,7 @@ using GraphType = Graph<Node<Vector2>, NodeVoronoi, Vector2>;
             
             CreateMines();
             
-            towncenterNode = CreateTowncenter(out townCenterPosition);
+            towncenterNode = CreateTownCenter(out townCenterPosition);
 
             Pathfinder = new AStarPathfinder<Node<Vector2>, Vector2, NodeVoronoi>(GraphType.NodesType);
             
@@ -146,7 +146,7 @@ using GraphType = Graph<Node<Vector2>, NodeVoronoi, Vector2>;
         {
 
             AmountSafeChecks();
-            if(GraphType.mines.Count > (mapWidth+mapHeight)/MaxMines) return;
+            if(GraphType.mines.Count + minesQuantity > (mapWidth+mapHeight)/MaxMines) return;
             
             for (int i = 0; i < minesQuantity; i++)
             {
@@ -160,13 +160,13 @@ using GraphType = Graph<Node<Vector2>, NodeVoronoi, Vector2>;
             }
         }
         
-        private int CreateTowncenter(out Vector3 townCenterPosition)
+        private int CreateTownCenter(out Vector3 townCenterPosition)
         {
-            int towncenterNode = Random.Range(0, Graph.CoordNodes.Count);
-            GraphType.NodesType[towncenterNode].NodeType = NodeType.TownCenter;
-            townCenterPosition = new Vector3(Graph.CoordNodes[towncenterNode].GetCoordinate().x,
-                Graph.CoordNodes[towncenterNode].GetCoordinate().y);
-            return towncenterNode;
+            int townCenterNode = Random.Range(0, Graph.CoordNodes.Count);
+            GraphType.NodesType[townCenterNode].NodeType = NodeType.TownCenter;
+            townCenterPosition = new Vector3(Graph.CoordNodes[townCenterNode].GetCoordinate().x,
+                Graph.CoordNodes[townCenterNode].GetCoordinate().y);
+            return townCenterNode;
         }
 
         private void AmountSafeChecks()

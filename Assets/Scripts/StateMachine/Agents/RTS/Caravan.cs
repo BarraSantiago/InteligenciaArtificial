@@ -56,7 +56,7 @@ namespace StateMachine.Agents.RTS
                 {
                     if (GameManager.MinesWithMiners == null || GameManager.MinesWithMiners.Count <= 0)
                     {
-                        Debug.LogError("No mines with miners.");
+                        Debug.Log("No mines with miners.");
                         return;
                     }
                     
@@ -66,7 +66,7 @@ namespace StateMachine.Agents.RTS
                     TargetNode = Graph<Node<Vector2>, NodeVoronoi, Vector2>.NodesType.Find(node => node.GetCoordinate() == target.GetCoordinate());
                     if(TargetNode == null) return;
                     
-                    Debug.Log("Get Food.");
+                    Debug.Log("Delivering food to " + TargetNode.GetCoordinate().x + " - " + TargetNode.GetCoordinate().y);
                 });
             Fsm.SetTransition(Behaviours.GatherResources, Flags.OnRetreat, Behaviours.Walk,
                 () =>
@@ -97,7 +97,7 @@ namespace StateMachine.Agents.RTS
                 {
                     if (GameManager.MinesWithMiners == null || GameManager.MinesWithMiners.Count <= 0)
                     {
-                        Debug.LogError("No mines with miners.");
+                        Debug.Log("No mines with miners.");
                         return;
                     }
                     Node<Vector2> target = GameManager.MinesWithMiners[0];

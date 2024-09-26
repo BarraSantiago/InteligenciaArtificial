@@ -27,7 +27,7 @@ namespace StateMachine.States.RTSStates
 
             behaviours.AddMainThreadBehaviours(1, () =>
             {
-                if (currentNode == null || targetNode == null)
+                if (currentNode == null)
                 {
                     return;
                 }
