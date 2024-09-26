@@ -34,7 +34,8 @@ namespace Game
         
         private Voronoi<NodeVoronoi, Vector2> voronoi;
         private Color color;
-
+        private int towncenterNode;
+        private Vector3 townCenterPosition;
         private void Start()
         {
             Miner.OnEmptyMine += RemakeVoronoi;
@@ -47,18 +48,7 @@ namespace Game
 
             Graph<Node<Vector2>, NodeVoronoi, Vector2>.OriginPosition = new NodeVoronoi(originPosition);
 
-            Graph = new Vector2Graph(mapWidth, mapHeight, nodesSize);
-            voronoi = new Voronoi<NodeVoronoi, Vector2>();
-
-            AmountSafeChecks();
-
-            SetupObstacles();
-            
-            int towncenterNode = CreateMines(out var townCenterPosition);
-
-            Pathfinder = new AStarPathfinder<Node<Vector2>, Vector2, NodeVoronoi>(Graph<Node<Vector2>, NodeVoronoi, Vector2>.NodesType);
-            
-            VoronoiSetup();
+            MakeMap();
 
             for (int i = 0; i < minersQuantity; i++)
             {
@@ -69,6 +59,22 @@ namespace Game
             {
                 CreateCaravan(townCenterPosition, towncenterNode);
             }
+        }
+
+        private void MakeMap()
+        {
+            Graph = new Vector2Graph(mapWidth, mapHeight, nodesSize);
+            voronoi = new Voronoi<NodeVoronoi, Vector2>();
+
+            AmountSafeChecks();
+
+            SetupObstacles();
+            
+            towncenterNode = CreateMines(out townCenterPosition);
+
+            Pathfinder = new AStarPathfinder<Node<Vector2>, Vector2, NodeVoronoi>(Graph<Node<Vector2>, NodeVoronoi, Vector2>.NodesType);
+            
+            VoronoiSetup();
         }
 
         private void OnReachMine(Node<Vector2> node)

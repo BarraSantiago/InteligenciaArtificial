@@ -403,9 +403,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea23d70321c643cd916ab6794d4e7f34, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapWidth: 27
-  mapHeight: 26
-  minesQuantity: 15
+  mapWidth: 10
+  mapHeight: 10
+  minesQuantity: 1
   nodesSize: 1
   originPosition: {x: -0.5, y: -0.5}
   retreatButton: {fileID: 1854582343}
@@ -680,7 +680,7 @@ GameObject:
   - component: {fileID: 1854582344}
   - component: {fileID: 1854582343}
   m_Layer: 5
-  m_Name: Button
+  m_Name: Retreat button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
