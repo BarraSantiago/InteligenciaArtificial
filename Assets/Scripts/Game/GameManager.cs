@@ -60,12 +60,12 @@ using GraphType = Graph<Node<Vector2>, NodeVoronoi, Vector2>;
 
             for (int i = 0; i < minersQuantity; i++)
             {
-                CreateMiner(townCenterPosition, towncenterNode);
+                CreateMiner();
             }
 
             for (int i = 0; i < caravansQuantity; i++)
             {
-                CreateCaravan(townCenterPosition, towncenterNode);
+                CreateCaravan();
             }
         }
 
@@ -178,7 +178,7 @@ using GraphType = Graph<Node<Vector2>, NodeVoronoi, Vector2>;
             if (caravansQuantity < Min) caravansQuantity = Min;
         }
 
-        private void CreateCaravan(Vector3 townCenterPosition, int towncenterNode)
+        private void CreateCaravan()
         {
             GameObject caravan = Instantiate(caravanPrefab, townCenterPosition, Quaternion.identity);
             Caravan agent2 = caravan.GetComponent<Caravan>();
@@ -187,7 +187,7 @@ using GraphType = Graph<Node<Vector2>, NodeVoronoi, Vector2>;
             agent2.Init();
         }
 
-        private void CreateMiner(Vector3 townCenterPosition, int towncenterNode)
+        private void CreateMiner()
         {
             GameObject miner = Instantiate(minerPrefab, townCenterPosition, Quaternion.identity);
             Miner agent = miner.GetComponent<Miner>();
