@@ -32,9 +32,10 @@ using GraphType = Graph<Node<Vector2>, NodeVoronoi, Vector2>;
 
 
         public static GraphType Graph;
-        public static List<Node<Vector2>> MinesWithMiners = new List<Node<Vector2>>();
+        public static readonly List<Node<Vector2>> MinesWithMiners = new List<Node<Vector2>>();
         public static AStarPathfinder<Node<Vector2>, Vector2, NodeVoronoi> Pathfinder; 
         
+        private const int MaxMines = 4;
         private Voronoi<NodeVoronoi, Vector2> voronoi;
         private Color color;
         private int towncenterNode;
@@ -97,7 +98,8 @@ using GraphType = Graph<Node<Vector2>, NodeVoronoi, Vector2>;
             MinesWithMiners.Remove(node);
             RemoveEmptyNodes();
         }
-        public void RemoveEmptyNodes()
+
+        private void RemoveEmptyNodes()
         {
             MinesWithMiners.RemoveAll(node => node.NodeType == NodeType.Empty);
         }
@@ -142,6 +144,9 @@ using GraphType = Graph<Node<Vector2>, NodeVoronoi, Vector2>;
 
         private void CreateMines()
         {
+
+            if(GraphType.mines.Count > (mapWidth+mapHeight)/MaxMines) return;
+            
             for (int i = 0; i < minesQuantity; i++)
             {
                 int rand = Random.Range(0, Graph.CoordNodes.Count);
@@ -166,9 +171,9 @@ using GraphType = Graph<Node<Vector2>, NodeVoronoi, Vector2>;
         private void AmountSafeChecks()
         {
             const int Min = 0;
-            const int Max = 3;
+            
             if (minesQuantity < Min) minesQuantity = Min;
-            if (minesQuantity > (mapWidth+mapHeight)/Max) minesQuantity = (mapWidth+mapHeight)/Max;
+            if (minesQuantity > (mapWidth+mapHeight)/MaxMines) minesQuantity = (mapWidth+mapHeight)/MaxMines;
             if (minersQuantity < Min) minersQuantity = Min;
             if (caravansQuantity < Min) caravansQuantity = Min;
         }
@@ -200,10 +205,12 @@ using GraphType = Graph<Node<Vector2>, NodeVoronoi, Vector2>;
         private void RemakeVoronoi()
         {
             List<NodeVoronoi> voronoiNodes = new List<NodeVoronoi>();
+            
             GraphType.NodesType.ForEach(node =>
             {
                 if (node.NodeType == NodeType.Mine && node.gold <= 0) node.NodeType = NodeType.Empty;
             });
+            
             foreach (var mine in GraphType.mines)
             {
                 if (mine.gold > 0)

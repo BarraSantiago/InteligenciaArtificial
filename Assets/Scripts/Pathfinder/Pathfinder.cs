@@ -14,25 +14,20 @@ namespace Pathfinder
 
         public List<TNodeType> FindPath(TNodeType startNode, TNodeType destinationNode, RTSAgent.AgentTypes agentType)
         {
-            var nodes = Graph.ToDictionary(node => node,
-                node => (Parent: default(TNodeType), AcumulativeCost: 0, Heuristic: 0));
+            Dictionary<TNodeType, (TNodeType Parent, int AcumulativeCost, int Heuristic)> nodes = 
+                Graph.ToDictionary(key => key, _ => (Parent: default(TNodeType), AcumulativeCost: 0, Heuristic: 0));
 
             var startCoor = new TCoordinate();
             startCoor.SetCoordinate(startNode.GetCoordinate());
 
             var openList = new List<TNodeType> { startNode };
-            var closedList = new HashSet<TNodeType>();
+            var closedList = new List<TNodeType>();
             
             while (openList.Count > 0)
             {
                 var currentNode = openList.OrderBy(node => nodes[node].AcumulativeCost + nodes[node].Heuristic).First();
                 openList.Remove(currentNode);
                 closedList.Add(currentNode);
-
-                if (NodesEquals(currentNode, destinationNode))
-                {
-                    return GeneratePath(startNode, destinationNode);
-                }
 
                 if (NodesEquals(currentNode, destinationNode))
                 {

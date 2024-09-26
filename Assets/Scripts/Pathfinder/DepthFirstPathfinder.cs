@@ -18,12 +18,15 @@ namespace Pathfinder
 
         protected override int Distance(TCoordinate A, TCoordinate B)
         {
-            float distance = 0;
-            Node<Vector2> nodeA = A as Node<Vector2>;
-            Node<Vector2> nodeB = B as Node<Vector2>;
+            if (A == null || B == null)
+            {
+                return int.MaxValue;
+            }
 
-            distance += Math.Abs(nodeA.GetCoordinate().x - nodeB.GetCoordinate().x);
-            distance += Math.Abs(nodeA.GetCoordinate().y - nodeB.GetCoordinate().y);
+            float distance = 0;
+
+            distance += Math.Abs(A.GetX() - B.GetX());
+            distance += Math.Abs(A.GetY() - B.GetY());
 
             return (int)distance;
         }
