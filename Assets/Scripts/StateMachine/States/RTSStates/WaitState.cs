@@ -74,6 +74,7 @@ namespace StateMachine.States.RTSStates
         {
             BehaviourActions behaviours = new BehaviourActions();
 
+            if(parameters == null) return default;
             Node<Vector2> currentNode = parameters[0] as Node<Vector2>;
             Action<Node<Vector2>> onLeaveMine = parameters[1] as Action<Node<Vector2>>;
 

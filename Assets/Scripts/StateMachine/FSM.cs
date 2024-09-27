@@ -53,7 +53,9 @@ namespace StateMachine
 
         public void ForceTransition(Enum state)
         {
+            ExecuteBehaviour(GetCurrentStateOnExitBehaviours);
             _currentState = Convert.ToInt32(state);
+            ExecuteBehaviour(GetCurrentStateOnEnterBehaviours);
         }
 
         public void AddBehaviour<T>(EnumState stateIndexEnum, Func<object[]> onTickParameters = null,

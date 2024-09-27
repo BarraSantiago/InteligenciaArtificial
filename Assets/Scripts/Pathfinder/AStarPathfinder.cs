@@ -45,23 +45,8 @@ namespace Pathfinder
             {
                 throw new InvalidOperationException("B node has to be a neighbor.");
             }
-
-            int cost = 0;
-
-            switch (type)
-            {
-                case RTSAgent.AgentTypes.Miner:
-                    if (B.GetNodeType() == Pathfinder.NodeType.Gravel) cost += 2;
-                    break;
-                case RTSAgent.AgentTypes.Caravan:
-                    if (B.GetNodeType() == Pathfinder.NodeType.Forest) cost += 2;
-                    break;
-                default:
-                cost = 0;
-                    break;
-            }
-
-            return cost;
+            
+            return B.GetCost() + A.GetCost();
         }
 
         protected override bool NodesEquals(NodeType A, NodeType B)

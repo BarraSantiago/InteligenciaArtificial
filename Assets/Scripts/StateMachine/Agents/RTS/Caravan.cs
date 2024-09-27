@@ -63,7 +63,7 @@ namespace StateMachine.Agents.RTS
                     Node<Vector2> target = GameManager.MinesWithMiners[0];
                     if(target == null) return;
 
-                    TargetNode = Graph<Node<Vector2>, NodeVoronoi, Vector2>.NodesType.Find(node => node.GetCoordinate() == target.GetCoordinate());
+                    TargetNode = GameManager.Graph.NodesType.Find(node => node.GetCoordinate() == target.GetCoordinate());
                     if(TargetNode == null) return;
                     
                     Debug.Log("Delivering food to " + TargetNode.GetCoordinate().x + " - " + TargetNode.GetCoordinate().y);
@@ -103,7 +103,7 @@ namespace StateMachine.Agents.RTS
                     Node<Vector2> target = GameManager.MinesWithMiners[0];
                     if(target == null) return;
 
-                    TargetNode = Graph<Node<Vector2>, NodeVoronoi, Vector2>.NodesType.Find(node => node.GetCoordinate() == target.GetCoordinate());
+                    TargetNode = GameManager.Graph.NodesType.Find(node => node.GetCoordinate() == target.GetCoordinate());
                     if(TargetNode == null) return;
 
                     Debug.Log("Walk to " + TargetNode.GetCoordinate().x + " - " + TargetNode.GetCoordinate().y);

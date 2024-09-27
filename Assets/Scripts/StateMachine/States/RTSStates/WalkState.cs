@@ -9,7 +9,6 @@ namespace StateMachine.States.RTSStates
 {
     public class WalkState : State
     {
-
         public override BehaviourActions GetTickBehaviour(params object[] parameters)
         {
             BehaviourActions behaviours = new BehaviourActions();
@@ -19,11 +18,8 @@ namespace StateMachine.States.RTSStates
             bool retreat = (bool)parameters[2];
             Transform position = (Transform)parameters[3];
             Action onMove = parameters[4] as Action;
-            
-            behaviours.AddMultiThreadableBehaviours(0, () =>
-            {
-                onMove?.Invoke();
-            });
+
+            behaviours.AddMultiThreadableBehaviours(0, () => { onMove?.Invoke(); });
 
             behaviours.AddMainThreadBehaviours(1, () =>
             {
@@ -44,13 +40,19 @@ namespace StateMachine.States.RTSStates
                 }
 
 
-                if (currentNode == null || targetNode == null || targetNode.NodeType == NodeType.Mine && targetNode.gold <= 0)
+                if (currentNode == null || targetNode == null ||
+                    targetNode.NodeType == NodeType.Mine && targetNode.gold <= 0)
                 {
                     OnFlag?.Invoke(RTSAgent.Flags.OnTargetLost);
                     return;
                 }
 
-                if (!currentNode.Equals(targetNode)) return;
+                if (currentNode.GetCoordinate() == targetNode.GetCoordinate())
+                {
+                    return;
+                }
+
+                //if ((currentNode.GetCoordinate()).Equals(targetNode.GetCoordinate())) return;
 
                 switch (currentNode.NodeType)
                 {
@@ -61,11 +63,10 @@ namespace StateMachine.States.RTSStates
                         OnFlag?.Invoke(RTSAgent.Flags.OnWait);
                         break;
                     case NodeType.Empty:
-                        OnFlag?.Invoke(RTSAgent.Flags.OnTargetLost);
-                        break;
                     case NodeType.Blocked:
                     default:
-                        throw new ArgumentOutOfRangeException();
+                        OnFlag?.Invoke(RTSAgent.Flags.OnTargetLost);
+                        break;
                 }
             });
 
@@ -85,7 +86,8 @@ namespace StateMachine.States.RTSStates
 
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {
-                if(currentNode != null && targetNode != null) path = pathfinder.FindPath(currentNode, targetNode, type);
+                if (currentNode != null && targetNode != null)
+                    path = pathfinder.FindPath(currentNode, targetNode, type);
             });
 
             return behaviours;

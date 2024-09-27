@@ -22,5 +22,8 @@ namespace Pathfinder
         
         public NodeType GetNodeType();
 
+        public int GetCost();
+        
+        public void SetCost(int newCost);
     }
 }

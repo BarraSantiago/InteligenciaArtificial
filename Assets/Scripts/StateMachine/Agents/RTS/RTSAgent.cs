@@ -41,9 +41,9 @@ namespace StateMachine.Agents.RTS
         public static bool Retreat;
         public Node<Vector2> CurrentNode;
         public Voronoi<NodeVoronoi, Vector2> Voronoi;
+        public AStarPathfinder<Node<Vector2>, Vector2, NodeVoronoi> Pathfinder;
 
         protected FSM<Behaviours, Flags> Fsm;
-        protected AStarPathfinder<Node<Vector2>, Vector2, NodeVoronoi> Pathfinder;
         protected List<Node<Vector2>> Path;
         protected AgentTypes AgentType;
         protected Node<Vector2> TargetNode
@@ -79,7 +79,7 @@ namespace StateMachine.Agents.RTS
         {
             Fsm = new FSM<Behaviours, Flags>();
 
-            Pathfinder = GameManager.Pathfinder;
+            Pathfinder = GameManager.MinerPathfinder;
 
             OnMove += Move;
             OnWait += Wait;
@@ -234,12 +234,12 @@ namespace StateMachine.Agents.RTS
                 return;
             }
 
-            if (CurrentNode.Equals(TargetNode)) return;
+            if (CurrentNode.GetCoordinate().Equals(TargetNode.GetCoordinate())) return;
 
             if (Path.Count <= 0) return;
             if (PathNodeId > Path.Count) PathNodeId = 0;
 
-            CurrentNode = Path[PathNodeId];
+            CurrentNode =  Path[PathNodeId];
             PathNodeId++;
         }
 
@@ -286,8 +286,7 @@ namespace StateMachine.Agents.RTS
                 return null;
             }
 
-            return Graph<Node<Vector2>, NodeVoronoi, Vector2>.NodesType.Find(node =>
-                node.GetCoordinate() == target.GetCoordinate());
+            return GameManager.Graph.NodesType.Find(node => node.GetCoordinate() == target.GetCoordinate());
         }
 
     }

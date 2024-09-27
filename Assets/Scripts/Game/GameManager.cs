@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Pathfinder;
 using Pathfinder.Graph;
 using Pathfinder.Voronoi;
@@ -33,8 +34,11 @@ using GraphType = Graph<Node<Vector2>, NodeVoronoi, Vector2>;
 
         public static GraphType Graph;
         public static readonly List<Node<Vector2>> MinesWithMiners = new List<Node<Vector2>>();
-        public static AStarPathfinder<Node<Vector2>, Vector2, NodeVoronoi> Pathfinder; 
+        public static AStarPathfinder<Node<Vector2>, Vector2, NodeVoronoi> CaravanPathfinder; 
+        public static AStarPathfinder<Node<Vector2>, Vector2, NodeVoronoi> MinerPathfinder;
         
+        private List<Node<Vector2>> CaravanNodes;
+        private List<Node<Vector2>> MinerNodes;
         private const int MaxMines = 4;
         private Voronoi<NodeVoronoi, Vector2> voronoi;
         private Color color;
@@ -81,10 +85,31 @@ using GraphType = Graph<Node<Vector2>, NodeVoronoi, Vector2>;
             CreateMines();
             
             towncenterNode = CreateTownCenter(out townCenterPosition);
+            
+            CaravanNodes = Graph.NodesType.Select(node => new Node<Vector2>(node.GetCoordinate())).ToList();
+            MinerNodes = Graph.NodesType.Select(node => new Node<Vector2>(node.GetCoordinate())).ToList();
 
-            Pathfinder = new AStarPathfinder<Node<Vector2>, Vector2, NodeVoronoi>(GraphType.NodesType);
+            UpdateCosts();
+            
+            MinerPathfinder = new AStarPathfinder<Node<Vector2>, Vector2, NodeVoronoi>(MinerNodes);
+            CaravanPathfinder = new AStarPathfinder<Node<Vector2>, Vector2, NodeVoronoi>(CaravanNodes);
             
             VoronoiSetup();
+        }
+
+        private void UpdateCosts()
+        {
+            const int midCost = 2;
+
+            foreach (var node in CaravanNodes.Where(node => node.NodeType == NodeType.Forest))
+            {
+                node.SetCost(midCost);
+            }
+            
+            foreach (var node in MinerNodes.Where(node => node.NodeType == NodeType.Gravel))
+            {
+                node.SetCost(midCost);
+            }
         }
 
         private void OnReachMine(Node<Vector2> node)
@@ -105,25 +130,27 @@ using GraphType = Graph<Node<Vector2>, NodeVoronoi, Vector2>;
         }
         private void SetupObstacles()
         {
+            const int obscacleChance = 10;
             for (int i = 0; i < Graph.CoordNodes.Count; i++)
             {
-                if (Random.Range(0, 100) < 10)
+                if (Random.Range(0, 100) < obscacleChance)
                 {
-                    GraphType.NodesType[i].NodeType = NodeType.Blocked;
+                    Graph.NodesType[i].NodeType = NodeType.Blocked;
+                    Graph.NodesType[i].SetCost(1000);
                 }
             }
             for (int i = 0; i < Graph.CoordNodes.Count; i++)
             {
-                if (Random.Range(0, 100) < 10)
+                if (Random.Range(0, 100) < obscacleChance)
                 {
-                    GraphType.NodesType[i].NodeType = NodeType.Forest;
+                    Graph.NodesType[i].NodeType = NodeType.Forest;
                 }
             }
             for (int i = 0; i < Graph.CoordNodes.Count; i++)
             {
-                if (Random.Range(0, 100) < 10)
+                if (Random.Range(0, 100) < obscacleChance)
                 {
-                    GraphType.NodesType[i].NodeType = NodeType.Gravel;
+                    Graph.NodesType[i].NodeType = NodeType.Gravel;
                 }
             }
         }
@@ -151,9 +178,9 @@ using GraphType = Graph<Node<Vector2>, NodeVoronoi, Vector2>;
             for (int i = 0; i < minesQuantity; i++)
             {
                 int rand = Random.Range(0, Graph.CoordNodes.Count);
-                if (GraphType.NodesType[rand].NodeType == NodeType.Mine || 
-                    GraphType.NodesType[rand].NodeType == NodeType.TownCenter) continue;
-                Node<Vector2> node = GraphType.NodesType[rand];
+                if (Graph.NodesType[rand].NodeType == NodeType.Mine || 
+                    Graph.NodesType[rand].NodeType == NodeType.TownCenter) continue;
+                Node<Vector2> node = Graph.NodesType[rand];
                 node.NodeType = NodeType.Mine;
                 node.gold = 100;
                 GraphType.mines.Add(node);
@@ -163,7 +190,7 @@ using GraphType = Graph<Node<Vector2>, NodeVoronoi, Vector2>;
         private int CreateTownCenter(out Vector3 townCenterPosition)
         {
             int townCenterNode = Random.Range(0, Graph.CoordNodes.Count);
-            GraphType.NodesType[townCenterNode].NodeType = NodeType.TownCenter;
+            Graph.NodesType[townCenterNode].NodeType = NodeType.TownCenter;
             townCenterPosition = new Vector3(Graph.CoordNodes[townCenterNode].GetCoordinate().x,
                 Graph.CoordNodes[townCenterNode].GetCoordinate().y);
             return townCenterNode;
@@ -182,18 +209,20 @@ using GraphType = Graph<Node<Vector2>, NodeVoronoi, Vector2>;
         private void CreateCaravan()
         {
             GameObject caravan = Instantiate(caravanPrefab, townCenterPosition, Quaternion.identity);
-            Caravan agent2 = caravan.GetComponent<Caravan>();
-            agent2.CurrentNode = GraphType.NodesType[towncenterNode];
-            agent2.Voronoi = voronoi;
-            agent2.Init();
+            Caravan agent = caravan.GetComponent<Caravan>();
+            agent.CurrentNode = Graph.NodesType[towncenterNode];
+            agent.Voronoi = voronoi;
+            agent.Pathfinder = CaravanPathfinder;
+            agent.Init();
         }
 
         private void CreateMiner()
         {
             GameObject miner = Instantiate(minerPrefab, townCenterPosition, Quaternion.identity);
             Miner agent = miner.GetComponent<Miner>();
-            agent.CurrentNode = GraphType.NodesType[towncenterNode];
-            RTSAgent.TownCenter = GraphType.NodesType[towncenterNode];
+            agent.CurrentNode = Graph.NodesType[towncenterNode];
+            RTSAgent.TownCenter = Graph.NodesType[towncenterNode];
+            agent.Pathfinder = MinerPathfinder;
             agent.Voronoi = voronoi;
             agent.Init();
         }
@@ -207,7 +236,7 @@ using GraphType = Graph<Node<Vector2>, NodeVoronoi, Vector2>;
         {
             List<NodeVoronoi> voronoiNodes = new List<NodeVoronoi>();
             
-            GraphType.NodesType.ForEach(node =>
+            Graph.NodesType.ForEach(node =>
             {
                 if (node.NodeType == NodeType.Mine && node.gold <= 0) node.NodeType = NodeType.Empty;
             });
@@ -242,7 +271,7 @@ using GraphType = Graph<Node<Vector2>, NodeVoronoi, Vector2>;
             }
 
 
-            foreach (var node in GraphType.NodesType)
+            foreach (var node in Graph.NodesType)
             {
                 Gizmos.color = node.NodeType switch
                 {

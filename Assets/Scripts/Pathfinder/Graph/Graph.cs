@@ -10,7 +10,7 @@ namespace Pathfinder.Graph
         where TCoordinateType : IEquatable<TCoordinateType>, new()
     {
         public readonly List<TCoordinateNode> CoordNodes = new List<TCoordinateNode>();
-        public static readonly List<TNodeType> NodesType = new List<TNodeType>();
+        public readonly List<TNodeType> NodesType = new List<TNodeType>();
         public static List<Node<TCoordinateType>> mines = new List<Node<TCoordinateType>>();
 
         public static TCoordinateNode MapDimensions;

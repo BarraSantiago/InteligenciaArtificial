@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Pathfinder
 {
@@ -17,10 +18,20 @@ namespace Pathfinder
         where Coordinate : IEquatable<Coordinate>
     {
         public NodeType NodeType { get; set; }
-        private Coordinate coordinate;
-        public ICollection<INode<Coordinate>> neighbors;
         public int food;
         public int gold;
+        
+        private ICollection<INode<Coordinate>> neighbors;
+        private Coordinate coordinate;
+        private int cost;
+
+        public Node()
+        {
+        }
+        public Node(Coordinate coord)
+        {
+            coordinate = coord;
+        }
 
         public void SetCoordinate(Coordinate coordinate)
         {
@@ -52,6 +63,16 @@ namespace Pathfinder
             return NodeType;
         }
 
+        public int GetCost()
+        {
+            return cost;
+        }
+
+        public void SetCost(int newCost)
+        {
+            cost = newCost;
+        }
+
         public bool EqualsTo(INode<Coordinate> other)
         {
             return coordinate.Equals(other.GetCoordinate());
@@ -59,7 +80,7 @@ namespace Pathfinder
 
         protected bool Equals(Node<Coordinate> other)
         {
-            return EqualityComparer<Coordinate>.Default.Equals(coordinate, other.coordinate);
+            return coordinate.Equals(other.coordinate);
         }
 
         public bool Equals(Coordinate other)
