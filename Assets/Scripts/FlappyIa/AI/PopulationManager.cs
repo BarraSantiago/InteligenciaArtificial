@@ -1,5 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
+
+[Serializable]
+public class ConfigurationData
+{
+    public int PopulationCount;
+    public int EliteCount;
+    public float MutationChance;
+    public float MutationRate;
+    public int InputsCount;
+    public int HiddenLayers;
+    public int OutputsCount;
+    public int NeuronsCountPerHL;
+    public float Bias;
+    public float Sigmoid;
+}
 
 public class PopulationManager : MonoBehaviour
 {
@@ -17,6 +34,9 @@ public class PopulationManager : MonoBehaviour
     public int NeuronsCountPerHL = 7;
     public float Bias = 1f;
     public float Sigmoid = 0.5f;
+    
+    private const string ConfigFilePath = "config.json";
+
 
     GeneticAlgorithm genAlg;
 
@@ -123,30 +143,41 @@ public class PopulationManager : MonoBehaviour
 
     public void Load()
     {
-        PopulationCount = PlayerPrefs.GetInt("PopulationCount", 2);
-        EliteCount = PlayerPrefs.GetInt("EliteCount", 0);
-        MutationChance = PlayerPrefs.GetFloat("MutationChance", 0);
-        MutationRate = PlayerPrefs.GetFloat("MutationRate", 0);
-        InputsCount = PlayerPrefs.GetInt("InputsCount", 1);
-        HiddenLayers = PlayerPrefs.GetInt("HiddenLayers", 5);
-        OutputsCount = PlayerPrefs.GetInt("OutputsCount", 1);
-        NeuronsCountPerHL = PlayerPrefs.GetInt("NeuronsCountPerHL", 1);
-        Bias = PlayerPrefs.GetFloat("Bias", 0);
-        Sigmoid = PlayerPrefs.GetFloat("P", 1);
+        if (!File.Exists(ConfigFilePath)) return;
+        
+        string json = File.ReadAllText(ConfigFilePath);
+        ConfigurationData config = JsonUtility.FromJson<ConfigurationData>(json);
+
+        PopulationCount = config.PopulationCount;
+        EliteCount = config.EliteCount;
+        MutationChance = config.MutationChance;
+        MutationRate = config.MutationRate;
+        InputsCount = config.InputsCount;
+        HiddenLayers = config.HiddenLayers;
+        OutputsCount = config.OutputsCount;
+        NeuronsCountPerHL = config.NeuronsCountPerHL;
+        Bias = config.Bias;
+        Sigmoid = config.Sigmoid;
     }
 
     void Save()
     {
-        PlayerPrefs.SetInt("PopulationCount", PopulationCount);
-        PlayerPrefs.SetInt("EliteCount", EliteCount);
-        PlayerPrefs.SetFloat("MutationChance", MutationChance);
-        PlayerPrefs.SetFloat("MutationRate", MutationRate);
-        PlayerPrefs.SetInt("InputsCount", InputsCount);
-        PlayerPrefs.SetInt("HiddenLayers", HiddenLayers);
-        PlayerPrefs.SetInt("OutputsCount", OutputsCount);
-        PlayerPrefs.SetInt("NeuronsCountPerHL", NeuronsCountPerHL);
-        PlayerPrefs.SetFloat("Bias", Bias);
-        PlayerPrefs.SetFloat("P", Sigmoid);
+        ConfigurationData config = new ConfigurationData
+        {
+            PopulationCount = PopulationCount,
+            EliteCount = EliteCount,
+            MutationChance = MutationChance,
+            MutationRate = MutationRate,
+            InputsCount = InputsCount,
+            HiddenLayers = HiddenLayers,
+            OutputsCount = OutputsCount,
+            NeuronsCountPerHL = NeuronsCountPerHL,
+            Bias = Bias,
+            Sigmoid = Sigmoid
+        };
+
+        string json = JsonUtility.ToJson(config, true);
+        File.WriteAllText(ConfigFilePath, json);
     }
 
     public void StartSimulation()
