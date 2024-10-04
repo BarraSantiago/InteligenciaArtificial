@@ -3,6 +3,7 @@ using UnityEngine;
 public class Coin : MonoBehaviour
 {
     public System.Action<Coin> OnDestroy;
+    public int id;
 
     public void CheckToDestroy()
     {

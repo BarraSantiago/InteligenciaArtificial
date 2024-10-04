@@ -44,6 +44,7 @@ public class BirdBase : MonoBehaviour
             Obstacle obstacle = ObstacleManager.Instance.GetNextObstacle(this.transform.position);
             
             Coin coin = ObstacleManager.Instance.GetNextCoin(this.transform.position);
+            
 
             if (!obstacle || !coin)
                 return;

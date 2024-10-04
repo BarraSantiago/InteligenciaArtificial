@@ -45,6 +45,7 @@ public class ObstacleManager : MonoBehaviour
         coins.Clear();
 
         obstaclePos.x = 0;
+        coinPos.x = DISTANCE_BETWEEN_OBSTACLES/2;
 
         InstantiateObstacle();
         InstantiateCoin();
@@ -123,6 +124,7 @@ public class ObstacleManager : MonoBehaviour
         GameObject coinGo = Instantiate(coinPrefab, coinPos, Quaternion.identity);
         coinGo.transform.SetParent(transform, false);
         Coin coin = coinGo.GetComponent<Coin>();
+        coin.id = coins.Count;
         coin.OnDestroy += OnCoinDestroy;
         coins.Add(coin);
     }
