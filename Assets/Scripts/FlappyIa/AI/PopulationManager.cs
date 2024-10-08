@@ -128,7 +128,7 @@ public class PopulationManager : MonoBehaviour
     {
         get
         {
-            if (instance == null)
+            if (!instance)
                 instance = FindObjectOfType<PopulationManager>();
 
             return instance;
@@ -293,11 +293,9 @@ public class PopulationManager : MonoBehaviour
                     areAllDead = false;
             }
 
-            if (areAllDead)
-            {
-                Epoch();
-                break;
-            }
+            if (!areAllDead) continue;
+            Epoch();
+            break;
         }
     }
 
