@@ -68,13 +68,18 @@ public class ObstacleManager : MonoBehaviour
     
     public Coin GetNextCoin(Vector3 pos)
     {
-        for (int i = 0; i < coins.Count; i++)
+        Coin nearestCoin = coins[0];
+        float nearestDist = float.MaxValue;
+        
+        foreach (var coin in coins)
         {
-            if (pos.x < coins[i].transform.position.x + 2f)
-                return coins[i];
+            if(coin.transform.position.x > pos.x && coin.transform.position.x - pos.x < nearestDist)
+            {
+                nearestCoin = coin;
+                nearestDist = coin.transform.position.x - pos.x;
+            }
         }
-
-        return null;
+        return nearestCoin;
     }
 
     public bool IsColliding(Vector3 pos)

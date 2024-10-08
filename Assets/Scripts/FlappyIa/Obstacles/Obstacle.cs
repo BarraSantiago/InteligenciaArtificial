@@ -3,6 +3,7 @@ using UnityEngine;
 public class Obstacle : MonoBehaviour
 {
     public System.Action<Obstacle> OnDestroy;
+    public int id;
 
     public void CheckToDestroy()
     {

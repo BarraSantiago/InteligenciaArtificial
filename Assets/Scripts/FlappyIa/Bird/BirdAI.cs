@@ -3,6 +3,7 @@
 public class BirdAI : BirdBase
 {
     int lastCoinId = -1;
+    int lastObstacleId = -1;
 
     protected override void OnThink(float dt, BirdBehaviour birdBehaviour, Obstacle obstacle, Coin coin)
     {
@@ -20,14 +21,20 @@ public class BirdAI : BirdBase
             birdBehaviour.Flap();
         }
 
-        if (Vector3.Distance(obstacle.transform.position, birdBehaviour.transform.position) <= 1.0f)
+        Vector3 diff = obstacle.transform.position - birdBehaviour.transform.position;
+        float sqrDistance = diff.sqrMagnitude;
+
+        if (sqrDistance <= 1.0f * 1.0f && lastObstacleId != obstacle.id)
         {
-            genome.fitness *= 2;
+            genome.fitness += 1500;
+            lastObstacleId = obstacle.id;
         }
 
-        if (Vector3.Distance(coin.transform.position, birdBehaviour.transform.position) <= .05f && lastCoinId != coin.id)
+        Vector2 distance = (coin.transform.position - birdBehaviour.transform.position);
+
+        if (distance.sqrMagnitude <= 3f && lastCoinId != coin.id)
         {
-            genome.fitness *= 2;
+            genome.fitness += 2500;
             lastCoinId = coin.id;
         }
 
