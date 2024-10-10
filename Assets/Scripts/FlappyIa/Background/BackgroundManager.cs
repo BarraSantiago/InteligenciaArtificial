@@ -1,63 +1,68 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class BackgroundManager : MonoBehaviour
+namespace FlappyIa.Background
 {
-    public GameObject[] frames;
-    float lastCameraPos;
-    float accumPos = 0;
-
-    private static BackgroundManager instance = null;
-
-    public static BackgroundManager Instance
+    public class BackgroundManager : MonoBehaviour
     {
-        get
-        {
-            if (instance == null)
-                instance = FindObjectOfType<BackgroundManager>();
+        public GameObject[] frames;
+        float lastCameraPos;
+        float accumPos = 0;
+        private UnityEngine.Camera camera1;
 
-            return instance;
+        private static BackgroundManager instance = null;
+
+        public static BackgroundManager Instance
+        {
+            get
+            {
+                if (!instance)
+                    instance = FindObjectOfType<BackgroundManager>();
+
+                return instance;
+            }
         }
-    }
 
-    private void Awake()
-    {
-        instance = this;
-    }
-
-    public void Reset()
-    {
-        this.transform.position = new Vector3(0, 0, 10);
-        lastCameraPos = 0;
-        accumPos = 0;
-
-        float posx = -4;
-
-        foreach (GameObject go in frames)
+        private void Start()
         {
-            Vector3 pos = go.transform.position;
-            pos.x = posx;
-            go.transform.position = pos;
-            posx += 7.2f;
+            camera1 = UnityEngine.Camera.main;
         }
-    }
 
-    void Update()
-    {
-        float delta = Camera.main.transform.position.x - lastCameraPos;
-
-        Vector3 parallax = this.transform.position;
-        parallax.x += delta * 0.2f;
-        this.transform.position = parallax;
-
-        delta -= delta * 0.2f;
-
-        lastCameraPos = Camera.main.transform.position.x;
-        accumPos += delta;
-
-        if (accumPos >= 7.2f)
+        private void Awake()
         {
+            instance = this;
+        }
+
+        public void Reset()
+        {
+            this.transform.position = new Vector3(0, 0, 10);
+            lastCameraPos = 0;
+            accumPos = 0;
+
+            float posx = -4;
+
+            foreach (GameObject go in frames)
+            {
+                Vector3 pos = go.transform.position;
+                pos.x = posx;
+                go.transform.position = pos;
+                posx += 7.2f;
+            }
+        }
+
+        void Update()
+        {
+            float delta = camera1.transform.position.x - lastCameraPos;
+
+            Vector3 parallax = this.transform.position;
+            parallax.x += delta * 0.2f;
+            this.transform.position = parallax;
+
+            delta -= delta * 0.2f;
+
+            lastCameraPos = camera1.transform.position.x;
+            accumPos += delta;
+
+            if (!(accumPos >= 7.2f)) return;
             foreach (GameObject go in frames)
             {
                 Vector3 pos = go.transform.position;

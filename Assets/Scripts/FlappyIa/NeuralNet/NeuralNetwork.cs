@@ -1,92 +1,95 @@
 ﻿using System.Collections.Generic;
 
-public class NeuralNetwork
+namespace FlappyIa.NeuralNet
 {
-    List<NeuronLayer> layers = new List<NeuronLayer>();
-    int totalWeightsCount = 0;
-    int inputsCount = 0;
-
-    public int InputsCount
+    public class NeuralNetwork
     {
-        get { return inputsCount; }
-    }
+        List<NeuronLayer> layers = new List<NeuronLayer>();
+        int totalWeightsCount = 0;
+        int inputsCount = 0;
 
-    public bool AddNeuronLayer(int neuronsCount, float bias, float p)
-    {
-        if (layers.Count == 0)
-            return false;
-
-        return AddNeuronLayer(layers[layers.Count - 1].OutputsCount, neuronsCount, bias, p);
-    }
-
-    public bool AddFirstNeuronLayer(int inputsCount, float bias, float p)
-    {
-        if (layers.Count != 0)
-            return false;
-
-        this.inputsCount = inputsCount;
-
-        return AddNeuronLayer(inputsCount, inputsCount, bias, p);
-    }
-
-    private bool AddNeuronLayer(int inputsCount, int neuronsCount, float bias, float p)
-    {
-        if (layers.Count > 0 && layers[layers.Count - 1].OutputsCount != inputsCount)
-            return false;
-
-        NeuronLayer layer = new NeuronLayer(inputsCount, neuronsCount, bias, p);
-
-        totalWeightsCount += (inputsCount + 1) * neuronsCount;
-
-        layers.Add(layer);
-
-        return true;
-    }
-
-    public int GetTotalWeightsCount()
-    {
-        return totalWeightsCount;
-    }
-
-    public void SetWeights(float[] newWeights)
-    {
-        int fromId = 0;
-
-        for (int i = 0; i < layers.Count; i++)
+        public int InputsCount
         {
-            fromId = layers[i].SetWeights(newWeights, fromId);
+            get { return inputsCount; }
         }
-    }
 
-    public float[] GetWeights()
-    {
-        float[] weights = new float[totalWeightsCount];
-        int id = 0;
-
-        for (int i = 0; i < layers.Count; i++)
+        public bool AddNeuronLayer(int neuronsCount, float bias, float p)
         {
-            float[] ws = layers[i].GetWeights();
+            if (layers.Count == 0)
+                return false;
 
-            for (int j = 0; j < ws.Length; j++)
+            return AddNeuronLayer(layers[^1].OutputsCount, neuronsCount, bias, p);
+        }
+
+        public bool AddFirstNeuronLayer(int inputsCount, float bias, float p)
+        {
+            if (layers.Count != 0)
+                return false;
+
+            this.inputsCount = inputsCount;
+
+            return AddNeuronLayer(inputsCount, inputsCount, bias, p);
+        }
+
+        private bool AddNeuronLayer(int inputsCount, int neuronsCount, float bias, float p)
+        {
+            if (layers.Count > 0 && layers[^1].OutputsCount != inputsCount)
+                return false;
+
+            NeuronLayer layer = new NeuronLayer(inputsCount, neuronsCount, bias, p);
+
+            totalWeightsCount += (inputsCount + 1) * neuronsCount;
+
+            layers.Add(layer);
+
+            return true;
+        }
+
+        public int GetTotalWeightsCount()
+        {
+            return totalWeightsCount;
+        }
+
+        public void SetWeights(float[] newWeights)
+        {
+            int fromId = 0;
+
+            for (int i = 0; i < layers.Count; i++)
             {
-                weights[id] = ws[j];
-                id++;
+                fromId = layers[i].SetWeights(newWeights, fromId);
             }
         }
 
-        return weights;
-    }
-
-    public float[] Synapsis(float[] inputs)
-    {
-        float[] outputs = null;
-
-        for (int i = 0; i < layers.Count; i++)
+        public float[] GetWeights()
         {
-            outputs = layers[i].Synapsis(inputs);
-            inputs = outputs;
+            float[] weights = new float[totalWeightsCount];
+            int id = 0;
+
+            foreach (var neuron in layers)
+            {
+                float[] ws = neuron.GetWeights();
+
+                for (int j = 0; j < ws.Length; j++)
+                {
+                    weights[id] = ws[j];
+                    id++;
+                }
+            }
+
+            return weights;
         }
 
-        return outputs;
+        public float[] Synapse(float[] inputs)
+        {
+            float[] outputs = null;
+
+            foreach (var neuron in layers)
+            {
+                outputs = neuron.Synapsis(inputs);
+                inputs = outputs;
+            }
+
+            return outputs;
+        }
     }
 }

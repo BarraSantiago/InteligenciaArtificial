@@ -1,48 +1,52 @@
-﻿using UnityEngine;
+﻿using FlappyIa.AI;
+using UnityEngine;
 
-public class CameraFollow : MonoBehaviour
+namespace FlappyIa.Camera
 {
-    public GameObject agent;
-
-    private static CameraFollow instance = null;
-
-    public static CameraFollow Instance
+    public class CameraFollow : MonoBehaviour
     {
-        get
-        {
-            if (instance == null)
-                instance = FindObjectOfType<CameraFollow>();
+        public GameObject agent;
 
-            return instance;
+        private static CameraFollow instance = null;
+
+        public static CameraFollow Instance
+        {
+            get
+            {
+                if (!instance)
+                    instance = FindObjectOfType<CameraFollow>();
+
+                return instance;
+            }
         }
-    }
 
-    private void Awake()
-    {
-        instance = this;
-    }
-
-    public void Reset()
-    {
-        this.transform.position = new Vector3(0, 0, this.transform.position.z);
-    }
-
-    public void UpdateCamera()
-    {
-        Vector3 follow = Vector3.zero;
-
-        if (PopulationManager.Instance != null)
+        private void Awake()
         {
-            if (PopulationManager.Instance.GetBestAgent() != null)
-                follow = PopulationManager.Instance.GetBestAgent().transform.position;
+            instance = this;
+        }
+
+        public void Reset()
+        {
+            this.transform.position = new Vector3(0, 0, this.transform.position.z);
+        }
+
+        public void UpdateCamera()
+        {
+            Vector3 follow = Vector3.zero;
+
+            if (PopulationManager.Instance)
+            {
+                if (PopulationManager.Instance.GetBestAgent())
+                    follow = PopulationManager.Instance.GetBestAgent().transform.position;
+                else
+                    return;
+            }
             else
-                return;
-        }
-        else
-            follow = agent.transform.position;
+                follow = agent.transform.position;
 
-        Vector3 pos = this.transform.position;
-        pos.x = follow.x;
-        this.transform.position = pos;
+            Vector3 pos = this.transform.position;
+            pos.x = follow.x;
+            this.transform.position = pos;
+        }
     }
 }

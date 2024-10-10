@@ -1,0 +1,12 @@
+{
+    "PopulationCount": 100,
+    "EliteCount": 16,
+    "MutationChance": 0.25999999046325686,
+    "MutationRate": 0.10000000149011612,
+    "InputsCount": 4,
+    "HiddenLayers": 0,
+    "OutputsCount": 1,
+    "NeuronsCountPerHL": 1,
+    "Bias": 1.0,
+    "Sigmoid": 0.5
+}

@@ -1,60 +1,60 @@
 ﻿using UnityEngine;
 
-public class Neuron
+namespace FlappyIa.NeuralNet
 {
-    private float[] weights;
-    private float bias;
-    private float p;
-
-    public int WeightsCount
+    public class Neuron
     {
-        get { return weights.Length; }
-    }
+        private float[] weights;
+        private float bias;
+        private float p;
 
-    public Neuron(int weightsCount, float bias, float p)
-    {
-        weights = new float[weightsCount];
+        public int WeightsCount => weights.Length;
 
-        for (int i = 0; i < weights.Length; i++)
+        public Neuron(int weightsCount, float bias, float p)
         {
-            weights[i] = Random.Range(-1.0f, 1.0f);
+            weights = new float[weightsCount];
+
+            for (int i = 0; i < weights.Length; i++)
+            {
+                weights[i] = Random.Range(-1.0f, 1.0f);
+            }
+
+            this.bias = bias;
+            this.p = p;
         }
 
-        this.bias = bias;
-        this.p = p;
-    }
-
-    public float Synapsis(float[] input)
-    {
-        float a = 0;
-
-        for (int i = 0; i < input.Length; i++)
+        public float Synapse(float[] input)
         {
-            a += weights[i] * input[i];
+            float a = 0;
+
+            for (int i = 0; i < input.Length; i++)
+            {
+                a += weights[i] * input[i];
+            }
+
+            a += bias * weights[^1];
+
+            return Sigmoid(a);
         }
 
-        a += bias * weights[weights.Length - 1];
-
-        return Sigmoid(a);
-    }
-
-    public int SetWeights(float[] newWeights, int fromId)
-    {
-        for (int i = 0; i < weights.Length; i++)
+        public int SetWeights(float[] newWeights, int fromId)
         {
-            this.weights[i] = newWeights[i + fromId];
+            for (int i = 0; i < weights.Length; i++)
+            {
+                this.weights[i] = newWeights[i + fromId];
+            }
+
+            return fromId + weights.Length;
         }
 
-        return fromId + weights.Length;
-    }
+        public float[] GetWeights()
+        {
+            return this.weights;
+        }
 
-    public float[] GetWeights()
-    {
-        return this.weights;
-    }
-
-    private float Sigmoid(float a)
-    {
-        return 1.0f / (1.0f + Mathf.Exp(-a / p));
+        private float Sigmoid(float a)
+        {
+            return 1.0f / (1.0f + Mathf.Exp(-a / p));
+        }
     }
 }
