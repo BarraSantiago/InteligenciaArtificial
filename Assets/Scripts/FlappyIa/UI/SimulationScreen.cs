@@ -1,4 +1,5 @@
-﻿using FlappyIa.AI;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -21,7 +22,8 @@ public class SimulationScreen : MonoBehaviour
     string timerText;
     int lastGeneration = 0;
 
-    private void Start()
+    // Start is called before the first frame update
+    void Start()
     {
         timerSlider.onValueChanged.AddListener(OnTimerChange);
         timerText = timerTxt.text;
@@ -29,28 +31,28 @@ public class SimulationScreen : MonoBehaviour
         timerTxt.text = string.Format(timerText, PopulationManager.Instance.IterationCount);
 
         if (string.IsNullOrEmpty(generationsCountText))
-            generationsCountText = generationsCountTxt.text;
+            generationsCountText = generationsCountTxt.text;   
         if (string.IsNullOrEmpty(bestFitnessText))
-            bestFitnessText = bestFitnessTxt.text;
+            bestFitnessText = bestFitnessTxt.text;   
         if (string.IsNullOrEmpty(avgFitnessText))
-            avgFitnessText = avgFitnessTxt.text;
+            avgFitnessText = avgFitnessTxt.text;   
         if (string.IsNullOrEmpty(worstFitnessText))
-            worstFitnessText = worstFitnessTxt.text;
+            worstFitnessText = worstFitnessTxt.text;   
 
         pauseBtn.onClick.AddListener(OnPauseButtonClick);
         stopBtn.onClick.AddListener(OnStopButtonClick);
     }
 
-    private void OnEnable()
+    void OnEnable()
     {
         if (string.IsNullOrEmpty(generationsCountText))
-            generationsCountText = generationsCountTxt.text;
+            generationsCountText = generationsCountTxt.text;   
         if (string.IsNullOrEmpty(bestFitnessText))
-            bestFitnessText = bestFitnessTxt.text;
+            bestFitnessText = bestFitnessTxt.text;   
         if (string.IsNullOrEmpty(avgFitnessText))
-            avgFitnessText = avgFitnessTxt.text;
+            avgFitnessText = avgFitnessTxt.text;   
         if (string.IsNullOrEmpty(worstFitnessText))
-            worstFitnessText = worstFitnessTxt.text;
+            worstFitnessText = worstFitnessTxt.text;   
 
         generationsCountTxt.text = string.Format(generationsCountText, 0);
         bestFitnessTxt.text = string.Format(bestFitnessText, 0);
@@ -58,18 +60,18 @@ public class SimulationScreen : MonoBehaviour
         worstFitnessTxt.text = string.Format(worstFitnessText, 0);
     }
 
-    private void OnTimerChange(float value)
+    void OnTimerChange(float value)
     {
         PopulationManager.Instance.IterationCount = (int)value;
         timerTxt.text = string.Format(timerText, PopulationManager.Instance.IterationCount);
     }
 
-    static void OnPauseButtonClick()
+    void OnPauseButtonClick()
     {
         PopulationManager.Instance.PauseSimulation();
     }
 
-    private void OnStopButtonClick()
+    void OnStopButtonClick()
     {
         PopulationManager.Instance.StopSimulation();
         this.gameObject.SetActive(false);
@@ -77,13 +79,15 @@ public class SimulationScreen : MonoBehaviour
         lastGeneration = 0;
     }
 
-    private void LateUpdate()
+    void LateUpdate()
     {
-        if (lastGeneration == PopulationManager.Instance.generation) return;
-        lastGeneration = PopulationManager.Instance.generation;
-        generationsCountTxt.text = string.Format(generationsCountText, PopulationManager.Instance.generation);
-        bestFitnessTxt.text = string.Format(bestFitnessText, PopulationManager.Instance.bestFitness);
-        avgFitnessTxt.text = string.Format(avgFitnessText, PopulationManager.Instance.avgFitness);
-        worstFitnessTxt.text = string.Format(worstFitnessText, PopulationManager.Instance.worstFitness);
+        if (lastGeneration != PopulationManager.Instance.generation)
+        {
+            lastGeneration = PopulationManager.Instance.generation;
+            generationsCountTxt.text = string.Format(generationsCountText, PopulationManager.Instance.generation);
+            bestFitnessTxt.text = string.Format(bestFitnessText, PopulationManager.Instance.bestFitness);
+            avgFitnessTxt.text = string.Format(avgFitnessText, PopulationManager.Instance.avgFitness);
+            worstFitnessTxt.text = string.Format(worstFitnessText, PopulationManager.Instance.worstFitness);
+        }
     }
 }

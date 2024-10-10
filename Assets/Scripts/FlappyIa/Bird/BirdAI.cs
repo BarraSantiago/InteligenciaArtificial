@@ -18,7 +18,7 @@ namespace FlappyIa.Bird
 
 
             float[] outputs;
-            outputs = brain.Synapse(inputs);
+            outputs = brain.Synapsis(inputs);
             if (outputs[0] < 0.5f)
             {
                 birdBehaviour.Flap();

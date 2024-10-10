@@ -1,5 +1,4 @@
-﻿using FlappyIa.AI;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace FlappyIa.Camera
 {
@@ -33,7 +32,7 @@ namespace FlappyIa.Camera
         public void UpdateCamera()
         {
             Vector3 follow = Vector3.zero;
-
+            /*
             if (PopulationManager.Instance)
             {
                 if (PopulationManager.Instance.GetBestAgent())
@@ -42,7 +41,7 @@ namespace FlappyIa.Camera
                     return;
             }
             else
-                follow = agent.transform.position;
+                follow = agent.transform.position;*/
 
             Vector3 pos = this.transform.position;
             pos.x = follow.x;
