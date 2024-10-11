@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using FlappyIa.GeneticAlg;
 using UnityEngine;
 
 namespace FlappyIa.AI

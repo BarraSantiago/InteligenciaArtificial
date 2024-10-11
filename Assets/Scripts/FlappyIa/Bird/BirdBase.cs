@@ -1,4 +1,5 @@
-﻿using FlappyIa.Obstacles;
+﻿using FlappyIa.GeneticAlg;
+using FlappyIa.Obstacles;
 using UnityEngine;
 
 namespace FlappyIa.Bird
