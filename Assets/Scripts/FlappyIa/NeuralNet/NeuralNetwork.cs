@@ -43,7 +43,7 @@ public class NeuralNetwork
 
 	private bool AddNeuronLayer(int inputsCount, int neuronsCount, float bias, float p)
 	{
-		if (layers.Count > 0 && layers[layers.Count - 1].OutputsCount != inputsCount)
+		if (layers.Count > 0 && layers[^1].OutputsCount != inputsCount)
 		{
 			Debug.LogError("Inputs Count must match outputs from previous layer.");
 			return false;

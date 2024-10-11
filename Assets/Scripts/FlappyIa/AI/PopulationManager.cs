@@ -19,7 +19,7 @@ public class PopulationManager : MonoBehaviour
     public float MutationChance = 0.10f;
     public float MutationRate = 0.01f;
 
-    public int InputsCount = 4;
+    public int InputsCount = 6;
     public int HiddenLayers = 1;
     public int OutputsCount = 2;
     public int NeuronsCountPerHL = 7;
@@ -99,7 +99,7 @@ public class PopulationManager : MonoBehaviour
     {
         get
         {
-            if (instance == null)
+            if (!instance)
                 instance = FindObjectOfType<PopulationManager>();
 
             return instance;
@@ -322,7 +322,7 @@ public class PopulationManager : MonoBehaviour
             bool good = Random.Range(-1.0f, 1.0f) >= 0;
 
             SetMineGood(good, go);
-
+            
             mines.Add(go);
         }
     }
@@ -410,11 +410,10 @@ public class PopulationManager : MonoBehaviour
         foreach (GameObject go in badMines)
         {
             float newDist = (go.transform.position - pos).sqrMagnitude;
-            if (newDist < distance)
-            {
-                nearest = go;
-                distance = newDist;
-            }
+            if (!(newDist < distance)) continue;
+            
+            nearest = go;
+            distance = newDist;
         }
 
         return nearest;
