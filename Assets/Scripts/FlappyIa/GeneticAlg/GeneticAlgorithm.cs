@@ -86,7 +86,7 @@ public class GeneticAlgorithm
 		return newPopulation.ToArray();
 	}
 
-	void SelectElite()
+	private void SelectElite()
 	{
 		for (int i = 0; i < eliteCount && newPopulation.Count < population.Count; i++)
 		{
@@ -94,7 +94,7 @@ public class GeneticAlgorithm
 		}
 	}
 
-	void Crossover()
+	private void Crossover()
 	{
 		Genome mom = RouletteSelection();
 		Genome dad = RouletteSelection();
@@ -108,11 +108,13 @@ public class GeneticAlgorithm
 		newPopulation.Add(child2);
 	}
 
-	void Crossover(Genome mom, Genome dad, out Genome child1, out Genome child2)
+	private void Crossover(Genome mom, Genome dad, out Genome child1, out Genome child2)
 	{
 		child1 = new Genome();
 		child2 = new Genome();
 
+		// TODO sesgo uniform o anular crossover
+		
 		child1.genome = new float[mom.genome.Length];
 		child2.genome = new float[mom.genome.Length];
 
@@ -145,12 +147,12 @@ public class GeneticAlgorithm
 		}
 	}
 
-	bool ShouldMutate()
+	private bool ShouldMutate()
 	{
 		return Random.Range(0.0f, 1.0f) < mutationChance;
 	}
 
-	int HandleComparison(Genome x, Genome y)
+	static int HandleComparison(Genome x, Genome y)
 	{
 		return x.fitness > y.fitness ? 1 : x.fitness < y.fitness ? -1 : 0;
 	}

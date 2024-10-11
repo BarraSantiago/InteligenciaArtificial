@@ -8,12 +8,9 @@ public class NeuralNetwork
 	int totalWeightsCount = 0;
     int inputsCount = 0;
 
-    public int InputsCount
-    {
-        get { return inputsCount; }
-    }
+    public int InputsCount => inputsCount;
 
-	public NeuralNetwork()
+    public NeuralNetwork()
 	{
 	}
 
@@ -25,7 +22,7 @@ public class NeuralNetwork
 			return false;
 		}
 
-		return AddNeuronLayer(layers[layers.Count - 1].OutputsCount, neuronsCount, bias, p);
+		return AddNeuronLayer(layers[^1].OutputsCount, neuronsCount, bias, p);
 	}
 
  	public bool AddFirstNeuronLayer(int inputsCount, float bias, float p)

@@ -31,7 +31,7 @@ namespace FlappyIa.AI
 
         GeneticAlgorithm genAlg;
 
-        List<Tank> populationGOs = new List<Tank>();
+        List<Tank.Tank> populationGOs = new List<Tank.Tank>();
         List<Genome> population = new List<Genome>();
         List<NeuralNetwork> brains = new List<NeuralNetwork>();
         List<GameObject> mines = new List<GameObject>();
@@ -41,26 +41,26 @@ namespace FlappyIa.AI
         float accumTime = 0;
         bool isRunning = false;
 
-        public int generation {
+        public int Generation {
             get; private set;
         }
 
-        public float bestFitness 
+        public float BestFitness 
         {
             get; private set;
         }
 
-        public float avgFitness 
+        public float AvgFitness 
         {
             get; private set;
         }
 
-        public float worstFitness 
+        public float WorstFitness 
         {
             get; private set;
         }
 
-        private float getBestFitness()
+        private float GetBestFitness()
         {
             float fitness = 0;
             foreach(Genome g in population)
@@ -72,7 +72,7 @@ namespace FlappyIa.AI
             return fitness;
         }
 
-        private float getAvgFitness()
+        private float GetAvgFitness()
         {
             float fitness = 0;
             foreach(Genome g in population)
@@ -83,7 +83,7 @@ namespace FlappyIa.AI
             return fitness / population.Count;
         }
 
-        private float getWorstFitness()
+        private float GetWorstFitness()
         {
             float fitness = float.MaxValue;
             foreach(Genome g in population)
@@ -108,7 +108,7 @@ namespace FlappyIa.AI
             }
         }
 
-        void Awake()
+        private void Awake()
         {
             instance = this;
         }
@@ -137,7 +137,7 @@ namespace FlappyIa.AI
         {
             isRunning = false;
 
-            generation = 0;
+            Generation = 0;
 
             // Destroy previous tanks (if there are any)
             DestroyTanks();
@@ -147,9 +147,9 @@ namespace FlappyIa.AI
         }
 
         // Generate the random initial population
-        void GenerateInitialPopulation()
+        private void GenerateInitialPopulation()
         {
-            generation = 0;
+            Generation = 0;
 
             // Destroy previous tanks (if there are any)
             DestroyTanks();
@@ -171,7 +171,7 @@ namespace FlappyIa.AI
         }
 
         // Creates a new NeuralNetwork
-        NeuralNetwork CreateBrain()
+        private NeuralNetwork CreateBrain()
         {
             NeuralNetwork brain = new NeuralNetwork();
 
@@ -194,12 +194,12 @@ namespace FlappyIa.AI
         void Epoch()
         {
             // Increment generation counter
-            generation++;
+            Generation++;
 
             // Calculate best, average and worst fitness
-            bestFitness = getBestFitness();
-            avgFitness = getAvgFitness();
-            worstFitness = getWorstFitness();
+            BestFitness = GetBestFitness();
+            AvgFitness = GetAvgFitness();
+            WorstFitness = GetWorstFitness();
 
             // Evolve each genome and create a new array of genomes
             Genome[] newGenomes = genAlg.Epoch(population.ToArray());
@@ -233,7 +233,7 @@ namespace FlappyIa.AI
 
             for (int i = 0; i < Mathf.Clamp((float)(IterationCount / 100.0f) * 50, 1, 50); i++)
             {
-                foreach (Tank t in populationGOs)
+                foreach (Tank.Tank t in populationGOs)
                 {
                     // Get the nearest mine
                     GameObject mine = GetNearestMine(t.transform.position);
@@ -282,7 +282,7 @@ namespace FlappyIa.AI
         }
 
         #region Helpers
-        Tank CreateTank(Genome genome, NeuralNetwork brain)
+        Tank.Tank CreateTank(Genome genome, NeuralNetwork brain)
         {
             Vector3 position = GetRandomPos();
             GameObject go = Instantiate(TankPrefab, position, GetRandomRot());
@@ -292,7 +292,7 @@ namespace FlappyIa.AI
                 renderer.material.color = tankColor;
             }
             
-            Tank t = go.GetComponent<Tank>();
+            Tank.Tank t = go.GetComponent<Tank.Tank>();
             t.SetBrain(genome, brain);
             return t;
         }
@@ -309,7 +309,7 @@ namespace FlappyIa.AI
 
         void DestroyTanks()
         {
-            foreach (Tank go in populationGOs)
+            foreach (Tank.Tank go in populationGOs)
                 Destroy(go.gameObject);
 
             populationGOs.Clear();

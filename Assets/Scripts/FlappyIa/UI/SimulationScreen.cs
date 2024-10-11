@@ -82,13 +82,13 @@ public class SimulationScreen : MonoBehaviour
 
     void LateUpdate()
     {
-        if (lastGeneration != PopulationManager.Instance.generation)
+        if (lastGeneration != PopulationManager.Instance.Generation)
         {
-            lastGeneration = PopulationManager.Instance.generation;
-            generationsCountTxt.text = string.Format(generationsCountText, PopulationManager.Instance.generation);
-            bestFitnessTxt.text = string.Format(bestFitnessText, PopulationManager.Instance.bestFitness);
-            avgFitnessTxt.text = string.Format(avgFitnessText, PopulationManager.Instance.avgFitness);
-            worstFitnessTxt.text = string.Format(worstFitnessText, PopulationManager.Instance.worstFitness);
+            lastGeneration = PopulationManager.Instance.Generation;
+            generationsCountTxt.text = string.Format(generationsCountText, PopulationManager.Instance.Generation);
+            bestFitnessTxt.text = string.Format(bestFitnessText, PopulationManager.Instance.BestFitness);
+            avgFitnessTxt.text = string.Format(avgFitnessText, PopulationManager.Instance.AvgFitness);
+            worstFitnessTxt.text = string.Format(worstFitnessText, PopulationManager.Instance.WorstFitness);
         }
     }
 }
