@@ -1,11 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
+using FlappyIa.AI;
 
 public class TankBase : MonoBehaviour
 {
     public float Speed = 10.0f;
     public float RotSpeed = 20.0f;
-
+    public int team = 0;
+    
     protected Genome genome;
 	protected NeuralNetwork brain;
     protected GameObject nearMine;

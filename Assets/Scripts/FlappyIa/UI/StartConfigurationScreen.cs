@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using FlappyIa.AI;
 using UnityEngine;
 using UnityEngine.UI;
 
