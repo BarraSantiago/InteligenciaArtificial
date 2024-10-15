@@ -1,15 +1,16 @@
-﻿using FlappyIa.AI;
+﻿using System;
 using FlappyIa.GeneticAlg;
 using UnityEngine;
 
-namespace Tank
+namespace Agent
 {
     public class TankBase : MonoBehaviour
     {
         public float Speed = 10.0f;
         public float RotSpeed = 20.0f;
         public int team = 0;
-    
+        public Action<GameObject> OnMineTaken;
+        
         protected Genome genome;
         protected NeuralNetwork brain;
         protected GameObject nearMine;
@@ -17,7 +18,7 @@ namespace Tank
         protected GameObject badMine;
         protected float[] inputs;
         protected float fitnessMod = 1;
-    
+        
     
     
         private int turnRightCount = 0;
@@ -94,7 +95,7 @@ namespace Tank
             {
                 OnTakeMine(nearMine);
             
-                PopulationManager.Instance.RelocateMine(nearMine);
+                OnMineTaken?.Invoke(nearMine);
             }
 
             if (turnRightCount <= MAX_TURNS && turnLeftCount <= MAX_TURNS && badMinesCount < MAX_BAD_MINES) return;

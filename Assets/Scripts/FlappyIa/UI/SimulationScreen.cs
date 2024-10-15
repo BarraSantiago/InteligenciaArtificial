@@ -15,6 +15,8 @@ public class SimulationScreen : MonoBehaviour
     public Button pauseBtn;
     public Button stopBtn;
     public GameObject startConfigurationScreen;
+    public PopulationManager populationManager1;
+    public PopulationManager populationManager2;
 
     string generationsCountText;
     string bestFitnessText;
@@ -26,10 +28,13 @@ public class SimulationScreen : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        var populations = FindObjectsOfType<PopulationManager>();
+        populationManager1 = populations[0];
+        populationManager2 = populations[1];
         timerSlider.onValueChanged.AddListener(OnTimerChange);
         timerText = timerTxt.text;
 
-        timerTxt.text = string.Format(timerText, PopulationManager.Instance.IterationCount);
+        timerTxt.text = string.Format(timerText, populationManager1.IterationCount);
 
         if (string.IsNullOrEmpty(generationsCountText))
             generationsCountText = generationsCountTxt.text;   
@@ -63,18 +68,20 @@ public class SimulationScreen : MonoBehaviour
 
     void OnTimerChange(float value)
     {
-        PopulationManager.Instance.IterationCount = (int)value;
-        timerTxt.text = string.Format(timerText, PopulationManager.Instance.IterationCount);
+        populationManager1.IterationCount = (int)value;
+        populationManager2.IterationCount = (int)value;
+        timerTxt.text = string.Format(timerText, populationManager1.IterationCount);
     }
 
     void OnPauseButtonClick()
     {
-        PopulationManager.Instance.PauseSimulation();
+        populationManager1.PauseSimulation();
     }
 
     void OnStopButtonClick()
     {
-        PopulationManager.Instance.StopSimulation();
+        populationManager1.StopSimulation();
+        populationManager2.StopSimulation();
         this.gameObject.SetActive(false);
         startConfigurationScreen.SetActive(true);
         lastGeneration = 0;
@@ -82,13 +89,13 @@ public class SimulationScreen : MonoBehaviour
 
     void LateUpdate()
     {
-        if (lastGeneration != PopulationManager.Instance.Generation)
+        if (lastGeneration != populationManager1.Generation)
         {
-            lastGeneration = PopulationManager.Instance.Generation;
-            generationsCountTxt.text = string.Format(generationsCountText, PopulationManager.Instance.Generation);
-            bestFitnessTxt.text = string.Format(bestFitnessText, PopulationManager.Instance.BestFitness);
-            avgFitnessTxt.text = string.Format(avgFitnessText, PopulationManager.Instance.AvgFitness);
-            worstFitnessTxt.text = string.Format(worstFitnessText, PopulationManager.Instance.WorstFitness);
+            lastGeneration = populationManager1.Generation;
+            generationsCountTxt.text = string.Format(generationsCountText, populationManager1.Generation);
+            bestFitnessTxt.text = string.Format(bestFitnessText, populationManager1.BestFitness);
+            avgFitnessTxt.text = string.Format(avgFitnessText, populationManager1.AvgFitness);
+            worstFitnessTxt.text = string.Format(worstFitnessText, populationManager1.WorstFitness);
         }
     }
 }

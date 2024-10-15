@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Tank
+namespace Agent
 {
     public class Tank : TankBase
     {

@@ -1950,6 +1950,8 @@ MonoBehaviour:
   pauseBtn: {fileID: 1143498180}
   stopBtn: {fileID: 898333281}
   startConfigurationScreen: {fileID: 886660823}
+  populationManager1: {fileID: 0}
+  populationManager2: {fileID: 0}
 --- !u!114 &493711103
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2917,6 +2919,8 @@ MonoBehaviour:
   sigmoidSlopeSlider: {fileID: 1585947224}
   startButton: {fileID: 1703906448}
   simulationScreen: {fileID: 493711100}
+  populationManager1: {fileID: 0}
+  populationManager2: {fileID: 0}
 --- !u!114 &886660826
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5262,7 +5266,7 @@ MonoBehaviour:
   TankPrefab: {fileID: 1915012411374756, guid: c7621d24efff4b04ca19cf2ef19a1af9, type: 3}
   MinePrefab: {fileID: 1712181699425504, guid: 74d6116ddc0b6ab4686323b873e69fb8, type: 3}
   PopulationCount: 40
-  MinesCount: 40
+  MinesCount: 0
   SceneHalfExtents: {x: 30, y: 0, z: 40}
   GenerationDuration: 20
   IterationCount: 1
