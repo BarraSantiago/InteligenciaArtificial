@@ -35,8 +35,8 @@ namespace FlappyIa.GeneticAlg
 
     public class GeneticAlgorithm
     {
-        List<Genome> population = new List<Genome>();
-        List<Genome> newPopulation = new List<Genome>();
+        private readonly List<Genome> population = new();
+        private readonly List<Genome> newPopulation = new();
 
         float totalFitness;
 
@@ -111,13 +111,11 @@ namespace FlappyIa.GeneticAlg
             newPopulation.Add(child2);
         }
 
-        private void Crossover(Genome mom, Genome dad, out Genome child1, out Genome child2)
+        private void SinglePivotCrossover(Genome mom, Genome dad, out Genome child1, out Genome child2)
         {
             child1 = new Genome();
             child2 = new Genome();
-
-            // TODO sesgo uniform o anular crossover
-
+            
             child1.genome = new float[mom.genome.Length];
             child2.genome = new float[mom.genome.Length];
 

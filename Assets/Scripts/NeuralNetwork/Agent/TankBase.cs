@@ -83,6 +83,11 @@ namespace Agent
             }
         }
 
+        protected void Shoot()
+        {
+            
+        }
+
         public void Think(float dt) 
         {
             const int MAX_TURNS = 100;

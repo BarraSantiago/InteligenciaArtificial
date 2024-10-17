@@ -14,7 +14,7 @@ namespace FlappyIa.AI
         public int PopulationCount = 40;
         public int MinesCount = 50;
 
-        public Vector3 SceneHalfExtents = new Vector3 (20.0f, 0.0f, 20.0f);
+        public Vector3 SceneHalfExtents = new(20.0f, 0.0f, 20.0f);
 
         public float GenerationDuration = 20.0f;
         public int IterationCount = 1;
@@ -33,39 +33,28 @@ namespace FlappyIa.AI
 
         GeneticAlgorithm genAlg;
 
-        List<Agent.Tank> populationGOs = new List<Agent.Tank>();
+        private List<Agent.Tank> populationGOs = new List<Agent.Tank>();
         List<Genome> population = new List<Genome>();
         List<NeuralNetwork> brains = new List<NeuralNetwork>();
         public static List<GameObject> mines = new List<GameObject>();
         static List<GameObject> goodMines = new List<GameObject>();
         static List<GameObject> badMines = new List<GameObject>();
-     
+
         float accumTime = 0;
         bool isRunning = false;
 
-        public int Generation {
-            get; private set;
-        }
+        public int Generation { get; private set; }
 
-        public float BestFitness 
-        {
-            get; private set;
-        }
+        public float BestFitness { get; private set; }
 
-        public float AvgFitness 
-        {
-            get; private set;
-        }
+        public float AvgFitness { get; private set; }
 
-        public float WorstFitness 
-        {
-            get; private set;
-        }
+        public float WorstFitness { get; private set; }
 
         private float GetBestFitness()
         {
             float fitness = 0;
-            foreach(Genome g in population)
+            foreach (Genome g in population)
             {
                 if (fitness < g.fitness)
                     fitness = g.fitness;
@@ -77,7 +66,7 @@ namespace FlappyIa.AI
         private float GetAvgFitness()
         {
             float fitness = 0;
-            foreach(Genome g in population)
+            foreach (Genome g in population)
             {
                 fitness += g.fitness;
             }
@@ -88,7 +77,7 @@ namespace FlappyIa.AI
         private float GetWorstFitness()
         {
             float fitness = float.MaxValue;
-            foreach(Genome g in population)
+            foreach (Genome g in population)
             {
                 if (fitness > g.fitness)
                     fitness = g.fitness;
@@ -96,13 +85,14 @@ namespace FlappyIa.AI
 
             return fitness;
         }
+
         public void StartSimulation()
         {
             // Create and confiugre the Genetic Algorithm
             genAlg = new GeneticAlgorithm(EliteCount, MutationChance, MutationRate);
 
             GenerateInitialPopulation();
-            if(MinesCount > 0)CreateMines();
+            if (MinesCount > 0) CreateMines();
 
             isRunning = true;
         }
@@ -132,11 +122,11 @@ namespace FlappyIa.AI
 
             // Destroy previous tanks (if there are any)
             DestroyTanks();
-        
+
             for (int i = 0; i < PopulationCount; i++)
             {
                 NeuralNetwork brain = CreateBrain();
-            
+
                 Genome genome = new Genome(brain.GetTotalWeightsCount());
 
                 brain.SetWeights(genome.genome);
@@ -203,11 +193,11 @@ namespace FlappyIa.AI
         }
 
         // Update is called once per frame
-        void FixedUpdate () 
+        void FixedUpdate()
         {
             if (!isRunning)
                 return;
-        
+
             float dt = Time.fixedDeltaTime;
 
             for (int i = 0; i < Mathf.Clamp((float)(IterationCount / 100.0f) * 50, 1, 50); i++)
@@ -261,6 +251,7 @@ namespace FlappyIa.AI
         }
 
         #region Helpers
+
         private Tank CreateTank(Genome genome, NeuralNetwork brain)
         {
             Vector3 position = GetRandomPos();
@@ -270,7 +261,7 @@ namespace FlappyIa.AI
             {
                 renderer.material.color = tankColor;
             }
-            
+
             Tank t = go.GetComponent<Tank>();
             t.SetBrain(genome, brain);
             t.OnMineTaken += RelocateMine;
@@ -300,7 +291,7 @@ namespace FlappyIa.AI
             brains.Clear();
         }
 
-        void CreateMines()
+        private void CreateMines()
         {
             // Destroy previous created mines
             DestroyMines();
@@ -308,12 +299,12 @@ namespace FlappyIa.AI
             for (int i = 0; i < MinesCount; i++)
             {
                 Vector3 position = GetRandomPos();
-                GameObject go = Instantiate<GameObject>(MinePrefab, position, Quaternion.identity);
+                GameObject go = Instantiate(MinePrefab, position, Quaternion.identity);
 
                 bool good = Random.Range(-1.0f, 1.0f) >= 0;
 
                 SetMineGood(good, go);
-            
+
                 mines.Add(go);
             }
         }
@@ -330,7 +321,6 @@ namespace FlappyIa.AI
                 go.GetComponent<Renderer>().material.color = Color.red;
                 badMines.Add(go);
             }
-
         }
 
         public void RelocateMine(GameObject mine)
@@ -349,7 +339,8 @@ namespace FlappyIa.AI
 
         Vector3 GetRandomPos()
         {
-            return new Vector3(Random.value * SceneHalfExtents.x * 2.0f - SceneHalfExtents.x, 0.0f, Random.value * SceneHalfExtents.z * 2.0f - SceneHalfExtents.z); 
+            return new Vector3(Random.value * SceneHalfExtents.x * 2.0f - SceneHalfExtents.x, 0.0f,
+                Random.value * SceneHalfExtents.z * 2.0f - SceneHalfExtents.z);
         }
 
         Quaternion GetRandomRot()
@@ -373,7 +364,7 @@ namespace FlappyIa.AI
             }
 
             return nearest;
-        }   
+        }
 
         GameObject GetNearestGoodMine(Vector3 pos)
         {
@@ -391,7 +382,7 @@ namespace FlappyIa.AI
             }
 
             return nearest;
-        }   
+        }
 
         GameObject GetNearestBadMine(Vector3 pos)
         {
@@ -402,15 +393,14 @@ namespace FlappyIa.AI
             {
                 float newDist = (go.transform.position - pos).sqrMagnitude;
                 if (!(newDist < distance)) continue;
-            
+
                 nearest = go;
                 distance = newDist;
             }
 
             return nearest;
-        }   
+        }
 
         #endregion
-
     }
 }
