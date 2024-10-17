@@ -28,6 +28,7 @@ namespace Agent
             float[] output = brain.Synapsis(inputs);
 
             SetForces(output[0], output[1], dt);
+            if(output[2] > 0.5f) Shoot();
         }
 
         protected override void OnTakeMine(GameObject mine)
@@ -48,6 +49,27 @@ namespace Agent
                 DecreaseFitnessMod();
                 fitness *= PUNISHMENT + 0.04f * fitnessMod;
                 badMinesCount++;
+            }
+
+            genome.fitness = fitness;
+        }
+
+        public void OnTankKilled(int victimTeamId)
+        {
+            const int REWARD = 10;
+            const float PUNISHMENT = 0.85f;
+        
+            if (team == victimTeamId)
+            {
+                DecreaseFitnessMod();
+                fitness *= PUNISHMENT + 0.04f * fitnessMod;
+            }
+            else
+            {
+                IncreaseFitnessMod();
+                if (fitnessMod > MAX_FITNESS) fitnessMod = MAX_FITNESS;
+
+                fitness += REWARD * fitnessMod;
             }
 
             genome.fitness = fitness;

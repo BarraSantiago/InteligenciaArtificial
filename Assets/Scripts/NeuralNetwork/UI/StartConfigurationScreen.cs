@@ -168,6 +168,8 @@ namespace FlappyIa.UI
 
         private void OnStartButtonClick()
         {
+            populationManager1.teamId = 0;
+            populationManager2.teamId = 1;
             populationManager1.StartSimulation();
             populationManager2.StartSimulation();
             this.gameObject.SetActive(false);

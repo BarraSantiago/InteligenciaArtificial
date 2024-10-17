@@ -6,11 +6,15 @@ namespace Agent
 {
     public class TankBase : MonoBehaviour
     {
+        [SerializeField] private Transform projectileSpawnPoint;
+        [SerializeField] private GameObject projectileDirection;
+        public static GameObject projectilePrefab;
         public float Speed = 10.0f;
         public float RotSpeed = 20.0f;
         public int team = 0;
+        public int id = 0;
         public Action<GameObject> OnMineTaken;
-        
+
         protected Genome genome;
         protected NeuralNetwork brain;
         protected GameObject nearMine;
@@ -18,9 +22,24 @@ namespace Agent
         protected GameObject badMine;
         protected float[] inputs;
         protected float fitnessMod = 1;
+
+        private int hp = 3;
+
+        public int Hp
+        {
+            get => hp;
+            protected set
+            {
+                hp = value;
+                if (hp <= 0)
+                {
+                    Death();
+                }
+            }
+        }
+
         
-    
-    
+
         private int turnRightCount = 0;
         private int turnLeftCount = 0;
         protected int badMinesCount = 0;
@@ -57,7 +76,7 @@ namespace Agent
         {
             return (mine.transform.position - this.transform.position).normalized;
         }
-    
+
         protected bool IsCloseToMine(GameObject mine)
         {
             return (this.transform.position - nearMine.transform.position).sqrMagnitude <= 2.0f;
@@ -70,7 +89,7 @@ namespace Agent
             this.transform.rotation *= Quaternion.AngleAxis(rotFactor * RotSpeed * dt, Vector3.up);
             pos += this.transform.forward * (Mathf.Abs(rightForce + leftForce) * 0.5f * Speed * dt);
             this.transform.position = pos;
-        
+
             if (rightForce > leftForce)
             {
                 turnRightCount++;
@@ -85,47 +104,30 @@ namespace Agent
 
         protected void Shoot()
         {
-            
+            Instantiate(projectilePrefab, this.transform.position, this.transform.rotation)
+                .GetComponent<TankProjectile>().Launch(projectileDirection.transform.forward, id, team);
         }
 
-        public void Think(float dt) 
+        public void Think(float dt)
         {
             const int MAX_TURNS = 100;
             const int MAX_BAD_MINES = 10;
             const float PUNISHMENT = 0.9f;
-        
+
             OnThink(dt);
 
-            if(IsCloseToMine(nearMine))
+            if (IsCloseToMine(nearMine))
             {
                 OnTakeMine(nearMine);
-            
+
                 OnMineTaken?.Invoke(nearMine);
             }
 
-            if (turnRightCount <= MAX_TURNS && turnLeftCount <= MAX_TURNS && badMinesCount < MAX_BAD_MINES) return;
-        
-            if(turnRightCount > MAX_TURNS)
-            {
-                DecreaseFitnessMod();
-                genome.fitness *= PUNISHMENT + 0.03f * fitnessMod;
-            }
-            else if(turnLeftCount > MAX_TURNS)
-            {
-                DecreaseFitnessMod();
-                genome.fitness *= PUNISHMENT + 0.03f * fitnessMod;
-            }
-        
-            if (badMinesCount >= MAX_BAD_MINES)
-            {
-                DecreaseFitnessMod();
-                genome.fitness *= PUNISHMENT/2 + 0.03f * fitnessMod;
-            }
+            CheckBadBehaviours(MAX_TURNS, MAX_BAD_MINES, PUNISHMENT);
         }
 
         protected virtual void OnThink(float dt)
         {
-
         }
 
         protected virtual void OnTakeMine(GameObject mine)
@@ -134,19 +136,51 @@ namespace Agent
 
         protected virtual void OnReset()
         {
-
         }
 
+        private void CheckBadBehaviours(int maxTurns, int maxBadMines, float punishment)
+        {
+            if (turnRightCount <= maxTurns && turnLeftCount <= maxTurns && badMinesCount < maxBadMines) return;
+
+            if (turnRightCount > maxTurns)
+            {
+                DecreaseFitnessMod();
+                genome.fitness *= punishment + 0.03f * fitnessMod;
+            }
+            else if (turnLeftCount > maxTurns)
+            {
+                DecreaseFitnessMod();
+                genome.fitness *= punishment + 0.03f * fitnessMod;
+            }
+
+            if (badMinesCount >= maxBadMines)
+            {
+                DecreaseFitnessMod();
+                genome.fitness *= punishment / 2 + 0.03f * fitnessMod;
+            }
+        }
+        
         protected void IncreaseFitnessMod()
         {
             const float MOD = 1.1f;
             fitnessMod *= MOD;
         }
-    
+
         protected void DecreaseFitnessMod()
         {
             const float MOD = 0.9f;
             fitnessMod *= MOD;
+        }
+
+        public bool TakeDamage(int damage)
+        {
+            Hp -= damage;
+            return hp <= 0;
+        }
+        
+        private void Death()
+        {
+            Destroy(this);
         }
     }
 }

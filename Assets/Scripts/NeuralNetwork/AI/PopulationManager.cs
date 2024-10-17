@@ -31,7 +31,7 @@ namespace FlappyIa.AI
         public float P = 0.5f;
 
 
-        GeneticAlgorithm genAlg;
+        private GeneticAlgorithm genAlg;
 
         private List<Agent.Tank> populationGOs = new List<Agent.Tank>();
         List<Genome> population = new List<Genome>();
@@ -42,6 +42,7 @@ namespace FlappyIa.AI
 
         float accumTime = 0;
         bool isRunning = false;
+        public int teamId;
 
         public int Generation { get; private set; }
 
@@ -88,6 +89,7 @@ namespace FlappyIa.AI
 
         public void StartSimulation()
         {
+            
             // Create and confiugre the Genetic Algorithm
             genAlg = new GeneticAlgorithm(EliteCount, MutationChance, MutationRate);
 
@@ -160,7 +162,7 @@ namespace FlappyIa.AI
         }
 
         // Evolve!!!
-        void Epoch()
+        private void Epoch()
         {
             // Increment generation counter
             Generation++;
@@ -193,7 +195,7 @@ namespace FlappyIa.AI
         }
 
         // Update is called once per frame
-        void FixedUpdate()
+        private void FixedUpdate()
         {
             if (!isRunning)
                 return;
@@ -263,6 +265,8 @@ namespace FlappyIa.AI
             }
 
             Tank t = go.GetComponent<Tank>();
+            t.team = teamId;
+            t.id = populationGOs.Count;
             t.SetBrain(genome, brain);
             t.OnMineTaken += RelocateMine;
             return t;
@@ -402,5 +406,10 @@ namespace FlappyIa.AI
         }
 
         #endregion
+
+        public void OnTankKilled(int tankId, int victimTeamId)
+        {
+            populationGOs[tankId].OnTankKilled(victimTeamId);
+        }
     }
 }
