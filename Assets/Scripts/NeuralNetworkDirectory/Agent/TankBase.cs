@@ -1,6 +1,7 @@
 ﻿using System;
 using Agent;
 using FlappyIa.GeneticAlg;
+using NeuralNetworkDirectory.NeuralNet;
 using UnityEngine;
 
 namespace NeuralNetworkDirectory.Agent

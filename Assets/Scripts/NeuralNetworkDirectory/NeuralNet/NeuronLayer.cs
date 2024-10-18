@@ -1,69 +1,72 @@
-﻿public class NeuronLayer
+﻿namespace NeuralNetworkDirectory.NeuralNet
 {
-    private readonly float bias = 1;
-    private readonly float p = 0.5f;
-    private Neuron[] neurons;
-    private float[] outputs;
-    private int totalWeights;
-
-    public NeuronLayer(int inputsCount, int neuronsCount, float bias, float p)
+    public class NeuronLayer
     {
-        InputsCount = inputsCount;
-        this.bias = bias;
-        this.p = p;
+        private readonly float bias = 1;
+        private readonly float p = 0.5f;
+        private Neuron[] neurons;
+        private float[] outputs;
+        private int totalWeights;
 
-        SetNeuronsCount(neuronsCount);
-    }
-
-    public int NeuronsCount => neurons.Length;
-
-    public int InputsCount { get; }
-
-    public int OutputsCount => outputs.Length;
-
-    private void SetNeuronsCount(int neuronsCount)
-    {
-        neurons = new Neuron[neuronsCount];
-
-        for (var i = 0; i < neurons.Length; i++)
+        public NeuronLayer(int inputsCount, int neuronsCount, float bias, float p)
         {
-            neurons[i] = new Neuron(InputsCount + 1, bias, p);
-            totalWeights += InputsCount + 1;
+            InputsCount = inputsCount;
+            this.bias = bias;
+            this.p = p;
+
+            SetNeuronsCount(neuronsCount);
         }
 
-        outputs = new float[neurons.Length];
-    }
+        public int NeuronsCount => neurons.Length;
 
-    public int SetWeights(float[] weights, int fromId)
-    {
-        for (var i = 0; i < neurons.Length; i++) fromId = neurons[i].SetWeights(weights, fromId);
+        public int InputsCount { get; }
 
-        return fromId;
-    }
+        public int OutputsCount => outputs.Length;
 
-    public float[] GetWeights()
-    {
-        var weights = new float[totalWeights];
-        var id = 0;
-
-        for (var i = 0; i < neurons.Length; i++)
+        private void SetNeuronsCount(int neuronsCount)
         {
-            var ws = neurons[i].GetWeights();
+            neurons = new Neuron[neuronsCount];
 
-            for (var j = 0; j < ws.Length; j++)
+            for (var i = 0; i < neurons.Length; i++)
             {
-                weights[id] = ws[j];
-                id++;
+                neurons[i] = new Neuron(InputsCount + 1, bias, p);
+                totalWeights += InputsCount + 1;
             }
+
+            outputs = new float[neurons.Length];
         }
 
-        return weights;
-    }
+        public int SetWeights(float[] weights, int fromId)
+        {
+            for (var i = 0; i < neurons.Length; i++) fromId = neurons[i].SetWeights(weights, fromId);
 
-    public float[] Synapsis(float[] inputs)
-    {
-        for (var j = 0; j < neurons.Length; j++) outputs[j] = neurons[j].Synapsis(inputs);
+            return fromId;
+        }
 
-        return outputs;
+        public float[] GetWeights()
+        {
+            var weights = new float[totalWeights];
+            var id = 0;
+
+            for (var i = 0; i < neurons.Length; i++)
+            {
+                var ws = neurons[i].GetWeights();
+
+                for (var j = 0; j < ws.Length; j++)
+                {
+                    weights[id] = ws[j];
+                    id++;
+                }
+            }
+
+            return weights;
+        }
+
+        public float[] Synapsis(float[] inputs)
+        {
+            for (var j = 0; j < neurons.Length; j++) outputs[j] = neurons[j].Synapsis(inputs);
+
+            return outputs;
+        }
     }
 }
