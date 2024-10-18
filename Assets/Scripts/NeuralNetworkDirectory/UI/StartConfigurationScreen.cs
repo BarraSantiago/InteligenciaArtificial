@@ -1,4 +1,4 @@
-﻿using FlappyIa.AI;
+﻿using NeuralNetworkDirectory.AI;
 using UnityEngine;
 using UnityEngine.UI;
 

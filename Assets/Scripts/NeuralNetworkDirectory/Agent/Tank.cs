@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using NeuralNetworkDirectory.Agent;
+using UnityEngine;
 
 namespace Agent
 {

@@ -1,8 +1,9 @@
 ﻿using System;
+using Agent;
 using FlappyIa.GeneticAlg;
 using UnityEngine;
 
-namespace Agent
+namespace NeuralNetworkDirectory.Agent
 {
     public class TankBase : MonoBehaviour
     {

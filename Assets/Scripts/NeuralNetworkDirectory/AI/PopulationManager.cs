@@ -3,7 +3,7 @@ using Agent;
 using FlappyIa.GeneticAlg;
 using UnityEngine;
 
-namespace FlappyIa.AI
+namespace NeuralNetworkDirectory.AI
 {
     public class PopulationManager : MonoBehaviour
     {
@@ -33,7 +33,7 @@ namespace FlappyIa.AI
 
         private GeneticAlgorithm genAlg;
 
-        private List<Agent.Tank> populationGOs = new List<Agent.Tank>();
+        private List<Tank> populationGOs = new List<Tank>();
         List<Genome> population = new List<Genome>();
         List<NeuralNetwork> brains = new List<NeuralNetwork>();
         public static List<GameObject> mines = new List<GameObject>();
@@ -204,7 +204,7 @@ namespace FlappyIa.AI
 
             for (int i = 0; i < Mathf.Clamp((float)(IterationCount / 100.0f) * 50, 1, 50); i++)
             {
-                foreach (Agent.Tank t in populationGOs)
+                foreach (Tank t in populationGOs)
                 {
                     // Get the nearest mine
                     GameObject mine = GetNearestMine(t.transform.position);

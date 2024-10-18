@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using FlappyIa.AI;
+using NeuralNetworkDirectory.AI;
 using UnityEngine;
 using UnityEngine.UI;
 

@@ -1,7 +1,7 @@
 ﻿using Agent;
 using UnityEngine;
 
-namespace FlappyIa.AI
+namespace NeuralNetworkDirectory.AI
 {
     public class GameManager : MonoBehaviour
     {
