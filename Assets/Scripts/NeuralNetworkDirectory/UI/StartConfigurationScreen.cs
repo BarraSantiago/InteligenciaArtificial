@@ -30,24 +30,24 @@ namespace FlappyIa.UI
         public GameObject simulationScreen;
         public PopulationManager populationManager1;
         public PopulationManager populationManager2;
-
-        private string populationText;
-        private string minesText;
-        private string generationDurationText;
+        private string biasText;
         private string elitesText;
+        private string generationDurationText;
+        private string hiddenLayersCountText;
+        private string minesText;
         private string mutationChanceText;
         private string mutationRateText;
-        private string hiddenLayersCountText;
-        private string biasText;
-        private string sigmoidSlopeText;
         private string neuronsPerHLCountText;
+
+        private string populationText;
+        private string sigmoidSlopeText;
 
         private void Start()
         {
             var populations = FindObjectsOfType<PopulationManager>();
             populationManager1 = populations[0];
             populationManager2 = populations[1];
-            
+
             populationCountSlider.onValueChanged.AddListener(OnPopulationCountChange);
             minesCountSlider.onValueChanged.AddListener(OnMinesCountChange);
             generationDurationSlider.onValueChanged.AddListener(OnGenerationDurationChange);
@@ -81,21 +81,21 @@ namespace FlappyIa.UI
             biasSlider.value = -populationManager1.Bias;
             sigmoidSlopeSlider.value = populationManager1.P;
 
-            startButton.onClick.AddListener(OnStartButtonClick);        
+            startButton.onClick.AddListener(OnStartButtonClick);
         }
 
         private void OnPopulationCountChange(float value)
         {
             populationManager1.PopulationCount = (int)value;
             populationManager2.PopulationCount = (int)value;
-        
+
             populationCountTxt.text = string.Format(populationText, populationManager1.PopulationCount);
         }
 
         private void OnMinesCountChange(float value)
         {
-            populationManager1.MinesCount = (int)value;        
-            populationManager2.MinesCount = 0;        
+            populationManager1.MinesCount = (int)value;
+            populationManager2.MinesCount = 0;
 
             minesCountTxt.text = string.Format(minesText, populationManager1.MinesCount);
         }
@@ -104,7 +104,7 @@ namespace FlappyIa.UI
         {
             populationManager1.GenerationDuration = (int)value;
             populationManager2.GenerationDuration = (int)value;
-        
+
             generationDurationTxt.text = string.Format(generationDurationText, populationManager1.GenerationDuration);
         }
 
@@ -136,7 +136,7 @@ namespace FlappyIa.UI
         {
             populationManager1.HiddenLayers = (int)value;
             populationManager2.HiddenLayers = (int)value;
-        
+
 
             hiddenLayersCountTxt.text = string.Format(hiddenLayersCountText, populationManager1.HiddenLayers);
         }
@@ -172,9 +172,8 @@ namespace FlappyIa.UI
             populationManager2.teamId = 1;
             populationManager1.StartSimulation();
             populationManager2.StartSimulation();
-            this.gameObject.SetActive(false);
+            gameObject.SetActive(false);
             simulationScreen.SetActive(true);
         }
-    
     }
 }

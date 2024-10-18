@@ -6,11 +6,11 @@ namespace NeuralNetworkDirectory.AI
     public class GameManager : MonoBehaviour
     {
         private PopulationManager[] populationManagers;
-        
+
         public void Init()
         {
             populationManagers = FindObjectsOfType<PopulationManager>();
-            
+
             TankProjectile.OnTankKilled += OnTankKilled;
         }
 

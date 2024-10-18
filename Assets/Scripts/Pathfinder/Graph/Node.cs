@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Pathfinder
 {
@@ -17,20 +16,32 @@ namespace Pathfinder
     public class Node<Coordinate> : INode, INode<Coordinate>, IEquatable<INode<Coordinate>>
         where Coordinate : IEquatable<Coordinate>
     {
-        public NodeType NodeType { get; set; }
-        public int food;
-        public int gold;
-        
-        private ICollection<INode<Coordinate>> neighbors;
         private Coordinate coordinate;
         private int cost;
+        public int food;
+        public int gold;
+
+        private ICollection<INode<Coordinate>> neighbors;
 
         public Node()
         {
         }
+
         public Node(Coordinate coord)
         {
             coordinate = coord;
+        }
+
+        public NodeType NodeType { get; set; }
+
+        public bool Equals(INode<Coordinate> other)
+        {
+            return other != null && coordinate.Equals(other.GetCoordinate());
+        }
+
+        public bool IsBlocked()
+        {
+            return false;
         }
 
         public void SetCoordinate(Coordinate coordinate)
@@ -43,11 +54,6 @@ namespace Pathfinder
             return coordinate;
         }
 
-        public bool IsBlocked()
-        {
-            return false;
-        }
-
         public void SetNeighbors(ICollection<INode<Coordinate>> neighbors)
         {
             this.neighbors = neighbors;
@@ -55,7 +61,7 @@ namespace Pathfinder
 
         public ICollection<INode<Coordinate>> GetNeighbors()
         {
-            return neighbors as ICollection<INode<Coordinate>>;
+            return neighbors;
         }
 
         public NodeType GetNodeType()
@@ -73,6 +79,11 @@ namespace Pathfinder
             cost = newCost;
         }
 
+        public bool Equals(Coordinate other)
+        {
+            return coordinate.Equals(other);
+        }
+
         public bool EqualsTo(INode<Coordinate> other)
         {
             return coordinate.Equals(other.GetCoordinate());
@@ -83,21 +94,11 @@ namespace Pathfinder
             return coordinate.Equals(other.coordinate);
         }
 
-        public bool Equals(Coordinate other)
-        {
-            return coordinate.Equals(other);
-        }
-
-        public bool Equals(INode<Coordinate> other)
-        {
-            return other != null && coordinate.Equals(other.GetCoordinate());
-        }
-
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
+            if (obj.GetType() != GetType()) return false;
             return Equals((Node<Coordinate>)obj);
         }
 

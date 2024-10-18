@@ -9,9 +9,9 @@ namespace FlockingECS.System
 {
     public class DirectionSystem<TVector> : ECSSystem
     {
+        private IDictionary<uint, FlockComponent<TVector>> flockComponents;
         private ParallelOptions parallelOptions;
         private IDictionary<uint, PositionComponent<TVector>> positionComponents;
-        private IDictionary<uint, FlockComponent<TVector>> flockComponents;
         private IEnumerable<uint> queriedEntities;
         private PositionComponent<TVector> targetPosition;
 
@@ -38,7 +38,7 @@ namespace FlockingECS.System
                 var position = positionComponents[entityId];
                 var flock = flockComponents[entityId];
 
-                TVector direction = VectorHelper<TVector>.SubtractVectors(targetPosition.Position, position.Position);
+                var direction = VectorHelper<TVector>.SubtractVectors(targetPosition.Position, position.Position);
                 direction = VectorHelper<TVector>.NormalizeVector(direction);
 
                 flock.Direction = direction;

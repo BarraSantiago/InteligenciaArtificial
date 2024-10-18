@@ -3,8 +3,7 @@ using UnityEngine;
 
 namespace Pathfinder
 {
-    
-    public interface ICoordinate<T> : IEquatable<T> 
+    public interface ICoordinate<T> : IEquatable<T>
         where T : IEquatable<T>
     {
         void Add(T a);
@@ -45,8 +44,7 @@ namespace Pathfinder
         {
             coordinate += a;
         }
-        
-   
+
 
         public Vector2 Multiply(float b)
         {
@@ -72,7 +70,7 @@ namespace Pathfinder
         {
             coordinate.y = y;
         }
-        
+
 
         public Vector2 GetCoordinate()
         {
@@ -88,12 +86,12 @@ namespace Pathfinder
         {
             return coordinate.magnitude;
         }
-  
+
         public void SetCoordinate(float x, float y)
         {
-            this.coordinate = new Vector2(x, y);
+            coordinate = new Vector2(x, y);
         }
-        
+
         public void SetCoordinate(Vector2 coordinate)
         {
             this.coordinate = coordinate;

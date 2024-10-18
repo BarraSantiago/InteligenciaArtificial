@@ -1,7 +1,6 @@
 using System;
 using Game;
 using Pathfinder;
-using Pathfinder.Graph;
 using StateMachine.States.RTSStates;
 using UnityEngine;
 
@@ -9,8 +8,8 @@ namespace StateMachine.Agents.RTS
 {
     public class Caravan : RTSAgent
     {
-        private Action onGather;
         private Action onDeliver;
+        private Action onGather;
 
         public override void Init()
         {
@@ -59,20 +58,22 @@ namespace StateMachine.Agents.RTS
                         Debug.Log("No mines with miners.");
                         return;
                     }
-                    
-                    Node<Vector2> target = GameManager.MinesWithMiners[0];
-                    if(target == null) return;
 
-                    TargetNode = GameManager.Graph.NodesType.Find(node => node.GetCoordinate() == target.GetCoordinate());
-                    if(TargetNode == null) return;
-                    
-                    Debug.Log("Delivering food to " + TargetNode.GetCoordinate().x + " - " + TargetNode.GetCoordinate().y);
+                    var target = GameManager.MinesWithMiners[0];
+                    if (target == null) return;
+
+                    TargetNode =
+                        GameManager.Graph.NodesType.Find(node => node.GetCoordinate() == target.GetCoordinate());
+                    if (TargetNode == null) return;
+
+                    Debug.Log("Delivering food to " + TargetNode.GetCoordinate().x + " - " +
+                              TargetNode.GetCoordinate().y);
                 });
             Fsm.SetTransition(Behaviours.GatherResources, Flags.OnRetreat, Behaviours.Walk,
                 () =>
                 {
                     TargetNode = GetTarget(NodeType.TownCenter);
-                    if(TargetNode == null) return;
+                    if (TargetNode == null) return;
 
                     Debug.Log("Retreat. Walk to " + TargetNode.GetCoordinate().x + " - " +
                               TargetNode.GetCoordinate().y);
@@ -85,9 +86,9 @@ namespace StateMachine.Agents.RTS
                 () =>
                 {
                     TargetNode = GetTarget(NodeType.TownCenter);
-                    if(TargetNode == null) return;
+                    if (TargetNode == null) return;
 
-                    
+
                     Debug.Log("Retreat. Walk to " + TargetNode.GetCoordinate().x + " - " +
                               TargetNode.GetCoordinate().y);
                 });
@@ -100,15 +101,17 @@ namespace StateMachine.Agents.RTS
                         Debug.Log("No mines with miners.");
                         return;
                     }
-                    Node<Vector2> target = GameManager.MinesWithMiners[0];
-                    if(target == null) return;
 
-                    TargetNode = GameManager.Graph.NodesType.Find(node => node.GetCoordinate() == target.GetCoordinate());
-                    if(TargetNode == null) return;
+                    var target = GameManager.MinesWithMiners[0];
+                    if (target == null) return;
+
+                    TargetNode =
+                        GameManager.Graph.NodesType.Find(node => node.GetCoordinate() == target.GetCoordinate());
+                    if (TargetNode == null) return;
 
                     Debug.Log("Walk to " + TargetNode.GetCoordinate().x + " - " + TargetNode.GetCoordinate().y);
                 });
-            
+
             Fsm.SetTransition(Behaviours.Walk, Flags.OnGather, Behaviours.Deliver,
                 () => Debug.Log("Deliver food"));
             Fsm.SetTransition(Behaviours.Walk, Flags.OnWait, Behaviours.GatherResources,
@@ -131,7 +134,7 @@ namespace StateMachine.Agents.RTS
                 () =>
                 {
                     TargetNode = TownCenter;
-                    if(TargetNode == null) return;
+                    if (TargetNode == null) return;
 
                     Debug.Log("To town center");
                 });
@@ -139,7 +142,7 @@ namespace StateMachine.Agents.RTS
                 () =>
                 {
                     TargetNode = TownCenter;
-                    if(TargetNode == null) return;
+                    if (TargetNode == null) return;
 
                     Debug.Log("Retreat. Walk to " + TargetNode.GetCoordinate().x + " - " +
                               TargetNode.GetCoordinate().y);

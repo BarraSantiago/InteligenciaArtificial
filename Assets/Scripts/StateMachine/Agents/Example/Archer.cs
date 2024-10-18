@@ -12,17 +12,15 @@ namespace Units.Archer
         {
             base.Init();
             _fsm.AddBehaviour<Shoot>(Behaviours.Shoot, ShootTickParameters);
-            
+
             _fsm.SetTransition(Behaviours.Chase, Flags.OnTargetReach, Behaviours.Shoot, () => Debug.Log("Shoot"));
             _fsm.SetTransition(Behaviours.Shoot, Flags.OnTargetLost, Behaviours.Patrol, () => Debug.Log("Chase"));
-            
-        }
-        
-        private object[] ShootTickParameters()
-        {
-            object[] objects = { arrowPrefab, transform, this.targetTransform, 10f, shootDistance};
-            return objects;
         }
 
+        private object[] ShootTickParameters()
+        {
+            object[] objects = { arrowPrefab, transform, targetTransform, 10f, shootDistance };
+            return objects;
+        }
     }
 }

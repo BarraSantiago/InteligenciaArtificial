@@ -1,7 +1,6 @@
 ﻿using System;
 using StateMachine.Agents.RTS;
 using States;
-using UnityEngine;
 
 namespace StateMachine.States.RTSStates
 {
@@ -9,16 +8,13 @@ namespace StateMachine.States.RTSStates
     {
         public override BehaviourActions GetTickBehaviour(params object[] parameters)
         {
-            BehaviourActions behaviours = new BehaviourActions();
-            int food = Convert.ToInt32(parameters[0]);
-            int foodLimit = Convert.ToInt32(parameters[1]);
-            Action onGatherFood = parameters[2] as Action;
-            bool retreat = Convert.ToBoolean(parameters[3]);
+            var behaviours = new BehaviourActions();
+            var food = Convert.ToInt32(parameters[0]);
+            var foodLimit = Convert.ToInt32(parameters[1]);
+            var onGatherFood = parameters[2] as Action;
+            var retreat = Convert.ToBoolean(parameters[3]);
 
-            behaviours.AddMultiThreadableBehaviours(0, () =>
-            {
-                onGatherFood?.Invoke();
-            });
+            behaviours.AddMultiThreadableBehaviours(0, () => { onGatherFood?.Invoke(); });
 
             behaviours.SetTransitionBehaviour(() =>
             {

@@ -8,9 +8,9 @@ namespace FlockingECS.System
 {
     public class SeparationSystem<TVector> : ECSSystem
     {
+        private IDictionary<uint, FlockComponent<TVector>> flockComponents;
         private ParallelOptions parallelOptions;
         private IDictionary<uint, PositionComponent<TVector>> positionComponents;
-        private IDictionary<uint, FlockComponent<TVector>> flockComponents;
         private IEnumerable<uint> queriedEntities;
 
         public override void Initialize()
@@ -22,7 +22,7 @@ namespace FlockingECS.System
         {
             positionComponents ??= ECSManager.GetComponents<PositionComponent<TVector>>();
             flockComponents ??= ECSManager.GetComponents<FlockComponent<TVector>>();
-            queriedEntities ??= ECSManager.GetEntitiesWithComponentTypes(typeof(PositionComponent<TVector>), 
+            queriedEntities ??= ECSManager.GetEntitiesWithComponentTypes(typeof(PositionComponent<TVector>),
                 typeof(FlockComponent<TVector>));
         }
 

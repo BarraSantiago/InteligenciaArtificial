@@ -1,61 +1,48 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class Neuron
 {
-	private float[] weights;
-	private float bias;
-	private float p; 
+    private readonly float bias;
+    private readonly float p;
+    private readonly float[] weights;
 
-	public int WeightsCount
-	{
-		get { return weights.Length; }
-	}
+    public Neuron(int weightsCount, float bias, float p)
+    {
+        weights = new float[weightsCount];
 
-	public Neuron(int weightsCount, float bias, float p)
-	{
-		weights = new float[weightsCount];
+        for (var i = 0; i < weights.Length; i++) weights[i] = Random.Range(-1.0f, 1.0f);
 
-		for (int i = 0; i < weights.Length; i++)
-		{
-			weights[i] = Random.Range(-1.0f, 1.0f);
-		}
+        this.bias = bias;
+        this.p = p;
+    }
 
-		this.bias = bias;
-		this.p = p;
-	}
+    public int WeightsCount => weights.Length;
 
-	public float Synapsis(float[] input)
-	{
-		float a = 0;
+    public float Synapsis(float[] input)
+    {
+        float a = 0;
 
-		for (int i = 0; i < input.Length; i++)
-		{
-			a += weights[i] * input[i];
-		}
+        for (var i = 0; i < input.Length; i++) a += weights[i] * input[i];
 
-		a += bias * weights[weights.Length - 1];
+        a += bias * weights[weights.Length - 1];
 
-		return Sigmoid(a);
-	}
+        return Sigmoid(a);
+    }
 
-	public int SetWeights(float[] newWeights, int fromId)
-	{
-		for (int i = 0; i < weights.Length; i++)
-		{
-			this.weights[i] = newWeights[i + fromId];
-		}
+    public int SetWeights(float[] newWeights, int fromId)
+    {
+        for (var i = 0; i < weights.Length; i++) weights[i] = newWeights[i + fromId];
 
-		return fromId + weights.Length;
-	}
+        return fromId + weights.Length;
+    }
 
-	public float[] GetWeights()
-	{
-		return this.weights;
-	}
+    public float[] GetWeights()
+    {
+        return weights;
+    }
 
-	private float Sigmoid(float a)
-	{
-		return 1.0f / (1.0f + Mathf.Exp(-a / p));
-	}
+    private float Sigmoid(float a)
+    {
+        return 1.0f / (1.0f + Mathf.Exp(-a / p));
+    }
 }

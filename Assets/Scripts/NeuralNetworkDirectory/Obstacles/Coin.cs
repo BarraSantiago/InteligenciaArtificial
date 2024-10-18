@@ -1,12 +1,13 @@
+using System;
 using UnityEngine;
 
 namespace FlappyIa.Obstacles
 {
     public class Coin : MonoBehaviour
     {
-        public System.Action<Coin> OnDestroy;
-        public int id;
         private static UnityEngine.Camera camera1;
+        public int id;
+        public Action<Coin> OnDestroy;
 
         private void Start()
         {
@@ -15,14 +16,13 @@ namespace FlappyIa.Obstacles
 
         public void CheckToDestroy()
         {
-            if (this.transform.position.x - camera1.transform.position.x < -7.5f)
+            if (transform.position.x - camera1.transform.position.x < -7.5f)
             {
                 if (OnDestroy != null)
                     OnDestroy.Invoke(this);
 
-                Destroy(this.gameObject);
+                Destroy(gameObject);
             }
-
         }
     }
 }

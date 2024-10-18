@@ -1,16 +1,17 @@
 ﻿using FlappyIa.Obstacles;
+using NeuralNetworkDirectory.Bird;
 using UnityEngine;
 
 namespace FlappyIa.Bird
 {
     public class BirdAI : BirdBase
     {
-        int lastCoinId = -1;
-        int lastObstacleId = -1;
+        private int lastCoinId = -1;
+        private int lastObstacleId = -1;
 
         protected override void OnThink(float dt, BirdBehaviour birdBehaviour, Obstacle obstacle, Coin coin)
         {
-            float[] inputs = new float[4];
+            var inputs = new float[4];
             inputs[0] = (obstacle.transform.position - birdBehaviour.transform.position).x / 10.0f;
             inputs[1] = (obstacle.transform.position - birdBehaviour.transform.position).y / 10.0f;
             inputs[2] = (coin.transform.position - coin.transform.position).x / 10.0f;
@@ -19,13 +20,10 @@ namespace FlappyIa.Bird
 
             float[] outputs;
             outputs = brain.Synapsis(inputs);
-            if (outputs[0] < 0.5f)
-            {
-                birdBehaviour.Flap();
-            }
+            if (outputs[0] < 0.5f) birdBehaviour.Flap();
 
-            Vector3 diff = obstacle.transform.position - birdBehaviour.transform.position;
-            float sqrDistance = diff.sqrMagnitude;
+            var diff = obstacle.transform.position - birdBehaviour.transform.position;
+            var sqrDistance = diff.sqrMagnitude;
 
             if (sqrDistance <= 1.0f * 1.0f && lastObstacleId != obstacle.id)
             {
@@ -33,7 +31,7 @@ namespace FlappyIa.Bird
                 lastObstacleId = obstacle.id;
             }
 
-            Vector2 distance = (coin.transform.position - birdBehaviour.transform.position);
+            Vector2 distance = coin.transform.position - birdBehaviour.transform.position;
 
             if (distance.sqrMagnitude <= 3f && lastCoinId != coin.id)
             {
@@ -41,7 +39,7 @@ namespace FlappyIa.Bird
                 lastCoinId = coin.id;
             }
 
-            genome.fitness += (100.0f - Vector3.Distance(obstacle.transform.position, birdBehaviour.transform.position));
+            genome.fitness += 100.0f - Vector3.Distance(obstacle.transform.position, birdBehaviour.transform.position);
         }
 
         protected override void OnDead()

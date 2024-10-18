@@ -2,9 +2,8 @@ using ECS.Patron;
 
 public class VelocityComponent<TVector> : ECSComponent
 {
-    public float velocity;
-
     public TVector direction;
+    public float velocity;
 
     public VelocityComponent(float velocity, TVector direction)
     {

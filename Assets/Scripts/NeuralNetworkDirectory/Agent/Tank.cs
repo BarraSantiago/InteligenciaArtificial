@@ -5,8 +5,8 @@ namespace Agent
 {
     public class Tank : TankBase
     {
-        const float MAX_FITNESS = 2;
-        float fitness = 0;
+        private const float MAX_FITNESS = 2;
+        private float fitness;
 
         protected override void OnReset()
         {
@@ -16,8 +16,8 @@ namespace Agent
 
         protected override void OnThink(float dt)
         {
-            Vector3 dirToMine = GetDirToMine(goodMine);
-            Vector3 dirToBadMine = GetDirToMine(badMine);
+            var dirToMine = GetDirToMine(goodMine);
+            var dirToBadMine = GetDirToMine(badMine);
 
             inputs[0] = dirToMine.x;
             inputs[1] = dirToMine.z;
@@ -26,17 +26,17 @@ namespace Agent
             inputs[4] = transform.forward.x;
             inputs[5] = transform.forward.z;
 
-            float[] output = brain.Synapsis(inputs);
+            var output = brain.Synapsis(inputs);
 
             SetForces(output[0], output[1], dt);
-            if(output[2] > 0.5f) Shoot();
+            //if (output[2] > 0.5f) Shoot();
         }
 
         protected override void OnTakeMine(GameObject mine)
         {
             const int REWARD = 10;
             const float PUNISHMENT = 0.85f;
-        
+
             if (IsGoodMine(mine))
             {
                 IncreaseFitnessMod();
@@ -59,7 +59,7 @@ namespace Agent
         {
             const int REWARD = 10;
             const float PUNISHMENT = 0.85f;
-        
+
             if (team == victimTeamId)
             {
                 DecreaseFitnessMod();

@@ -8,9 +8,9 @@ namespace FlockingECS.System
 {
     public class CohesionSystem<TVector> : ECSSystem
     {
+        private IDictionary<uint, FlockComponent<TVector>> flockComponents;
         private ParallelOptions parallelOptions;
         private IDictionary<uint, PositionComponent<TVector>> positionComponents;
-        private IDictionary<uint, FlockComponent<TVector>> flockComponents;
         private IEnumerable<uint> queriedEntities;
 
         public override void Initialize()
@@ -36,10 +36,7 @@ namespace FlockingECS.System
                 if (insideRadiusBoids.Count == 0) return;
 
                 TVector avg = default;
-                foreach (var b in insideRadiusBoids)
-                {
-                    avg = VectorHelper<TVector>.AddVectors(avg, b.Position);
-                }
+                foreach (var b in insideRadiusBoids) avg = VectorHelper<TVector>.AddVectors(avg, b.Position);
 
                 avg = VectorHelper<TVector>.DivideVector(avg, insideRadiusBoids.Count);
                 flock.Cohesion = avg;

@@ -17,7 +17,7 @@ namespace Units
         Patrol,
         Explode,
         Shoot,
-        Mine,
+        Mine
     }
 
     public class Agent : MonoBehaviour
@@ -37,6 +37,12 @@ namespace Units
             Init();
         }
 
+
+        private void Update()
+        {
+            _fsm.Tick();
+        }
+
         protected virtual void Init()
         {
             _fsm = new FSM<Behaviours, Flags>();
@@ -52,21 +58,15 @@ namespace Units
 
         protected object[] ChaseTickParameters()
         {
-            object[] objects = { transform, targetTransform, speed, this.reachDistance, this.lostDistance };
+            object[] objects = { transform, targetTransform, speed, reachDistance, lostDistance };
             return objects;
         }
 
         protected object[] PatrolTickParameters()
         {
             object[] objects =
-                { transform, wayPoint1, wayPoint2, this.targetTransform, this.speed, this.chaseDistance };
+                { transform, wayPoint1, wayPoint2, targetTransform, speed, chaseDistance };
             return objects;
-        }
-
-
-        private void Update()
-        {
-            _fsm.Tick();
         }
     }
 }

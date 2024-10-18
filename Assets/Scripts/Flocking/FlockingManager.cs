@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -15,16 +14,16 @@ namespace Flocking
         [SerializeField] private float separationWeight = 1.0f;
         [SerializeField] private float directionWeight = 1.0f;
 
-        private List<Boid> boids = new List<Boid>();
+        private readonly List<Boid> boids = new();
 
         private void Start()
         {
-            for (int i = 0; i < boidCount; i++)
+            for (var i = 0; i < boidCount; i++)
             {
-                GameObject boidGO = Instantiate(boidPrefab.gameObject,
+                var boidGO = Instantiate(boidPrefab.gameObject,
                     new Vector3(Random.Range(-10, 10), Random.Range(-10, 10)), Quaternion.identity);
 
-                Boid boid = boidGO.GetComponent<Boid>();
+                var boid = boidGO.GetComponent<Boid>();
                 boid.Init(Alignment, Cohesion, Separation, Direction);
                 boids.Add(boid);
             }
@@ -41,14 +40,11 @@ namespace Flocking
 
         public Vector3 Alignment(Boid boid)
         {
-            List<Boid> insideRadiusBoids = GetBoidsInsideRadius(boid);
+            var insideRadiusBoids = GetBoidsInsideRadius(boid);
             if (insideRadiusBoids.Count == 0) return Vector3.zero;
 
-            Vector3 avg = Vector3.zero;
-            foreach (Boid b in insideRadiusBoids)
-            {
-                avg += b.transform.up;
-            }
+            var avg = Vector3.zero;
+            foreach (var b in insideRadiusBoids) avg += b.transform.up;
 
             avg /= insideRadiusBoids.Count;
             return avg.normalized;
@@ -56,14 +52,11 @@ namespace Flocking
 
         public Vector3 Cohesion(Boid boid)
         {
-            List<Boid> insideRadiusBoids = GetBoidsInsideRadius(boid);
+            var insideRadiusBoids = GetBoidsInsideRadius(boid);
             if (insideRadiusBoids.Count == 0) return Vector3.zero;
 
-            Vector3 avg = Vector3.zero;
-            foreach (Boid b in insideRadiusBoids)
-            {
-                avg += b.transform.position;
-            }
+            var avg = Vector3.zero;
+            foreach (var b in insideRadiusBoids) avg += b.transform.position;
 
             avg /= insideRadiusBoids.Count;
             return (avg - boid.transform.position).normalized;
@@ -71,14 +64,11 @@ namespace Flocking
 
         public Vector3 Separation(Boid boid)
         {
-            List<Boid> insideRadiusBoids = GetBoidsInsideRadius(boid);
+            var insideRadiusBoids = GetBoidsInsideRadius(boid);
             if (insideRadiusBoids.Count == 0) return Vector3.zero;
 
-            Vector3 avg = Vector3.zero;
-            foreach (Boid b in insideRadiusBoids)
-            {
-                avg += (boid.transform.position - b.transform.position);
-            }
+            var avg = Vector3.zero;
+            foreach (var b in insideRadiusBoids) avg += boid.transform.position - b.transform.position;
 
             avg /= insideRadiusBoids.Count;
             return avg.normalized;
@@ -91,15 +81,11 @@ namespace Flocking
 
         public List<Boid> GetBoidsInsideRadius(Boid boid)
         {
-            List<Boid> insideRadiusBoids = new List<Boid>();
+            var insideRadiusBoids = new List<Boid>();
 
-            foreach (Boid b in boids)
-            {
+            foreach (var b in boids)
                 if (Vector3.Distance(boid.transform.position, b.transform.position) < boid.detectionRadius)
-                {
                     insideRadiusBoids.Add(b);
-                }
-            }
 
             return insideRadiusBoids;
         }

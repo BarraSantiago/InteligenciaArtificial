@@ -4,9 +4,8 @@ namespace FlappyIa.Camera
 {
     public class CameraFollow : MonoBehaviour
     {
+        private static CameraFollow instance;
         public GameObject agent;
-
-        private static CameraFollow instance = null;
 
         public static CameraFollow Instance
         {
@@ -26,12 +25,12 @@ namespace FlappyIa.Camera
 
         public void Reset()
         {
-            this.transform.position = new Vector3(0, 0, this.transform.position.z);
+            transform.position = new Vector3(0, 0, transform.position.z);
         }
 
         public void UpdateCamera()
         {
-            Vector3 follow = Vector3.zero;
+            var follow = Vector3.zero;
             /*
             if (PopulationManager.Instance)
             {
@@ -43,9 +42,9 @@ namespace FlappyIa.Camera
             else
                 follow = agent.transform.position;*/
 
-            Vector3 pos = this.transform.position;
+            var pos = transform.position;
             pos.x = follow.x;
-            this.transform.position = pos;
+            transform.position = pos;
         }
     }
 }

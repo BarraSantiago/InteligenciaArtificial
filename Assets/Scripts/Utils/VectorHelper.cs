@@ -14,7 +14,8 @@ namespace Utils
                 var v = (Vector2)(object)vector;
                 return (TVector)(object)(v * scalar);
             }
-            else if (type == typeof(Vector3))
+
+            if (type == typeof(Vector3))
             {
                 var v = (Vector3)(object)vector;
                 return (TVector)(object)(v * scalar);
@@ -32,7 +33,8 @@ namespace Utils
                 var vb = (Vector2)(object)b;
                 return (TVector)(object)(va - vb);
             }
-            else if (type == typeof(Vector3))
+
+            if (type == typeof(Vector3))
             {
                 var va = (Vector3)(object)a;
                 var vb = (Vector3)(object)b;
@@ -53,7 +55,8 @@ namespace Utils
                 var vd = d != null ? (Vector2)(object)d : Vector2.Zero;
                 return (TVector)(object)(va + vb + vc + vd);
             }
-            else if (type == typeof(Vector3))
+
+            if (type == typeof(Vector3))
             {
                 var va = (Vector3)(object)a;
                 var vb = (Vector3)(object)b;
@@ -73,7 +76,8 @@ namespace Utils
                 var v = (Vector2)(object)vector;
                 return (TVector)(object)(v / scalar);
             }
-            else if (type == typeof(Vector3))
+
+            if (type == typeof(Vector3))
             {
                 var v = (Vector3)(object)vector;
                 return (TVector)(object)(v / scalar);
@@ -88,43 +92,34 @@ namespace Utils
             if (type == typeof(Vector2))
             {
                 var v = (Vector2)(object)vector;
-                if (v.Length() == 0)
-                {
-                    return (TVector)(object)Vector2.Zero;
-                }
+                if (v.Length() == 0) return (TVector)(object)Vector2.Zero;
                 return (TVector)(object)Vector2.Normalize(v);
             }
-            else if (type == typeof(Vector3))
+
+            if (type == typeof(Vector3))
             {
                 var v = (Vector3)(object)vector;
-                if (v.Length() == 0)
-                {
-                    return (TVector)(object)Vector3.Zero;
-                }
+                if (v.Length() == 0) return (TVector)(object)Vector3.Zero;
                 return (TVector)(object)Vector3.Normalize(v);
             }
 
             throw new InvalidOperationException("Unsupported vector type");
         }
-        
+
         public static List<PositionComponent<TVector>> GetBoidsInsideRadius(PositionComponent<TVector> boid,
             IDictionary<uint, PositionComponent<TVector>> positionComponents)
         {
-            List<PositionComponent<TVector>> insideRadiusBoids = new List<PositionComponent<TVector>>();
+            var insideRadiusBoids = new List<PositionComponent<TVector>>();
             foreach (var otherBoid in positionComponents.Values)
-            {
-                if (!otherBoid.Equals(boid) && VectorHelper<TVector>.IsWithinRadius(boid.Position, otherBoid.Position))
-                {
+                if (!otherBoid.Equals(boid) && IsWithinRadius(boid.Position, otherBoid.Position))
                     insideRadiusBoids.Add(otherBoid);
-                }
-            }
 
             return insideRadiusBoids;
         }
 
         public static bool IsWithinRadius(TVector position1, TVector position2)
         {
-            double distanceSquared = 0.0;
+            var distanceSquared = 0.0;
             var type = typeof(TVector);
 
             if (type == typeof(Vector2))
@@ -141,7 +136,7 @@ namespace Utils
                                   (p1.Z - p2.Z) * (p1.Z - p2.Z);
             }
 
-            double radiusSquared = 3.0;
+            var radiusSquared = 3.0;
             return distanceSquared <= radiusSquared;
         }
 
@@ -153,11 +148,13 @@ namespace Utils
                 var v = (Vector2)(object)newPosition;
                 return !float.IsNaN(v.X) && !float.IsNaN(v.Y);
             }
-            else if (type == typeof(Vector3))
+
+            if (type == typeof(Vector3))
             {
                 var v = (Vector3)(object)newPosition;
                 return !float.IsNaN(v.X) && !float.IsNaN(v.Y) && !float.IsNaN(v.Z);
             }
+
             throw new InvalidOperationException("Unsupported vector type");
         }
     }

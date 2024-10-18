@@ -4,13 +4,6 @@ namespace FlockingECS.Component
 {
     public class FlockComponent<TVector> : ECSComponent
     {
-        public TVector Alignment { get; set; }
-        public TVector Cohesion { get; set; }
-        public TVector Separation { get; set; }
-        public TVector Direction { get; set; }
-        
-        public float DetectionRadius { get; set; }
-        
         public FlockComponent(TVector alignment, TVector cohesion, TVector separation, TVector direction)
         {
             Alignment = alignment;
@@ -18,5 +11,12 @@ namespace FlockingECS.Component
             Separation = separation;
             Direction = direction;
         }
+
+        public TVector Alignment { get; set; }
+        public TVector Cohesion { get; set; }
+        public TVector Separation { get; set; }
+        public TVector Direction { get; set; }
+
+        public float DetectionRadius { get; set; }
     }
 }

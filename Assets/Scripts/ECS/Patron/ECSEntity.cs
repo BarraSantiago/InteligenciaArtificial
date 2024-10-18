@@ -5,15 +5,10 @@ namespace ECS.Patron
 {
     public class ECSEntity
     {
-        private class EntityID
-        {
-            private static uint LastEntityID = 0;
-            internal static uint GetNew() => LastEntityID++;
-        }
+        private readonly List<Type> componentsType;
+        private readonly List<Type> flagType;
 
-        private uint ID;
-        private List<Type> componentsType;
-        private List<Type> flagType;
+        private readonly uint ID;
 
         public ECSEntity()
         {
@@ -22,7 +17,10 @@ namespace ECS.Patron
             flagType = new List<Type>();
         }
 
-        public uint GetID() => ID;
+        public uint GetID()
+        {
+            return ID;
+        }
 
         public void Dispose()
         {
@@ -49,45 +47,55 @@ namespace ECS.Patron
         {
             return componentsType.Contains(ComponentType);
         }
-        
+
         public void RemoveComponentType<ComponentType>() where ComponentType : ECSComponent
         {
             componentsType.Remove(typeof(ComponentType));
         }
-        
+
         public void RemoveComponentType(Type ComponentType)
         {
             componentsType.Remove(ComponentType);
         }
-        
+
         public void AddFlagType<FlagType>() where FlagType : ECSFlag
         {
             AddFlagType(typeof(FlagType));
         }
-        
+
         public void AddFlagType(Type FlagType)
         {
             flagType.Add(FlagType);
         }
-        
+
         public bool ContainsFlagType<FlagType>() where FlagType : ECSFlag
         {
             return ContainsFlagType(typeof(FlagType));
         }
-        
+
         public bool ContainsFlagType(Type FlagType)
         {
             return flagType.Contains(FlagType);
         }
-        
+
         public void RemoveFlagType<FlagType>() where FlagType : ECSFlag
         {
             flagType.Remove(typeof(FlagType));
         }
-        
+
         public void RemoveFlagType(Type FlagType)
         {
             flagType.Remove(FlagType);
+        }
+
+        private class EntityID
+        {
+            private static uint LastEntityID;
+
+            internal static uint GetNew()
+            {
+                return LastEntityID++;
+            }
         }
     }
 }

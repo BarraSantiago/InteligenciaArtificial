@@ -4,12 +4,11 @@ namespace FlappyIa.Background
 {
     public class BackgroundManager : MonoBehaviour
     {
+        private static BackgroundManager instance;
         public GameObject[] frames;
-        float lastCameraPos;
-        float accumPos = 0;
+        private float accumPos;
         private UnityEngine.Camera camera1;
-
-        private static BackgroundManager instance = null;
+        private float lastCameraPos;
 
         public static BackgroundManager Instance
         {
@@ -22,11 +21,6 @@ namespace FlappyIa.Background
             }
         }
 
-        private void Start()
-        {
-            camera1 = UnityEngine.Camera.main;
-        }
-
         private void Awake()
         {
             instance = this;
@@ -34,28 +28,33 @@ namespace FlappyIa.Background
 
         public void Reset()
         {
-            this.transform.position = new Vector3(0, 0, 10);
+            transform.position = new Vector3(0, 0, 10);
             lastCameraPos = 0;
             accumPos = 0;
 
             float posx = -4;
 
-            foreach (GameObject go in frames)
+            foreach (var go in frames)
             {
-                Vector3 pos = go.transform.position;
+                var pos = go.transform.position;
                 pos.x = posx;
                 go.transform.position = pos;
                 posx += 7.2f;
             }
         }
 
-        void Update()
+        private void Start()
         {
-            float delta = camera1.transform.position.x - lastCameraPos;
+            camera1 = UnityEngine.Camera.main;
+        }
 
-            Vector3 parallax = this.transform.position;
+        private void Update()
+        {
+            var delta = camera1.transform.position.x - lastCameraPos;
+
+            var parallax = transform.position;
             parallax.x += delta * 0.2f;
-            this.transform.position = parallax;
+            transform.position = parallax;
 
             delta -= delta * 0.2f;
 
@@ -63,12 +62,13 @@ namespace FlappyIa.Background
             accumPos += delta;
 
             if (!(accumPos >= 7.2f)) return;
-            foreach (GameObject go in frames)
+            foreach (var go in frames)
             {
-                Vector3 pos = go.transform.position;
+                var pos = go.transform.position;
                 pos.x += 7.2f;
                 go.transform.position = pos;
             }
+
             accumPos -= 7.2f;
         }
     }

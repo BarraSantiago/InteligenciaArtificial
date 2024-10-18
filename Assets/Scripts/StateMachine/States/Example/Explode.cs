@@ -6,9 +6,9 @@ namespace States.Creeper
     {
         public override BehaviourActions GetTickBehaviour(params object[] parameters)
         {
-            BehaviourActions behaviours = new BehaviourActions();
+            var behaviours = new BehaviourActions();
 
-            GameObject ownerObject = parameters[0] as GameObject;
+            var ownerObject = parameters[0] as GameObject;
 
             behaviours.AddMainThreadBehaviours(1, () => { ownerObject.SetActive(false); });
 
@@ -17,7 +17,7 @@ namespace States.Creeper
 
         public override BehaviourActions GetOnEnterBehaviour(params object[] parameters)
         {
-            BehaviourActions behaviours = new BehaviourActions();
+            var behaviours = new BehaviourActions();
             behaviours.AddMultiThreadableBehaviours(0, () => { Debug.Log("Explode!"); });
 
 

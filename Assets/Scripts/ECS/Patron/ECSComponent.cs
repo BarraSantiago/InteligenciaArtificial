@@ -2,17 +2,7 @@ namespace ECS.Patron
 {
     public abstract class ECSComponent
     {
-        private uint entityOwnerID = 0;
-
-        public uint EntityOwnerID
-        {
-            get => entityOwnerID;
-            set => entityOwnerID = value;
-        }
-
-        protected ECSComponent()
-        {
-        }
+        public uint EntityOwnerID { get; set; } = 0;
 
         public virtual void Dispose()
         {

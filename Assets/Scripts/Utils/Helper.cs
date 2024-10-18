@@ -7,6 +7,6 @@ namespace Utils
         public static GameObject InstantiatePrefab(GameObject prefab, Vector3 position, Quaternion rotation)
         {
             return Instantiate(prefab, position, rotation);
-        } 
+        }
     }
 }

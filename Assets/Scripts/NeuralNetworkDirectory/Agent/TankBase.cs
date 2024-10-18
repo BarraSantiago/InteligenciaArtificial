@@ -7,24 +7,29 @@ namespace NeuralNetworkDirectory.Agent
 {
     public class TankBase : MonoBehaviour
     {
+        public static GameObject projectilePrefab;
         [SerializeField] private Transform projectileSpawnPoint;
         [SerializeField] private GameObject projectileDirection;
-        public static GameObject projectilePrefab;
         public float Speed = 10.0f;
         public float RotSpeed = 20.0f;
-        public int team = 0;
-        public int id = 0;
-        public Action<GameObject> OnMineTaken;
-
-        protected Genome genome;
-        protected NeuralNetwork brain;
-        protected GameObject nearMine;
-        protected GameObject goodMine;
+        public int team;
+        public int id;
         protected GameObject badMine;
-        protected float[] inputs;
+        protected int badMinesCount = 0;
+        protected NeuralNetwork brain;
         protected float fitnessMod = 1;
 
+        protected Genome genome;
+        protected GameObject goodMine;
+
         private int hp = 3;
+        protected float[] inputs;
+        protected GameObject nearMine;
+        public Action<GameObject> OnMineTaken;
+        private int turnLeftCount;
+
+
+        private int turnRightCount;
 
         public int Hp
         {
@@ -32,18 +37,9 @@ namespace NeuralNetworkDirectory.Agent
             protected set
             {
                 hp = value;
-                if (hp <= 0)
-                {
-                    Death();
-                }
+                if (hp <= 0) Death();
             }
         }
-
-        
-
-        private int turnRightCount = 0;
-        private int turnLeftCount = 0;
-        protected int badMinesCount = 0;
 
         public void SetBrain(Genome genome, NeuralNetwork brain)
         {
@@ -75,21 +71,21 @@ namespace NeuralNetworkDirectory.Agent
 
         protected Vector3 GetDirToMine(GameObject mine)
         {
-            return (mine.transform.position - this.transform.position).normalized;
+            return (mine.transform.position - transform.position).normalized;
         }
 
         protected bool IsCloseToMine(GameObject mine)
         {
-            return (this.transform.position - nearMine.transform.position).sqrMagnitude <= 2.0f;
+            return (transform.position - nearMine.transform.position).sqrMagnitude <= 2.0f;
         }
 
         protected void SetForces(float leftForce, float rightForce, float dt)
         {
-            Vector3 pos = this.transform.position;
-            float rotFactor = Mathf.Clamp((rightForce - leftForce), -1.0f, 1.0f);
-            this.transform.rotation *= Quaternion.AngleAxis(rotFactor * RotSpeed * dt, Vector3.up);
-            pos += this.transform.forward * (Mathf.Abs(rightForce + leftForce) * 0.5f * Speed * dt);
-            this.transform.position = pos;
+            var pos = transform.position;
+            var rotFactor = Mathf.Clamp(rightForce - leftForce, -1.0f, 1.0f);
+            transform.rotation *= Quaternion.AngleAxis(rotFactor * RotSpeed * dt, Vector3.up);
+            pos += transform.forward * (Mathf.Abs(rightForce + leftForce) * 0.5f * Speed * dt);
+            transform.position = pos;
 
             if (rightForce > leftForce)
             {
@@ -105,7 +101,7 @@ namespace NeuralNetworkDirectory.Agent
 
         protected void Shoot()
         {
-            Instantiate(projectilePrefab, this.transform.position, this.transform.rotation)
+            Instantiate(projectilePrefab, transform.position, transform.rotation)
                 .GetComponent<TankProjectile>().Launch(projectileDirection.transform.forward, id, team);
         }
 
@@ -160,7 +156,7 @@ namespace NeuralNetworkDirectory.Agent
                 genome.fitness *= punishment / 2 + 0.03f * fitnessMod;
             }
         }
-        
+
         protected void IncreaseFitnessMod()
         {
             const float MOD = 1.1f;
@@ -178,7 +174,7 @@ namespace NeuralNetworkDirectory.Agent
             Hp -= damage;
             return hp <= 0;
         }
-        
+
         private void Death()
         {
             Destroy(this);

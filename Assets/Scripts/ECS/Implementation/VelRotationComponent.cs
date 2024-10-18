@@ -4,11 +4,10 @@ namespace ECS.Implementation
 {
     public class VelRotationComponent : ECSComponent
     {
-        public float rotation;
-
         public float directionX;
         public float directionY;
         public float directionZ;
+        public float rotation;
 
         public VelRotationComponent(float rotation, float directionX, float directionY, float directionZ)
         {
@@ -17,6 +16,5 @@ namespace ECS.Implementation
             this.directionY = directionY;
             this.directionZ = directionZ;
         }
-
     }
 }

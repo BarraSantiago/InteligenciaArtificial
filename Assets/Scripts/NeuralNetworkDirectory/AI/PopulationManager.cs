@@ -7,6 +7,9 @@ namespace NeuralNetworkDirectory.AI
 {
     public class PopulationManager : MonoBehaviour
     {
+        public static List<GameObject> mines = new();
+        private static readonly List<GameObject> goodMines = new();
+        private static readonly List<GameObject> badMines = new();
         [SerializeField] private Color tankColor = Color.white;
         public GameObject TankPrefab;
         public GameObject MinePrefab;
@@ -29,20 +32,17 @@ namespace NeuralNetworkDirectory.AI
         public int NeuronsCountPerHL = 7;
         public float Bias = 1f;
         public float P = 0.5f;
+        public int teamId;
+
+        private float accumTime;
+        private readonly List<NeuralNetwork> brains = new();
 
 
         private GeneticAlgorithm genAlg;
+        private bool isRunning;
+        private readonly List<Genome> population = new();
 
-        private List<Tank> populationGOs = new List<Tank>();
-        List<Genome> population = new List<Genome>();
-        List<NeuralNetwork> brains = new List<NeuralNetwork>();
-        public static List<GameObject> mines = new List<GameObject>();
-        static List<GameObject> goodMines = new List<GameObject>();
-        static List<GameObject> badMines = new List<GameObject>();
-
-        float accumTime = 0;
-        bool isRunning = false;
-        public int teamId;
+        private readonly List<Tank> populationGOs = new();
 
         public int Generation { get; private set; }
 
@@ -52,14 +52,70 @@ namespace NeuralNetworkDirectory.AI
 
         public float WorstFitness { get; private set; }
 
+        // Update is called once per frame
+        private void FixedUpdate()
+        {
+            if (!isRunning)
+                return;
+
+            var dt = Time.fixedDeltaTime;
+
+            for (var i = 0; i < Mathf.Clamp(IterationCount / 100.0f * 50, 1, 50); i++)
+            {
+                foreach (var t in populationGOs)
+                {
+                    // Get the nearest mine
+                    var mine = GetNearestMine(t.transform.position);
+
+                    // Set the nearest mine to current tank
+                    t.SetNearestMine(mine);
+
+                    mine = GetNearestGoodMine(t.transform.position);
+
+                    // Set the nearest mine to current tank
+                    t.SetGoodNearestMine(mine);
+
+                    mine = GetNearestBadMine(t.transform.position);
+
+                    // Set the nearest mine to current tank
+                    t.SetBadNearestMine(mine);
+
+                    // Think!! 
+                    t.Think(dt);
+
+                    // Just adjust tank position when reaching world extents
+                    var pos = t.transform.position;
+                    if (pos.x > SceneHalfExtents.x)
+                        pos.x -= SceneHalfExtents.x * 2;
+                    else if (pos.x < -SceneHalfExtents.x)
+                        pos.x += SceneHalfExtents.x * 2;
+
+                    if (pos.z > SceneHalfExtents.z)
+                        pos.z -= SceneHalfExtents.z * 2;
+                    else if (pos.z < -SceneHalfExtents.z)
+                        pos.z += SceneHalfExtents.z * 2;
+
+                    // Set tank position
+                    t.transform.position = pos;
+                }
+
+                // Check the time to evolve
+                accumTime += dt;
+                if (accumTime >= GenerationDuration)
+                {
+                    accumTime -= GenerationDuration;
+                    Epoch();
+                    break;
+                }
+            }
+        }
+
         private float GetBestFitness()
         {
             float fitness = 0;
-            foreach (Genome g in population)
-            {
+            foreach (var g in population)
                 if (fitness < g.fitness)
                     fitness = g.fitness;
-            }
 
             return fitness;
         }
@@ -67,29 +123,23 @@ namespace NeuralNetworkDirectory.AI
         private float GetAvgFitness()
         {
             float fitness = 0;
-            foreach (Genome g in population)
-            {
-                fitness += g.fitness;
-            }
+            foreach (var g in population) fitness += g.fitness;
 
             return fitness / population.Count;
         }
 
         private float GetWorstFitness()
         {
-            float fitness = float.MaxValue;
-            foreach (Genome g in population)
-            {
+            var fitness = float.MaxValue;
+            foreach (var g in population)
                 if (fitness > g.fitness)
                     fitness = g.fitness;
-            }
 
             return fitness;
         }
 
         public void StartSimulation()
         {
-            
             // Create and confiugre the Genetic Algorithm
             genAlg = new GeneticAlgorithm(EliteCount, MutationChance, MutationRate);
 
@@ -125,11 +175,11 @@ namespace NeuralNetworkDirectory.AI
             // Destroy previous tanks (if there are any)
             DestroyTanks();
 
-            for (int i = 0; i < PopulationCount; i++)
+            for (var i = 0; i < PopulationCount; i++)
             {
-                NeuralNetwork brain = CreateBrain();
+                var brain = CreateBrain();
 
-                Genome genome = new Genome(brain.GetTotalWeightsCount());
+                var genome = new Genome(brain.GetTotalWeightsCount());
 
                 brain.SetWeights(genome.genome);
                 brains.Add(brain);
@@ -144,16 +194,14 @@ namespace NeuralNetworkDirectory.AI
         // Creates a new NeuralNetwork
         private NeuralNetwork CreateBrain()
         {
-            NeuralNetwork brain = new NeuralNetwork();
+            var brain = new NeuralNetwork();
 
             // Add first neuron layer that has as many neurons as inputs
             brain.AddFirstNeuronLayer(InputsCount, Bias, P);
 
-            for (int i = 0; i < HiddenLayers; i++)
-            {
+            for (var i = 0; i < HiddenLayers; i++)
                 // Add each hidden layer with custom neurons count
                 brain.AddNeuronLayer(NeuronsCountPerHL, Bias, P);
-            }
 
             // Add the output layer with as many neurons as outputs
             brain.AddNeuronLayer(OutputsCount, Bias, P);
@@ -173,7 +221,7 @@ namespace NeuralNetworkDirectory.AI
             WorstFitness = GetWorstFitness();
 
             // Evolve each genome and create a new array of genomes
-            Genome[] newGenomes = genAlg.Epoch(population.ToArray());
+            var newGenomes = genAlg.Epoch(population.ToArray());
 
             // Clear current population
             population.Clear();
@@ -182,9 +230,9 @@ namespace NeuralNetworkDirectory.AI
             population.AddRange(newGenomes);
 
             // Set the new genomes as each NeuralNetwork weights
-            for (int i = 0; i < PopulationCount; i++)
+            for (var i = 0; i < PopulationCount; i++)
             {
-                NeuralNetwork brain = brains[i];
+                var brain = brains[i];
 
                 brain.SetWeights(newGenomes[i].genome);
 
@@ -194,77 +242,21 @@ namespace NeuralNetworkDirectory.AI
             }
         }
 
-        // Update is called once per frame
-        private void FixedUpdate()
+        public void OnTankKilled(int tankId, int victimTeamId)
         {
-            if (!isRunning)
-                return;
-
-            float dt = Time.fixedDeltaTime;
-
-            for (int i = 0; i < Mathf.Clamp((float)(IterationCount / 100.0f) * 50, 1, 50); i++)
-            {
-                foreach (Tank t in populationGOs)
-                {
-                    // Get the nearest mine
-                    GameObject mine = GetNearestMine(t.transform.position);
-
-                    // Set the nearest mine to current tank
-                    t.SetNearestMine(mine);
-
-                    mine = GetNearestGoodMine(t.transform.position);
-
-                    // Set the nearest mine to current tank
-                    t.SetGoodNearestMine(mine);
-
-                    mine = GetNearestBadMine(t.transform.position);
-
-                    // Set the nearest mine to current tank
-                    t.SetBadNearestMine(mine);
-
-                    // Think!! 
-                    t.Think(dt);
-
-                    // Just adjust tank position when reaching world extents
-                    Vector3 pos = t.transform.position;
-                    if (pos.x > SceneHalfExtents.x)
-                        pos.x -= SceneHalfExtents.x * 2;
-                    else if (pos.x < -SceneHalfExtents.x)
-                        pos.x += SceneHalfExtents.x * 2;
-
-                    if (pos.z > SceneHalfExtents.z)
-                        pos.z -= SceneHalfExtents.z * 2;
-                    else if (pos.z < -SceneHalfExtents.z)
-                        pos.z += SceneHalfExtents.z * 2;
-
-                    // Set tank position
-                    t.transform.position = pos;
-                }
-
-                // Check the time to evolve
-                accumTime += dt;
-                if (accumTime >= GenerationDuration)
-                {
-                    accumTime -= GenerationDuration;
-                    Epoch();
-                    break;
-                }
-            }
+            populationGOs[tankId].OnTankKilled(victimTeamId);
         }
 
         #region Helpers
 
         private Tank CreateTank(Genome genome, NeuralNetwork brain)
         {
-            Vector3 position = GetRandomPos();
-            GameObject go = Instantiate(TankPrefab, position, GetRandomRot());
+            var position = GetRandomPos();
+            var go = Instantiate(TankPrefab, position, GetRandomRot());
 
-            foreach (var renderer in go.GetComponentsInChildren<Renderer>())
-            {
-                renderer.material.color = tankColor;
-            }
+            foreach (var renderer in go.GetComponentsInChildren<Renderer>()) renderer.material.color = tankColor;
 
-            Tank t = go.GetComponent<Tank>();
+            var t = go.GetComponent<Tank>();
             t.team = teamId;
             t.id = populationGOs.Count;
             t.SetBrain(genome, brain);
@@ -272,9 +264,9 @@ namespace NeuralNetworkDirectory.AI
             return t;
         }
 
-        void DestroyMines()
+        private void DestroyMines()
         {
-            foreach (GameObject go in mines)
+            foreach (var go in mines)
                 Destroy(go);
 
             mines.Clear();
@@ -282,9 +274,9 @@ namespace NeuralNetworkDirectory.AI
             badMines.Clear();
         }
 
-        void DestroyTanks()
+        private void DestroyTanks()
         {
-            foreach (Tank go in populationGOs)
+            foreach (var go in populationGOs)
             {
                 go.OnMineTaken -= RelocateMine;
                 Destroy(go.gameObject);
@@ -300,12 +292,12 @@ namespace NeuralNetworkDirectory.AI
             // Destroy previous created mines
             DestroyMines();
 
-            for (int i = 0; i < MinesCount; i++)
+            for (var i = 0; i < MinesCount; i++)
             {
-                Vector3 position = GetRandomPos();
-                GameObject go = Instantiate(MinePrefab, position, Quaternion.identity);
+                var position = GetRandomPos();
+                var go = Instantiate(MinePrefab, position, Quaternion.identity);
 
-                bool good = Random.Range(-1.0f, 1.0f) >= 0;
+                var good = Random.Range(-1.0f, 1.0f) >= 0;
 
                 SetMineGood(good, go);
 
@@ -313,7 +305,7 @@ namespace NeuralNetworkDirectory.AI
             }
         }
 
-        void SetMineGood(bool good, GameObject go)
+        private void SetMineGood(bool good, GameObject go)
         {
             if (good)
             {
@@ -334,32 +326,32 @@ namespace NeuralNetworkDirectory.AI
             else
                 badMines.Remove(mine);
 
-            bool good = Random.Range(-1.0f, 1.0f) >= 0;
+            var good = Random.Range(-1.0f, 1.0f) >= 0;
 
             SetMineGood(good, mine);
 
             mine.transform.position = GetRandomPos();
         }
 
-        Vector3 GetRandomPos()
+        private Vector3 GetRandomPos()
         {
             return new Vector3(Random.value * SceneHalfExtents.x * 2.0f - SceneHalfExtents.x, 0.0f,
                 Random.value * SceneHalfExtents.z * 2.0f - SceneHalfExtents.z);
         }
 
-        Quaternion GetRandomRot()
+        private Quaternion GetRandomRot()
         {
             return Quaternion.AngleAxis(Random.value * 360.0f, Vector3.up);
         }
 
-        GameObject GetNearestMine(Vector3 pos)
+        private GameObject GetNearestMine(Vector3 pos)
         {
-            GameObject nearest = mines[0];
-            float distance = (pos - nearest.transform.position).sqrMagnitude;
+            var nearest = mines[0];
+            var distance = (pos - nearest.transform.position).sqrMagnitude;
 
-            foreach (GameObject go in mines)
+            foreach (var go in mines)
             {
-                float newDist = (go.transform.position - pos).sqrMagnitude;
+                var newDist = (go.transform.position - pos).sqrMagnitude;
                 if (newDist < distance)
                 {
                     nearest = go;
@@ -370,14 +362,14 @@ namespace NeuralNetworkDirectory.AI
             return nearest;
         }
 
-        GameObject GetNearestGoodMine(Vector3 pos)
+        private GameObject GetNearestGoodMine(Vector3 pos)
         {
-            GameObject nearest = mines[0];
-            float distance = (pos - nearest.transform.position).sqrMagnitude;
+            var nearest = mines[0];
+            var distance = (pos - nearest.transform.position).sqrMagnitude;
 
-            foreach (GameObject go in goodMines)
+            foreach (var go in goodMines)
             {
-                float newDist = (go.transform.position - pos).sqrMagnitude;
+                var newDist = (go.transform.position - pos).sqrMagnitude;
                 if (newDist < distance)
                 {
                     nearest = go;
@@ -388,14 +380,14 @@ namespace NeuralNetworkDirectory.AI
             return nearest;
         }
 
-        GameObject GetNearestBadMine(Vector3 pos)
+        private GameObject GetNearestBadMine(Vector3 pos)
         {
-            GameObject nearest = mines[0];
-            float distance = (pos - nearest.transform.position).sqrMagnitude;
+            var nearest = mines[0];
+            var distance = (pos - nearest.transform.position).sqrMagnitude;
 
-            foreach (GameObject go in badMines)
+            foreach (var go in badMines)
             {
-                float newDist = (go.transform.position - pos).sqrMagnitude;
+                var newDist = (go.transform.position - pos).sqrMagnitude;
                 if (!(newDist < distance)) continue;
 
                 nearest = go;
@@ -406,10 +398,5 @@ namespace NeuralNetworkDirectory.AI
         }
 
         #endregion
-
-        public void OnTankKilled(int tankId, int victimTeamId)
-        {
-            populationGOs[tankId].OnTankKilled(victimTeamId);
-        }
     }
 }

@@ -12,28 +12,17 @@ namespace ECS.Patron
         TypeD = 1 << 3,
         TypeE = 1 << 4
     }
-    
+
     public class ECSFlag
     {
-        private uint entityOwnerID = 0;
-        private FlagType flagType;
-
-        public uint EntityOwnerID
-        {
-            get => entityOwnerID;
-            set => entityOwnerID = value;
-        }
-        
-        public FlagType Flag
-        {
-            get => flagType;
-            set => flagType = value;
-        }
-
         protected ECSFlag(FlagType flagType)
         {
-            this.flagType = flagType;
+            Flag = flagType;
         }
+
+        public uint EntityOwnerID { get; set; } = 0;
+
+        public FlagType Flag { get; set; }
 
         public virtual void Dispose()
         {

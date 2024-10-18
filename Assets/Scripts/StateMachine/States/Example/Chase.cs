@@ -8,13 +8,13 @@ namespace States.Generic
     {
         public override BehaviourActions GetTickBehaviour(params object[] parameters)
         {
-            Transform ownerTransform = parameters[0] as Transform;
-            Transform targetTransform = parameters[1] as Transform;
-            float speed = Convert.ToSingle(parameters[2]);
-            float reachDistance = Convert.ToSingle(parameters[3]);
-            float lostDistance = Convert.ToSingle(parameters[4]);
+            var ownerTransform = parameters[0] as Transform;
+            var targetTransform = parameters[1] as Transform;
+            var speed = Convert.ToSingle(parameters[2]);
+            var reachDistance = Convert.ToSingle(parameters[3]);
+            var lostDistance = Convert.ToSingle(parameters[4]);
 
-            BehaviourActions behaviours = new BehaviourActions();
+            var behaviours = new BehaviourActions();
 
             if (!ownerTransform && !targetTransform) return default;
 
@@ -35,7 +35,6 @@ namespace States.Generic
                 if (Vector3.Distance(targetTransform.position, ownerTransform.position) < reachDistance)
                 {
                     OnFlag?.Invoke(Flags.OnTargetReach);
-                    return;
                 }
             });
 

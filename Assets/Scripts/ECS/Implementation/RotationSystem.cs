@@ -7,10 +7,10 @@ namespace ECS.Implementation
     public class RotationSystem : ECSSystem
     {
         private ParallelOptions parallelOptions;
+        private IEnumerable<uint> queryedEntities;
 
         private IDictionary<uint, RotationComponent> rotationComponents;
         private IDictionary<uint, VelRotationComponent> velRotationComponents;
-        private IEnumerable<uint> queryedEntities;
 
         public override void Initialize()
         {
@@ -19,24 +19,27 @@ namespace ECS.Implementation
 
         protected override void PreExecute(float deltaTime)
         {
-            rotationComponents??= ECSManager.GetComponents<RotationComponent>();
-            velRotationComponents??= ECSManager.GetComponents<VelRotationComponent>();
-            queryedEntities??= ECSManager.GetEntitiesWithComponentTypes(typeof(RotationComponent), typeof(VelRotationComponent));
+            rotationComponents ??= ECSManager.GetComponents<RotationComponent>();
+            velRotationComponents ??= ECSManager.GetComponents<VelRotationComponent>();
+            queryedEntities ??=
+                ECSManager.GetEntitiesWithComponentTypes(typeof(RotationComponent), typeof(VelRotationComponent));
         }
 
         protected override void Execute(float deltaTime)
         {
             Parallel.ForEach(queryedEntities, parallelOptions, i =>
             {
-                rotationComponents[i].X += velRotationComponents[i].directionX * velRotationComponents[i].rotation * deltaTime;
-                rotationComponents[i].Y += velRotationComponents[i].directionY * velRotationComponents[i].rotation * deltaTime;
-                rotationComponents[i].Z += velRotationComponents[i].directionZ * velRotationComponents[i].rotation * deltaTime;
+                rotationComponents[i].X +=
+                    velRotationComponents[i].directionX * velRotationComponents[i].rotation * deltaTime;
+                rotationComponents[i].Y +=
+                    velRotationComponents[i].directionY * velRotationComponents[i].rotation * deltaTime;
+                rotationComponents[i].Z +=
+                    velRotationComponents[i].directionZ * velRotationComponents[i].rotation * deltaTime;
             });
         }
 
         protected override void PostExecute(float deltaTime)
         {
         }
-
     }
 }

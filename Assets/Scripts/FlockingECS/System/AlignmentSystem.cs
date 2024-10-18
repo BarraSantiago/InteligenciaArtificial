@@ -1,17 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Numerics;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using ECS.Patron;
 using FlockingECS.Component;
 using Utils;
 
 namespace FlockingECS.System
 {
-    public class AlignmentSystem<TVector> : ECS.Patron.ECSSystem
+    public class AlignmentSystem<TVector> : ECSSystem
     {
+        private IDictionary<uint, FlockComponent<TVector>> flockComponents;
         private ParallelOptions parallelOptions;
         private IDictionary<uint, PositionComponent<TVector>> positionComponents;
-        private IDictionary<uint, FlockComponent<TVector>> flockComponents;
         private IEnumerable<uint> queriedEntities;
 
         public override void Initialize()
@@ -37,10 +36,7 @@ namespace FlockingECS.System
                 if (insideRadiusBoids.Count == 0) return;
 
                 TVector avg = default;
-                foreach (var b in insideRadiusBoids)
-                {
-                    avg = VectorHelper<TVector>.AddVectors(avg, b.Position);
-                }
+                foreach (var b in insideRadiusBoids) avg = VectorHelper<TVector>.AddVectors(avg, b.Position);
 
                 avg = VectorHelper<TVector>.DivideVector(avg, insideRadiusBoids.Count);
                 avg = VectorHelper<TVector>.NormalizeVector(avg);

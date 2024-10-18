@@ -7,7 +7,7 @@ namespace Units.Creeper
         protected override void Init()
         {
             base.Init();
-            
+
             _fsm.AddBehaviour<ExplodeState>(Behaviours.Explode, ExplodeTickParameters);
 
             _fsm.SetTransition(Behaviours.Chase, Flags.OnTargetReach, Behaviours.Explode);
@@ -15,7 +15,7 @@ namespace Units.Creeper
 
         private object[] ExplodeTickParameters()
         {
-            object[] objects = { this.gameObject };
+            object[] objects = { gameObject };
             return objects;
         }
     }

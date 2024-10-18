@@ -1,27 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using StateMachine.Agents.RTS;
-using UnityEngine;
 
 namespace Pathfinder
 {
-    public class DijkstraPathfinder<NodeType, TCoordinateType, TCoordinate> : Pathfinder<NodeType, TCoordinateType, TCoordinate> 
+    public class
+        DijkstraPathfinder<NodeType, TCoordinateType, TCoordinate> : Pathfinder<NodeType, TCoordinateType, TCoordinate>
         where NodeType : INode, INode<TCoordinateType>, new()
         where TCoordinateType : IEquatable<TCoordinateType>
         where TCoordinate : ICoordinate<TCoordinateType>, new()
 
-    { 
+    {
         public DijkstraPathfinder(ICollection<NodeType> graph)
         {
-            this.Graph = graph;
+            Graph = graph;
         }
-        
+
         protected override int Distance(TCoordinate A, TCoordinate B)
         {
-            if (A == null || B == null)
-            {
-                return int.MaxValue;
-            }
+            if (A == null || B == null) return int.MaxValue;
 
             float distance = 0;
 
@@ -48,7 +45,7 @@ namespace Pathfinder
 
         protected override bool NodesEquals(NodeType A, NodeType B)
         {
-            return Equals(A,B);
+            return Equals(A, B);
         }
     }
 }

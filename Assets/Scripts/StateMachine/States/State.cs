@@ -6,48 +6,38 @@ namespace States
 {
     public struct BehaviourActions
     {
-        private Dictionary<int, List<Action>> mainThreadBehaviour;
-        private ConcurrentDictionary<int, ConcurrentBag<Action>> multiThreadablesBehaviour;
-        private Action transitionBehaviour;
-
         public void AddMainThreadBehaviours(int executionOrder, Action behaviour)
         {
-            if (mainThreadBehaviour == null)
-                mainThreadBehaviour = new Dictionary<int, List<Action>>();
+            if (MainThreadBehaviour == null)
+                MainThreadBehaviour = new Dictionary<int, List<Action>>();
 
-            if (mainThreadBehaviour.ContainsKey(executionOrder))
-            {
-                mainThreadBehaviour[executionOrder].Add(behaviour);
-            }
+            if (MainThreadBehaviour.ContainsKey(executionOrder))
+                MainThreadBehaviour[executionOrder].Add(behaviour);
             else
-            {
-                mainThreadBehaviour.Add(executionOrder, new List<Action> { behaviour });
-            }
+                MainThreadBehaviour.Add(executionOrder, new List<Action> { behaviour });
         }
 
         public void AddMultiThreadableBehaviours(int executionOrder, Action behaviour)
         {
-            if (multiThreadablesBehaviour == null)
-                multiThreadablesBehaviour = new ConcurrentDictionary<int, ConcurrentBag<Action>>();
+            if (MultiThreadablesBehaviour == null)
+                MultiThreadablesBehaviour = new ConcurrentDictionary<int, ConcurrentBag<Action>>();
 
-            if (multiThreadablesBehaviour.ContainsKey(executionOrder))
-            {
-                multiThreadablesBehaviour[executionOrder].Add(behaviour);
-            }
+            if (MultiThreadablesBehaviour.ContainsKey(executionOrder))
+                MultiThreadablesBehaviour[executionOrder].Add(behaviour);
             else
-            {
-                multiThreadablesBehaviour.TryAdd(executionOrder, new ConcurrentBag<Action> { behaviour });
-            }
+                MultiThreadablesBehaviour.TryAdd(executionOrder, new ConcurrentBag<Action> { behaviour });
         }
 
         public void SetTransitionBehaviour(Action behaviour)
         {
-            transitionBehaviour = behaviour;
+            TransitionBehaviour = behaviour;
         }
 
-        public Dictionary<int, List<Action>> MainThreadBehaviour => mainThreadBehaviour;
-        public ConcurrentDictionary<int, ConcurrentBag<Action>> MultiThreadablesBehaviour => multiThreadablesBehaviour;
-        public Action TransitionBehaviour => transitionBehaviour;
+        public Dictionary<int, List<Action>> MainThreadBehaviour { get; private set; }
+
+        public ConcurrentDictionary<int, ConcurrentBag<Action>> MultiThreadablesBehaviour { get; private set; }
+
+        public Action TransitionBehaviour { get; private set; }
     }
 
     public abstract class State

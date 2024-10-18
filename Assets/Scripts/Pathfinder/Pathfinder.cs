@@ -14,7 +14,7 @@ namespace Pathfinder
 
         public List<TNodeType> FindPath(TNodeType startNode, TNodeType destinationNode, RTSAgent.AgentTypes agentType)
         {
-            Dictionary<TNodeType, (TNodeType Parent, int AcumulativeCost, int Heuristic)> nodes = 
+            var nodes =
                 Graph.ToDictionary(key => key, _ => (Parent: default(TNodeType), AcumulativeCost: 0, Heuristic: 0));
 
             var startCoor = new TCoordinate();
@@ -22,39 +22,31 @@ namespace Pathfinder
 
             var openList = new List<TNodeType> { startNode };
             var closedList = new List<TNodeType>();
-            
+
             while (openList.Count > 0)
             {
                 var currentNode = openList.OrderBy(node => nodes[node].AcumulativeCost + nodes[node].Heuristic).First();
                 openList.Remove(currentNode);
                 closedList.Add(currentNode);
 
-                if (NodesEquals(currentNode, destinationNode))
-                {
-                    return GeneratePath(startNode, destinationNode);
-                }
+                if (NodesEquals(currentNode, destinationNode)) return GeneratePath(startNode, destinationNode);
 
                 foreach (TNodeType neighbor in GetNeighbors(currentNode))
                 {
-                    if (!nodes.ContainsKey(neighbor) || IsBlocked(neighbor) || closedList.Contains(neighbor))
-                    {
-                        continue;
-                    }
+                    if (!nodes.ContainsKey(neighbor) || IsBlocked(neighbor) || closedList.Contains(neighbor)) continue;
 
-                    var aproxAcumulativeCost = nodes[currentNode].AcumulativeCost 
+                    var aproxAcumulativeCost = nodes[currentNode].AcumulativeCost
                                                + MoveToNeighborCost(currentNode, neighbor, agentType);
 
-                    if (openList.Contains(neighbor) && aproxAcumulativeCost >= nodes[neighbor].AcumulativeCost) continue;
+                    if (openList.Contains(neighbor) && aproxAcumulativeCost >= nodes[neighbor].AcumulativeCost)
+                        continue;
 
-                    TCoordinate neighborCoor = new TCoordinate();
+                    var neighborCoor = new TCoordinate();
                     neighborCoor.SetCoordinate(neighbor.GetCoordinate());
 
                     nodes[neighbor] = (currentNode, aproxAcumulativeCost, Distance(neighborCoor, startCoor));
 
-                    if (!openList.Contains(neighbor))
-                    {
-                        openList.Add(neighbor);
-                    }
+                    if (!openList.Contains(neighbor)) openList.Add(neighbor);
                 }
             }
 
@@ -62,8 +54,8 @@ namespace Pathfinder
 
             List<TNodeType> GeneratePath(TNodeType startNode, TNodeType goalNode)
             {
-                List<TNodeType> path = new List<TNodeType>();
-                TNodeType currentNode = goalNode;
+                var path = new List<TNodeType>();
+                var currentNode = goalNode;
 
                 while (!NodesEquals(currentNode, startNode))
                 {

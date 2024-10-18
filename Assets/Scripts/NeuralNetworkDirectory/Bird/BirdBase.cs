@@ -1,8 +1,9 @@
-﻿using FlappyIa.GeneticAlg;
+﻿using FlappyIa.Bird;
+using FlappyIa.GeneticAlg;
 using FlappyIa.Obstacles;
 using UnityEngine;
 
-namespace FlappyIa.Bird
+namespace NeuralNetworkDirectory.Bird
 {
     public class BirdBase : MonoBehaviour
     {
@@ -12,14 +13,12 @@ namespace FlappyIa.Bird
             Dead
         }
 
-        public State state
-        {
-            get; private set;
-        }
+        protected BirdBehaviour birdBehaviour;
+        protected NeuralNetwork brain;
 
         protected Genome genome;
-        protected NeuralNetwork brain;
-        protected BirdBehaviour birdBehaviour;
+
+        public State state { get; private set; }
 
         private void Awake()
         {
@@ -43,11 +42,11 @@ namespace FlappyIa.Bird
         public void Think(float dt)
         {
             if (state != State.Alive) return;
-        
-            Obstacle obstacle = ObstacleManager.Instance.GetNextObstacle(this.transform.position);
-            
-            Coin coin = ObstacleManager.Instance.GetNextCoin(this.transform.position);
-            
+
+            var obstacle = ObstacleManager.Instance.GetNextObstacle(transform.position);
+
+            var coin = ObstacleManager.Instance.GetNextCoin(transform.position);
+
 
             if (!obstacle || !coin)
                 return;
@@ -56,27 +55,23 @@ namespace FlappyIa.Bird
 
             birdBehaviour.UpdateBird(dt);
 
-            if (!(this.transform.position.y > 5f) && !(this.transform.position.y < -5f) &&
-                !ObstacleManager.Instance.IsColliding(this.transform.position)) return;
-        
+            if (!(transform.position.y > 5f) && !(transform.position.y < -5f) &&
+                !ObstacleManager.Instance.IsColliding(transform.position)) return;
+
             OnDead();
             state = State.Dead;
         }
 
         protected virtual void OnDead()
         {
-
         }
 
         protected virtual void OnThink(float dt, BirdBehaviour birdBehaviour, Obstacle obstacle, Coin coin)
         {
-
         }
 
         protected virtual void OnReset()
         {
-
         }
-
     }
 }

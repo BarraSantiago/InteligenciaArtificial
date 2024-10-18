@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using NeuralNetworkDirectory.AI;
+﻿using NeuralNetworkDirectory.AI;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,16 +15,16 @@ public class SimulationScreen : MonoBehaviour
     public GameObject startConfigurationScreen;
     public PopulationManager populationManager1;
     public PopulationManager populationManager2;
+    private string avgFitnessText;
+    private string bestFitnessText;
 
-    string generationsCountText;
-    string bestFitnessText;
-    string avgFitnessText;
-    string worstFitnessText;
-    string timerText;
-    int lastGeneration = 0;
+    private string generationsCountText;
+    private int lastGeneration;
+    private string timerText;
+    private string worstFitnessText;
 
     // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
         var populations = FindObjectsOfType<PopulationManager>();
         populationManager1 = populations[0];
@@ -37,57 +35,19 @@ public class SimulationScreen : MonoBehaviour
         timerTxt.text = string.Format(timerText, populationManager1.IterationCount);
 
         if (string.IsNullOrEmpty(generationsCountText))
-            generationsCountText = generationsCountTxt.text;   
+            generationsCountText = generationsCountTxt.text;
         if (string.IsNullOrEmpty(bestFitnessText))
-            bestFitnessText = bestFitnessTxt.text;   
+            bestFitnessText = bestFitnessTxt.text;
         if (string.IsNullOrEmpty(avgFitnessText))
-            avgFitnessText = avgFitnessTxt.text;   
+            avgFitnessText = avgFitnessTxt.text;
         if (string.IsNullOrEmpty(worstFitnessText))
-            worstFitnessText = worstFitnessTxt.text;   
+            worstFitnessText = worstFitnessTxt.text;
 
         pauseBtn.onClick.AddListener(OnPauseButtonClick);
         stopBtn.onClick.AddListener(OnStopButtonClick);
     }
 
-    void OnEnable()
-    {
-        if (string.IsNullOrEmpty(generationsCountText))
-            generationsCountText = generationsCountTxt.text;   
-        if (string.IsNullOrEmpty(bestFitnessText))
-            bestFitnessText = bestFitnessTxt.text;   
-        if (string.IsNullOrEmpty(avgFitnessText))
-            avgFitnessText = avgFitnessTxt.text;   
-        if (string.IsNullOrEmpty(worstFitnessText))
-            worstFitnessText = worstFitnessTxt.text;   
-
-        generationsCountTxt.text = string.Format(generationsCountText, 0);
-        bestFitnessTxt.text = string.Format(bestFitnessText, 0);
-        avgFitnessTxt.text = string.Format(avgFitnessText, 0);
-        worstFitnessTxt.text = string.Format(worstFitnessText, 0);
-    }
-
-    void OnTimerChange(float value)
-    {
-        populationManager1.IterationCount = (int)value;
-        populationManager2.IterationCount = (int)value;
-        timerTxt.text = string.Format(timerText, populationManager1.IterationCount);
-    }
-
-    void OnPauseButtonClick()
-    {
-        populationManager1.PauseSimulation();
-    }
-
-    void OnStopButtonClick()
-    {
-        populationManager1.StopSimulation();
-        populationManager2.StopSimulation();
-        this.gameObject.SetActive(false);
-        startConfigurationScreen.SetActive(true);
-        lastGeneration = 0;
-    }
-
-    void LateUpdate()
+    private void LateUpdate()
     {
         if (lastGeneration != populationManager1.Generation)
         {
@@ -97,5 +57,43 @@ public class SimulationScreen : MonoBehaviour
             avgFitnessTxt.text = string.Format(avgFitnessText, populationManager1.AvgFitness);
             worstFitnessTxt.text = string.Format(worstFitnessText, populationManager1.WorstFitness);
         }
+    }
+
+    private void OnEnable()
+    {
+        if (string.IsNullOrEmpty(generationsCountText))
+            generationsCountText = generationsCountTxt.text;
+        if (string.IsNullOrEmpty(bestFitnessText))
+            bestFitnessText = bestFitnessTxt.text;
+        if (string.IsNullOrEmpty(avgFitnessText))
+            avgFitnessText = avgFitnessTxt.text;
+        if (string.IsNullOrEmpty(worstFitnessText))
+            worstFitnessText = worstFitnessTxt.text;
+
+        generationsCountTxt.text = string.Format(generationsCountText, 0);
+        bestFitnessTxt.text = string.Format(bestFitnessText, 0);
+        avgFitnessTxt.text = string.Format(avgFitnessText, 0);
+        worstFitnessTxt.text = string.Format(worstFitnessText, 0);
+    }
+
+    private void OnTimerChange(float value)
+    {
+        populationManager1.IterationCount = (int)value;
+        populationManager2.IterationCount = (int)value;
+        timerTxt.text = string.Format(timerText, populationManager1.IterationCount);
+    }
+
+    private void OnPauseButtonClick()
+    {
+        populationManager1.PauseSimulation();
+    }
+
+    private void OnStopButtonClick()
+    {
+        populationManager1.StopSimulation();
+        populationManager2.StopSimulation();
+        gameObject.SetActive(false);
+        startConfigurationScreen.SetActive(true);
+        lastGeneration = 0;
     }
 }

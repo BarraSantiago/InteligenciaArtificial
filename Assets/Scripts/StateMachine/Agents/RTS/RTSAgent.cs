@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Game;
 using Pathfinder;
-using Pathfinder.Graph;
 using Pathfinder.Voronoi;
 using StateMachine.States.RTSStates;
 using UnityEngine;
@@ -11,6 +10,20 @@ namespace StateMachine.Agents.RTS
 {
     public class RTSAgent : MonoBehaviour
     {
+        public enum AgentTypes
+        {
+            Miner,
+            Caravan
+        }
+
+        public enum Behaviours
+        {
+            Wait,
+            Walk,
+            GatherResources,
+            Deliver
+        }
+
         public enum Flags
         {
             OnTargetReach,
@@ -22,30 +35,31 @@ namespace StateMachine.Agents.RTS
             OnWait
         }
 
-        public enum Behaviours
-        {
-            Wait,
-            Walk,
-            GatherResources,
-            Deliver
-        }
-
-        public enum AgentTypes
-        {
-            Miner,
-            Caravan
-        }
+        protected const int GoldPerFood = 3;
+        protected const int GoldLimit = 15;
+        protected const int FoodLimit = 10;
 
         public static Node<Vector2> TownCenter;
 
         public static bool Retreat;
+        protected AgentTypes AgentType;
+        protected int CurrentGold;
         public Node<Vector2> CurrentNode;
-        public Voronoi<NodeVoronoi, Vector2> Voronoi;
-        public AStarPathfinder<Node<Vector2>, Vector2, NodeVoronoi> Pathfinder;
+
+        protected int Food = 3;
 
         protected FSM<Behaviours, Flags> Fsm;
+        protected int LastTimeEat = 0;
+
+        protected Action OnMove;
+        protected Action OnWait;
         protected List<Node<Vector2>> Path;
-        protected AgentTypes AgentType;
+        public AStarPathfinder<Node<Vector2>, Vector2, NodeVoronoi> Pathfinder;
+        protected int PathNodeId;
+
+        private Node<Vector2> targetNode;
+        public Voronoi<NodeVoronoi, Vector2> Voronoi;
+
         protected Node<Vector2> TargetNode
         {
             get => targetNode;
@@ -56,19 +70,6 @@ namespace StateMachine.Agents.RTS
                 PathNodeId = 0;
             }
         }
-
-        protected Action OnMove;
-        protected Action OnWait;
-
-        protected int Food = 3;
-        protected int CurrentGold = 0;
-        protected int LastTimeEat = 0;
-        protected const int GoldPerFood = 3;
-        protected const int GoldLimit = 15;
-        protected const int FoodLimit = 10;
-        protected int PathNodeId;
-
-        private Node<Vector2> targetNode;
 
         private void Update()
         {
@@ -112,7 +113,7 @@ namespace StateMachine.Agents.RTS
                 () =>
                 {
                     TargetNode = GetTarget(NodeType.TownCenter);
-                    if(TargetNode == null) return;
+                    if (TargetNode == null) return;
 
                     Debug.Log("Retreat to " + TargetNode.GetCoordinate().x + " - " + TargetNode.GetCoordinate().y);
                 });
@@ -132,7 +133,7 @@ namespace StateMachine.Agents.RTS
                 () =>
                 {
                     TargetNode = GetTarget(NodeType.TownCenter);
-                    if(TargetNode == null) return;
+                    if (TargetNode == null) return;
 
                     Debug.Log("Retreat. Walk to " + TargetNode.GetCoordinate().x + " - " +
                               TargetNode.GetCoordinate().y);
@@ -141,8 +142,8 @@ namespace StateMachine.Agents.RTS
             Fsm.SetTransition(Behaviours.Walk, Flags.OnTargetLost, Behaviours.Walk,
                 () =>
                 {
-                    TargetNode = GetTarget(NodeType.Mine);
-                    if(TargetNode == null) return;
+                    TargetNode = GetTarget();
+                    if (TargetNode == null) return;
 
                     Debug.Log("Walk to " + TargetNode.GetCoordinate().x + " - " + TargetNode.GetCoordinate().y);
                 });
@@ -167,16 +168,16 @@ namespace StateMachine.Agents.RTS
             Fsm.SetTransition(Behaviours.Wait, Flags.OnGather, Behaviours.Walk,
                 () =>
                 {
-                    TargetNode = GetTarget(NodeType.Mine);
-                    if(TargetNode == null) return;
+                    TargetNode = GetTarget();
+                    if (TargetNode == null) return;
 
                     Debug.Log("walk to " + TargetNode.GetCoordinate().x + " - " + TargetNode.GetCoordinate().y);
                 });
             Fsm.SetTransition(Behaviours.Wait, Units.Flags.OnTargetLost, Behaviours.Walk,
                 () =>
                 {
-                    TargetNode = GetTarget(NodeType.Mine);
-                    if(TargetNode == null) return;
+                    TargetNode = GetTarget();
+                    if (TargetNode == null) return;
 
                     Debug.Log("walk to " + TargetNode.GetCoordinate().x + " - " + TargetNode.GetCoordinate().y);
                 });
@@ -184,36 +185,33 @@ namespace StateMachine.Agents.RTS
                 () =>
                 {
                     TargetNode = GetTarget(NodeType.TownCenter);
-                    if(TargetNode == null) return;
+                    if (TargetNode == null) return;
 
                     Debug.Log("Retreat. Walk to " + TargetNode.GetCoordinate().x + " - " +
                               TargetNode.GetCoordinate().y);
                 });
         }
 
-        
-        
 
         protected virtual object[] WaitTickParameters()
         {
             object[] objects = { Retreat, Food, CurrentGold, CurrentNode, OnWait };
             return objects;
         }
-        
+
         protected virtual object[] WaitEnterParameters()
         {
             return null;
         }
-        
+
         protected virtual object[] WaitExitParameters()
         {
             return null;
         }
-        
+
 
         protected virtual void GetFoodTransitions()
         {
-            return;
         }
 
         protected virtual object[] GetFoodTickParameters()
@@ -224,22 +222,18 @@ namespace StateMachine.Agents.RTS
 
         protected virtual void DeliverTransitions()
         {
-            return;
         }
 
         protected virtual void Move()
         {
-            if (CurrentNode == null || TargetNode == null)
-            {
-                return;
-            }
+            if (CurrentNode == null || TargetNode == null) return;
 
             if (CurrentNode.GetCoordinate().Equals(TargetNode.GetCoordinate())) return;
 
             if (Path.Count <= 0) return;
             if (PathNodeId > Path.Count) PathNodeId = 0;
 
-            CurrentNode =  Path[PathNodeId];
+            CurrentNode = Path[PathNodeId];
             PathNodeId++;
         }
 
@@ -257,29 +251,29 @@ namespace StateMachine.Agents.RTS
             CurrentNode.gold++;
             CurrentGold--;
         }
-        
+
         protected Node<Vector2> GetTarget(NodeType nodeType = NodeType.Mine)
         {
             Vector2 position = transform.position;
             Node<Vector2> target;
-            
+
             switch (nodeType)
             {
                 case NodeType.Mine:
                     target = Voronoi.GetMineCloser(GameManager.Graph.CoordNodes.Find(nodeVoronoi =>
                         nodeVoronoi.GetCoordinate() == position));
                     break;
-                
+
                 case NodeType.TownCenter:
                     target = TownCenter;
                     break;
-                
+
                 default:
                     target = Voronoi.GetMineCloser(GameManager.Graph.CoordNodes.Find(nodeVoronoi =>
                         nodeVoronoi.GetCoordinate() == position));
                     break;
             }
-            
+
             if (target == null)
             {
                 Debug.LogError("No mines with gold.");
@@ -288,6 +282,5 @@ namespace StateMachine.Agents.RTS
 
             return GameManager.Graph.NodesType.Find(node => node.GetCoordinate() == target.GetCoordinate());
         }
-
     }
 }

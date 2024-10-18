@@ -10,17 +10,33 @@ namespace StateMachine
         where EnumFlag : Enum
     {
         private const int UNNASIGNED_TRANSITION = -1;
-        private int _currentState = 0;
-        private readonly Dictionary<int, State> _behaviours;
-        private readonly Dictionary<int, Func<object[]>> _behaviourTickParameters;
         private readonly Dictionary<int, Func<object[]>> _behaviourOnEnterParameters;
         private readonly Dictionary<int, Func<object[]>> _behaviourOnExitParameters;
+        private readonly Dictionary<int, State> _behaviours;
+        private readonly Dictionary<int, Func<object[]>> _behaviourTickParameters;
         private readonly (int destinationInState, Action onTransition)[,] _transitions;
+        private int _currentState;
 
-        ParallelOptions parallelOptions = new ParallelOptions()
+        private readonly ParallelOptions parallelOptions = new()
         {
             MaxDegreeOfParallelism = 32
         };
+
+        public FSM()
+        {
+            var states = Enum.GetValues(typeof(EnumState)).Length;
+            var flags = Enum.GetValues(typeof(EnumFlag)).Length;
+            _behaviours = new Dictionary<int, State>();
+            _transitions = new (int, Action)[states, flags];
+
+            for (var i = 0; i < states; i++)
+            for (var j = 0; j < flags; j++)
+                _transitions[i, j] = (UNNASIGNED_TRANSITION, null);
+
+            _behaviourTickParameters = new Dictionary<int, Func<object[]>>();
+            _behaviourOnEnterParameters = new Dictionary<int, Func<object[]>>();
+            _behaviourOnExitParameters = new Dictionary<int, Func<object[]>>();
+        }
 
         private BehaviourActions GetCurrentStateOnEnterBehaviours => _behaviours[_currentState]
             .GetOnEnterBehaviour(_behaviourOnEnterParameters[_currentState]?.Invoke());
@@ -30,26 +46,6 @@ namespace StateMachine
 
         private BehaviourActions GetCurrentStateTickBehaviours => _behaviours[_currentState]
             .GetTickBehaviour(_behaviourTickParameters[_currentState]?.Invoke());
-
-        public FSM()
-        {
-            int states = Enum.GetValues(typeof(EnumState)).Length;
-            int flags = Enum.GetValues(typeof(EnumFlag)).Length;
-            _behaviours = new Dictionary<int, State>();
-            _transitions = new (int, Action)[states, flags];
-
-            for (int i = 0; i < states; i++)
-            {
-                for (int j = 0; j < flags; j++)
-                {
-                    _transitions[i, j] = (UNNASIGNED_TRANSITION, null);
-                }
-            }
-
-            _behaviourTickParameters = new Dictionary<int, Func<object[]>>();
-            _behaviourOnEnterParameters = new Dictionary<int, Func<object[]>>();
-            _behaviourOnExitParameters = new Dictionary<int, Func<object[]>>();
-        }
 
         public void ForceTransition(Enum state)
         {
@@ -61,7 +57,7 @@ namespace StateMachine
         public void AddBehaviour<T>(EnumState stateIndexEnum, Func<object[]> onTickParameters = null,
             Func<object[]> onEnterParameters = null, Func<object[]> onExitParameters = null) where T : State, new()
         {
-            int stateIndex = Convert.ToInt32(stateIndexEnum);
+            var stateIndex = Convert.ToInt32(stateIndexEnum);
 
             if (_behaviours.ContainsKey(stateIndex)) return;
 
@@ -104,20 +100,20 @@ namespace StateMachine
         {
             if (behaviourActions.Equals(default(BehaviourActions))) return;
 
-            int executionOrder = 0;
+            var executionOrder = 0;
 
-            while (behaviourActions.MainThreadBehaviour != null && behaviourActions.MainThreadBehaviour.Count > 0 ||
-                   behaviourActions.MultiThreadablesBehaviour != null &&
-                   behaviourActions.MultiThreadablesBehaviour.Count > 0)
+            while ((behaviourActions.MainThreadBehaviour != null && behaviourActions.MainThreadBehaviour.Count > 0) ||
+                   (behaviourActions.MultiThreadablesBehaviour != null &&
+                    behaviourActions.MultiThreadablesBehaviour.Count > 0))
             {
-                Task multithreadableBehaviour = new Task(() =>
+                var multithreadableBehaviour = new Task(() =>
                 {
                     if (behaviourActions.MultiThreadablesBehaviour != null)
                     {
                         if (!behaviourActions.MultiThreadablesBehaviour.ContainsKey(executionOrder)) return;
 
                         Parallel.ForEach(behaviourActions.MultiThreadablesBehaviour[executionOrder], parallelOptions,
-                            (behaviour) => { (behaviour)?.Invoke(); });
+                            behaviour => { behaviour?.Invoke(); });
                         behaviourActions.MultiThreadablesBehaviour.TryRemove(executionOrder, out _);
                     }
                 });
@@ -125,17 +121,12 @@ namespace StateMachine
                 multithreadableBehaviour.Start();
 
                 if (behaviourActions.MainThreadBehaviour != null)
-                {
                     if (behaviourActions.MainThreadBehaviour.ContainsKey(executionOrder))
                     {
-                        foreach (var action in behaviourActions.MainThreadBehaviour[executionOrder])
-                        {
-                            action.Invoke();
-                        }
+                        foreach (var action in behaviourActions.MainThreadBehaviour[executionOrder]) action.Invoke();
 
                         behaviourActions.MainThreadBehaviour.Remove(executionOrder);
                     }
-                }
 
                 multithreadableBehaviour.Wait();
 

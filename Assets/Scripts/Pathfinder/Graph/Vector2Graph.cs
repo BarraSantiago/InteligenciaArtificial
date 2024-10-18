@@ -10,18 +10,16 @@ namespace Pathfinder.Graph
 
         public override void CreateGraph(int x, int y, float cellSize)
         {
-            for (int i = 0; i < x; i++)
+            for (var i = 0; i < x; i++)
+            for (var j = 0; j < y; j++)
             {
-                for (int j = 0; j < y; j++)
-                {
-                    NodeVoronoi node = new NodeVoronoi();
-                    (node).SetCoordinate(i * cellSize, j * cellSize);
-                    CoordNodes.Add(node);
+                var node = new NodeVoronoi();
+                node.SetCoordinate(i * cellSize, j * cellSize);
+                CoordNodes.Add(node);
 
-                    Node<Vector2> nodeType = new Node<Vector2>();
-                    nodeType.SetCoordinate(new Vector2(i*cellSize, j*cellSize));
-                    NodesType.Add(nodeType);
-                }
+                var nodeType = new Node<Vector2>();
+                nodeType.SetCoordinate(new Vector2(i * cellSize, j * cellSize));
+                NodesType.Add(nodeType);
             }
         }
     }
