@@ -38,7 +38,7 @@ namespace Pathfinder
             return node.IsBlocked();
         }
 
-        protected override int MoveToNeighborCost(NodeType A, NodeType B, RTSAgent.AgentTypes type)
+        protected override int MoveToNeighborCost(NodeType A, NodeType B)
         {
             return 0;
         }

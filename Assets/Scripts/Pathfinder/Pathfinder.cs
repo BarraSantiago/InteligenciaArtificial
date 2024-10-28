@@ -12,7 +12,7 @@ namespace Pathfinder
     {
         protected ICollection<TNodeType> Graph;
 
-        public List<TNodeType> FindPath(TNodeType startNode, TNodeType destinationNode, RTSAgent.AgentTypes agentType)
+        public List<TNodeType> FindPath(TNodeType startNode, TNodeType destinationNode)
         {
             var nodes =
                 Graph.ToDictionary(key => key, _ => (Parent: default(TNodeType), AcumulativeCost: 0, Heuristic: 0));
@@ -36,7 +36,7 @@ namespace Pathfinder
                     if (!nodes.ContainsKey(neighbor) || IsBlocked(neighbor) || closedList.Contains(neighbor)) continue;
 
                     var aproxAcumulativeCost = nodes[currentNode].AcumulativeCost
-                                               + MoveToNeighborCost(currentNode, neighbor, agentType);
+                                               + MoveToNeighborCost(currentNode, neighbor);
 
                     if (openList.Contains(neighbor) && aproxAcumulativeCost >= nodes[neighbor].AcumulativeCost)
                         continue;
@@ -79,7 +79,7 @@ namespace Pathfinder
 
         protected abstract bool NodesEquals(TNodeType A, TNodeType B);
 
-        protected abstract int MoveToNeighborCost(TNodeType A, TNodeType B, RTSAgent.AgentTypes type);
+        protected abstract int MoveToNeighborCost(TNodeType A, TNodeType B);
 
         protected abstract bool IsBlocked(TNodeType node);
     }

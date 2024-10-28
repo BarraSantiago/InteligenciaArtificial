@@ -34,10 +34,10 @@ namespace Pathfinder
 
         protected override bool IsBlocked(NodeType node)
         {
-            return node.GetNodeType() == Pathfinder.NodeType.Blocked;
+            return node.GetNodeType() == Pathfinder.RTSNodeType.Blocked;
         }
 
-        protected override int MoveToNeighborCost(NodeType A, NodeType B, RTSAgent.AgentTypes type)
+        protected override int MoveToNeighborCost(NodeType A, NodeType B)
         {
             if (!GetNeighbors(A).Contains(B)) throw new InvalidOperationException("B node has to be a neighbor.");
 
