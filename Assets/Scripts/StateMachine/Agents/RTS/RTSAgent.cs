@@ -39,12 +39,12 @@ namespace StateMachine.Agents.RTS
         protected const int GoldLimit = 15;
         protected const int FoodLimit = 10;
 
-        public static Node<Vector2> TownCenter;
+        public static RTSNode<Vector2> TownCenter;
 
         public static bool Retreat;
         protected AgentTypes AgentType;
         protected int CurrentGold;
-        public Node<Vector2> CurrentNode;
+        public RTSNode<Vector2> CurrentRtsNode;
 
         protected int Food = 3;
 
@@ -53,20 +53,20 @@ namespace StateMachine.Agents.RTS
 
         protected Action OnMove;
         protected Action OnWait;
-        protected List<Node<Vector2>> Path;
-        public AStarPathfinder<Node<Vector2>, Vector2, NodeVoronoi> Pathfinder;
+        protected List<RTSNode<Vector2>> Path;
+        public AStarPathfinder<RTSNode<Vector2>, Vector2, NodeVoronoi> Pathfinder;
         protected int PathNodeId;
 
-        private Node<Vector2> targetNode;
+        private RTSNode<Vector2> targetRtsNode;
         public Voronoi<NodeVoronoi, Vector2> Voronoi;
 
-        protected Node<Vector2> TargetNode
+        protected RTSNode<Vector2> TargetRtsNode
         {
-            get => targetNode;
+            get => targetRtsNode;
             set
             {
-                targetNode = value;
-                Path = Pathfinder.FindPath(CurrentNode, TargetNode, AgentType);
+                targetRtsNode = value;
+                Path = Pathfinder.FindPath(CurrentRtsNode, TargetRtsNode);
                 PathNodeId = 0;
             }
         }
@@ -112,10 +112,10 @@ namespace StateMachine.Agents.RTS
             Fsm.SetTransition(Behaviours.GatherResources, Flags.OnRetreat, Behaviours.Walk,
                 () =>
                 {
-                    TargetNode = GetTarget(NodeType.TownCenter);
-                    if (TargetNode == null) return;
+                    TargetRtsNode = GetTarget(RTSNodeType.TownCenter);
+                    if (TargetRtsNode == null) return;
 
-                    Debug.Log("Retreat to " + TargetNode.GetCoordinate().x + " - " + TargetNode.GetCoordinate().y);
+                    Debug.Log("Retreat to " + TargetRtsNode.GetCoordinate().x + " - " + TargetRtsNode.GetCoordinate().y);
                 });
         }
 
@@ -132,20 +132,20 @@ namespace StateMachine.Agents.RTS
             Fsm.SetTransition(Behaviours.Walk, Flags.OnRetreat, Behaviours.Walk,
                 () =>
                 {
-                    TargetNode = GetTarget(NodeType.TownCenter);
-                    if (TargetNode == null) return;
+                    TargetRtsNode = GetTarget(RTSNodeType.TownCenter);
+                    if (TargetRtsNode == null) return;
 
-                    Debug.Log("Retreat. Walk to " + TargetNode.GetCoordinate().x + " - " +
-                              TargetNode.GetCoordinate().y);
+                    Debug.Log("Retreat. Walk to " + TargetRtsNode.GetCoordinate().x + " - " +
+                              TargetRtsNode.GetCoordinate().y);
                 });
 
             Fsm.SetTransition(Behaviours.Walk, Flags.OnTargetLost, Behaviours.Walk,
                 () =>
                 {
-                    TargetNode = GetTarget();
-                    if (TargetNode == null) return;
+                    TargetRtsNode = GetTarget();
+                    if (TargetRtsNode == null) return;
 
-                    Debug.Log("Walk to " + TargetNode.GetCoordinate().x + " - " + TargetNode.GetCoordinate().y);
+                    Debug.Log("Walk to " + TargetRtsNode.GetCoordinate().x + " - " + TargetRtsNode.GetCoordinate().y);
                 });
 
             Fsm.SetTransition(Behaviours.Walk, Flags.OnWait, Behaviours.Wait, () => Debug.Log("Wait"));
@@ -153,13 +153,13 @@ namespace StateMachine.Agents.RTS
 
         protected virtual object[] WalkTickParameters()
         {
-            object[] objects = { CurrentNode, TargetNode, Retreat, transform, OnMove };
+            object[] objects = { CurrentRtsNode, TargetRtsNode, Retreat, transform, OnMove };
             return objects;
         }
 
         protected virtual object[] WalkEnterParameters()
         {
-            object[] objects = { CurrentNode, TargetNode, Path, Pathfinder, AgentType };
+            object[] objects = { CurrentRtsNode, TargetRtsNode, Path, Pathfinder, AgentType };
             return objects;
         }
 
@@ -168,34 +168,34 @@ namespace StateMachine.Agents.RTS
             Fsm.SetTransition(Behaviours.Wait, Flags.OnGather, Behaviours.Walk,
                 () =>
                 {
-                    TargetNode = GetTarget();
-                    if (TargetNode == null) return;
+                    TargetRtsNode = GetTarget();
+                    if (TargetRtsNode == null) return;
 
-                    Debug.Log("walk to " + TargetNode.GetCoordinate().x + " - " + TargetNode.GetCoordinate().y);
+                    Debug.Log("walk to " + TargetRtsNode.GetCoordinate().x + " - " + TargetRtsNode.GetCoordinate().y);
                 });
             Fsm.SetTransition(Behaviours.Wait, Units.Flags.OnTargetLost, Behaviours.Walk,
                 () =>
                 {
-                    TargetNode = GetTarget();
-                    if (TargetNode == null) return;
+                    TargetRtsNode = GetTarget();
+                    if (TargetRtsNode == null) return;
 
-                    Debug.Log("walk to " + TargetNode.GetCoordinate().x + " - " + TargetNode.GetCoordinate().y);
+                    Debug.Log("walk to " + TargetRtsNode.GetCoordinate().x + " - " + TargetRtsNode.GetCoordinate().y);
                 });
             Fsm.SetTransition(Behaviours.Wait, Flags.OnRetreat, Behaviours.Walk,
                 () =>
                 {
-                    TargetNode = GetTarget(NodeType.TownCenter);
-                    if (TargetNode == null) return;
+                    TargetRtsNode = GetTarget(RTSNodeType.TownCenter);
+                    if (TargetRtsNode == null) return;
 
-                    Debug.Log("Retreat. Walk to " + TargetNode.GetCoordinate().x + " - " +
-                              TargetNode.GetCoordinate().y);
+                    Debug.Log("Retreat. Walk to " + TargetRtsNode.GetCoordinate().x + " - " +
+                              TargetRtsNode.GetCoordinate().y);
                 });
         }
 
 
         protected virtual object[] WaitTickParameters()
         {
-            object[] objects = { Retreat, Food, CurrentGold, CurrentNode, OnWait };
+            object[] objects = { Retreat, Food, CurrentGold, CurrentRtsNode, OnWait };
             return objects;
         }
 
@@ -226,45 +226,45 @@ namespace StateMachine.Agents.RTS
 
         protected virtual void Move()
         {
-            if (CurrentNode == null || TargetNode == null) return;
+            if (CurrentRtsNode == null || TargetRtsNode == null) return;
 
-            if (CurrentNode.GetCoordinate().Equals(TargetNode.GetCoordinate())) return;
+            if (CurrentRtsNode.GetCoordinate().Equals(TargetRtsNode.GetCoordinate())) return;
 
             if (Path.Count <= 0) return;
             if (PathNodeId > Path.Count) PathNodeId = 0;
 
-            CurrentNode = Path[PathNodeId];
+            CurrentRtsNode = Path[PathNodeId];
             PathNodeId++;
         }
 
         private void Wait()
         {
-            if (CurrentNode.NodeType == NodeType.Mine && CurrentNode.food > 0)
+            if (CurrentRtsNode.RtsNodeType == RTSNodeType.Mine && CurrentRtsNode.food > 0)
             {
                 if (Food > 1) return;
                 Food++;
-                CurrentNode.food--;
+                CurrentRtsNode.food--;
             }
 
-            if (CurrentNode.NodeType != NodeType.TownCenter || CurrentGold < 1) return;
+            if (CurrentRtsNode.RtsNodeType != RTSNodeType.TownCenter || CurrentGold < 1) return;
 
-            CurrentNode.gold++;
+            CurrentRtsNode.gold++;
             CurrentGold--;
         }
 
-        protected Node<Vector2> GetTarget(NodeType nodeType = NodeType.Mine)
+        protected RTSNode<Vector2> GetTarget(RTSNodeType rtsNodeType = RTSNodeType.Mine)
         {
             Vector2 position = transform.position;
-            Node<Vector2> target;
+            RTSNode<Vector2> target;
 
-            switch (nodeType)
+            switch (rtsNodeType)
             {
-                case NodeType.Mine:
+                case RTSNodeType.Mine:
                     target = Voronoi.GetMineCloser(GameManager.Graph.CoordNodes.Find(nodeVoronoi =>
                         nodeVoronoi.GetCoordinate() == position));
                     break;
 
-                case NodeType.TownCenter:
+                case RTSNodeType.TownCenter:
                     target = TownCenter;
                     break;
 

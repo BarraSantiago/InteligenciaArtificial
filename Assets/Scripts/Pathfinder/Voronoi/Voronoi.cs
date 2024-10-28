@@ -22,11 +22,11 @@ namespace Pathfinder.Voronoi
             // Calculo los limites del mapa con sus dimensiones, distancia entre nodos y punto de origen
             var mapSize = new TCoordinate();
             mapSize.SetCoordinate(
-                Graph<Node<TCoordinateType>, TCoordinate, TCoordinateType>.MapDimensions.GetCoordinate());
-            mapSize.Multiply(Graph<Node<TCoordinateType>, TCoordinate, TCoordinateType>.CellSize);
+                Graph<RTSNode<TCoordinateType>, TCoordinate, TCoordinateType>.MapDimensions.GetCoordinate());
+            mapSize.Multiply(Graph<RTSNode<TCoordinateType>, TCoordinate, TCoordinateType>.CellSize);
             var offset = new TCoordinate();
             offset.SetCoordinate(
-                Graph<Node<TCoordinateType>, TCoordinate, TCoordinateType>.OriginPosition.GetCoordinate());
+                Graph<RTSNode<TCoordinateType>, TCoordinate, TCoordinateType>.OriginPosition.GetCoordinate());
 
 
             var coordinateUp = new TCoordinate();
@@ -58,7 +58,7 @@ namespace Pathfinder.Voronoi
             foreach (var mine in goldMines)
             {
                 // Agrego las minas de oro como sectores
-                var node = new Node<TCoordinateType>();
+                var node = new RTSNode<TCoordinateType>();
                 node.SetCoordinate(mine.GetCoordinate());
                 sectors.Add(new Sector<TCoordinate, TCoordinateType>(node));
             }
@@ -80,7 +80,7 @@ namespace Pathfinder.Voronoi
                 sector.SetIntersections();
         }
 
-        public Node<TCoordinateType> GetMineCloser(TCoordinate agentPosition)
+        public RTSNode<TCoordinateType> GetMineCloser(TCoordinate agentPosition)
         {
             // Calculo que mina esta mas cerca a x position
             return sectors != null

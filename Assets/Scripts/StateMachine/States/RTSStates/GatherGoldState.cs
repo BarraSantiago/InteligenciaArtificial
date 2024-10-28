@@ -17,7 +17,7 @@ namespace StateMachine.States.RTSStates
             var gold = Convert.ToInt32(parameters[2]);
             var goldLimit = Convert.ToInt32(parameters[3]);
             var OnMine = parameters[4] as Action;
-            var currentNode = parameters[5] as Node<Vector2>;
+            var currentNode = parameters[5] as RTSNode<Vector2>;
 
             behaviours.AddMultiThreadableBehaviours(0, () => { OnMine?.Invoke(); });
 
@@ -36,8 +36,8 @@ namespace StateMachine.States.RTSStates
         {
             var behaviours = new BehaviourActions();
 
-            var onReachMine = parameters[0] as Action<Node<Vector2>>;
-            var currentNode = parameters[1] as Node<Vector2>;
+            var onReachMine = parameters[0] as Action<RTSNode<Vector2>>;
+            var currentNode = parameters[1] as RTSNode<Vector2>;
 
             behaviours.AddMultiThreadableBehaviours(0, () => { onReachMine?.Invoke(currentNode); });
 
@@ -48,8 +48,8 @@ namespace StateMachine.States.RTSStates
         {
             var behaviours = new BehaviourActions();
 
-            var onLeaveMine = parameters[0] as Action<Node<Vector2>>;
-            var currentNode = parameters[1] as Node<Vector2>;
+            var onLeaveMine = parameters[0] as Action<RTSNode<Vector2>>;
+            var currentNode = parameters[1] as RTSNode<Vector2>;
 
             behaviours.AddMultiThreadableBehaviours(0, () => { onLeaveMine?.Invoke(currentNode); });
 

@@ -19,7 +19,8 @@ namespace Pathfinder
 
         public ICollection<INode<Coordinate>> GetNeighbors();
 
-        public NodeType GetNodeType();
+        public RTSNodeType GetRTSNodeType();
+        public SimNodeType GetSimNodeType();
 
         public int GetCost();
 

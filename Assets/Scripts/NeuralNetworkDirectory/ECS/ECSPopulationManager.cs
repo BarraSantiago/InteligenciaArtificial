@@ -8,7 +8,6 @@ namespace NeuralNetworkDirectory.ECS
     public class ECSPopulationManager : MonoBehaviour
     {
         public int entityCount = 100;
-        public float velocity = 1.0f;
         public GameObject prefab;
 
         private Dictionary<uint, GameObject> entities;

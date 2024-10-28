@@ -46,6 +46,7 @@ namespace NeuralNetworkDirectory.ECS
                 }
                 a += neuron.Bias * neuron.Weights[^1];
                 return Sigmoid(a, neuron.P);
+                
             }
 
             private static float Sigmoid(float a, float p)

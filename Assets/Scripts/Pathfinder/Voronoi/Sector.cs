@@ -15,14 +15,14 @@ namespace Pathfinder.Voronoi
         private readonly List<Segment<TCoordinate, TCoordinateType>> segments = new();
         private List<TCoordinate> points;
 
-        public Sector(Node<TCoordinateType> mine)
+        public Sector(RTSNode<TCoordinateType> mine)
         {
             _wrongPoint = new TCoordinate();
             _wrongPoint.SetCoordinate(-1, -1);
             Mine = mine;
         }
 
-        public Node<TCoordinateType> Mine { get; }
+        public RTSNode<TCoordinateType> Mine { get; }
 
         public bool
             CheckPointInSector(TCoordinate position) // Calculo si "position" esta dentro de un sector del diagrama
@@ -58,9 +58,9 @@ namespace Pathfinder.Voronoi
             return inside;
         }
 
-        public List<Node<TCoordinate>> GetNodesInSector(List<Node<TCoordinate>> allNodes)
+        public List<RTSNode<TCoordinate>> GetNodesInSector(List<RTSNode<TCoordinate>> allNodes)
         {
-            var nodesInSector = new List<Node<TCoordinate>>();
+            var nodesInSector = new List<RTSNode<TCoordinate>>();
 
             foreach (var node in allNodes)
                 if (CheckPointInSector(node.GetCoordinate()))
@@ -69,7 +69,7 @@ namespace Pathfinder.Voronoi
             return nodesInSector;
         }
 
-        public int CalculateTotalWeight(List<Node<TCoordinate>> nodesInSector)
+        public int CalculateTotalWeight(List<RTSNode<TCoordinate>> nodesInSector)
         {
             var totalWeight = 0;
 
@@ -175,13 +175,13 @@ namespace Pathfinder.Voronoi
             var p1 = seg1.Mediatrix;
             var p2 = new TCoordinate();
             p2.SetCoordinate(seg1.Mediatrix.GetCoordinate());
-            p2.Add(seg1.Direction.Multiply(Graph<Node<TCoordinateType>, TCoordinate, TCoordinateType>.MapDimensions
+            p2.Add(seg1.Direction.Multiply(Graph<RTSNode<TCoordinateType>, TCoordinate, TCoordinateType>.MapDimensions
                 .GetMagnitude()));
 
             var p3 = seg2.Mediatrix;
             var p4 = new TCoordinate();
             p4.SetCoordinate(seg2.Mediatrix.GetCoordinate());
-            p4.Add(seg2.Direction.Multiply(Graph<Node<TCoordinateType>, TCoordinate, TCoordinateType>.MapDimensions
+            p4.Add(seg2.Direction.Multiply(Graph<RTSNode<TCoordinateType>, TCoordinate, TCoordinateType>.MapDimensions
                 .GetMagnitude()));
 
             // Chequeo si los dos segmentos son paralelos, si es asi no hay interseccion

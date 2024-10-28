@@ -11,7 +11,7 @@ using Random = UnityEngine.Random;
 
 namespace Game
 {
-    using GraphType = Graph<Node<Vector2>, NodeVoronoi, Vector2>;
+    using GraphType = Graph<RTSNode<Vector2>, NodeVoronoi, Vector2>;
 
     public class GameManager : MonoBehaviour
     {
@@ -19,9 +19,9 @@ namespace Game
 
 
         public static GraphType Graph;
-        public static readonly List<Node<Vector2>> MinesWithMiners = new();
-        public static AStarPathfinder<Node<Vector2>, Vector2, NodeVoronoi> CaravanPathfinder;
-        public static AStarPathfinder<Node<Vector2>, Vector2, NodeVoronoi> MinerPathfinder;
+        public static readonly List<RTSNode<Vector2>> MinesWithMiners = new();
+        public static AStarPathfinder<RTSNode<Vector2>, Vector2, NodeVoronoi> CaravanPathfinder;
+        public static AStarPathfinder<RTSNode<Vector2>, Vector2, NodeVoronoi> MinerPathfinder;
 
         [Header("Map Config")] [SerializeField] [Range(4, 150)]
         private int mapWidth;
@@ -40,9 +40,9 @@ namespace Game
         [SerializeField] private int minersQuantity;
         [SerializeField] private int caravansQuantity;
 
-        private List<Node<Vector2>> CaravanNodes;
+        private List<RTSNode<Vector2>> CaravanNodes;
         private Color color;
-        private List<Node<Vector2>> MinerNodes;
+        private List<RTSNode<Vector2>> MinerNodes;
         private int towncenterNode;
         private Vector3 townCenterPosition;
         private Voronoi<NodeVoronoi, Vector2> voronoi;
@@ -90,14 +90,14 @@ namespace Game
 
             foreach (var node in Graph.NodesType)
             {
-                Gizmos.color = node.NodeType switch
+                Gizmos.color = node.RtsNodeType switch
                 {
-                    NodeType.Mine => Color.yellow,
-                    NodeType.Empty => Color.white,
-                    NodeType.TownCenter => Color.blue,
-                    NodeType.Forest => Color.green,
-                    NodeType.Gravel => Color.gray,
-                    NodeType.Blocked => Color.red,
+                    RTSNodeType.Mine => Color.yellow,
+                    RTSNodeType.Empty => Color.white,
+                    RTSNodeType.TownCenter => Color.blue,
+                    RTSNodeType.Forest => Color.green,
+                    RTSNodeType.Gravel => Color.gray,
+                    RTSNodeType.Blocked => Color.red,
                     _ => Color.white
                 };
 
@@ -118,13 +118,13 @@ namespace Game
 
             towncenterNode = CreateTownCenter(out townCenterPosition);
 
-            CaravanNodes = Graph.NodesType.Select(node => new Node<Vector2>(node.GetCoordinate())).ToList();
-            MinerNodes = Graph.NodesType.Select(node => new Node<Vector2>(node.GetCoordinate())).ToList();
+            CaravanNodes = Graph.NodesType.Select(node => new RTSNode<Vector2>(node.GetCoordinate())).ToList();
+            MinerNodes = Graph.NodesType.Select(node => new RTSNode<Vector2>(node.GetCoordinate())).ToList();
 
             UpdateCosts();
 
-            MinerPathfinder = new AStarPathfinder<Node<Vector2>, Vector2, NodeVoronoi>(MinerNodes);
-            CaravanPathfinder = new AStarPathfinder<Node<Vector2>, Vector2, NodeVoronoi>(CaravanNodes);
+            MinerPathfinder = new AStarPathfinder<RTSNode<Vector2>, Vector2, NodeVoronoi>(MinerNodes);
+            CaravanPathfinder = new AStarPathfinder<RTSNode<Vector2>, Vector2, NodeVoronoi>(CaravanNodes);
 
             VoronoiSetup();
         }
@@ -133,26 +133,26 @@ namespace Game
         {
             const int midCost = 2;
 
-            foreach (var node in CaravanNodes.Where(node => node.NodeType == NodeType.Forest)) node.SetCost(midCost);
+            foreach (var node in CaravanNodes.Where(node => node.RtsNodeType == RTSNodeType.Forest)) node.SetCost(midCost);
 
-            foreach (var node in MinerNodes.Where(node => node.NodeType == NodeType.Gravel)) node.SetCost(midCost);
+            foreach (var node in MinerNodes.Where(node => node.RtsNodeType == RTSNodeType.Gravel)) node.SetCost(midCost);
         }
 
-        private void OnReachMine(Node<Vector2> node)
+        private void OnReachMine(RTSNode<Vector2> rtsNode)
         {
             RemoveEmptyNodes();
-            MinesWithMiners.Add(node);
+            MinesWithMiners.Add(rtsNode);
         }
 
-        private void OnLeaveMine(Node<Vector2> node)
+        private void OnLeaveMine(RTSNode<Vector2> rtsNode)
         {
-            MinesWithMiners.Remove(node);
+            MinesWithMiners.Remove(rtsNode);
             RemoveEmptyNodes();
         }
 
         private void RemoveEmptyNodes()
         {
-            MinesWithMiners.RemoveAll(node => node.NodeType == NodeType.Empty);
+            MinesWithMiners.RemoveAll(node => node.RtsNodeType == RTSNodeType.Empty);
         }
 
         private void SetupObstacles()
@@ -161,16 +161,16 @@ namespace Game
             for (var i = 0; i < Graph.CoordNodes.Count; i++)
                 if (Random.Range(0, 100) < obscacleChance)
                 {
-                    Graph.NodesType[i].NodeType = NodeType.Blocked;
+                    Graph.NodesType[i].RtsNodeType = RTSNodeType.Blocked;
                     Graph.NodesType[i].SetCost(1000);
                 }
 
             for (var i = 0; i < Graph.CoordNodes.Count; i++)
                 if (Random.Range(0, 100) < obscacleChance)
-                    Graph.NodesType[i].NodeType = NodeType.Forest;
+                    Graph.NodesType[i].RtsNodeType = RTSNodeType.Forest;
             for (var i = 0; i < Graph.CoordNodes.Count; i++)
                 if (Random.Range(0, 100) < obscacleChance)
-                    Graph.NodesType[i].NodeType = NodeType.Gravel;
+                    Graph.NodesType[i].RtsNodeType = RTSNodeType.Gravel;
         }
 
         private void VoronoiSetup()
@@ -193,10 +193,10 @@ namespace Game
             for (var i = 0; i < minesQuantity; i++)
             {
                 var rand = Random.Range(0, Graph.CoordNodes.Count);
-                if (Graph.NodesType[rand].NodeType == NodeType.Mine ||
-                    Graph.NodesType[rand].NodeType == NodeType.TownCenter) continue;
+                if (Graph.NodesType[rand].RtsNodeType == RTSNodeType.Mine ||
+                    Graph.NodesType[rand].RtsNodeType == RTSNodeType.TownCenter) continue;
                 var node = Graph.NodesType[rand];
-                node.NodeType = NodeType.Mine;
+                node.RtsNodeType = RTSNodeType.Mine;
                 node.gold = 100;
                 GraphType.mines.Add(node);
             }
@@ -205,7 +205,7 @@ namespace Game
         private int CreateTownCenter(out Vector3 townCenterPosition)
         {
             var townCenterNode = Random.Range(0, Graph.CoordNodes.Count);
-            Graph.NodesType[townCenterNode].NodeType = NodeType.TownCenter;
+            Graph.NodesType[townCenterNode].RtsNodeType = RTSNodeType.TownCenter;
             townCenterPosition = new Vector3(Graph.CoordNodes[townCenterNode].GetCoordinate().x,
                 Graph.CoordNodes[townCenterNode].GetCoordinate().y);
             return townCenterNode;
@@ -225,7 +225,7 @@ namespace Game
         {
             var caravan = Instantiate(caravanPrefab, townCenterPosition, Quaternion.identity);
             var agent = caravan.GetComponent<Caravan>();
-            agent.CurrentNode = Graph.NodesType[towncenterNode];
+            agent.CurrentRtsNode = Graph.NodesType[towncenterNode];
             agent.Voronoi = voronoi;
             agent.Pathfinder = CaravanPathfinder;
             agent.Init();
@@ -235,7 +235,7 @@ namespace Game
         {
             var miner = Instantiate(minerPrefab, townCenterPosition, Quaternion.identity);
             var agent = miner.GetComponent<Miner>();
-            agent.CurrentNode = Graph.NodesType[towncenterNode];
+            agent.CurrentRtsNode = Graph.NodesType[towncenterNode];
             RTSAgent.TownCenter = Graph.NodesType[towncenterNode];
             agent.Pathfinder = MinerPathfinder;
             agent.Voronoi = voronoi;
@@ -253,7 +253,7 @@ namespace Game
 
             Graph.NodesType.ForEach(node =>
             {
-                if (node.NodeType == NodeType.Mine && node.gold <= 0) node.NodeType = NodeType.Empty;
+                if (node.RtsNodeType == RTSNodeType.Mine && node.gold <= 0) node.RtsNodeType = RTSNodeType.Empty;
             });
 
             GraphType.mines.RemoveAll(node => node.gold <= 0);

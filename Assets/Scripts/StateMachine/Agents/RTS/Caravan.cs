@@ -30,7 +30,7 @@ namespace StateMachine.Agents.RTS
             if (Food <= 0) return;
 
             Food--;
-            CurrentNode.food++;
+            CurrentRtsNode.food++;
         }
 
         protected override void FsmBehaviours()
@@ -62,21 +62,21 @@ namespace StateMachine.Agents.RTS
                     var target = GameManager.MinesWithMiners[0];
                     if (target == null) return;
 
-                    TargetNode =
+                    TargetRtsNode =
                         GameManager.Graph.NodesType.Find(node => node.GetCoordinate() == target.GetCoordinate());
-                    if (TargetNode == null) return;
+                    if (TargetRtsNode == null) return;
 
-                    Debug.Log("Delivering food to " + TargetNode.GetCoordinate().x + " - " +
-                              TargetNode.GetCoordinate().y);
+                    Debug.Log("Delivering food to " + TargetRtsNode.GetCoordinate().x + " - " +
+                              TargetRtsNode.GetCoordinate().y);
                 });
             Fsm.SetTransition(Behaviours.GatherResources, Flags.OnRetreat, Behaviours.Walk,
                 () =>
                 {
-                    TargetNode = GetTarget(NodeType.TownCenter);
-                    if (TargetNode == null) return;
+                    TargetRtsNode = GetTarget(RTSNodeType.TownCenter);
+                    if (TargetRtsNode == null) return;
 
-                    Debug.Log("Retreat. Walk to " + TargetNode.GetCoordinate().x + " - " +
-                              TargetNode.GetCoordinate().y);
+                    Debug.Log("Retreat. Walk to " + TargetRtsNode.GetCoordinate().x + " - " +
+                              TargetRtsNode.GetCoordinate().y);
                 });
         }
 
@@ -85,12 +85,12 @@ namespace StateMachine.Agents.RTS
             Fsm.SetTransition(Behaviours.Walk, Flags.OnRetreat, Behaviours.Walk,
                 () =>
                 {
-                    TargetNode = GetTarget(NodeType.TownCenter);
-                    if (TargetNode == null) return;
+                    TargetRtsNode = GetTarget(RTSNodeType.TownCenter);
+                    if (TargetRtsNode == null) return;
 
 
-                    Debug.Log("Retreat. Walk to " + TargetNode.GetCoordinate().x + " - " +
-                              TargetNode.GetCoordinate().y);
+                    Debug.Log("Retreat. Walk to " + TargetRtsNode.GetCoordinate().x + " - " +
+                              TargetRtsNode.GetCoordinate().y);
                 });
 
             Fsm.SetTransition(Behaviours.Walk, Flags.OnTargetLost, Behaviours.Walk,
@@ -105,11 +105,11 @@ namespace StateMachine.Agents.RTS
                     var target = GameManager.MinesWithMiners[0];
                     if (target == null) return;
 
-                    TargetNode =
+                    TargetRtsNode =
                         GameManager.Graph.NodesType.Find(node => node.GetCoordinate() == target.GetCoordinate());
-                    if (TargetNode == null) return;
+                    if (TargetRtsNode == null) return;
 
-                    Debug.Log("Walk to " + TargetNode.GetCoordinate().x + " - " + TargetNode.GetCoordinate().y);
+                    Debug.Log("Walk to " + TargetRtsNode.GetCoordinate().x + " - " + TargetRtsNode.GetCoordinate().y);
                 });
 
             Fsm.SetTransition(Behaviours.Walk, Flags.OnGather, Behaviours.Deliver,
@@ -133,19 +133,19 @@ namespace StateMachine.Agents.RTS
             Fsm.SetTransition(Behaviours.Deliver, Flags.OnHunger, Behaviours.Walk,
                 () =>
                 {
-                    TargetNode = TownCenter;
-                    if (TargetNode == null) return;
+                    TargetRtsNode = TownCenter;
+                    if (TargetRtsNode == null) return;
 
                     Debug.Log("To town center");
                 });
             Fsm.SetTransition(Behaviours.Deliver, Flags.OnRetreat, Behaviours.Walk,
                 () =>
                 {
-                    TargetNode = TownCenter;
-                    if (TargetNode == null) return;
+                    TargetRtsNode = TownCenter;
+                    if (TargetRtsNode == null) return;
 
-                    Debug.Log("Retreat. Walk to " + TargetNode.GetCoordinate().x + " - " +
-                              TargetNode.GetCoordinate().y);
+                    Debug.Log("Retreat. Walk to " + TargetRtsNode.GetCoordinate().x + " - " +
+                              TargetRtsNode.GetCoordinate().y);
                 });
         }
 

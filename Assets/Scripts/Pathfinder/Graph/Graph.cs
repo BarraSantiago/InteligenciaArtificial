@@ -8,7 +8,7 @@ namespace Pathfinder.Graph
         where TCoordinateNode : ICoordinate<TCoordinateType>, new()
         where TCoordinateType : IEquatable<TCoordinateType>, new()
     {
-        public static List<Node<TCoordinateType>> mines = new();
+        public static List<RTSNode<TCoordinateType>> mines = new();
 
         public static TCoordinateNode MapDimensions;
         public static TCoordinateNode OriginPosition;

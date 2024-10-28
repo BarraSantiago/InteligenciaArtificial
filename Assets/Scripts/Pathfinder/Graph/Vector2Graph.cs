@@ -2,7 +2,7 @@
 
 namespace Pathfinder.Graph
 {
-    public class Vector2Graph : Graph<Node<Vector2>, NodeVoronoi, Vector2>
+    public class Vector2Graph : Graph<RTSNode<Vector2>, NodeVoronoi, Vector2>
     {
         public Vector2Graph(int x, int y, float cellSize) : base(x, y, cellSize)
         {
@@ -17,7 +17,7 @@ namespace Pathfinder.Graph
                 node.SetCoordinate(i * cellSize, j * cellSize);
                 CoordNodes.Add(node);
 
-                var nodeType = new Node<Vector2>();
+                var nodeType = new RTSNode<Vector2>();
                 nodeType.SetCoordinate(new Vector2(i * cellSize, j * cellSize));
                 NodesType.Add(nodeType);
             }

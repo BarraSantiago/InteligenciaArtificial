@@ -13,8 +13,8 @@ namespace StateMachine.States.RTSStates
         {
             var behaviours = new BehaviourActions();
 
-            var currentNode = parameters[0] as Node<Vector2>;
-            var targetNode = parameters[1] as Node<Vector2>;
+            var currentNode = parameters[0] as RTSNode<Vector2>;
+            var targetNode = parameters[1] as RTSNode<Vector2>;
             var retreat = (bool)parameters[2];
             var position = (Transform)parameters[3];
             var onMove = parameters[4] as Action;
@@ -30,7 +30,7 @@ namespace StateMachine.States.RTSStates
 
             behaviours.SetTransitionBehaviour(() =>
             {
-                if (retreat && (targetNode is null || targetNode.NodeType != NodeType.TownCenter))
+                if (retreat && (targetNode is null || targetNode.RtsNodeType != RTSNodeType.TownCenter))
                 {
                     OnFlag?.Invoke(RTSAgent.Flags.OnRetreat);
                     return;
@@ -38,7 +38,7 @@ namespace StateMachine.States.RTSStates
 
 
                 if (currentNode == null || targetNode == null ||
-                    (targetNode.NodeType == NodeType.Mine && targetNode.gold <= 0))
+                    (targetNode.RtsNodeType == RTSNodeType.Mine && targetNode.gold <= 0))
                 {
                     OnFlag?.Invoke(RTSAgent.Flags.OnTargetLost);
                     return;
@@ -48,16 +48,16 @@ namespace StateMachine.States.RTSStates
 
                 //if ((currentNode.GetCoordinate()).Equals(targetNode.GetCoordinate())) return;
 
-                switch (currentNode.NodeType)
+                switch (currentNode.RtsNodeType)
                 {
-                    case NodeType.Mine:
+                    case RTSNodeType.Mine:
                         OnFlag?.Invoke(RTSAgent.Flags.OnGather);
                         break;
-                    case NodeType.TownCenter:
+                    case RTSNodeType.TownCenter:
                         OnFlag?.Invoke(RTSAgent.Flags.OnWait);
                         break;
-                    case NodeType.Empty:
-                    case NodeType.Blocked:
+                    case RTSNodeType.Empty:
+                    case RTSNodeType.Blocked:
                     default:
                         OnFlag?.Invoke(RTSAgent.Flags.OnTargetLost);
                         break;
@@ -71,17 +71,17 @@ namespace StateMachine.States.RTSStates
         {
             var behaviours = new BehaviourActions();
 
-            var currentNode = parameters[0] as Node<Vector2>;
-            var targetNode = parameters[1] as Node<Vector2>;
-            var path = (List<Node<Vector2>>)parameters[2];
+            var currentNode = parameters[0] as RTSNode<Vector2>;
+            var targetNode = parameters[1] as RTSNode<Vector2>;
+            var path = (List<RTSNode<Vector2>>)parameters[2];
             var pathfinder =
-                parameters[3] as Pathfinder<Node<Vector2>, Vector2, NodeVoronoi>;
+                parameters[3] as Pathfinder<RTSNode<Vector2>, Vector2, NodeVoronoi>;
             var type = (RTSAgent.AgentTypes)parameters[4];
 
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {
                 if (currentNode != null && targetNode != null)
-                    path = pathfinder.FindPath(currentNode, targetNode, type);
+                    path = pathfinder.FindPath(currentNode, targetNode);
             });
 
             return behaviours;

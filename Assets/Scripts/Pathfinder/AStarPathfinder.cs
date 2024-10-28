@@ -34,7 +34,7 @@ namespace Pathfinder
 
         protected override bool IsBlocked(NodeType node)
         {
-            return node.GetNodeType() == Pathfinder.RTSNodeType.Blocked;
+            return node.GetRTSNodeType() == Pathfinder.RTSNodeType.Blocked;
         }
 
         protected override int MoveToNeighborCost(NodeType A, NodeType B)

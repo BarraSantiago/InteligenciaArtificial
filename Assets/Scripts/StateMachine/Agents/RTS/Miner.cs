@@ -8,8 +8,8 @@ namespace StateMachine.Agents.RTS
     public class Miner : RTSAgent
     {
         public static Action OnEmptyMine;
-        public static Action<Node<Vector2>> OnReachMine;
-        public static Action<Node<Vector2>> OnLeaveMine;
+        public static Action<RTSNode<Vector2>> OnReachMine;
+        public static Action<RTSNode<Vector2>> OnLeaveMine;
         private Action onMine;
 
         public override void Init()
@@ -43,36 +43,36 @@ namespace StateMachine.Agents.RTS
             Fsm.SetTransition(Behaviours.GatherResources, Flags.OnFull, Behaviours.Walk,
                 () =>
                 {
-                    TargetNode = GetTarget(NodeType.TownCenter);
+                    TargetRtsNode = GetTarget(RTSNodeType.TownCenter);
 
-                    if (TargetNode == null) return;
+                    if (TargetRtsNode == null) return;
 
-                    Debug.Log("Gold full. Walk to " + TargetNode.GetCoordinate().x + " - " +
-                              TargetNode.GetCoordinate().y);
+                    Debug.Log("Gold full. Walk to " + TargetRtsNode.GetCoordinate().x + " - " +
+                              TargetRtsNode.GetCoordinate().y);
                 });
             Fsm.SetTransition(Behaviours.GatherResources, Flags.OnTargetLost, Behaviours.Walk,
                 () =>
                 {
-                    TargetNode = GetTarget();
-                    if (TargetNode == null) return;
-                    Debug.Log("Mine empty. Walk to " + TargetNode.GetCoordinate().x + " - " +
-                              TargetNode.GetCoordinate().y);
+                    TargetRtsNode = GetTarget();
+                    if (TargetRtsNode == null) return;
+                    Debug.Log("Mine empty. Walk to " + TargetRtsNode.GetCoordinate().x + " - " +
+                              TargetRtsNode.GetCoordinate().y);
                 });
         }
 
         protected override object[] GatherTickParameters()
         {
-            return new object[] { Retreat, Food, CurrentGold, GoldLimit, onMine, CurrentNode };
+            return new object[] { Retreat, Food, CurrentGold, GoldLimit, onMine, CurrentRtsNode };
         }
 
         protected object[] GatherEnterParameters()
         {
-            return new object[] { OnReachMine, CurrentNode };
+            return new object[] { OnReachMine, CurrentRtsNode };
         }
 
         protected object[] GatherLeaveParameters()
         {
-            return new object[] { OnLeaveMine, CurrentNode };
+            return new object[] { OnLeaveMine, CurrentRtsNode };
         }
 
         protected override void WalkTransitions()
@@ -84,33 +84,33 @@ namespace StateMachine.Agents.RTS
 
         protected override object[] WaitEnterParameters()
         {
-            return new object[] { CurrentNode, OnReachMine };
+            return new object[] { CurrentRtsNode, OnReachMine };
         }
 
         protected override object[] WaitExitParameters()
         {
-            return new object[] { CurrentNode, OnLeaveMine };
+            return new object[] { CurrentRtsNode, OnLeaveMine };
         }
 
         private void Mine()
         {
-            if (Food <= 0 || CurrentNode.gold <= 0) return;
+            if (Food <= 0 || CurrentRtsNode.gold <= 0) return;
 
             CurrentGold++;
 
             LastTimeEat++;
-            CurrentNode.gold--;
-            if (CurrentNode.gold <= 0) OnEmptyMine?.Invoke();
+            CurrentRtsNode.gold--;
+            if (CurrentRtsNode.gold <= 0) OnEmptyMine?.Invoke();
 
             if (LastTimeEat < GoldPerFood) return;
 
             Food--;
             LastTimeEat = 0;
 
-            if (Food > 0 || CurrentNode.food <= 0) return;
+            if (Food > 0 || CurrentRtsNode.food <= 0) return;
 
             Food++;
-            CurrentNode.food--;
+            CurrentRtsNode.food--;
         }
     }
 }
