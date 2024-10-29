@@ -9,6 +9,7 @@ namespace StateMachine.Agents.Simulation
             base.Init();
             FoodLimit = 1;
             foodTarget = SimNodeType.Corpse;
+            movement = 2;
         }
     }
 }

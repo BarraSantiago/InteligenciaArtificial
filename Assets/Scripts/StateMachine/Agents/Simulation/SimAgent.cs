@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Pathfinder;
-using Pathfinder.Voronoi;
-using StateMachine.States.RTSStates;
+using StateMachine.States.SimStates;
 using UnityEngine;
 
 namespace StateMachine.Agents.Simulation
@@ -32,11 +31,10 @@ namespace StateMachine.Agents.Simulation
             OnGather,
         }
 
-        public bool Retreat;
         public SimNode<Vector2> CurrentNode;
-        public AStarPathfinder<SimNode<Vector2>, Vector2, NodeVoronoi> Pathfinder;
-        public Voronoi<NodeVoronoi, Vector2> Voronoi;
+        public bool CanReproduce() => Food >= FoodLimit;
 
+        protected int movement = 3;
         protected SimNodeType foodTarget;
         protected int FoodLimit = 5;
         protected int Food = 0;
@@ -45,18 +43,19 @@ namespace StateMachine.Agents.Simulation
         protected List<SimNode<Vector2>> Path;
         protected AgentTypes AgentType;
         protected Action OnMove;
-        protected SimNode<Vector2> TargetRtsNode
+        protected Action OnEat;
+        
+        protected SimNode<Vector2> TargetNode
         {
-            get => targetRtsNode;
+            get => targetNode;
             set
             {
-                targetRtsNode = value;
-                Path = Pathfinder.FindPath(CurrentNode, TargetRtsNode);
+                targetNode = value;
                 PathNodeId = 0;
             }
         }
         
-        private SimNode<Vector2> targetRtsNode;
+        private SimNode<Vector2> targetNode;
 
         private void Update()
         {
@@ -70,87 +69,72 @@ namespace StateMachine.Agents.Simulation
             //Pathfinder = GameManager.MinerPathfinder;
 
             OnMove += Move;
+            OnEat += Eat;
 
             FsmBehaviours();
 
             FsmTransitions();
         }
 
+        public virtual void Uninit()
+        {
+            OnMove -= Move;
+            OnEat -= Eat;
+        }
+
+
 
         protected virtual void FsmTransitions()
         {
             WalkTransitions();
             GatherTransitions();
-            GetFoodTransitions();
+            EatTransitions();
         }
 
 
         protected virtual void FsmBehaviours()
         {
-            Fsm.AddBehaviour<WalkState>(Behaviours.Walk, WalkTickParameters, WalkEnterParameters);
+            Fsm.AddBehaviour<SimWalkState>(Behaviours.Walk, WalkTickParameters);
+            Fsm.AddBehaviour<SimEatState>(Behaviours.Eat, EatTickParameters);
         }
 
         protected virtual void GatherTransitions()
         {
-            Fsm.SetTransition(Behaviours.Eat, Flags.OnEscape, Behaviours.Escape,
-                () =>
-                {
-                    TargetRtsNode = GetTarget(SimNodeType.Empty);
-                    if (TargetRtsNode == null) return;
-
-                    Debug.Log("Retreat to " + TargetRtsNode.GetCoordinate().x + " - " + TargetRtsNode.GetCoordinate().y);
-                });
         }
         
         protected virtual void WalkTransitions()
         {
-            Fsm.SetTransition(Behaviours.Walk, Flags.OnEscape, Behaviours.Escape,
-                () =>
-                {
-                    TargetRtsNode = GetTarget(SimNodeType.Empty);
-                    if (TargetRtsNode == null) return;
-
-                    Debug.Log("Retreat. Walk to " + TargetRtsNode.GetCoordinate().x + " - " +
-                              TargetRtsNode.GetCoordinate().y);
-                });
-
-            Fsm.SetTransition(Behaviours.Walk, Flags.OnTargetLost, Behaviours.Walk,
-                () =>
-                {
-                    TargetRtsNode = GetTarget();
-                    if (TargetRtsNode == null) return;
-
-                    Debug.Log("Walk to " + TargetRtsNode.GetCoordinate().x + " - " + TargetRtsNode.GetCoordinate().y);
-                });
         }
 
         protected virtual object[] WalkTickParameters()
         {
-            object[] objects = { CurrentNode, TargetRtsNode, Retreat, transform, OnMove };
+            object[] objects = { CurrentNode, TargetNode, transform, OnMove };
             return objects;
         }
 
         protected virtual object[] WalkEnterParameters()
         {
-            object[] objects = { CurrentNode, TargetRtsNode, Path, Pathfinder, AgentType };
+            object[] objects = { };
             return objects;
         }
 
-        protected virtual void GetFoodTransitions()
+        protected virtual void EatTransitions()
         {
         }
 
-        protected virtual object[] GetFoodTickParameters()
+        protected virtual object[] EatTickParameters()
         {
-            object[] objects = { Food, FoodLimit };
+            object[] objects = { CurrentNode, foodTarget, OnEat };
             return objects;
         }
 
+        private void Eat() => Food++;
+        
         protected virtual void Move()
         {
-            if (CurrentNode == null || TargetRtsNode == null) return;
+            if (CurrentNode == null || TargetNode == null) return;
 
-            if (CurrentNode.GetCoordinate().Equals(TargetRtsNode.GetCoordinate())) return;
+            if (CurrentNode.GetCoordinate().Equals(TargetNode.GetCoordinate())) return;
 
             if (Path.Count <= 0) return;
             if (PathNodeId > Path.Count) PathNodeId = 0;
