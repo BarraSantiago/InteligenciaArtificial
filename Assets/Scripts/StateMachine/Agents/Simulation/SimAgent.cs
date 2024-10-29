@@ -33,12 +33,13 @@ namespace StateMachine.Agents.Simulation
         }
 
         public bool Retreat;
-        public SimNode<Vector2> CurrentRtsNode;
+        public SimNode<Vector2> CurrentNode;
         public AStarPathfinder<SimNode<Vector2>, Vector2, NodeVoronoi> Pathfinder;
         public Voronoi<NodeVoronoi, Vector2> Voronoi;
 
+        protected SimNodeType foodTarget;
         protected int FoodLimit = 5;
-        protected int Food = 3;
+        protected int Food = 0;
         protected int PathNodeId;
         protected FSM<Behaviours, Flags> Fsm;
         protected List<SimNode<Vector2>> Path;
@@ -50,7 +51,7 @@ namespace StateMachine.Agents.Simulation
             set
             {
                 targetRtsNode = value;
-                Path = Pathfinder.FindPath(CurrentRtsNode, TargetRtsNode);
+                Path = Pathfinder.FindPath(CurrentNode, TargetRtsNode);
                 PathNodeId = 0;
             }
         }
@@ -125,13 +126,13 @@ namespace StateMachine.Agents.Simulation
 
         protected virtual object[] WalkTickParameters()
         {
-            object[] objects = { CurrentRtsNode, TargetRtsNode, Retreat, transform, OnMove };
+            object[] objects = { CurrentNode, TargetRtsNode, Retreat, transform, OnMove };
             return objects;
         }
 
         protected virtual object[] WalkEnterParameters()
         {
-            object[] objects = { CurrentRtsNode, TargetRtsNode, Path, Pathfinder, AgentType };
+            object[] objects = { CurrentNode, TargetRtsNode, Path, Pathfinder, AgentType };
             return objects;
         }
 
@@ -147,14 +148,14 @@ namespace StateMachine.Agents.Simulation
 
         protected virtual void Move()
         {
-            if (CurrentRtsNode == null || TargetRtsNode == null) return;
+            if (CurrentNode == null || TargetRtsNode == null) return;
 
-            if (CurrentRtsNode.GetCoordinate().Equals(TargetRtsNode.GetCoordinate())) return;
+            if (CurrentNode.GetCoordinate().Equals(TargetRtsNode.GetCoordinate())) return;
 
             if (Path.Count <= 0) return;
             if (PathNodeId > Path.Count) PathNodeId = 0;
 
-            CurrentRtsNode = Path[PathNodeId];
+            CurrentNode = Path[PathNodeId];
             PathNodeId++;
         }
 

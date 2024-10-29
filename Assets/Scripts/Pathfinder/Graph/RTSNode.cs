@@ -139,7 +139,7 @@ namespace Pathfinder
             coordinate = coord;
         }
 
-        public SimNodeType SimNodeType { get; set; }
+        public SimNodeType NodeType { get; set; }
 
         public bool Equals(INode<Coordinate> other)
         {
@@ -178,7 +178,7 @@ namespace Pathfinder
 
         public SimNodeType GetSimNodeType()
         {
-            return SimNodeType;
+            return NodeType;
         }
 
         public int GetCost()
