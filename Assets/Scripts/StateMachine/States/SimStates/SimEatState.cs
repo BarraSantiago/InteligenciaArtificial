@@ -14,7 +14,8 @@
             var currentNode = parameters[0] as SimNode<Vector2>;
             var foodTarget = (SimNodeType)parameters[1];
             var onEat = parameters[2] as Action;
-
+            var outputBrain1 = (float[])parameters[3];
+            var outputBrain2 = (float[])parameters[4];
             
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {
@@ -25,7 +26,11 @@
             
             behaviours.SetTransitionBehaviour( () =>
             {
-                if(currentNode is not { food: > 0 } || foodTarget != currentNode.NodeType) OnFlag?.Invoke(SimAgent.Flags.OnGather);
+                if(currentNode is not { food: > 0 } || foodTarget != currentNode.NodeType) OnFlag?.Invoke(SimAgent.Flags.OnEat);
+                
+                if(outputBrain1[0] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnEat);
+                if(outputBrain1[1] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnSearchFood);
+                if(outputBrain2[0] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnEscape);
             });
             
             return behaviours;

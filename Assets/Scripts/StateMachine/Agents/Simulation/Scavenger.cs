@@ -11,6 +11,7 @@ namespace StateMachine.Agents.Simulation
             FoodLimit = 20;
             foodTarget = SimNodeType.Carrion;
             movement = 5;
+            SimAgentType = SimAgentTypes.Scavenger;
         }
 
     }

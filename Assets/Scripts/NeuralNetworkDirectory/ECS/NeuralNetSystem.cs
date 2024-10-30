@@ -30,17 +30,20 @@ namespace NeuralNetworkDirectory.ECS
         {
             Parallel.ForEach(queriedEntities, parallelOptions, entityId =>
             {
-                var neuralNetwork = neuralNetworkComponents[entityId];
-                var inputs = inputComponents[entityId].inputs;
+                NeuralNetComponent neuralNetwork = neuralNetworkComponents[entityId];
+                float[] inputs = inputComponents[entityId].inputs;
                 float[] outputs = new float[outputComponents[entityId].outputs.Length];
 
                 for (int i = 0; i < outputs.Length; i++)
                 {
-                    outputs = neuralNetwork.Layers[i].Synapsis(inputs);
-                    inputs = outputs;
-                }
+                    for (int j = 0; j < neuralNetwork.Layers[i].Count; j++)
+                    {
+                        outputs = neuralNetwork.Layers[i][j].Synapsis(inputs);
+                        inputs = outputs;
+                    }
 
-                outputComponents[entityId].outputs = outputs;
+                    outputComponents[entityId].outputs[i] = outputs;
+                }
             });
         }
 

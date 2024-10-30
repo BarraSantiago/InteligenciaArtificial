@@ -1,5 +1,6 @@
 ﻿using System;
 using Pathfinder;
+using StateMachine.Agents.Simulation;
 using States;
 using UnityEngine;
 
@@ -15,6 +16,8 @@ namespace StateMachine.States.SimStates
             var targetNode = parameters[1] as RTSNode<Vector2>;
             var position = (Transform)parameters[2];
             var onMove = parameters[3] as Action;
+            var outputBrain1 = (float[])parameters[4];
+            var outputBrain2 = (float[])parameters[5];
 
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {
@@ -31,38 +34,10 @@ namespace StateMachine.States.SimStates
 
             behaviours.SetTransitionBehaviour(() =>
             {
-                /*
-                 if (retreat && (targetNode is null || targetNode.RtsNodeType != RTSNodeType.TownCenter))
-                {
-                    OnFlag?.Invoke(RTSAgent.Flags.OnRetreat);
-                    return;
-                }
-
-
-                if (currentNode == null || targetNode == null ||
-                    (targetNode.RtsNodeType == RTSNodeType.Mine && targetNode.gold <= 0))
-                {
-                    OnFlag?.Invoke(RTSAgent.Flags.OnTargetLost);
-                    return;
-                }
-
-                if (currentNode.GetCoordinate() == targetNode.GetCoordinate()) return;
-
-                switch (currentNode.NodeType)
-                {
-                    case RTSNodeType.Mine:
-                        OnFlag?.Invoke(RTSAgent.Flags.OnGather);
-                        break;
-                    case RTSNodeType.TownCenter:
-                        OnFlag?.Invoke(RTSAgent.Flags.OnWait);
-                        break;
-                    case RTSNodeType.Empty:
-                    case RTSNodeType.Blocked:
-                    default:
-                        OnFlag?.Invoke(RTSAgent.Flags.OnTargetLost);
-                        break;
-                }
-                */
+                if(outputBrain1[0] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnEat);
+                if(outputBrain1[1] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnSearchFood);
+                if(outputBrain2[0] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnEscape);
+                
             });
             return behaviours;
         }

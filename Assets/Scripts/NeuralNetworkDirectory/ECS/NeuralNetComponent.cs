@@ -6,8 +6,6 @@ namespace NeuralNetworkDirectory.ECS
 {
     public class NeuralNetComponent : ECSComponent
     {
-        public List<NeuronLayer> Layers { get; set; } = new();
-        public int TotalWeightsCount { get; set; }
-        public int InputsCount { get; set; }
+        public List<List<NeuronLayer>> Layers { get; set; } = new();
     }
 }

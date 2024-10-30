@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Pathfinder;
+using Pathfinder.Graph;
 using StateMachine.States.SimStates;
 using UnityEngine;
 
@@ -8,7 +9,7 @@ namespace StateMachine.Agents.Simulation
 {
     public class SimAgent : MonoBehaviour
     {
-        public enum AgentTypes
+        public enum SimAgentTypes
         {
             Carnivorous,
             Herbivore,
@@ -24,16 +25,17 @@ namespace StateMachine.Agents.Simulation
 
         public enum Flags
         {
-            OnTargetReach,
             OnTargetLost,
             OnEscape,
-            OnFull,
-            OnGather,
+            OnEat,
+            OnSearchFood,
         }
 
+        public static Graph<SimNode<Vector2>, NodeVoronoi, Vector2> graph;
         public SimNode<Vector2> CurrentNode;
         public bool CanReproduce() => Food >= FoodLimit;
-
+        public SimAgentTypes SimAgentType{ get; protected set; }
+    
         protected int movement = 3;
         protected SimNodeType foodTarget;
         protected int FoodLimit = 5;
@@ -41,10 +43,9 @@ namespace StateMachine.Agents.Simulation
         protected int PathNodeId;
         protected FSM<Behaviours, Flags> Fsm;
         protected List<SimNode<Vector2>> Path;
-        protected AgentTypes AgentType;
         protected Action OnMove;
         protected Action OnEat;
-        
+
         protected SimNode<Vector2> TargetNode
         {
             get => targetNode;
@@ -54,10 +55,13 @@ namespace StateMachine.Agents.Simulation
                 PathNodeId = 0;
             }
         }
-        
-        private SimNode<Vector2> targetNode;
 
-        private void Update()
+        private SimNode<Vector2> targetNode;
+        public float[][] output;
+        public float[][] input;
+
+
+        public void Tick()
         {
             Fsm.Tick();
         }
@@ -74,6 +78,34 @@ namespace StateMachine.Agents.Simulation
             FsmBehaviours();
 
             FsmTransitions();
+
+            UpdateInputs();
+        }
+
+        protected virtual void UpdateInputs()
+        {
+            FindFoodInputs();
+            EscapeInputs();
+            AttackInputs();
+        }
+
+
+
+        private void FindFoodInputs()
+        {
+            input[0][0] = CurrentNode.GetCoordinate().x;
+            input[0][1] = CurrentNode.GetCoordinate().y;
+            SimNode<Vector2> target = GetTarget(foodTarget);
+            input[0][2] = target.GetCoordinate().x;
+            input[0][3] = target.GetCoordinate().y;
+        }
+        
+        protected virtual void EscapeInputs()
+        {
+        }
+        
+        protected virtual void AttackInputs()
+        {
         }
 
         public virtual void Uninit()
@@ -81,7 +113,6 @@ namespace StateMachine.Agents.Simulation
             OnMove -= Move;
             OnEat -= Eat;
         }
-
 
 
         protected virtual void FsmTransitions()
@@ -101,14 +132,14 @@ namespace StateMachine.Agents.Simulation
         protected virtual void GatherTransitions()
         {
         }
-        
+
         protected virtual void WalkTransitions()
         {
         }
 
         protected virtual object[] WalkTickParameters()
         {
-            object[] objects = { CurrentNode, TargetNode, transform, OnMove };
+            object[] objects = { CurrentNode, TargetNode, transform, OnMove, output[0], output[1] };
             return objects;
         }
 
@@ -124,12 +155,12 @@ namespace StateMachine.Agents.Simulation
 
         protected virtual object[] EatTickParameters()
         {
-            object[] objects = { CurrentNode, foodTarget, OnEat };
+            object[] objects = { CurrentNode, foodTarget, OnEat, output[0], output[1] };
             return objects;
         }
 
         private void Eat() => Food++;
-        
+
         protected virtual void Move()
         {
             if (CurrentNode == null || TargetNode == null) return;
@@ -143,17 +174,19 @@ namespace StateMachine.Agents.Simulation
             PathNodeId++;
         }
 
-        //TODO Remake get target
         protected virtual SimNode<Vector2> GetTarget(SimNodeType nodeType = SimNodeType.Empty)
         {
             Vector2 position = transform.position;
             SimNode<Vector2> target = null;
+            SimNode<Vector2> nearestNode = null;
+            float minDistance = float.MaxValue;
 
-            switch (nodeType)
+           /* switch (nodeType)
             {
                 case SimNodeType.Empty:
                     break;
                 case SimNodeType.Blocked:
+
                     break;
                 case SimNodeType.Bush:
                     break;
@@ -163,15 +196,21 @@ namespace StateMachine.Agents.Simulation
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(nodeType), nodeType, null);
-            }
+            }*/
 
-            if (target == null)
+            foreach (var node in graph.NodesType)
             {
-                return null;
+                if(node.NodeType != nodeType) continue;
+                float distance = Vector2.Distance(position, node.GetCoordinate());
+                if (!(distance < minDistance)) continue;
+                
+                minDistance = distance;
+                nearestNode = node;
             }
+            
+            return nearestNode;
 
             //return GameManager.Graph.NodesType.Find(node => node.GetCoordinate() == target.GetCoordinate());
-            return null;
         }
     }
 }

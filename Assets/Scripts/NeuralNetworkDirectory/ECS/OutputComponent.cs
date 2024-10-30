@@ -4,6 +4,6 @@ namespace NeuralNetworkDirectory.ECS
 {
     public class OutputComponent : ECSComponent
     {
-        public float[] outputs;
+        public float[][] outputs;
     }
 }

@@ -1,16 +1,17 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using ECS.Implementation;
-using UnityEngine;
+using Pathfinder;
+using StateMachine.Agents.Simulation;
 
 namespace NeuralNetworkDirectory.ECS
 {
-    public class ECSPopulationManager : MonoBehaviour
+    public class EcsPopulationManager : MonoBehaviour
     {
         public int entityCount = 100;
         public GameObject prefab;
 
         private Dictionary<uint, GameObject> entities;
+        private static Dictionary<uint, SimAgent> agents;
 
         private void Start()
         {
@@ -34,13 +35,40 @@ namespace NeuralNetworkDirectory.ECS
         {
             foreach (var entity in entities)
             {
-                var position = ECSManager.GetComponent<PositionComponent<Vector3>>(entity.Key);
-                entity.Value.transform.SetPositionAndRotation(
-                    new Vector3(position.Position.x, position.Position.y, position.Position.z), Quaternion.identity);
-                var rotationComponent = ECSManager.GetComponent<RotationComponent>(entity.Key);
-                entity.Value.transform.rotation =
-                    Quaternion.Euler(rotationComponent.X, rotationComponent.Y, rotationComponent.Z);
+                for (int i = 0; i < agents[entity.Key].input.Length; i++)
+                {
+                    ECSManager.GetComponent<InputComponent>(entity.Key).inputs = agents[entity.Key].input[i];
+                }
+                
+                var output = ECSManager.GetComponent<OutputComponent>(entity.Key).outputs;
+                
+                for (int i = 0; i < output.Length; i++)
+                {
+                    agents[entity.Key].output[i] = output[i];
+                }
+                
+                agents[entity.Key].Tick();
             }
+        }
+
+        public static SimNode<Vector2> GetEntity(SimAgent.SimAgentTypes entityType, SimNode<Vector2> position)
+        {
+            SimNode<Vector2> nearestAgent = null;
+            float minDistance = float.MaxValue;
+
+            foreach (var agent in agents.Values)
+            {
+                if (agent.SimAgentType != entityType) continue;
+                
+                float distance = Vector2.Distance(position.GetCoordinate(), agent.CurrentNode.GetCoordinate());
+                
+                if (!(distance < minDistance)) continue;
+                
+                minDistance = distance;
+                nearestAgent = agent.CurrentNode;
+            }
+
+            return nearestAgent;
         }
     }
 }

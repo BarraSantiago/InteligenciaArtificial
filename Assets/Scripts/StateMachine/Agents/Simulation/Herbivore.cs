@@ -1,4 +1,6 @@
+using NeuralNetworkDirectory.ECS;
 using Pathfinder;
+using UnityEngine;
 
 namespace StateMachine.Agents.Simulation
 {
@@ -24,6 +26,16 @@ namespace StateMachine.Agents.Simulation
             base.Init();
             hp = InitialHp;
             foodTarget = SimNodeType.Bush;
+            SimAgentType = SimAgentTypes.Herbivore;
+        }
+
+        protected override void EscapeInputs()
+        {
+            input[1][0] = CurrentNode.GetCoordinate().x;
+            input[1][1] = CurrentNode.GetCoordinate().y;
+            SimNode<Vector2> target = EcsPopulationManager.GetEntity(SimAgentTypes.Carnivorous, CurrentNode);
+            input[1][2] = target.GetCoordinate().x;
+            input[1][3] = target.GetCoordinate().y;
         }
 
         private void Die()
