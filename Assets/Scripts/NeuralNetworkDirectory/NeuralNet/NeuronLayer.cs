@@ -1,9 +1,20 @@
 ﻿using System.Threading.Tasks;
+using StateMachine.Agents.Simulation;
 
 namespace NeuralNetworkDirectory.NeuralNet
 {
+    public enum BrainType
+    {
+        Movement,
+        Eat,
+        Attack,
+        Escape
+    }
+    
     public class NeuronLayer
     {
+        public BrainType BrainType;
+        public SimAgent.SimAgentTypes AgentType;
         private readonly float bias = 1;
         private readonly float p = 0.5f;
         private Neuron[] neurons;
