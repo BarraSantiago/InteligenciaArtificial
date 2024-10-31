@@ -31,18 +31,18 @@ namespace NeuralNetworkDirectory.ECS
             Parallel.ForEach(queriedEntities, parallelOptions, entityId =>
             {
                 NeuralNetComponent neuralNetwork = neuralNetworkComponents[entityId];
-                float[] inputs = inputComponents[entityId].inputs;
-                float[] outputs = new float[outputComponents[entityId].outputs.Length];
+                float[][] inputs = inputComponents[entityId].inputs;
+                float[][] outputs = new float[][outputComponents[entityId].outputsQty];
 
                 for (int i = 0; i < outputs.Length; i++)
                 {
                     for (int j = 0; j < neuralNetwork.Layers[i].Count; j++)
                     {
-                        outputs = neuralNetwork.Layers[i][j].Synapsis(inputs);
+                        outputs[i] = neuralNetwork.Layers[i][j].Synapsis(inputs[i]);
                         inputs = outputs;
                     }
 
-                    outputComponents[entityId].outputs[i] = outputs;
+                    outputComponents[entityId].outputs[i] = outputs[i];
                 }
             });
         }

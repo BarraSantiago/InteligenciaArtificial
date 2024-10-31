@@ -35,18 +35,12 @@ namespace NeuralNetworkDirectory.ECS
         {
             foreach (var entity in entities)
             {
-                for (int i = 0; i < agents[entity.Key].input.Length; i++)
-                {
-                    ECSManager.GetComponent<InputComponent>(entity.Key).inputs = agents[entity.Key].input[i];
-                }
-                
+                ECSManager.GetComponent<InputComponent>(entity.Key).inputs = agents[entity.Key].input;
+
                 var output = ECSManager.GetComponent<OutputComponent>(entity.Key).outputs;
                 
-                for (int i = 0; i < output.Length; i++)
-                {
-                    agents[entity.Key].output[i] = output[i];
-                }
-                
+                agents[entity.Key].output = output;
+
                 agents[entity.Key].Tick();
             }
         }
@@ -59,11 +53,11 @@ namespace NeuralNetworkDirectory.ECS
             foreach (var agent in agents.Values)
             {
                 if (agent.SimAgentType != entityType) continue;
-                
+
                 float distance = Vector2.Distance(position.GetCoordinate(), agent.CurrentNode.GetCoordinate());
-                
+
                 if (!(distance < minDistance)) continue;
-                
+
                 minDistance = distance;
                 nearestAgent = agent.CurrentNode;
             }
