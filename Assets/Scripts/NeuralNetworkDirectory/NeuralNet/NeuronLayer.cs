@@ -1,4 +1,6 @@
-﻿namespace NeuralNetworkDirectory.NeuralNet
+﻿using System.Threading.Tasks;
+
+namespace NeuralNetworkDirectory.NeuralNet
 {
     public class NeuronLayer
     {
@@ -64,8 +66,10 @@
 
         public float[] Synapsis(float[] inputs)
         {
-            for (var j = 0; j < neurons.Length; j++) outputs[j] = neurons[j].Synapsis(inputs);
-
+            Parallel.For(0, neurons.Length, j =>
+            {
+                outputs[j] = neurons[j].Synapsis(inputs);
+            });
             return outputs;
         }
     }
