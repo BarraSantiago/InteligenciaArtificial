@@ -34,16 +34,16 @@ namespace NeuralNetworkDirectory.ECS
                 float[][] inputs = inputComponents[entityId].inputs;
                 float[][] outputs = new float[][outputComponents[entityId].outputsQty];
 
-                for (int i = 0; i < outputs.Length; i++)
+                Parallel.For(0, outputs.Length, i =>
                 {
                     for (int j = 0; j < neuralNetwork.Layers[i].Count; j++)
                     {
                         outputs[i] = neuralNetwork.Layers[i][j].Synapsis(inputs[i]);
-                        inputs = outputs;
+                        inputs[i] = outputs[i];
                     }
 
                     outputComponents[entityId].outputs[i] = outputs[i];
-                }
+                });
             });
         }
 
