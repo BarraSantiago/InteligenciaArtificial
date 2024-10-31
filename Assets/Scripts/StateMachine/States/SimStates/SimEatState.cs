@@ -30,12 +30,15 @@
                 
                 if(outputBrain1[0] > 0.5f && currentNode != null && currentNode.NodeType == foodTarget) OnFlag?.Invoke(SimAgent.Flags.OnEat);
                 if(outputBrain1[1] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnSearchFood);
-                if(outputBrain2[0] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnEscape);
-                if(outputBrain2[0] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnAttack);
                 
+                SpecialAction(outputBrain2);
             });
             
             return behaviours;
+        }
+
+        protected virtual void SpecialAction(float[] outputBrain2)
+        {
         }
 
         public override BehaviourActions GetOnEnterBehaviour(params object[] parameters)
@@ -46,6 +49,22 @@
         public override BehaviourActions GetOnExitBehaviour(params object[] parameters)
         {
             return default;
+        }
+    }
+    
+    public class SimEatHerbState : SimEatState
+    {
+        protected override void SpecialAction(float[] outputs)
+        {
+            if(outputs[0] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnEscape);
+        }
+    }
+    
+    public class SimEatCarnState : SimEatState
+    {
+        protected override void SpecialAction(float[] outputs)
+        {
+            if(outputs[0] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnAttack);
         }
     }
 }

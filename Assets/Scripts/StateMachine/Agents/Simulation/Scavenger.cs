@@ -1,6 +1,7 @@
 using NeuralNetworkDirectory.ECS;
 using NeuralNetworkDirectory.NeuralNet;
 using Pathfinder;
+using StateMachine.States.SimStates;
 using UnityEngine;
 
 namespace StateMachine.Agents.Simulation
@@ -30,6 +31,18 @@ namespace StateMachine.Agents.Simulation
             input[brain][5] = nodeTarget.GetCoordinate().y;
             input[brain][6] = Food;
 
+        }
+
+        protected override void ExtraBehaviours()
+        {
+            Fsm.AddBehaviour<SimEatState>(Behaviours.Eat, EatTickParameters);
+        }
+
+        protected override object[] WalkTickParameters()
+        {
+            object[] objects = { CurrentNode, TargetNode, transform, foodTarget, OnMove, output[(int)BrainType.Movement] };
+
+            return objects;
         }
     }
 }

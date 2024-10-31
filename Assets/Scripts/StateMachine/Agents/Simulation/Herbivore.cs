@@ -65,7 +65,9 @@ namespace StateMachine.Agents.Simulation
 
         protected override void ExtraBehaviours()
         {
-            Fsm.AddBehaviour<SimEscapeState>(Behaviours.Escape, WalkTickParameters);
+            Fsm.AddBehaviour<SimEatHerbState>(Behaviours.Eat, EatTickParameters);
+
+            Fsm.AddBehaviour<SimWalkHerbState>(Behaviours.Escape, WalkTickParameters);
         }
     }
 }

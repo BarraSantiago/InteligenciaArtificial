@@ -55,7 +55,9 @@ namespace StateMachine.Agents.Simulation
 
         protected override void ExtraBehaviours()
         {
-            Fsm.AddBehaviour<SimHuntState>(Behaviours.Eat, AttackEnterParameters);
+            Fsm.AddBehaviour<SimEatCarnState>(Behaviours.Eat, EatTickParameters);
+
+            Fsm.AddBehaviour<SimWalkCarnState>(Behaviours.Walk, AttackEnterParameters);
             
             Fsm.AddBehaviour<SimAttackState>(Behaviours.Attack, AttackEnterParameters);
         }

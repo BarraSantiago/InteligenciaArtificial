@@ -137,7 +137,6 @@ namespace StateMachine.Agents.Simulation
         protected virtual void FsmBehaviours()
         {
             Fsm.AddBehaviour<SimWalkState>(Behaviours.Walk, WalkTickParameters);
-            Fsm.AddBehaviour<SimEatState>(Behaviours.Eat, EatTickParameters);
             ExtraBehaviours();
         }
 
@@ -147,7 +146,8 @@ namespace StateMachine.Agents.Simulation
 
         protected virtual object[] WalkTickParameters()
         {
-            object[] objects = { CurrentNode, TargetNode, transform, foodTarget, OnMove, output[0], output[1] };
+            int extraBrain = SimAgentType == SimAgentTypes.Carnivorous ? (int)BrainType.Attack : (int)BrainType.Escape;
+            object[] objects = { CurrentNode, TargetNode, transform, foodTarget, OnMove, output[(int)BrainType.Movement], output[extraBrain] };
             return objects;
         }
 

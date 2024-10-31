@@ -58,7 +58,7 @@ namespace StateMachine.States.SimStates
         }
     }
     
-    public class SimEscapeState : SimWalkState
+    public class SimWalkHerbState : SimWalkState
     {
         protected override void SpecialAction(float[] outputs)
         {
@@ -66,7 +66,7 @@ namespace StateMachine.States.SimStates
         }
     }
     
-    public class SimHuntState : SimWalkState
+    public class SimWalkCarnState : SimWalkState
     {
         protected override void SpecialAction(float[] outputs)
         {
