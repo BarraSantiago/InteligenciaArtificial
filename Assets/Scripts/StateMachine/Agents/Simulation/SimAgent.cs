@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using NeuralNetworkDirectory.NeuralNet;
 using Pathfinder;
 using Pathfinder.Graph;
 using StateMachine.States.SimStates;
@@ -92,15 +93,24 @@ namespace StateMachine.Agents.Simulation
         {
             FindFoodInputs();
             ExtraInputs();
+            MovementInputs();
         }
+
+       
 
         private void FindFoodInputs()
         {
-            input[0][0] = CurrentNode.GetCoordinate().x;
-            input[0][1] = CurrentNode.GetCoordinate().y;
+            int brain = (int)BrainType.Eat;
+            input[brain][0] = CurrentNode.GetCoordinate().x;
+            input[brain][1] = CurrentNode.GetCoordinate().y;
             SimNode<Vector2> target = GetTarget(foodTarget);
-            input[0][2] = target.GetCoordinate().x;
-            input[0][3] = target.GetCoordinate().y;
+            input[brain][2] = target.GetCoordinate().x;
+            input[brain][3] = target.GetCoordinate().y;
+        }
+        
+        protected virtual void MovementInputs()
+        {
+            
         }
 
         protected virtual void ExtraInputs()
