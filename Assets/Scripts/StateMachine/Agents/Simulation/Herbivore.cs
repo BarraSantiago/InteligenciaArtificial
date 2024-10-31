@@ -33,9 +33,9 @@ namespace StateMachine.Agents.Simulation
         {
             input[1][0] = CurrentNode.GetCoordinate().x;
             input[1][1] = CurrentNode.GetCoordinate().y;
-            SimNode<Vector2> target = EcsPopulationManager.GetEntity(SimAgentTypes.Carnivorous, CurrentNode);
-            input[1][2] = target.GetCoordinate().x;
-            input[1][3] = target.GetCoordinate().y;
+            SimAgent target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivorous, CurrentNode);
+            input[1][2] = target.CurrentNode.GetCoordinate().x;
+            input[1][3] = target.CurrentNode.GetCoordinate().y;
         }
 
         private void Die()

@@ -45,9 +45,9 @@ namespace NeuralNetworkDirectory.ECS
             }
         }
 
-        public static SimNode<Vector2> GetEntity(SimAgent.SimAgentTypes entityType, SimNode<Vector2> position)
+        public static SimAgent GetNearestEntity(SimAgent.SimAgentTypes entityType, SimNode<Vector2> position)
         {
-            SimNode<Vector2> nearestAgent = null;
+            SimAgent nearestAgent = null;
             float minDistance = float.MaxValue;
 
             foreach (var agent in agents.Values)
@@ -56,13 +56,30 @@ namespace NeuralNetworkDirectory.ECS
 
                 float distance = Vector2.Distance(position.GetCoordinate(), agent.CurrentNode.GetCoordinate());
 
-                if (!(distance < minDistance)) continue;
+                if (minDistance > distance) continue;
 
                 minDistance = distance;
-                nearestAgent = agent.CurrentNode;
+                nearestAgent = agent;
             }
 
             return nearestAgent;
+        }
+        
+        public static SimAgent GetEntity(SimAgent.SimAgentTypes entityType, SimNode<Vector2> position)
+        {
+            SimAgent target = null;
+
+            foreach (var agent in agents.Values)
+            {
+                if (agent.SimAgentType != entityType) continue;
+                
+                if (!position.GetCoordinate().Equals(agent.CurrentNode.GetCoordinate())) continue;
+
+                target = agent;
+                break;
+            }
+
+            return target;
         }
     }
 }
