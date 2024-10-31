@@ -10,13 +10,13 @@ namespace StateMachine.Agents.Simulation
         public override void Init()
         {
             base.Init();
-            FoodLimit = 1;
-            foodTarget = SimNodeType.Corpse;
-            movement = 2;
             SimAgentType = SimAgentTypes.Carnivorous;
+            foodTarget = SimNodeType.Corpse;
+            FoodLimit = 1;
+            movement = 2;
         }
         
-        protected override void AttackInputs()
+        protected override void ExtraInputs()
         {
             input[1][0] = CurrentNode.GetCoordinate().x;
             input[1][1] = CurrentNode.GetCoordinate().y;
@@ -27,7 +27,7 @@ namespace StateMachine.Agents.Simulation
 
         protected override void ExtraBehaviours()
         {
-            Fsm.AddBehaviour<SimAttackState>(Behaviours.Eat, AttackEnterParameters);
+            Fsm.AddBehaviour<SimHuntState>(Behaviours.Eat, AttackEnterParameters);
         }
         
         private object[] AttackEnterParameters()

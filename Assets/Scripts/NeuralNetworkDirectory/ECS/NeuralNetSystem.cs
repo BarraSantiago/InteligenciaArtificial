@@ -22,8 +22,8 @@ namespace NeuralNetworkDirectory.ECS
             neuralNetworkComponents ??= ECSManager.GetComponents<NeuralNetComponent>();
             outputComponents ??= ECSManager.GetComponents<OutputComponent>();
             inputComponents ??= ECSManager.GetComponents<InputComponent>();
-            queriedEntities ??= ECSManager.GetEntitiesWithComponentTypes(typeof(NeuralNetComponent),
-                typeof(NeuronComponent), typeof(OutputComponent), typeof(InputComponent));
+            queriedEntities ??= ECSManager.GetEntitiesWithComponentTypes(
+                typeof(NeuralNetComponent), typeof(OutputComponent), typeof(InputComponent));
         }
 
         protected override void Execute(float deltaTime)

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using ECS.Implementation;
+using ECS.Patron;
 using UnityEngine;
 
 public class ECSExample_ECSWithGOs : MonoBehaviour

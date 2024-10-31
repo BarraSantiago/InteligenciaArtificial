@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ECS.Implementation;
+using ECS.Patron;
 using UnityEngine;
 
 public class ECSExample_ECSWithoutGOs : MonoBehaviour

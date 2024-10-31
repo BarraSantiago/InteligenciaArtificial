@@ -66,7 +66,7 @@ namespace StateMachine.States.SimStates
         }
     }
     
-    public class SimAttackState : SimWalkState
+    public class SimHuntState : SimWalkState
     {
         protected override void SpecialAction(float[] outputs)
         {

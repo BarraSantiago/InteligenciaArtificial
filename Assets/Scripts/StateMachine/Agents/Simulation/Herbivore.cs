@@ -24,12 +24,12 @@ namespace StateMachine.Agents.Simulation
         public override void Init()
         {
             base.Init();
-            hp = InitialHp;
-            foodTarget = SimNodeType.Bush;
             SimAgentType = SimAgentTypes.Herbivore;
+            foodTarget = SimNodeType.Bush;
+            hp = InitialHp;
         }
 
-        protected override void EscapeInputs()
+        protected override void ExtraInputs()
         {
             input[1][0] = CurrentNode.GetCoordinate().x;
             input[1][1] = CurrentNode.GetCoordinate().y;
@@ -46,7 +46,7 @@ namespace StateMachine.Agents.Simulation
 
         protected override void ExtraBehaviours()
         {
-            Fsm.AddBehaviour<SimEscapeState>(Behaviours.Escape, EscapeTickParameters);
+            Fsm.AddBehaviour<SimEscapeState>(Behaviours.Escape, WalkTickParameters);
         }
     }
 }

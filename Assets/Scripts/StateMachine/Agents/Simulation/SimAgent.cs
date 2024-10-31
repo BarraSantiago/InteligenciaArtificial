@@ -91,8 +91,7 @@ namespace StateMachine.Agents.Simulation
         protected virtual void UpdateInputs()
         {
             FindFoodInputs();
-            EscapeInputs();
-            AttackInputs();
+            ExtraInputs();
         }
 
         private void FindFoodInputs()
@@ -104,34 +103,27 @@ namespace StateMachine.Agents.Simulation
             input[0][3] = target.GetCoordinate().y;
         }
 
-        protected virtual void EscapeInputs()
-        {
-        }
-
-        protected virtual void AttackInputs()
+        protected virtual void ExtraInputs()
         {
         }
 
         protected virtual void FsmTransitions()
         {
             WalkTransitions();
-            AttackTransitions();
-            EscapeTransitions();
             EatTransitions();
+            ExtraTransitions();
         }
-
-        protected virtual void EscapeTransitions()
-        {
-        }
-
-        protected virtual void AttackTransitions()
-        {
-        }
-
+        
         protected virtual void WalkTransitions()
         {
         }
+        protected virtual void EatTransitions()
+        {
+        }
         
+        protected virtual void ExtraTransitions()
+        {
+        }
         protected virtual void FsmBehaviours()
         {
             Fsm.AddBehaviour<SimWalkState>(Behaviours.Walk, WalkTickParameters);
@@ -155,9 +147,7 @@ namespace StateMachine.Agents.Simulation
             return objects;
         }
 
-        protected virtual void EatTransitions()
-        {
-        }
+       
 
         protected virtual object[] EatTickParameters()
         {

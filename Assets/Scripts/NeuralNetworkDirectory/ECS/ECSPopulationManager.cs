@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using ECS.Patron;
 using Pathfinder;
 using StateMachine.Agents.Simulation;
 
