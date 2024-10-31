@@ -33,14 +33,13 @@ namespace NeuralNetworkDirectory.ECS
 
         private void LateUpdate()
         {
+            // TODO deberia ser pararell for each?
             foreach (var entity in entities)
             {
                 ECSManager.GetComponent<InputComponent>(entity.Key).inputs = agents[entity.Key].input;
 
-                var output = ECSManager.GetComponent<OutputComponent>(entity.Key).outputs;
+                agents[entity.Key].output = ECSManager.GetComponent<OutputComponent>(entity.Key).outputs;
                 
-                agents[entity.Key].output = output;
-
                 agents[entity.Key].Tick();
             }
         }

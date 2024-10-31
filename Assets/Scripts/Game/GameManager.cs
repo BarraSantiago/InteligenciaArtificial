@@ -23,9 +23,8 @@ namespace Game
         public static AStarPathfinder<RTSNode<Vector2>, Vector2, NodeVoronoi> CaravanPathfinder;
         public static AStarPathfinder<RTSNode<Vector2>, Vector2, NodeVoronoi> MinerPathfinder;
 
-        [Header("Map Config")] [SerializeField] [Range(4, 150)]
-        private int mapWidth;
-
+        [Header("Map Config")] 
+        [SerializeField] [Range(4, 150)] private int mapWidth;
         [SerializeField] [Range(4, 150)] private int mapHeight;
         [SerializeField] private int minesQuantity;
         [SerializeField] private float nodesSize;
@@ -33,9 +32,8 @@ namespace Game
         [SerializeField] private Button retreatButton;
         [SerializeField] private Button addMinesButton;
 
-        [Header("Units Config")] [SerializeField]
-        private GameObject minerPrefab;
-
+        [Header("Units Config")] 
+        [SerializeField] private GameObject minerPrefab;
         [SerializeField] private GameObject caravanPrefab;
         [SerializeField] private int minersQuantity;
         [SerializeField] private int caravansQuantity;

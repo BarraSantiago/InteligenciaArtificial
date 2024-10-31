@@ -26,7 +26,7 @@ namespace NeuralNetworkDirectory.NeuralNet
 
             for (var i = 0; i < input.Length; i++) a += weights[i] * input[i];
 
-            a += bias * weights[weights.Length - 1];
+            a += bias * weights[^1];
 
             return Sigmoid(a);
         }
