@@ -1,5 +1,6 @@
 using NeuralNetworkDirectory.ECS;
 using Pathfinder;
+using StateMachine.States.SimStates;
 using UnityEngine;
 
 namespace StateMachine.Agents.Simulation
@@ -23,5 +24,17 @@ namespace StateMachine.Agents.Simulation
             input[1][2] = target.GetCoordinate().x;
             input[1][3] = target.GetCoordinate().y;
         }
+
+        protected override void ExtraBehaviours()
+        {
+            Fsm.AddBehaviour<SimAttackState>(Behaviours.Eat, AttackEnterParameters);
+        }
+        
+        private object[] AttackEnterParameters()
+        {
+            object[] objects = { };
+            return objects;
+        }
+
     }
 }

@@ -20,7 +20,8 @@ namespace StateMachine.Agents.Simulation
         {
             Walk,
             Escape,
-            Eat
+            Eat,
+            Attack
         }
 
         public enum Flags
@@ -29,13 +30,14 @@ namespace StateMachine.Agents.Simulation
             OnEscape,
             OnEat,
             OnSearchFood,
+            OnAttack
         }
 
         public static Graph<SimNode<Vector2>, NodeVoronoi, Vector2> graph;
         public SimNode<Vector2> CurrentNode;
         public bool CanReproduce() => Food >= FoodLimit;
-        public SimAgentTypes SimAgentType{ get; protected set; }
-    
+        public SimAgentTypes SimAgentType { get; protected set; }
+
         protected int movement = 3;
         protected SimNodeType foodTarget;
         protected int FoodLimit = 5;
@@ -60,18 +62,10 @@ namespace StateMachine.Agents.Simulation
         public float[][] output;
         public float[][] input;
 
-
-        public void Tick()
-        {
-            Fsm.Tick();
-        }
-
         public virtual void Init()
         {
             Fsm = new FSM<Behaviours, Flags>();
-
-            //Pathfinder = GameManager.MinerPathfinder;
-
+            
             OnMove += Move;
             OnEat += Eat;
 
@@ -82,14 +76,24 @@ namespace StateMachine.Agents.Simulation
             UpdateInputs();
         }
 
+        public virtual void Uninit()
+        {
+            OnMove -= Move;
+            OnEat -= Eat;
+        }
+        
+        public void Tick()
+        {
+            Fsm.Tick();
+            UpdateInputs();
+        }
+        
         protected virtual void UpdateInputs()
         {
             FindFoodInputs();
             EscapeInputs();
             AttackInputs();
         }
-
-
 
         private void FindFoodInputs()
         {
@@ -99,47 +103,49 @@ namespace StateMachine.Agents.Simulation
             input[0][2] = target.GetCoordinate().x;
             input[0][3] = target.GetCoordinate().y;
         }
-        
+
         protected virtual void EscapeInputs()
         {
         }
-        
+
         protected virtual void AttackInputs()
         {
         }
 
-        public virtual void Uninit()
-        {
-            OnMove -= Move;
-            OnEat -= Eat;
-        }
-
-
         protected virtual void FsmTransitions()
         {
             WalkTransitions();
-            GatherTransitions();
+            AttackTransitions();
+            EscapeTransitions();
             EatTransitions();
         }
 
-
-        protected virtual void FsmBehaviours()
+        protected virtual void EscapeTransitions()
         {
-            Fsm.AddBehaviour<SimWalkState>(Behaviours.Walk, WalkTickParameters);
-            Fsm.AddBehaviour<SimEatState>(Behaviours.Eat, EatTickParameters);
         }
 
-        protected virtual void GatherTransitions()
+        protected virtual void AttackTransitions()
         {
         }
 
         protected virtual void WalkTransitions()
         {
         }
+        
+        protected virtual void FsmBehaviours()
+        {
+            Fsm.AddBehaviour<SimWalkState>(Behaviours.Walk, WalkTickParameters);
+            Fsm.AddBehaviour<SimEatState>(Behaviours.Eat, EatTickParameters);
+            ExtraBehaviours();
+        }
+
+        protected virtual void ExtraBehaviours()
+        {
+        }
 
         protected virtual object[] WalkTickParameters()
         {
-            object[] objects = { CurrentNode, TargetNode, transform, OnMove, output[0], output[1] };
+            object[] objects = { CurrentNode, TargetNode, transform, foodTarget, OnMove, output[0], output[1] };
             return objects;
         }
 
@@ -177,40 +183,20 @@ namespace StateMachine.Agents.Simulation
         protected virtual SimNode<Vector2> GetTarget(SimNodeType nodeType = SimNodeType.Empty)
         {
             Vector2 position = transform.position;
-            SimNode<Vector2> target = null;
             SimNode<Vector2> nearestNode = null;
             float minDistance = float.MaxValue;
 
-           /* switch (nodeType)
-            {
-                case SimNodeType.Empty:
-                    break;
-                case SimNodeType.Blocked:
-
-                    break;
-                case SimNodeType.Bush:
-                    break;
-                case SimNodeType.Corpse:
-                    break;
-                case SimNodeType.Carrion:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(nodeType), nodeType, null);
-            }*/
-
             foreach (var node in graph.NodesType)
             {
-                if(node.NodeType != nodeType) continue;
+                if (node.NodeType != nodeType) continue;
                 float distance = Vector2.Distance(position, node.GetCoordinate());
                 if (!(distance < minDistance)) continue;
-                
+
                 minDistance = distance;
                 nearestNode = node;
             }
-            
-            return nearestNode;
 
-            //return GameManager.Graph.NodesType.Find(node => node.GetCoordinate() == target.GetCoordinate());
+            return nearestNode;
         }
     }
 }

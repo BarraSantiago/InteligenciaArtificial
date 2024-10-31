@@ -15,9 +15,10 @@ namespace StateMachine.States.SimStates
             var currentNode = parameters[0] as SimNode<Vector2>;
             var targetNode = parameters[1] as RTSNode<Vector2>;
             var position = (Transform)parameters[2];
-            var onMove = parameters[3] as Action;
-            var outputBrain1 = (float[])parameters[4];
-            var outputBrain2 = (float[])parameters[5];
+            var foodTarget = (SimNodeType)parameters[3];
+            var onMove = parameters[4] as Action;
+            var outputBrain1 = (float[])parameters[5];
+            var outputBrain2 = (float[])parameters[6];
 
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {
@@ -34,12 +35,16 @@ namespace StateMachine.States.SimStates
 
             behaviours.SetTransitionBehaviour(() =>
             {
-                if(outputBrain1[0] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnEat);
+                if(outputBrain1[0] > 0.5f && currentNode != null && currentNode.NodeType == foodTarget) OnFlag?.Invoke(SimAgent.Flags.OnEat);
                 if(outputBrain1[1] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnSearchFood);
-                if(outputBrain2[0] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnEscape);
+                SpecialAction(outputBrain2);
                 
             });
             return behaviours;
+        }
+
+        protected virtual void SpecialAction(float[] outputs)
+        {
         }
 
         public override BehaviourActions GetOnEnterBehaviour(params object[] parameters)
@@ -50,6 +55,22 @@ namespace StateMachine.States.SimStates
         public override BehaviourActions GetOnExitBehaviour(params object[] parameters)
         {
             return default;
+        }
+    }
+    
+    public class SimEscapeState : SimWalkState
+    {
+        protected override void SpecialAction(float[] outputs)
+        {
+            if(outputs[0] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnEscape);
+        }
+    }
+    
+    public class SimAttackState : SimWalkState
+    {
+        protected override void SpecialAction(float[] outputs)
+        {
+            if(outputs[0] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnAttack);
         }
     }
 }

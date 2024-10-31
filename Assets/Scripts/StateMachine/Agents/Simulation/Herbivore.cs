@@ -1,13 +1,12 @@
 using NeuralNetworkDirectory.ECS;
 using Pathfinder;
+using StateMachine.States.SimStates;
 using UnityEngine;
 
 namespace StateMachine.Agents.Simulation
 {
     public class Herbivore : SimAgent
     {
-        private int hp;
-
         public int Hp
         {
             get => hp;
@@ -18,6 +17,7 @@ namespace StateMachine.Agents.Simulation
             }
         }
 
+        private int hp;
         private const int FoodDropped = 1;
         private const int InitialHp = 2;
 
@@ -42,6 +42,11 @@ namespace StateMachine.Agents.Simulation
         {
             CurrentNode.NodeType = SimNodeType.Corpse;
             CurrentNode.food = FoodDropped;
+        }
+
+        protected override void ExtraBehaviours()
+        {
+            Fsm.AddBehaviour<SimEscapeState>(Behaviours.Escape, EscapeTickParameters);
         }
     }
 }
