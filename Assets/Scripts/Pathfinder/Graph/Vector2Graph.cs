@@ -11,15 +11,17 @@ namespace Pathfinder.Graph
         public override void CreateGraph(int x, int y, float cellSize)
         {
             for (var i = 0; i < x; i++)
-            for (var j = 0; j < y; j++)
             {
-                var node = new NodeVoronoi();
-                node.SetCoordinate(i * cellSize, j * cellSize);
-                CoordNodes.Add(node);
+                for (var j = 0; j < y; j++)
+                {
+                    var node = new NodeVoronoi();
+                    node.SetCoordinate(i * cellSize, j * cellSize);
+                    CoordNodes[i, j] = node;
 
-                var nodeType = new RTSNode<Vector2>();
-                nodeType.SetCoordinate(new Vector2(i * cellSize, j * cellSize));
-                NodesType.Add(nodeType);
+                    var nodeType = new RTSNode<Vector2>();
+                    nodeType.SetCoordinate(new Vector2(i * cellSize, j * cellSize));
+                    NodesType.Add(nodeType);
+                }
             }
         }
     }

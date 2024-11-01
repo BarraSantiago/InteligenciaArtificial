@@ -35,7 +35,7 @@ namespace StateMachine.Agents.Simulation
         }
 
         public static Graph<SimNode<Vector2>, NodeVoronoi, Vector2> graph;
-        public SimNode<Vector2> CurrentNode;
+        public NodeVoronoi CurrentNode;
         public bool CanReproduce() => Food >= FoodLimit;
         public SimAgentTypes SimAgentType { get; protected set; }
 
@@ -43,20 +43,14 @@ namespace StateMachine.Agents.Simulation
         protected SimNodeType foodTarget;
         protected int FoodLimit = 5;
         protected int Food = 0;
-        protected int PathNodeId;
         protected FSM<Behaviours, Flags> Fsm;
-        protected List<SimNode<Vector2>> Path;
         protected Action OnMove;
         protected Action OnEat;
 
         protected SimNode<Vector2> TargetNode
         {
             get => targetNode;
-            set
-            {
-                targetNode = value;
-                PathNodeId = 0;
-            }
+            set { targetNode = value; }
         }
 
         private SimNode<Vector2> targetNode;
@@ -66,7 +60,7 @@ namespace StateMachine.Agents.Simulation
         public virtual void Init()
         {
             Fsm = new FSM<Behaviours, Flags>();
-            
+
             OnMove += Move;
             OnEat += Eat;
 
@@ -82,13 +76,13 @@ namespace StateMachine.Agents.Simulation
             OnMove -= Move;
             OnEat -= Eat;
         }
-        
+
         public void Tick()
         {
             Fsm.Tick();
             UpdateInputs();
         }
-        
+
         protected virtual void UpdateInputs()
         {
             FindFoodInputs();
@@ -96,7 +90,6 @@ namespace StateMachine.Agents.Simulation
             MovementInputs();
         }
 
-       
 
         private void FindFoodInputs()
         {
@@ -107,10 +100,9 @@ namespace StateMachine.Agents.Simulation
             input[brain][2] = target.GetCoordinate().x;
             input[brain][3] = target.GetCoordinate().y;
         }
-        
+
         protected virtual void MovementInputs()
         {
-            
         }
 
         protected virtual void ExtraInputs()
@@ -123,17 +115,19 @@ namespace StateMachine.Agents.Simulation
             EatTransitions();
             ExtraTransitions();
         }
-        
+
         protected virtual void WalkTransitions()
         {
         }
+
         protected virtual void EatTransitions()
         {
         }
-        
+
         protected virtual void ExtraTransitions()
         {
         }
+
         protected virtual void FsmBehaviours()
         {
             Fsm.AddBehaviour<SimWalkState>(Behaviours.Walk, WalkTickParameters);
@@ -147,7 +141,11 @@ namespace StateMachine.Agents.Simulation
         protected virtual object[] WalkTickParameters()
         {
             int extraBrain = SimAgentType == SimAgentTypes.Carnivorous ? (int)BrainType.Attack : (int)BrainType.Escape;
-            object[] objects = { CurrentNode, TargetNode, transform, foodTarget, OnMove, output[(int)BrainType.Movement], output[extraBrain] };
+            object[] objects =
+            {
+                CurrentNode, TargetNode, transform, foodTarget, OnMove, output[(int)BrainType.Movement],
+                output[extraBrain]
+            };
             return objects;
         }
 
@@ -157,7 +155,6 @@ namespace StateMachine.Agents.Simulation
             return objects;
         }
 
-       
 
         protected virtual object[] EatTickParameters()
         {
@@ -173,11 +170,48 @@ namespace StateMachine.Agents.Simulation
 
             if (CurrentNode.GetCoordinate().Equals(TargetNode.GetCoordinate())) return;
 
-            if (Path.Count <= 0) return;
-            if (PathNodeId > Path.Count) PathNodeId = 0;
+            int brain = (int)BrainType.Movement;
 
-            CurrentNode = Path[PathNodeId];
-            PathNodeId++;
+            // TODO - Refactor this
+            var targetPos = CurrentNode.GetCoordinate();
+            float speed = output[brain][2];
+            if (speed < 1) speed = movement;
+            if (speed < 0) speed = movement - 1;
+            if (speed < -0.6) speed = movement - 2;
+
+            // X axis
+            if (output[brain][0] > 0)
+            {
+                if (output[brain][1] > 0.1) // Right
+                {
+                    targetPos.x += speed;
+                }
+                else if (output[brain][1] < -0.1) // left
+                {
+                    targetPos.x -= speed;
+                }
+                else
+                {
+                    // No movement
+                }
+            }
+            else // Y Axis
+            {
+                if (output[brain][1] > 0.1) // Up
+                {
+                    targetPos.y += 3;
+                }
+                else if (output[brain][1] < -0.1) // Down
+                {
+                    targetPos.y -= 3;
+                }
+                else
+                {
+                    // No movement
+                }
+            }
+
+            if (targetPos != Vector2.zero) CurrentNode = GetNode(targetPos);
         }
 
         protected virtual SimNode<Vector2> GetTarget(SimNodeType nodeType = SimNodeType.Empty)
@@ -197,6 +231,11 @@ namespace StateMachine.Agents.Simulation
             }
 
             return nearestNode;
+        }
+
+        protected virtual NodeVoronoi GetNode(Vector2 position)
+        {
+            return graph.CoordNodes[(int)position.x, (int)position.y];
         }
     }
 }
