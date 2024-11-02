@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 using ECS.Patron;
 using Pathfinder;
 using StateMachine.Agents.Simulation;
@@ -45,7 +46,7 @@ namespace NeuralNetworkDirectory.ECS
             }
         }
 
-        public static SimAgent GetNearestEntity(SimAgent.SimAgentTypes entityType, SimNode<Vector2> position)
+        public static SimAgent GetNearestEntity(SimAgent.SimAgentTypes entityType, NodeVoronoi position)
         {
             SimAgent nearestAgent = null;
             float minDistance = float.MaxValue;
@@ -80,6 +81,30 @@ namespace NeuralNetworkDirectory.ECS
             }
 
             return target;
+        }
+        
+        public static SimAgent GetEntity(SimAgent.SimAgentTypes entityType, NodeVoronoi position)
+        {
+            SimAgent target = null;
+
+            foreach (var agent in agents.Values)
+            {
+                if (agent.SimAgentType != entityType) continue;
+                
+                if (!position.GetCoordinate().Equals(agent.CurrentNode.GetCoordinate())) continue;
+
+                target = agent;
+                break;
+            }
+
+            return target;
+        }   
+        
+        public static SimNode<Vector2> CoordinateToNode(NodeVoronoi coordinate)
+        {
+            return SimAgent.graph.NodesType
+                .FirstOrDefault(node => node.GetCoordinate().Equals(coordinate.GetCoordinate()));
+
         }
     }
 }

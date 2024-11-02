@@ -6,6 +6,7 @@ namespace NeuralNetworkDirectory.NeuralNet
     public enum BrainType
     {
         Movement,
+        ScavengerMovement,
         Eat,
         Attack,
         Escape

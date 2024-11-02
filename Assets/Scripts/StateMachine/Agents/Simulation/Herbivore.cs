@@ -59,8 +59,9 @@ namespace StateMachine.Agents.Simulation
 
         private void Die()
         {
-            CurrentNode.NodeType = SimNodeType.Corpse;
-            CurrentNode.food = FoodDropped;
+            var node = EcsPopulationManager.CoordinateToNode(CurrentNode);
+            node.NodeType = SimNodeType.Corpse;
+            node.food = FoodDropped;
         }
 
         protected override void ExtraBehaviours()
