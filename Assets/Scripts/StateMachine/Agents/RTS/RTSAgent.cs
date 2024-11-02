@@ -260,8 +260,7 @@ namespace StateMachine.Agents.RTS
             switch (rtsNodeType)
             {
                 case RTSNodeType.Mine:
-                    target = Voronoi.GetMineCloser(GameManager.Graph.CoordNodes.Find(nodeVoronoi =>
-                        nodeVoronoi.GetCoordinate() == position));
+                    //target = Voronoi.GetMineCloser(GameManager.Graph.CoordNodes.Find(nodeVoronoi => nodeVoronoi.GetCoordinate() == position));
                     break;
 
                 case RTSNodeType.TownCenter:
@@ -269,12 +268,11 @@ namespace StateMachine.Agents.RTS
                     break;
 
                 default:
-                    target = Voronoi.GetMineCloser(GameManager.Graph.CoordNodes.Find(nodeVoronoi =>
-                        nodeVoronoi.GetCoordinate() == position));
+                    //target = Voronoi.GetMineCloser(GameManager.Graph.CoordNodes.Find(nodeVoronoi => nodeVoronoi.GetCoordinate() == position));
                     break;
             }
 
-            if (target == null)
+            //if (target == null)
             {
                 Debug.LogError("No mines with gold.");
                 return null;

@@ -15,6 +15,7 @@ namespace NeuralNetworkDirectory.Agent
         public float RotSpeed = 20.0f;
         public int team;
         public int id;
+        public Action<GameObject> OnMineTaken;
         protected GameObject badMine;
         protected int badMinesCount = 0;
         protected NeuralNetwork brain;
@@ -22,14 +23,11 @@ namespace NeuralNetworkDirectory.Agent
 
         protected Genome genome;
         protected GameObject goodMine;
-
-        private int hp = 3;
         protected float[] inputs;
         protected GameObject nearMine;
-        public Action<GameObject> OnMineTaken;
+        
+        private int hp = 3;
         private int turnLeftCount;
-
-
         private int turnRightCount;
 
         public int Hp
