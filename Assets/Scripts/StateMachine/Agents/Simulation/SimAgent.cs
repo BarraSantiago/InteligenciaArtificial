@@ -171,49 +171,49 @@ namespace StateMachine.Agents.Simulation
             if (CurrentNode.GetCoordinate().Equals(TargetNode.GetCoordinate())) return;
 
             int brain = (int)BrainType.Movement;
-
-            // TODO - Refactor this
             var targetPos = CurrentNode.GetCoordinate();
-            float speed = output[brain][2];
-            if (speed < 1) speed = movement;
-            if (speed < 0) speed = movement - 1;
-            if (speed < -0.6) speed = movement - 2;
+            float speed = CalculateSpeed(output[brain][2]);
 
-            // X axis
-            if (output[brain][0] > 0)
-            {
-                if (output[brain][1] > 0.1) // Right
-                {
-                    targetPos.x += speed;
-                }
-                else if (output[brain][1] < -0.1) // left
-                {
-                    targetPos.x -= speed;
-                }
-                else
-                {
-                    // No movement
-                }
-            }
-            else // Y Axis
-            {
-                if (output[brain][1] > 0.1) // Up
-                {
-                    targetPos.y += 3;
-                }
-                else if (output[brain][1] < -0.1) // Down
-                {
-                    targetPos.y -= 3;
-                }
-                else
-                {
-                    // No movement
-                }
-            }
+            targetPos = CalculateNewPosition(targetPos, output[brain], speed);
 
             if (targetPos != Vector2.zero) CurrentNode = GetNode(targetPos);
         }
 
+        private float CalculateSpeed(float rawSpeed)
+        {
+            if (rawSpeed < 1) return movement;
+            if (rawSpeed < 0) return movement - 1;
+            if (rawSpeed < -0.6) return movement - 2;
+            return rawSpeed;
+        }
+
+        private Vector2 CalculateNewPosition(Vector2 targetPos, float[] brainOutput, float speed)
+        {
+            if (brainOutput[0] > 0)
+            {
+                if (brainOutput[1] > 0.1) // Right
+                {
+                    targetPos.x += speed;
+                }
+                else if (brainOutput[1] < -0.1) // Left
+                {
+                    targetPos.x -= speed;
+                }
+            }
+            else
+            {
+                if (brainOutput[1] > 0.1) // Up
+                {
+                    targetPos.y += speed;
+                }
+                else if (brainOutput[1] < -0.1) // Down
+                {
+                    targetPos.y -= speed;
+                }
+            }
+
+            return targetPos;
+        }
         protected virtual SimNode<Vector2> GetTarget(SimNodeType nodeType = SimNodeType.Empty)
         {
             Vector2 position = transform.position;

@@ -1,6 +1,7 @@
 using NeuralNetworkDirectory.ECS;
 using NeuralNetworkDirectory.NeuralNet;
 using Pathfinder;
+using Pathfinder.Graph;
 using StateMachine.States.SimStates;
 using UnityEngine;
 
@@ -8,6 +9,10 @@ namespace StateMachine.Agents.Simulation
 {
     public class Scavenger : SimAgent
     {
+        public float Speed;
+        public float RotSpeed = 20.0f;
+        private int turnLeftCount;
+        private int turnRightCount;
         public override void Init()
         {
             base.Init();
@@ -15,6 +20,7 @@ namespace StateMachine.Agents.Simulation
             foodTarget = SimNodeType.Carrion;
             FoodLimit = 20;
             movement = 5;
+            Speed = movement * Graph<SimNode<Vector2>, NodeVoronoi, Vector2>.CellSize;
         }
         
         protected override void MovementInputs()
@@ -37,6 +43,30 @@ namespace StateMachine.Agents.Simulation
         {
             Fsm.AddBehaviour<SimEatState>(Behaviours.Eat, EatTickParameters);
         }
+
+        protected override void Move()
+        {
+            float leftForce = output[(int)BrainType.ScavengerMovement][0];
+            float rightForce = output[(int)BrainType.ScavengerMovement][1];
+            
+            var pos = transform.position;
+            var rotFactor = Mathf.Clamp(rightForce - leftForce, -1.0f, 1.0f);
+            transform.rotation *= Quaternion.AngleAxis(rotFactor * RotSpeed * dt, Vector3.up);
+            pos += transform.forward * (Mathf.Abs(rightForce + leftForce) * 0.5f * Speed * dt);
+            transform.position = pos;
+
+            if (rightForce > leftForce)
+            {
+                turnRightCount++;
+                turnLeftCount = 0;
+            }
+            else
+            {
+                turnLeftCount++;
+                turnRightCount = 0;
+            }
+        }
+        
 
         protected override object[] WalkTickParameters()
         {
