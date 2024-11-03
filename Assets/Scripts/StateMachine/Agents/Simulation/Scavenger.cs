@@ -21,6 +21,8 @@ namespace StateMachine.Agents.Simulation
             FoodLimit = 20;
             movement = 5;
             Speed = movement * Graph<SimNode<Vector2>, NodeVoronoi, Vector2>.CellSize;
+            brainTypes = new[] {BrainType.Movement, BrainType.Eat};
+
         }
         
         protected override void MovementInputs()

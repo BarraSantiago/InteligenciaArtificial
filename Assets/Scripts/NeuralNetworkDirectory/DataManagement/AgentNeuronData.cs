@@ -7,7 +7,7 @@ namespace NeuralNetworkDirectory.DataManagement
     public class AgentNeuronData
     {
         public uint AgentId { get; set; }
-        public List<float[]> NeuronWeights { get; set; }
+        public float[] NeuronWeights { get; set; }
         public float Fitness { get; set; }
         public BrainType BrainType { get; set; }
         public SimAgentTypes AgentType { get; set; }

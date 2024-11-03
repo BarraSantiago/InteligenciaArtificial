@@ -18,6 +18,7 @@ namespace StateMachine.Agents.Simulation
             FoodLimit = 1;
             movement = 2;
             
+            brainTypes = new[] {BrainType.Movement, BrainType.Attack, BrainType.Eat};
             OnAttack = () =>
             {
                 SimAgent target = EcsPopulationManager.GetEntity(SimAgentTypes.Herbivore, CurrentNode);

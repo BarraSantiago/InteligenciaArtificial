@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ECS.Patron;
 using Flocking;
+using NeuralNetworkDirectory.DataManagement;
 using NeuralNetworkDirectory.NeuralNet;
 using Pathfinder;
 using StateMachine.Agents.Simulation;
@@ -67,6 +68,71 @@ namespace NeuralNetworkDirectory.ECS
             boid.alignmentOffset = outputs[3];
         }
 
+        public void Save(string directoryPath, int generation)
+        {
+            var agentsData = new List<AgentNeuronData>();
+
+            Parallel.ForEach(entities, entity =>
+            {
+                var netComponent = ECSManager.GetComponent<NeuralNetComponent>(entity.Key);
+                for (int i = 0; i < netComponent.Layers.Count; i++)
+                {
+                    for (int j = 0; j < netComponent.Layers[i].Count; j++)
+                    {
+                        var layer = netComponent.Layers[i][j];
+                        var neuronData = new AgentNeuronData
+                        {
+                            AgentType = layer.AgentType,
+                            BrainType = layer.BrainType,
+                            TotalWeights = layer.GetWeights().Length,
+                            Bias = layer.Bias,
+                            NeuronWeights = layer.GetWeights(),
+                            Fitness = netComponent.Fitness[i]
+                        };
+                        agentsData.Add(neuronData);
+                    }
+                }
+
+                NeuronDataSystem.SaveNeurons(agentsData, directoryPath, generation);
+            });
+        }
+
+        public void Load(string directoryPath)
+        {
+            var loadedData = NeuronDataSystem.LoadLatestNeurons(directoryPath);
+
+            Parallel.ForEach(entities, entity =>
+            {
+                var netComponent = ECSManager.GetComponent<NeuralNetComponent>(entity.Key);
+                var agent = agents[entity.Key];
+
+                if (loadedData.TryGetValue(agent.agentType, out var brainData))
+                {
+                    foreach (var brainType in agent.brainTypes)
+                    {
+                        if (brainData.TryGetValue(brainType, out var neuronDataList))
+                        {
+                            foreach (var neuronData in neuronDataList)
+                            {
+                                for (int i = 0; i < netComponent.Layers.Count; i++)
+                                {
+                                    for (int j = 0; j < netComponent.Layers[i].Count; j++)
+                                    {
+                                        var layer = netComponent.Layers[i][j];
+                                        layer.AgentType = neuronData.AgentType;
+                                        layer.BrainType = neuronData.BrainType;
+                                        layer.Bias = neuronData.Bias;
+                                        layer.SetWeights(neuronData.NeuronWeights, 0);
+                                    }
+                                }
+
+                                netComponent.Fitness = new float[] { neuronData.Fitness };
+                            }
+                        }
+                    }
+                }
+            });
+        }
         public static SimAgent GetNearestEntity(SimAgentTypes entityType, NodeVoronoi position)
         {
             SimAgent nearestAgent = null;

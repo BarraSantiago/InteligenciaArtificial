@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Flocking;
 using NeuralNetworkDirectory.NeuralNet;
@@ -59,6 +60,7 @@ namespace StateMachine.Agents.Simulation
         private SimNode<Vector2> targetNode;
         public float[][] output;
         public float[][] input;
+        public BrainType[] brainTypes;
 
         public virtual void Init()
         {

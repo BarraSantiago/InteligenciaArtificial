@@ -17,7 +17,7 @@ namespace NeuralNetworkDirectory.NeuralNet
     {
         public BrainType BrainType;
         public SimAgentTypes AgentType;
-        private readonly float bias = 1;
+        public float Bias {  get; set; }= 1;
         private readonly float p = 0.5f;
         private Neuron[] neurons;
         private float[] outputs;
@@ -26,7 +26,7 @@ namespace NeuralNetworkDirectory.NeuralNet
         public NeuronLayer(int inputsCount, int neuronsCount, float bias, float p)
         {
             InputsCount = inputsCount;
-            this.bias = bias;
+            this.Bias = bias;
             this.p = p;
 
             SetNeuronsCount(neuronsCount);
@@ -44,7 +44,7 @@ namespace NeuralNetworkDirectory.NeuralNet
 
             for (var i = 0; i < neurons.Length; i++)
             {
-                neurons[i] = new Neuron(InputsCount + 1, bias, p);
+                neurons[i] = new Neuron(InputsCount + 1, Bias, p);
                 totalWeights += InputsCount + 1;
             }
 
