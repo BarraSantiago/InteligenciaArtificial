@@ -13,7 +13,7 @@ namespace StateMachine.Agents.Simulation
         public override void Init()
         {
             base.Init();
-            SimAgentType = SimAgentTypes.Carnivorous;
+            agentType = SimAgentTypes.Carnivorous;
             foodTarget = SimNodeType.Corpse;
             FoodLimit = 1;
             movement = 2;

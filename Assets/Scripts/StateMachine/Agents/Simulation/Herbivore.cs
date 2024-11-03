@@ -25,7 +25,7 @@ namespace StateMachine.Agents.Simulation
         public override void Init()
         {
             base.Init();
-            SimAgentType = SimAgentTypes.Herbivore;
+            agentType = SimAgentTypes.Herbivore;
             foodTarget = SimNodeType.Bush;
             hp = InitialHp;
         }

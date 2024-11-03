@@ -9,14 +9,15 @@ using UnityEngine;
 
 namespace StateMachine.Agents.Simulation
 {
+    public enum SimAgentTypes
+    {
+        Carnivorous,
+        Herbivore,
+        Scavenger
+    }
     public class SimAgent : MonoBehaviour
     {
-        public enum SimAgentTypes
-        {
-            Carnivorous,
-            Herbivore,
-            Scavenger
-        }
+        
 
         public enum Behaviours
         {
@@ -38,7 +39,7 @@ namespace StateMachine.Agents.Simulation
         public static Graph<SimNode<Vector2>, NodeVoronoi, Vector2> graph;
         public NodeVoronoi CurrentNode;
         public bool CanReproduce() => Food >= FoodLimit;
-        public SimAgentTypes SimAgentType { get; protected set; }
+        public SimAgentTypes agentType { get; protected set; }
         public Boid boid;
 
         protected int movement = 3;
@@ -52,7 +53,7 @@ namespace StateMachine.Agents.Simulation
         protected SimNode<Vector2> TargetNode
         {
             get => targetNode;
-            set { targetNode = value; }
+            set => targetNode = value;
         }
 
         private SimNode<Vector2> targetNode;
@@ -142,7 +143,7 @@ namespace StateMachine.Agents.Simulation
 
         protected virtual object[] WalkTickParameters()
         {
-            int extraBrain = SimAgentType == SimAgentTypes.Carnivorous ? (int)BrainType.Attack : (int)BrainType.Escape;
+            int extraBrain = agentType == SimAgentTypes.Carnivorous ? (int)BrainType.Attack : (int)BrainType.Escape;
             object[] objects =
             {
                 CurrentNode, TargetNode, transform, foodTarget, OnMove, output[(int)BrainType.Movement],
