@@ -9,7 +9,8 @@ namespace NeuralNetworkDirectory.NeuralNet
         ScavengerMovement,
         Eat,
         Attack,
-        Escape
+        Escape,
+        Flocking
     }
     
     public class NeuronLayer

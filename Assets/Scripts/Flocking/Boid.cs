@@ -8,10 +8,10 @@ namespace Flocking
         public float speed = 2.5f;
         public float turnSpeed = 5f;
         public float detectionRadious = 3.0f;
-        public float alignmentOffset = 0.0f;
-        public float cohesionOffset = 0.0f;
-        public float separationOffset = 0.0f;
-        public float directionOffset = 0.0f;
+        public float alignmentOffset;
+        public float cohesionOffset;
+        public float separationOffset;
+        public float directionOffset;
 
         private Func<Boid, Vector2> alignment;
         private Func<Boid, Vector2> cohesion;

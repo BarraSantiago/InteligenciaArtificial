@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Flocking;
 using NeuralNetworkDirectory.NeuralNet;
 using Pathfinder;
 using Pathfinder.Graph;
@@ -38,6 +39,7 @@ namespace StateMachine.Agents.Simulation
         public NodeVoronoi CurrentNode;
         public bool CanReproduce() => Food >= FoodLimit;
         public SimAgentTypes SimAgentType { get; protected set; }
+        public Boid boid;
 
         protected int movement = 3;
         protected SimNodeType foodTarget;

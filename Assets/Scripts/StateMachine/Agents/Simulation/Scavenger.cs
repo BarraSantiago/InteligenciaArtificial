@@ -25,7 +25,7 @@ namespace StateMachine.Agents.Simulation
         
         protected override void MovementInputs()
         {
-            int brain = (int)BrainType.Movement;
+            int brain = (int)BrainType.ScavengerMovement;
             
             input[brain][0] = CurrentNode.GetCoordinate().x;
             input[brain][1] = CurrentNode.GetCoordinate().y;
@@ -37,6 +37,14 @@ namespace StateMachine.Agents.Simulation
             input[brain][5] = nodeTarget.GetCoordinate().y;
             input[brain][6] = Food;
 
+        }
+
+        // TODO check for flocking inputs
+        protected override void ExtraInputs()
+        {
+            int brain = (int)BrainType.Flocking;
+            input[brain][0] = CurrentNode.GetCoordinate().x;
+            input[brain][1] = CurrentNode.GetCoordinate().y;
         }
 
         protected override void ExtraBehaviours()
