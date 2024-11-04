@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using FlappyIa.GeneticAlg;
 using Flocking;
 using NeuralNetworkDirectory.NeuralNet;
 using Pathfinder;
@@ -16,10 +17,9 @@ namespace StateMachine.Agents.Simulation
         Herbivore,
         Scavenger
     }
+
     public class SimAgent : MonoBehaviour
     {
-        
-
         public enum Behaviours
         {
             Walk,
@@ -58,9 +58,19 @@ namespace StateMachine.Agents.Simulation
         }
 
         private SimNode<Vector2> targetNode;
+        Genome[] genomes;
         public float[][] output;
         public float[][] input;
         public BrainType[] brainTypes;
+
+        public SimAgent()
+        {
+        }
+
+        public SimAgent(SimAgentTypes agentType)
+        {
+            this.agentType = agentType;
+        }
 
         public virtual void Init()
         {
@@ -219,6 +229,7 @@ namespace StateMachine.Agents.Simulation
 
             return targetPos;
         }
+
         protected virtual SimNode<Vector2> GetTarget(SimNodeType nodeType = SimNodeType.Empty)
         {
             Vector2 position = transform.position;

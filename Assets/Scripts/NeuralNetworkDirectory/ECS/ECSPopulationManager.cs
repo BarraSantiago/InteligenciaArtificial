@@ -1,41 +1,96 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using ECS.Patron;
+using FlappyIa.GeneticAlg;
 using Flocking;
 using NeuralNetworkDirectory.DataManagement;
 using NeuralNetworkDirectory.NeuralNet;
 using Pathfinder;
+using Pathfinder.Graph;
 using StateMachine.Agents.Simulation;
+using Random = UnityEngine.Random;
 
 namespace NeuralNetworkDirectory.ECS
 {
     public class EcsPopulationManager : MonoBehaviour
     {
-        public int entityCount = 100;
-        public GameObject prefab;
+        public GameObject CarnivorePrefab;
+        public GameObject HerbivorePrefab;
+        public GameObject ScavengerPrefab;
 
-        private Dictionary<uint, GameObject> entities;
+        public int CarnivoreCount = 10;
+        public int HerbivoreCount = 20;
+        public int ScavengerCount = 10;
+
+        public float GenerationDuration = 20.0f;
+        public int EliteCount = 4;
+        public float MutationChance = 0.10f;
+        public float MutationRate = 0.01f;
+
+        public int gridWidth = 10;
+        public int gridHeight = 10;
+        public int generationTurns = 100;
+
         private static Dictionary<uint, SimAgent> agents;
+        private Dictionary<uint, GameObject> entities;
+        private readonly Dictionary<uint, List<Genome>> population = new();
+        private GraphManager gridManager;
+        private int currentTurn;
+
+        private float accumTime;
+        private GeneticAlgorithm genAlg;
+        private bool isRunning;
+        private readonly List<SimAgent> populationGOs = new();
+
+        public int Generation { get; private set; }
+        public float BestFitness { get; private set; }
+        public float AvgFitness { get; private set; }
+        public float WorstFitness { get; private set; }
 
         private void Start()
         {
             ECSManager.Init();
             entities = new Dictionary<uint, GameObject>();
-            for (var i = 0; i < entityCount; i++)
-            {
-                var entityID = ECSManager.CreateEntity();
-                ECSManager.AddComponent(entityID, new InputComponent());
-                ECSManager.AddComponent(entityID, new NeuralNetComponent());
-                ECSManager.AddComponent(entityID, new OutputComponent());
-            }
+            gridManager = new GraphManager(gridWidth, gridHeight);
+
+            InitializePlants();
         }
 
         private void Update()
         {
-            ECSManager.Tick(Time.deltaTime);
+            if (currentTurn < generationTurns)
+            {
+                ECSManager.Tick(Time.deltaTime);
+                currentTurn++;
+            }
+            else
+            {
+                // Epoch or end generation 
+            }
         }
+
+        private void FixedUpdate()
+        {
+            if (!isRunning)
+                return;
+
+            var dt = Time.fixedDeltaTime;
+
+            foreach (var agent in populationGOs)
+            {
+                agent.Think(dt);
+            }
+
+            accumTime += dt;
+
+            if (!(accumTime >= GenerationDuration)) return;
+            accumTime -= GenerationDuration;
+            Epoch();
+        }
+
 
         private void LateUpdate()
         {
@@ -67,6 +122,245 @@ namespace NeuralNetworkDirectory.ECS
             boid.directionOffset = outputs[2];
             boid.alignmentOffset = outputs[3];
         }
+
+
+        private void GenerateInitialPopulation()
+        {
+            Generation = 0;
+            DestroyAgents();
+
+            CreateAgents(CarnivorePrefab, CarnivoreCount, SimAgentTypes.Carnivorous);
+            CreateAgents(HerbivorePrefab, HerbivoreCount, SimAgentTypes.Herbivore);
+            CreateAgents(ScavengerPrefab, ScavengerCount, SimAgentTypes.Scavenger);
+
+            accumTime = 0.0f;
+        }
+
+        private void CreateEntities(int count, SimAgentTypes agentType)
+        {
+            for (var i = 0; i < count; i++)
+            {
+                var entityID = ECSManager.CreateEntity();
+                ECSManager.AddComponent(entityID, new InputComponent());
+                ECSManager.AddComponent(entityID, new NeuralNetComponent());
+                ECSManager.AddComponent(entityID, new OutputComponent());
+
+                var agent = CreateAgent(agentType);
+                agents[entityID] = agent;
+                entities[entityID] = agent.gameObject;
+            }
+        }
+
+        private SimAgent CreateAgent(SimAgentTypes agentType)
+        {
+            GameObject prefab = agentType switch
+            {
+                SimAgentTypes.Carnivorous => CarnivorePrefab,
+                SimAgentTypes.Herbivore => HerbivorePrefab,
+                SimAgentTypes.Scavenger => ScavengerPrefab,
+                _ => throw new ArgumentException("Invalid agent type")
+            };
+
+            var position = GetRandomPos();
+            var go = Instantiate(prefab, position, Quaternion.identity);
+            var agent = go.GetComponent<SimAgent>();
+            return agent;
+        }
+
+        private void CreateAgents(GameObject prefab, int count, SimAgentTypes agentType)
+        {
+            for (var i = 0; i < count; i++)
+            {
+                var entityID = ECSManager.CreateEntity();
+                ECSManager.AddComponent(entityID, new InputComponent());
+                var neuralNetComponent = new NeuralNetComponent();
+                ECSManager.AddComponent(entityID, neuralNetComponent);
+                ECSManager.AddComponent(entityID, new OutputComponent());
+
+                var brains = CreateBrain(agentType);
+                var genomes = new List<Genome>();
+
+                foreach (var brain in brains)
+                {
+                    var genome =
+                        new Genome(brain.Layers.Sum(layerList => layerList.Sum(layer => layer.GetWeights().Length)));
+                    foreach (var layerList in brain.Layers)
+                    {
+                        foreach (var layer in layerList)
+                        {
+                            layer.SetWeights(genome.genome, 0);
+                        }
+                    }
+
+                    genomes.Add(genome);
+                }
+
+                neuralNetComponent.Layers = brains.SelectMany(brain => brain.Layers).ToList();
+
+                var agent = CreateAgent(prefab);
+                agents[entityID] = agent;
+                entities[entityID] = agent.gameObject;
+                population[entityID] = genomes;
+            }
+        }
+
+        private List<NeuralNetComponent> CreateBrain(SimAgentTypes agentType)
+        {
+            var brains = new List<NeuralNetComponent>();
+
+            brains.Add(CreateSingleBrain(BrainType.Eat));
+
+            switch (agentType)
+            {
+                case SimAgentTypes.Herbivore:
+                    brains.Add(CreateSingleBrain(BrainType.Escape));
+                    brains.Add(CreateSingleBrain(BrainType.Movement));
+                    break;
+                case SimAgentTypes.Carnivorous:
+                    brains.Add(CreateSingleBrain(BrainType.Attack));
+                    brains.Add(CreateSingleBrain(BrainType.Movement));
+                    break;
+                case SimAgentTypes.Scavenger:
+                    brains.Add(CreateSingleBrain(BrainType.Flocking));
+                    brains.Add(CreateSingleBrain(BrainType.ScavengerMovement));
+                    break;
+            }
+
+            return brains;
+        }
+
+        // TODO - Refactor this method
+        private NeuralNetComponent CreateSingleBrain(BrainType brainType)
+        {
+            var neuralNetComponent = new NeuralNetComponent();
+            neuralNetComponent.Layers.Add(CreateNeuronLayerList(brainType));
+            return neuralNetComponent;
+        }
+
+
+        private List<NeuronLayer> CreateNeuronLayerList(BrainType brainType)
+        {
+            var layers = new List<NeuronLayer>
+            {
+                new NeuronLayer(6, 7, 1f, 0.5f) { BrainType = brainType },
+                new NeuronLayer(7, 2, 1f, 0.5f) { BrainType = brainType }
+            };
+            return layers;
+        }
+
+        private SimAgent CreateAgent(GameObject prefab)
+        {
+            var position = GetRandomPos();
+            var go = Instantiate(prefab, position, Quaternion.identity);
+            var agent = go.GetComponent<SimAgent>();
+            return agent;
+        }
+
+        private void DestroyAgents()
+        {
+            foreach (var agent in populationGOs)
+            {
+                Destroy(agent.gameObject);
+            }
+
+            populationGOs.Clear();
+            population.Clear();
+        }
+
+        private void Epoch()
+        {
+            Generation++;
+            BestFitness = GetBestFitness();
+            AvgFitness = GetAvgFitness();
+            WorstFitness = GetWorstFitness();
+
+            var newGenomes = genAlg.Epoch(population.Values.SelectMany(g => g).ToArray());
+            population.Clear();
+
+            int genomeIndex = 0;
+            foreach (var entityID in agents.Keys)
+            {
+                var agent = agents[entityID];
+                var neuralNetComponent = ECSManager.GetComponent<NeuralNetComponent>(entityID);
+                var newGenomesForAgent = new List<Genome>();
+
+                foreach (var brainLayers in neuralNetComponent.Layers)
+                {
+                    var newGenome = newGenomes[genomeIndex++];
+                    foreach (var layer in brainLayers)
+                    {
+                        layer.SetWeights(newGenome.genome, 0);
+                    }
+                    newGenomesForAgent.Add(newGenome);
+                }
+
+                population[entityID] = newGenomesForAgent;
+                agent.SetBrain(newGenomesForAgent, neuralNetComponent);
+                agent.transform.position = GetRandomPos();
+            }
+        }
+
+        private float GetBestFitness()
+        {
+            float bestFitness = 0;
+            foreach (var genomes in population.Values)
+            {
+                foreach (var genome in genomes)
+                {
+                    if (genome.fitness > bestFitness)
+                    {
+                        bestFitness = genome.fitness;
+                    }
+                }
+            }
+
+            return bestFitness;
+        }
+
+        private float GetAvgFitness()
+        {
+            float totalFitness = 0;
+            int genomeCount = 0;
+            foreach (var genomes in population.Values)
+            {
+                foreach (var genome in genomes)
+                {
+                    totalFitness += genome.fitness;
+                    genomeCount++;
+                }
+            }
+
+            return totalFitness / genomeCount;
+        }
+
+        private float GetWorstFitness()
+        {
+            float worstFitness = float.MaxValue;
+            foreach (var genomes in population.Values)
+            {
+                foreach (var genome in genomes)
+                {
+                    if (genome.fitness < worstFitness)
+                    {
+                        worstFitness = genome.fitness;
+                    }
+                }
+            }
+
+            return worstFitness;
+        }
+
+        private void InitializePlants()
+        {
+            int plantCount = agents.Values.Count(agent => agent.agentType == SimAgentTypes.Herbivore) * 2;
+            for (int i = 0; i < plantCount; i++)
+            {
+                var plantPosition = gridManager.GetRandomPosition();
+                plantPosition.NodeType = SimNodeType.Bush;
+                plantPosition.food = 5;
+            }
+        }
+
 
         public void Save(string directoryPath, int generation)
         {
@@ -192,10 +486,34 @@ namespace NeuralNetworkDirectory.ECS
             return target;
         }
 
+        private Vector3 GetRandomPos()
+        {
+            return new Vector3(Random.value * 40.0f - 20.0f, 0.0f, Random.value * 40.0f - 20.0f);
+        }
+
         public static SimNode<Vector2> CoordinateToNode(NodeVoronoi coordinate)
         {
             return SimAgent.graph.NodesType
                 .FirstOrDefault(node => node.GetCoordinate().Equals(coordinate.GetCoordinate()));
+        }
+
+        public void StartSimulation()
+        {
+            genAlg = new GeneticAlgorithm(EliteCount, MutationChance, MutationRate);
+            GenerateInitialPopulation();
+            isRunning = true;
+        }
+
+        public void StopSimulation()
+        {
+            isRunning = false;
+            Generation = 0;
+            DestroyAgents();
+        }
+
+        public void PauseSimulation()
+        {
+            isRunning = !isRunning;
         }
     }
 }
