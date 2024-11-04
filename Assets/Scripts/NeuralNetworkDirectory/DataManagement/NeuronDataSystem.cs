@@ -26,8 +26,6 @@ namespace NeuralNetworkDirectory.DataManagement
                 string filePath = Path.Combine(agentTypeDirectory, fileName);
                 string json = JsonSerializer.Serialize(group.Value);
                 File.WriteAllText(filePath, json);
-                Console.WriteLine("Saving in path: " + filePath);
-
             }
         }
         
