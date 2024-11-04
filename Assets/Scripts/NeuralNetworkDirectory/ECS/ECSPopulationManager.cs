@@ -106,33 +106,38 @@ namespace NeuralNetworkDirectory.ECS
                 var netComponent = ECSManager.GetComponent<NeuralNetComponent>(entity.Key);
                 var agent = agents[entity.Key];
 
-                if (loadedData.TryGetValue(agent.agentType, out var brainData))
-                {
-                    foreach (var brainType in agent.brainTypes)
-                    {
-                        if (brainData.TryGetValue(brainType, out var neuronDataList))
-                        {
-                            foreach (var neuronData in neuronDataList)
-                            {
-                                for (int i = 0; i < netComponent.Layers.Count; i++)
-                                {
-                                    for (int j = 0; j < netComponent.Layers[i].Count; j++)
-                                    {
-                                        var layer = netComponent.Layers[i][j];
-                                        layer.AgentType = neuronData.AgentType;
-                                        layer.BrainType = neuronData.BrainType;
-                                        layer.Bias = neuronData.Bias;
-                                        layer.SetWeights(neuronData.NeuronWeights, 0);
-                                    }
-                                }
+                if (!loadedData.TryGetValue(agent.agentType, out var brainData)) return;
 
-                                netComponent.Fitness = new float[] { neuronData.Fitness };
+                Parallel.ForEach(agent.brainTypes, brainType =>
+                {
+                    if (!brainData.TryGetValue(brainType, out var neuronDataList)) return;
+
+                    for (var i = 0; i < neuronDataList.Count; i++)
+                    {
+                        var neuronData = neuronDataList[i];
+                        foreach (var neuronLayer in netComponent.Layers)
+                        {
+                            foreach (var layer in neuronLayer)
+                            {
+                                lock (layer)
+                                {
+                                    layer.AgentType = neuronData.AgentType;
+                                    layer.BrainType = neuronData.BrainType;
+                                    layer.Bias = neuronData.Bias;
+                                    layer.SetWeights(neuronData.NeuronWeights, 0);
+                                }
                             }
                         }
+
+                        lock (netComponent.Fitness)
+                        {
+                            netComponent.Fitness[i] = neuronData.Fitness;
+                        }
                     }
-                }
+                });
             });
         }
+
         public static SimAgent GetNearestEntity(SimAgentTypes entityType, NodeVoronoi position)
         {
             SimAgent nearestAgent = null;
