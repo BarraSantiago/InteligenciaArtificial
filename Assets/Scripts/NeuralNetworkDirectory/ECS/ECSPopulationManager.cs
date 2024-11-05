@@ -17,32 +17,31 @@ namespace NeuralNetworkDirectory.ECS
 {
     public class EcsPopulationManager : MonoBehaviour
     {
-        public GameObject CarnivorePrefab;
-        public GameObject HerbivorePrefab;
-        public GameObject ScavengerPrefab;
+        [SerializeField] private GameObject carnivorePrefab;
+        [SerializeField] private GameObject herbivorePrefab;
+        [SerializeField] private GameObject scavengerPrefab;
 
-        public int CarnivoreCount = 10;
-        public int HerbivoreCount = 20;
-        public int ScavengerCount = 10;
+        [SerializeField] private int CarnivoreCount = 10;
+        [SerializeField] private int HerbivoreCount = 20;
+        [SerializeField] private int ScavengerCount = 10;
 
-        public float GenerationDuration = 20.0f;
-        public int EliteCount = 4;
-        public float MutationChance = 0.10f;
-        public float MutationRate = 0.01f;
+        [SerializeField] private int EliteCount = 4;
+        [SerializeField] private float GenerationDuration = 20.0f;
+        [SerializeField] private float MutationChance = 0.10f;
+        [SerializeField] private float MutationRate = 0.01f;
 
         public int gridWidth = 10;
         public int gridHeight = 10;
         public int generationTurns = 100;
 
-        private static Dictionary<uint, SimAgent> agents;
+        private int currentTurn;
+        private float accumTime;
+        private bool isRunning;
         private Dictionary<uint, GameObject> entities;
+        private static Dictionary<uint, SimAgent> agents;
         private readonly Dictionary<uint, List<Genome>> population = new();
         private GraphManager gridManager;
-        private int currentTurn;
-
-        private float accumTime;
         private GeneticAlgorithm genAlg;
-        private bool isRunning;
         private readonly List<SimAgent> populationGOs = new();
 
         public int Generation { get; private set; }
@@ -61,15 +60,9 @@ namespace NeuralNetworkDirectory.ECS
 
         private void Update()
         {
-            if (currentTurn < generationTurns)
-            {
-                ECSManager.Tick(Time.deltaTime);
-                currentTurn++;
-            }
-            else
-            {
-                // Epoch or end generation 
-            }
+            if (currentTurn >= generationTurns) return;
+            ECSManager.Tick(Time.deltaTime);
+            currentTurn++;
         }
 
         private void FixedUpdate()
@@ -81,7 +74,7 @@ namespace NeuralNetworkDirectory.ECS
 
             foreach (var agent in populationGOs)
             {
-                agent.Think(dt);
+                agent.Tick();
             }
 
             accumTime += dt;
@@ -129,9 +122,9 @@ namespace NeuralNetworkDirectory.ECS
             Generation = 0;
             DestroyAgents();
 
-            CreateAgents(CarnivorePrefab, CarnivoreCount, SimAgentTypes.Carnivorous);
-            CreateAgents(HerbivorePrefab, HerbivoreCount, SimAgentTypes.Herbivore);
-            CreateAgents(ScavengerPrefab, ScavengerCount, SimAgentTypes.Scavenger);
+            CreateAgents(carnivorePrefab, CarnivoreCount, SimAgentTypes.Carnivorous);
+            CreateAgents(herbivorePrefab, HerbivoreCount, SimAgentTypes.Herbivore);
+            CreateAgents(scavengerPrefab, ScavengerCount, SimAgentTypes.Scavenger);
 
             accumTime = 0.0f;
         }
@@ -155,9 +148,9 @@ namespace NeuralNetworkDirectory.ECS
         {
             GameObject prefab = agentType switch
             {
-                SimAgentTypes.Carnivorous => CarnivorePrefab,
-                SimAgentTypes.Herbivore => HerbivorePrefab,
-                SimAgentTypes.Scavenger => ScavengerPrefab,
+                SimAgentTypes.Carnivorous => carnivorePrefab,
+                SimAgentTypes.Herbivore => herbivorePrefab,
+                SimAgentTypes.Scavenger => scavengerPrefab,
                 _ => throw new ArgumentException("Invalid agent type")
             };
 
@@ -295,7 +288,7 @@ namespace NeuralNetworkDirectory.ECS
                 }
 
                 population[entityID] = newGenomesForAgent;
-                agent.SetBrain(newGenomesForAgent, neuralNetComponent);
+                ECSManager.GetComponent<NeuralNetComponent>(entityID).Layers = neuralNetComponent.Layers;
                 agent.transform.position = GetRandomPos();
             }
         }
