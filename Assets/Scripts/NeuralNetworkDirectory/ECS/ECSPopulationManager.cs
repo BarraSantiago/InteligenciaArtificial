@@ -72,11 +72,6 @@ namespace NeuralNetworkDirectory.ECS
 
             var dt = Time.fixedDeltaTime;
 
-            foreach (var agent in populationGOs)
-            {
-                agent.Tick();
-            }
-
             accumTime += dt;
 
             if (!(accumTime >= GenerationDuration)) return;
@@ -104,7 +99,7 @@ namespace NeuralNetworkDirectory.ECS
 
                 agents[entity.Key].output = ECSManager.GetComponent<OutputComponent>(entity.Key).outputs;
 
-                agents[entity.Key].Tick();
+                agents[entity.Key].Tick(Time.deltaTime);
             });
         }
 
@@ -194,6 +189,8 @@ namespace NeuralNetworkDirectory.ECS
                 agents[entityID] = agent;
                 entities[entityID] = agent.gameObject;
                 population[entityID] = genomes;
+                populationGOs.Add(agent);
+                agent.Init();
             }
         }
 

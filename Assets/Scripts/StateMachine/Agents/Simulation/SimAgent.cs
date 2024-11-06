@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using FlappyIa.GeneticAlg;
 using Flocking;
+using NeuralNetworkDirectory.ECS;
 using NeuralNetworkDirectory.NeuralNet;
 using Pathfinder;
 using Pathfinder.Graph;
@@ -50,6 +51,7 @@ namespace StateMachine.Agents.Simulation
         protected FSM<Behaviours, Flags> Fsm;
         protected Action OnMove;
         protected Action OnEat;
+        protected float dt;
 
         protected SimNode<Vector2> TargetNode
         {
@@ -92,17 +94,18 @@ namespace StateMachine.Agents.Simulation
             OnEat -= Eat;
         }
 
-        public void Tick()
+        public void Tick(float deltaTime)
         {
-            Fsm.Tick();
+            dt = deltaTime;
             UpdateInputs();
+            Fsm.Tick();
         }
 
         protected virtual void UpdateInputs()
         {
             FindFoodInputs();
-            ExtraInputs();
             MovementInputs();
+            ExtraInputs();
         }
 
 
@@ -245,6 +248,12 @@ namespace StateMachine.Agents.Simulation
                 minDistance = distance;
                 nearestNode = node;
             }
+
+            if (nodeType != SimNodeType.Corpse || nearestNode != null) return nearestNode;
+
+            var nodeVoronoi = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Herbivore, CurrentNode).CurrentNode;
+            nearestNode = EcsPopulationManager.CoordinateToNode(nodeVoronoi);
+
 
             return nearestNode;
         }
