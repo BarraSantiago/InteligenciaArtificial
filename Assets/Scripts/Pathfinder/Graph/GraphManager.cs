@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using NeuralNetworkDirectory.ECS;
 using StateMachine.Agents.Simulation;
+using Vector3 = UnityEngine.Vector3;
 
 namespace Pathfinder.Graph
 {
@@ -35,8 +36,15 @@ namespace Pathfinder.Graph
         {
             int x = random.Next(0, Width);
             int y = random.Next(0, Height);
-            var node = EcsPopulationManager.CoordinateToNode(SimAgent.graph.CoordNodes[x, y]);
+            var node = EcsPopulationManager.CoordinateToNode(EcsPopulationManager.graph.CoordNodes[x, y]);
             return node;
+        }
+
+        public NodeVoronoi GetNode(Vector3 position)
+        {
+            int x = (int)position.x;
+            int y = (int)position.z;
+            return EcsPopulationManager.graph.CoordNodes[x, y];
         }
     }
 }

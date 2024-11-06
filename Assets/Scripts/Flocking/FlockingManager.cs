@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using StateMachine.Agents.Simulation;
 using UnityEngine;
 
 namespace Flocking
@@ -12,21 +13,22 @@ namespace Flocking
 
         private void Start()
         {
-            for (int i = 0; i < boidCount; i++)
-            {
-                GameObject boidGO = Instantiate(boidPrefab.gameObject,
-                    new Vector2(Random.Range(-10, 10), Random.Range(-10, 10)), Quaternion.identity);
-
-                Boid boid = boidGO.GetComponent<Boid>();
-                boid.Init(Alignment, Cohesion, Separation, Direction);
-
-                boid.alignmentOffset = 1.0f;
-                boid.cohesionOffset = 1.5f;
-                boid.separationOffset = 2.0f;
-                boid.directionOffset = 2.0f;
-
-                boids.Add(boid);
-            }
+            //var scavengers = GetComponents<Scavenger>();
+            //foreach (var scavenger in scavengers)
+            //{
+            //    for (int i = 0; i < boidCount; i++)
+            //    {
+            //        Boid boid = scavenger.GetComponent<Boid>();
+            //        boid.Init(Alignment, Cohesion, Separation, Direction);
+//
+            //        boid.alignmentOffset = 1.0f;
+            //        boid.cohesionOffset = 1.5f;
+            //        boid.separationOffset = 2.0f;
+            //        boid.directionOffset = 2.0f;
+//
+            //        boids.Add(boid);
+            //    }
+            //}
         }
 
         public Vector2 Alignment(Boid boid)
@@ -39,6 +41,7 @@ namespace Flocking
             {
                 avg += (Vector2)b.transform.up;
             }
+
             avg /= insideRadiusBoids.Count;
             return avg.normalized;
         }
@@ -53,6 +56,7 @@ namespace Flocking
             {
                 avg += (Vector2)b.transform.position;
             }
+
             avg /= insideRadiusBoids.Count;
             return (avg - (Vector2)boid.transform.position).normalized;
         }
@@ -67,6 +71,7 @@ namespace Flocking
             {
                 avg += (Vector2)(boid.transform.position - b.transform.position);
             }
+
             avg /= insideRadiusBoids.Count;
             return avg.normalized;
         }

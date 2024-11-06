@@ -20,6 +20,7 @@ namespace NeuralNetworkDirectory.ECS
         [SerializeField] private GameObject carnivorePrefab;
         [SerializeField] private GameObject herbivorePrefab;
         [SerializeField] private GameObject scavengerPrefab;
+        [SerializeField] private FlockingManager flockingManager;
 
         [SerializeField] private int CarnivoreCount = 10;
         [SerializeField] private int HerbivoreCount = 20;
@@ -29,7 +30,8 @@ namespace NeuralNetworkDirectory.ECS
         [SerializeField] private float GenerationDuration = 20.0f;
         [SerializeField] private float MutationChance = 0.10f;
         [SerializeField] private float MutationRate = 0.01f;
-
+        
+        public static Graph<SimNode<Vector2>, NodeVoronoi, Vector2> graph;
         public int gridWidth = 10;
         public int gridHeight = 10;
         public int generationTurns = 100;
@@ -39,7 +41,7 @@ namespace NeuralNetworkDirectory.ECS
         private bool isRunning;
         private Dictionary<uint, GameObject> entities;
         private static Dictionary<uint, SimAgent> agents;
-        private readonly Dictionary<uint, List<Genome>> population = new();
+        private Dictionary<uint, List<Genome>> population = new();
         private GraphManager gridManager;
         private GeneticAlgorithm genAlg;
         private readonly List<SimAgent> populationGOs = new();
@@ -49,12 +51,14 @@ namespace NeuralNetworkDirectory.ECS
         public float AvgFitness { get; private set; }
         public float WorstFitness { get; private set; }
 
-        private void Start()
+        private void Awake()
         {
+            ECSManager.AddSystem(new NeuralNetSystem());
             ECSManager.Init();
             entities = new Dictionary<uint, GameObject>();
             gridManager = new GraphManager(gridWidth, gridHeight);
-
+            graph = new Sim2Graph(gridWidth,gridHeight,1);
+            StartSimulation();
             InitializePlants();
         }
 
@@ -84,8 +88,11 @@ namespace NeuralNetworkDirectory.ECS
         {
             Parallel.ForEach(entities, entity =>
             {
+                if (agents[entity.Key].agentType != SimAgentTypes.Scavenger) return;
                 var outputComponent = ECSManager.GetComponent<OutputComponent>(entity.Key);
-                var boid = agents[entity.Key].boid;
+                var agent = agents[entity.Key];
+                var scavenger = (Scavenger)agent;
+                var boid = scavenger.boid;
 
                 if (boid)
                 {
@@ -117,8 +124,8 @@ namespace NeuralNetworkDirectory.ECS
             Generation = 0;
             DestroyAgents();
 
-            CreateAgents(carnivorePrefab, CarnivoreCount, SimAgentTypes.Carnivorous);
             CreateAgents(herbivorePrefab, HerbivoreCount, SimAgentTypes.Herbivore);
+            CreateAgents(carnivorePrefab, CarnivoreCount, SimAgentTypes.Carnivorous);
             CreateAgents(scavengerPrefab, ScavengerCount, SimAgentTypes.Scavenger);
 
             accumTime = 0.0f;
@@ -152,6 +159,12 @@ namespace NeuralNetworkDirectory.ECS
             var position = GetRandomPos();
             var go = Instantiate(prefab, position, Quaternion.identity);
             var agent = go.GetComponent<SimAgent>();
+            
+            if (agentType != SimAgentTypes.Scavenger) return agent;
+            
+            var sca = (Scavenger)agent;
+            sca.boid.Init(flockingManager.Alignment, flockingManager.Cohesion, flockingManager.Separation,
+                flockingManager.Direction);
             return agent;
         }
 
@@ -240,9 +253,11 @@ namespace NeuralNetworkDirectory.ECS
 
         private SimAgent CreateAgent(GameObject prefab)
         {
-            var position = GetRandomPos();
-            var go = Instantiate(prefab, position, Quaternion.identity);
+            var position = gridManager.GetRandomPosition();
+            var go = Instantiate(prefab, position.GetCoordinate(), Quaternion.identity);
             var agent = go.GetComponent<SimAgent>();
+            agent.CurrentNode = NodeToCoordinate(position);
+            
             return agent;
         }
 
@@ -281,6 +296,7 @@ namespace NeuralNetworkDirectory.ECS
                     {
                         layer.SetWeights(newGenome.genome, 0);
                     }
+
                     newGenomesForAgent.Add(newGenome);
                 }
 
@@ -483,12 +499,20 @@ namespace NeuralNetworkDirectory.ECS
 
         public static SimNode<Vector2> CoordinateToNode(NodeVoronoi coordinate)
         {
-            return SimAgent.graph.NodesType
+            return graph.NodesType
                 .FirstOrDefault(node => node.GetCoordinate().Equals(coordinate.GetCoordinate()));
+        }
+        
+        public static NodeVoronoi NodeToCoordinate(SimNode<Vector2> coordinate)
+        {
+            return graph.CoordNodes[(int)coordinate.GetCoordinate().x, (int)coordinate.GetCoordinate().y];
         }
 
         public void StartSimulation()
         {
+            agents = new Dictionary<uint, SimAgent>();
+            entities = new Dictionary<uint, GameObject>();
+            population = new Dictionary<uint, List<Genome>>();
             genAlg = new GeneticAlgorithm(EliteCount, MutationChance, MutationRate);
             GenerateInitialPopulation();
             isRunning = true;

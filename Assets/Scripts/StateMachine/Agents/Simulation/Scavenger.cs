@@ -1,3 +1,4 @@
+using Flocking;
 using NeuralNetworkDirectory.ECS;
 using NeuralNetworkDirectory.NeuralNet;
 using Pathfinder;
@@ -9,6 +10,7 @@ namespace StateMachine.Agents.Simulation
 {
     public class Scavenger : SimAgent
     {
+        public Boid boid;
         public float Speed;
         public float RotSpeed = 20.0f;
         private int turnLeftCount;
@@ -22,7 +24,7 @@ namespace StateMachine.Agents.Simulation
             movement = 5;
             Speed = movement * Graph<SimNode<Vector2>, NodeVoronoi, Vector2>.CellSize;
             brainTypes = new[] {BrainType.Movement, BrainType.Eat};
-
+            boid = GetComponent<Boid>();
         }
         
         protected override void MovementInputs()

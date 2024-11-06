@@ -13,7 +13,7 @@ namespace Pathfinder.Graph
         public static TCoordinateNode MapDimensions;
         public static TCoordinateNode OriginPosition;
         public static float CellSize;
-        public readonly TCoordinateNode[,] CoordNodes;
+        public TCoordinateNode[,] CoordNodes;
         public readonly List<TNodeType> NodesType = new();
 
         public Graph(int x, int y, float cellSize)

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using NeuralNetworkDirectory.ECS;
 
 namespace ECS.Patron
 {
@@ -21,10 +22,12 @@ namespace ECS.Patron
             flags = new ConcurrentDictionary<Type, ConcurrentDictionary<uint, ECSFlag>>();
             systems = new ConcurrentDictionary<Type, ECSSystem>();
 
-            foreach (var classType in typeof(ECSSystem).Assembly.GetTypes())
-                if (typeof(ECSSystem).IsAssignableFrom(classType) && !classType.IsAbstract)
-                    systems.TryAdd(classType, Activator.CreateInstance(classType) as ECSSystem);
+            //foreach (var classType in typeof(ECSSystem).Assembly.GetTypes())
+            //    if (typeof(ECSSystem).IsAssignableFrom(classType) && !classType.IsAbstract)
+            //        systems.TryAdd(classType, Activator.CreateInstance(classType) as ECSSystem);
 
+            systems.TryAdd(typeof(NeuralNetSystem), Activator.CreateInstance(typeof(NeuralNetSystem)) as ECSSystem);
+            
             foreach (var system in systems) system.Value.Initialize();
 
             foreach (var classType in typeof(ECSComponent).Assembly.GetTypes())

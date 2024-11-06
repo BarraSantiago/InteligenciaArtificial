@@ -38,11 +38,9 @@ namespace StateMachine.Agents.Simulation
             OnAttack
         }
 
-        public static Graph<SimNode<Vector2>, NodeVoronoi, Vector2> graph;
         public NodeVoronoi CurrentNode;
         public bool CanReproduce() => Food >= FoodLimit;
         public SimAgentTypes agentType { get; protected set; }
-        public Boid boid;
 
         protected int movement = 3;
         protected SimNodeType foodTarget;
@@ -76,7 +74,17 @@ namespace StateMachine.Agents.Simulation
 
         public virtual void Init()
         {
-            Fsm = new FSM<Behaviours, Flags>();
+            int brainTypesCount = Enum.GetValues(typeof(BrainType)).Length;
+            input = new float[brainTypesCount][];
+            output = new float[brainTypesCount][];
+            brainTypes = new BrainType[brainTypesCount];
+
+            const int MaxInputs = 8;
+            for (int i = 0; i < brainTypesCount; i++)
+            {
+                input[i] = new float[MaxInputs]; // Assuming each brain type requires 4 inputs
+                output[i] = new float[MaxInputs]; // Assuming each brain type produces 4 outputs
+            }            Fsm = new FSM<Behaviours, Flags>();
 
             OnMove += Move;
             OnEat += Eat;
@@ -85,7 +93,7 @@ namespace StateMachine.Agents.Simulation
 
             FsmTransitions();
 
-            UpdateInputs();
+            //UpdateInputs();
         }
 
         public virtual void Uninit()
@@ -239,7 +247,7 @@ namespace StateMachine.Agents.Simulation
             SimNode<Vector2> nearestNode = null;
             float minDistance = float.MaxValue;
 
-            foreach (var node in graph.NodesType)
+            foreach (var node in EcsPopulationManager.graph.NodesType)
             {
                 if (node.NodeType != nodeType) continue;
                 float distance = Vector2.Distance(position, node.GetCoordinate());
@@ -260,7 +268,7 @@ namespace StateMachine.Agents.Simulation
 
         protected virtual NodeVoronoi GetNode(Vector2 position)
         {
-            return graph.CoordNodes[(int)position.x, (int)position.y];
+            return EcsPopulationManager.graph.CoordNodes[(int)position.x, (int)position.y];
         }
     }
 }
