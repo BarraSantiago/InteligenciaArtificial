@@ -84,7 +84,9 @@ namespace StateMachine.Agents.Simulation
             {
                 input[i] = new float[MaxInputs]; // Assuming each brain type requires 4 inputs
                 output[i] = new float[MaxInputs]; // Assuming each brain type produces 4 outputs
-            }            Fsm = new FSM<Behaviours, Flags>();
+            }           
+            
+            Fsm = new FSM<Behaviours, Flags>();
 
             OnMove += Move;
             OnEat += Eat;
