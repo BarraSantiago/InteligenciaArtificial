@@ -40,7 +40,8 @@ namespace NeuralNetworkDirectory.ECS
         private float accumTime;
         private bool isRunning;
         private Dictionary<uint, GameObject> entities;
-        private static Dictionary<uint, SimAgent> agents;
+        private static Dictionary<uint, SimAgent> _agents;
+        private static Dictionary<uint, Scavenger> _scavengers;
         private Dictionary<uint, List<Genome>> population = new();
         private GraphManager gridManager;
         private GeneticAlgorithm genAlg;
@@ -86,13 +87,10 @@ namespace NeuralNetworkDirectory.ECS
 
         private void LateUpdate()
         {
-            Parallel.ForEach(entities, entity =>
+            Parallel.ForEach(_scavengers, entity =>
             {
-                if (agents[entity.Key].agentType != SimAgentTypes.Scavenger) return;
                 var outputComponent = ECSManager.GetComponent<OutputComponent>(entity.Key);
-                var agent = agents[entity.Key];
-                var scavenger = (Scavenger)agent;
-                var boid = scavenger.boid;
+                var boid = _scavengers[entity.Key].boid;
 
                 if (boid)
                 {
@@ -102,11 +100,11 @@ namespace NeuralNetworkDirectory.ECS
 
             Parallel.ForEach(entities, entity =>
             {
-                ECSManager.GetComponent<InputComponent>(entity.Key).inputs = agents[entity.Key].input;
+                ECSManager.GetComponent<InputComponent>(entity.Key).inputs = _agents[entity.Key].input;
 
-                agents[entity.Key].output = ECSManager.GetComponent<OutputComponent>(entity.Key).outputs;
+                _agents[entity.Key].output = ECSManager.GetComponent<OutputComponent>(entity.Key).outputs;
 
-                agents[entity.Key].Tick(Time.deltaTime);
+                _agents[entity.Key].Tick(Time.deltaTime);
             });
         }
 
@@ -141,7 +139,7 @@ namespace NeuralNetworkDirectory.ECS
                 ECSManager.AddComponent(entityID, new OutputComponent());
 
                 var agent = CreateAgent(agentType);
-                agents[entityID] = agent;
+                _agents[entityID] = agent;
                 entities[entityID] = agent.gameObject;
             }
         }
@@ -199,11 +197,12 @@ namespace NeuralNetworkDirectory.ECS
                 neuralNetComponent.Layers = brains.SelectMany(brain => brain.Layers).ToList();
 
                 var agent = CreateAgent(prefab);
-                agents[entityID] = agent;
+                _agents[entityID] = agent;
                 entities[entityID] = agent.gameObject;
                 population[entityID] = genomes;
                 populationGOs.Add(agent);
                 agent.Init();
+                if(agentType == SimAgentTypes.Scavenger) _scavengers[entityID] = (Scavenger)agent;
             }
         }
 
@@ -283,9 +282,9 @@ namespace NeuralNetworkDirectory.ECS
             population.Clear();
 
             int genomeIndex = 0;
-            foreach (var entityID in agents.Keys)
+            foreach (var entityID in _agents.Keys)
             {
-                var agent = agents[entityID];
+                var agent = _agents[entityID];
                 var neuralNetComponent = ECSManager.GetComponent<NeuralNetComponent>(entityID);
                 var newGenomesForAgent = new List<Genome>();
 
@@ -358,7 +357,7 @@ namespace NeuralNetworkDirectory.ECS
 
         private void InitializePlants()
         {
-            int plantCount = agents.Values.Count(agent => agent.agentType == SimAgentTypes.Herbivore) * 2;
+            int plantCount = _agents.Values.Count(agent => agent.agentType == SimAgentTypes.Herbivore) * 2;
             for (int i = 0; i < plantCount; i++)
             {
                 var plantPosition = gridManager.GetRandomPosition();
@@ -404,7 +403,7 @@ namespace NeuralNetworkDirectory.ECS
             Parallel.ForEach(entities, entity =>
             {
                 var netComponent = ECSManager.GetComponent<NeuralNetComponent>(entity.Key);
-                var agent = agents[entity.Key];
+                var agent = _agents[entity.Key];
 
                 if (!loadedData.TryGetValue(agent.agentType, out var brainData)) return;
 
@@ -443,7 +442,7 @@ namespace NeuralNetworkDirectory.ECS
             SimAgent nearestAgent = null;
             float minDistance = float.MaxValue;
 
-            foreach (var agent in agents.Values)
+            foreach (var agent in _agents.Values)
             {
                 if (agent.agentType != entityType) continue;
 
@@ -462,7 +461,7 @@ namespace NeuralNetworkDirectory.ECS
         {
             SimAgent target = null;
 
-            foreach (var agent in agents.Values)
+            foreach (var agent in _agents.Values)
             {
                 if (agent.agentType != entityType) continue;
 
@@ -479,7 +478,7 @@ namespace NeuralNetworkDirectory.ECS
         {
             SimAgent target = null;
 
-            foreach (var agent in agents.Values)
+            foreach (var agent in _agents.Values)
             {
                 if (agent.agentType != entityType) continue;
 
@@ -510,7 +509,7 @@ namespace NeuralNetworkDirectory.ECS
 
         public void StartSimulation()
         {
-            agents = new Dictionary<uint, SimAgent>();
+            _agents = new Dictionary<uint, SimAgent>();
             entities = new Dictionary<uint, GameObject>();
             population = new Dictionary<uint, List<Genome>>();
             genAlg = new GeneticAlgorithm(EliteCount, MutationChance, MutationRate);
@@ -528,6 +527,41 @@ namespace NeuralNetworkDirectory.ECS
         public void PauseSimulation()
         {
             isRunning = !isRunning;
+        }
+        
+        public static List<Boid> GetBoidsInsideRadius(Boid boid)
+        {
+            List<Boid> insideRadiusBoids = new List<Boid>();
+
+            foreach (Scavenger b in _scavengers.Values)
+            {
+                if (Vector2.Distance(boid.transform.position, b.CurrentNode.GetCoordinate()) < boid.detectionRadious)
+                {
+                    insideRadiusBoids.Add(b.boid);
+                }
+            }
+
+            return insideRadiusBoids;
+        }
+
+        public static SimNode<Vector2> GetNearestNode(SimNodeType carrion, NodeVoronoi currentNode)
+        {
+            SimNode<Vector2> nearestNode = null;
+            float minDistance = float.MaxValue;
+
+            foreach (var node in graph.NodesType)
+            {
+                if (node.NodeType != carrion) continue;
+
+                float distance = Vector2.Distance(currentNode.GetCoordinate(), node.GetCoordinate());
+
+                if (minDistance > distance) continue;
+
+                minDistance = distance;
+                nearestNode = node;
+            }
+
+            return nearestNode;
         }
     }
 }

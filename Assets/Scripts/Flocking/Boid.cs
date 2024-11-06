@@ -12,6 +12,7 @@ namespace Flocking
         public float cohesionOffset;
         public float separationOffset;
         public float directionOffset;
+        public Transform target;
 
         private Func<Boid, Vector2> alignment;
         private Func<Boid, Vector2> cohesion;
@@ -43,6 +44,26 @@ namespace Flocking
                           (separation(this) * separationOffset) +
                           (direction(this) * directionOffset);
             return ACS.normalized;
+        }
+        
+        public Vector2 GetDirection()
+        {
+            return direction(this);
+        }
+        
+        public Vector2 GetAlignment()
+        {
+            return alignment(this);
+        }
+        
+        public Vector2 GetCohesion()
+        {
+            return cohesion(this);
+        }
+        
+        public Vector2 GetSeparation()
+        {
+            return separation(this);
         }
     }
 }
