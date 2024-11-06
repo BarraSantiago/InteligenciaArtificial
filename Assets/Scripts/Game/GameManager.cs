@@ -23,8 +23,9 @@ namespace Game
         public static AStarPathfinder<RTSNode<Vector2>, Vector2, NodeVoronoi> CaravanPathfinder;
         public static AStarPathfinder<RTSNode<Vector2>, Vector2, NodeVoronoi> MinerPathfinder;
 
-        [Header("Map Config")] 
-        [SerializeField] [Range(4, 150)] private int mapWidth;
+        [Header("Map Config")] [SerializeField] [Range(4, 150)]
+        private int mapWidth;
+
         [SerializeField] [Range(4, 150)] private int mapHeight;
         [SerializeField] private int minesQuantity;
         [SerializeField] private float nodesSize;
@@ -32,8 +33,9 @@ namespace Game
         [SerializeField] private Button retreatButton;
         [SerializeField] private Button addMinesButton;
 
-        [Header("Units Config")] 
-        [SerializeField] private GameObject minerPrefab;
+        [Header("Units Config")] [SerializeField]
+        private GameObject minerPrefab;
+
         [SerializeField] private GameObject caravanPrefab;
         [SerializeField] private int minersQuantity;
         [SerializeField] private int caravansQuantity;
@@ -131,9 +133,11 @@ namespace Game
         {
             const int midCost = 2;
 
-            foreach (var node in CaravanNodes.Where(node => node.RtsNodeType == RTSNodeType.Forest)) node.SetCost(midCost);
+            foreach (var node in CaravanNodes.Where(node => node.RtsNodeType == RTSNodeType.Forest))
+                node.SetCost(midCost);
 
-            foreach (var node in MinerNodes.Where(node => node.RtsNodeType == RTSNodeType.Gravel)) node.SetCost(midCost);
+            foreach (var node in MinerNodes.Where(node => node.RtsNodeType == RTSNodeType.Gravel))
+                node.SetCost(midCost);
         }
 
         private void OnReachMine(RTSNode<Vector2> rtsNode)
@@ -156,17 +160,18 @@ namespace Game
         private void SetupObstacles()
         {
             const int obscacleChance = 10;
-            for (var i = 0; i < Graph.CoordNodes.Count; i++)
+            var total = mapWidth * mapHeight;
+            for (var i = 0; i < total; i++)
                 if (Random.Range(0, 100) < obscacleChance)
                 {
                     Graph.NodesType[i].RtsNodeType = RTSNodeType.Blocked;
                     Graph.NodesType[i].SetCost(1000);
                 }
 
-            for (var i = 0; i < Graph.CoordNodes.Count; i++)
+            for (var i = 0; i < total; i++)
                 if (Random.Range(0, 100) < obscacleChance)
                     Graph.NodesType[i].RtsNodeType = RTSNodeType.Forest;
-            for (var i = 0; i < Graph.CoordNodes.Count; i++)
+            for (var i = 0; i < total; i++)
                 if (Random.Range(0, 100) < obscacleChance)
                     Graph.NodesType[i].RtsNodeType = RTSNodeType.Gravel;
         }
@@ -175,9 +180,9 @@ namespace Game
         {
             var voronoiNodes = new List<NodeVoronoi>();
 
-            foreach (var t in GraphType.mines)
-                voronoiNodes.Add(Graph.CoordNodes.Find(node =>
-                    node.GetCoordinate() == t.GetCoordinate()));
+            //foreach (var t in GraphType.mines)
+            //voronoiNodes.Add(Graph.CoordNodes.Find((node, index) => node.GetCoordinate().Equals(t.GetCoordinate())));
+
 
             voronoi.Init();
             voronoi.SetVoronoi(voronoiNodes);
@@ -187,7 +192,7 @@ namespace Game
         {
             AmountSafeChecks();
             if (GraphType.mines.Count + minesQuantity > (mapWidth + mapHeight) / MaxMines) return;
-
+            /*
             for (var i = 0; i < minesQuantity; i++)
             {
                 var rand = Random.Range(0, Graph.CoordNodes.Count);
@@ -197,15 +202,16 @@ namespace Game
                 node.RtsNodeType = RTSNodeType.Mine;
                 node.gold = 100;
                 GraphType.mines.Add(node);
-            }
+            }*/
         }
 
         private int CreateTownCenter(out Vector3 townCenterPosition)
         {
-            var townCenterNode = Random.Range(0, Graph.CoordNodes.Count);
+            //var townCenterNode = Random.Range(0, Graph.CoordNodes.Count);
+            var townCenterNode = 5;
             Graph.NodesType[townCenterNode].RtsNodeType = RTSNodeType.TownCenter;
-            townCenterPosition = new Vector3(Graph.CoordNodes[townCenterNode].GetCoordinate().x,
-                Graph.CoordNodes[townCenterNode].GetCoordinate().y);
+            townCenterPosition = new Vector3(Graph.CoordNodes[townCenterNode, 5].GetCoordinate().x,
+                Graph.CoordNodes[townCenterNode, 5].GetCoordinate().y);
             return townCenterNode;
         }
 
@@ -258,8 +264,10 @@ namespace Game
 
 
             foreach (var mine in GraphType.mines)
-                if (mine.gold > 0)
-                    voronoiNodes.Add(Graph.CoordNodes.Find(node => node.GetCoordinate() == mine.GetCoordinate()));
+            {
+                //if (mine.gold > 0)
+                //    voronoiNodes.Add(Graph.CoordNodes.Find(node => node.GetCoordinate() == mine.GetCoordinate()));
+            }
 
             voronoi.SetVoronoi(voronoiNodes);
         }
