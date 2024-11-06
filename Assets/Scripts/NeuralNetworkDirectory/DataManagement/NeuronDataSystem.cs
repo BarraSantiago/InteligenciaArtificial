@@ -21,10 +21,10 @@ namespace NeuralNetworkDirectory.DataManagement
             {
                 string agentTypeDirectory = Path.Combine(directoryPath, group.Key.AgentType.ToString());
                 Directory.CreateDirectory(agentTypeDirectory);
-
+            
                 string fileName = $"gen{generation}{group.Key.BrainType}.json";
                 string filePath = Path.Combine(agentTypeDirectory, fileName);
-                string json = JsonSerializer.Serialize(group.Value);
+                string json = "";// = JsonSerializer.Serialize(group.Value);
                 File.WriteAllText(filePath, json);
             }
         }
@@ -55,7 +55,7 @@ namespace NeuralNetworkDirectory.DataManagement
                 }).First();
 
                 var json = File.ReadAllText(latestFile);
-                var agentDataList = JsonSerializer.Deserialize<List<AgentNeuronData>>(json);
+                var agentDataList = new AgentNeuronData[0];//  JsonSerializer.Deserialize<List<AgentNeuronData>>(json);
 
                 foreach (var agentData in agentDataList)
                 {
