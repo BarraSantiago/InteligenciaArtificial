@@ -12,7 +12,7 @@ namespace NeuralNetworkDirectory.AI
     public class FitnessManager
     {
         private static Dictionary<uint, SimAgent> _agents;
-        
+
         public FitnessManager(Dictionary<uint, SimAgent> agents)
         {
             _agents = agents;
@@ -25,7 +25,7 @@ namespace NeuralNetworkDirectory.AI
                 CalculateFitness(agent.Value.agentType, agent.Key);
             }
         }
-        
+
         public void CalculateFitness(SimAgentTypes agentType, uint agentId)
         {
             switch (agentType)
@@ -41,6 +41,48 @@ namespace NeuralNetworkDirectory.AI
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(agentType), agentType, null);
+            }
+        }
+        
+        private void HerbivoreFitnessCalculator(uint agentId)
+        {
+            foreach (var brainType in _agents[agentId].brainTypes)
+            {
+                switch (brainType)
+                {
+                    case BrainType.ScavengerMovement:
+                        ScavengerMovementFC(agentId);
+                        break;
+                    case BrainType.Eat:
+                        ScavengerEatFC(agentId);
+                        break;
+                    case BrainType.Flocking:
+                        ScavengerFlockingFC(agentId);
+                        break;
+                    default:
+                        throw new ArgumentException("Herbivore doesn't have a brain type: ", nameof(brainType));
+                }
+            }
+        }
+
+        private void CarnivorousFitnessCalculator(uint agentId)
+        {
+            foreach (var brainType in _agents[agentId].brainTypes)
+            {
+                switch (brainType)
+                {
+                    case BrainType.Attack:
+                        ScavengerMovementFC(agentId);
+                        break;
+                    case BrainType.Eat:
+                        ScavengerEatFC(agentId);
+                        break;
+                    case BrainType.Movement:
+                        ScavengerFlockingFC(agentId);
+                        break;
+                    default:
+                        throw new ArgumentException("Carnivore doesn't have a brain type: ", nameof(brainType));
+                }
             }
         }
 
@@ -172,16 +214,6 @@ namespace NeuralNetworkDirectory.AI
             }
         }
 
-        private void HerbivoreFitnessCalculator(uint agentId)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void CarnivorousFitnessCalculator(uint agentId)
-        {
-            throw new NotImplementedException();
-        }
-
         private bool IsMovingTowardsTarget(uint agentId, Vector2 targetPosition)
         {
             var agent = _agents[agentId];
@@ -200,7 +232,5 @@ namespace NeuralNetworkDirectory.AI
             // If the dot product is close to 1, the agent is moving towards the target
             return dotProduct > 0.9f;
         }
-
-        
     }
 }
