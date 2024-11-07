@@ -23,14 +23,14 @@ namespace NeuralNetworkDirectory.ECS
         [SerializeField] private GameObject scavengerPrefab;
         [SerializeField] private FlockingManager flockingManager;
 
-        [SerializeField] private int CarnivoreCount = 10;
-        [SerializeField] private int HerbivoreCount = 20;
-        [SerializeField] private int ScavengerCount = 10;
+        [SerializeField] private int carnivoreCount = 10;
+        [SerializeField] private int herbivoreCount = 20;
+        [SerializeField] private int scavengerCount = 10;
 
-        [SerializeField] private int EliteCount = 4;
-        [SerializeField] private float GenerationDuration = 20.0f;
-        [SerializeField] private float MutationChance = 0.10f;
-        [SerializeField] private float MutationRate = 0.01f;
+        [SerializeField] private int eliteCount = 4;
+        [SerializeField] private float generationDuration = 20.0f;
+        [SerializeField] private float mutationChance = 0.10f;
+        [SerializeField] private float mutationRate = 0.01f;
         
         public static Graph<SimNode<Vector2>, NodeVoronoi, Vector2> graph;
         public int gridWidth = 10;
@@ -66,13 +66,6 @@ namespace NeuralNetworkDirectory.ECS
             fitnessManager = new FitnessManager(_agents);
         }
 
-        private void Update()
-        {
-            if (currentTurn >= generationTurns) return;
-            ECSManager.Tick(Time.deltaTime);
-            currentTurn++;
-        }
-
         private void FixedUpdate()
         {
             if (!isRunning)
@@ -81,14 +74,15 @@ namespace NeuralNetworkDirectory.ECS
             var dt = Time.fixedDeltaTime;
 
             accumTime += dt;
+            
+            EntitiesTurn();
 
-            if (!(accumTime >= GenerationDuration)) return;
-            accumTime -= GenerationDuration;
+            if (!(accumTime >= generationDuration)) return;
+            accumTime -= generationDuration;
             Epoch();
         }
 
-
-        private void LateUpdate()
+        private void EntitiesTurn()
         {
             Parallel.ForEach(_scavengers, entity =>
             {
@@ -101,6 +95,13 @@ namespace NeuralNetworkDirectory.ECS
                 }
             });
 
+            Parallel.ForEach(entities, entity =>
+            {
+                ECSManager.GetComponent<InputComponent>(entity.Key).inputs = _agents[entity.Key].input;
+            });
+            
+            ECSManager.Tick(Time.deltaTime);
+            
             Parallel.ForEach(entities, entity =>
             {
                 ECSManager.GetComponent<InputComponent>(entity.Key).inputs = _agents[entity.Key].input;
@@ -127,9 +128,9 @@ namespace NeuralNetworkDirectory.ECS
             Generation = 0;
             DestroyAgents();
 
-            CreateAgents(herbivorePrefab, HerbivoreCount, SimAgentTypes.Herbivore);
-            CreateAgents(carnivorePrefab, CarnivoreCount, SimAgentTypes.Carnivorous);
-            CreateAgents(scavengerPrefab, ScavengerCount, SimAgentTypes.Scavenger);
+            CreateAgents(herbivorePrefab, herbivoreCount, SimAgentTypes.Herbivore);
+            CreateAgents(carnivorePrefab, carnivoreCount, SimAgentTypes.Carnivorous);
+            CreateAgents(scavengerPrefab, scavengerCount, SimAgentTypes.Scavenger);
 
             accumTime = 0.0f;
         }
@@ -186,8 +187,8 @@ namespace NeuralNetworkDirectory.ECS
 
                 foreach (var brain in brains)
                 {
-                    var genome =
-                        new Genome(brain.Layers.Sum(layerList => layerList.Sum(layer => layer.GetWeights().Length)));
+                    var genome = new Genome(brain.Layers.
+                        Sum(layerList => layerList.Sum(layer => layer.GetWeights().Length)));
                     foreach (var layerList in brain.Layers)
                     {
                         foreach (var layer in layerList)
@@ -213,9 +214,7 @@ namespace NeuralNetworkDirectory.ECS
 
         private List<NeuralNetComponent> CreateBrain(SimAgentTypes agentType)
         {
-            var brains = new List<NeuralNetComponent>();
-
-            brains.Add(CreateSingleBrain(BrainType.Eat));
+            var brains = new List<NeuralNetComponent> { CreateSingleBrain(BrainType.Eat) };
 
             switch (agentType)
             {
@@ -231,6 +230,8 @@ namespace NeuralNetworkDirectory.ECS
                     brains.Add(CreateSingleBrain(BrainType.Flocking));
                     brains.Add(CreateSingleBrain(BrainType.ScavengerMovement));
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(agentType), agentType, "Not prepared for this agent type");
             }
 
             return brains;
@@ -517,7 +518,7 @@ namespace NeuralNetworkDirectory.ECS
             _agents = new Dictionary<uint, SimAgent>();
             entities = new Dictionary<uint, GameObject>();
             population = new Dictionary<uint, List<Genome>>();
-            genAlg = new GeneticAlgorithm(EliteCount, MutationChance, MutationRate);
+            genAlg = new GeneticAlgorithm(eliteCount, mutationChance, mutationRate);
             GenerateInitialPopulation();
             isRunning = true;
         }
