@@ -6,6 +6,7 @@ using System.Linq;
 using ECS.Patron;
 using FlappyIa.GeneticAlg;
 using Flocking;
+using NeuralNetworkDirectory.AI;
 using NeuralNetworkDirectory.DataManagement;
 using NeuralNetworkDirectory.NeuralNet;
 using Pathfinder;
@@ -43,10 +44,11 @@ namespace NeuralNetworkDirectory.ECS
         private static Dictionary<uint, SimAgent> _agents;
         private static Dictionary<uint, Scavenger> _scavengers;
         private Dictionary<uint, List<Genome>> population = new();
+        private readonly List<SimAgent> populationGOs = new();
         private GraphManager gridManager;
         private GeneticAlgorithm genAlg;
-        private readonly List<SimAgent> populationGOs = new();
-
+        private FitnessManager fitnessManager;
+        
         public int Generation { get; private set; }
         public float BestFitness { get; private set; }
         public float AvgFitness { get; private set; }
@@ -61,6 +63,7 @@ namespace NeuralNetworkDirectory.ECS
             graph = new Sim2Graph(gridWidth,gridHeight,1);
             StartSimulation();
             InitializePlants();
+            fitnessManager = new FitnessManager(_agents);
         }
 
         private void Update()
@@ -106,6 +109,8 @@ namespace NeuralNetworkDirectory.ECS
 
                 _agents[entity.Key].Tick(Time.deltaTime);
             });
+            
+            fitnessManager.Tick();
         }
 
         private void UpdateBoidOffsets(Boid boid, float[] outputs)

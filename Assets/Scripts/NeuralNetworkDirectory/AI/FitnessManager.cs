@@ -12,8 +12,21 @@ namespace NeuralNetworkDirectory.AI
     public class FitnessManager
     {
         private static Dictionary<uint, SimAgent> _agents;
+        
+        public FitnessManager(Dictionary<uint, SimAgent> agents)
+        {
+            _agents = agents;
+        }
 
-        void AgentIdentifier(SimAgentTypes agentType, uint agentId)
+        public void Tick()
+        {
+            foreach (var agent in _agents)
+            {
+                CalculateFitness(agent.Value.agentType, agent.Key);
+            }
+        }
+        
+        public void CalculateFitness(SimAgentTypes agentType, uint agentId)
         {
             switch (agentType)
             {
@@ -37,33 +50,97 @@ namespace NeuralNetworkDirectory.AI
             {
                 switch (brainType)
                 {
-                    case BrainType.Movement:
-                        break;
                     case BrainType.ScavengerMovement:
-                        ScavengerMovementFitnessCalculator(agentId);
+                        ScavengerMovementFC(agentId);
                         break;
                     case BrainType.Eat:
-                        break;
-                    case BrainType.Attack:
-                        break;
-                    case BrainType.Escape:
+                        ScavengerEatFC(agentId);
                         break;
                     case BrainType.Flocking:
+                        ScavengerFlockingFC(agentId);
                         break;
                     default:
-                        throw new ArgumentOutOfRangeException();
+                        throw new ArgumentException("Scavenger doesn't have a brain type: ", nameof(brainType));
                 }
             }
         }
 
-        private void ScavengerMovementFitnessCalculator(uint agentId)
+        private void ScavengerFlockingFC(uint agentId)
+        {
+            const float reward = 10;
+            const float punishment = 0.97f;
+            const float safeDistance = 1f;
+
+            var agent = (Scavenger)_agents[agentId];
+            var neighbors = EcsPopulationManager.GetBoidsInsideRadius(agent.boid);
+            var targetPosition = agent.CurrentNode.GetCoordinate();
+
+            bool isMaintainingDistance = true;
+            bool isAligningWithFlock = true;
+            bool isColliding = false;
+
+            Vector2 averageDirection = Vector2.zero;
+            int neighborCount = 0;
+
+            foreach (var neighbor in neighbors)
+            {
+                if (neighbor == agent) continue;
+
+                Vector2 neighborPosition = neighbor.transform.position;
+                float distance = Vector2.Distance(agent.CurrentNode.GetCoordinate(), neighborPosition);
+
+                if (distance < safeDistance) // Assuming 1.0f is the minimum safe distance
+                {
+                    isColliding = true;
+                    isMaintainingDistance = false;
+                }
+
+                averageDirection += (Vector2)neighbor.transform.forward;
+                neighborCount++;
+            }
+
+            if (neighborCount > 0)
+            {
+                averageDirection /= neighborCount;
+                var agentDirection = agent.transform.forward.normalized;
+                var alignmentDotProduct = Vector2.Dot(agentDirection, averageDirection.normalized);
+
+                if (alignmentDotProduct < 0.9f) // Assuming 0.9f as the threshold for alignment
+                {
+                    isAligningWithFlock = false;
+                }
+            }
+
+            if (isMaintainingDistance && isAligningWithFlock && IsMovingTowardsTarget(agentId, targetPosition))
+            {
+                // Reward the agent
+                ECSManager.GetComponent<NeuralNetComponent>(agentId).Reward(reward, BrainType.Flocking);
+            }
+            else if (isColliding || !IsMovingTowardsTarget(agentId, targetPosition))
+            {
+                // Penalize the agent
+                ECSManager.GetComponent<NeuralNetComponent>(agentId).Punish(punishment, BrainType.Flocking);
+            }
+        }
+
+        private void ScavengerEatFC(uint agentId)
+        {
+            const float reward = 10;
+            const float punishment = 0.97f;
+
+            int brainId = (int)BrainType.ScavengerMovement;
+
+            // Reward the agent
+            ECSManager.GetComponent<NeuralNetComponent>(agentId).Reward(reward, BrainType.ScavengerMovement);
+        }
+
+        private void ScavengerMovementFC(uint agentId)
         {
             const float reward = 10;
             const float punishment = 0.97f;
 
             int brainId = (int)BrainType.ScavengerMovement;
             var agent = _agents[agentId];
-            var currentPosition = agent.CurrentNode.GetCoordinate();
             var nearestCarrionNode = EcsPopulationManager.GetNearestNode(SimNodeType.Carrion, agent.CurrentNode);
             var nearestCorpseNode = EcsPopulationManager.GetNearestNode(SimNodeType.Corpse, agent.CurrentNode);
             var nearestCarNode = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivorous, agent.CurrentNode);
