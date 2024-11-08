@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Utils;
 
 namespace Pathfinder
 {
@@ -77,7 +78,7 @@ namespace Pathfinder
             return RtsNodeType;
         }
 
-        public SimNodeType GetSimNodeType()
+        public SimNodeType NodeType()
         {
             return SimNodeType.Empty;
         }
@@ -174,11 +175,6 @@ namespace Pathfinder
         public RTSNodeType GetRTSNodeType()
         {
             return RTSNodeType.Empty;
-        }
-
-        public SimNodeType GetSimNodeType()
-        {
-            return NodeType;
         }
 
         public int GetCost()

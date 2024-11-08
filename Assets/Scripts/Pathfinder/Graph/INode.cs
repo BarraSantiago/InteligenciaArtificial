@@ -20,10 +20,11 @@ namespace Pathfinder
         public ICollection<INode<Coordinate>> GetNeighbors();
 
         public RTSNodeType GetRTSNodeType();
-        public SimNodeType GetSimNodeType();
 
         public int GetCost();
 
         public void SetCost(int newCost);
+        SimNodeType NodeType { get; set; }
+        int Food { get; set; }
     }
 }

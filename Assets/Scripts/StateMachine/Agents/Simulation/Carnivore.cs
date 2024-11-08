@@ -24,7 +24,7 @@ namespace StateMachine.Agents.Simulation
             brainTypes = new[] {BrainType.Movement, BrainType.Attack, BrainType.Eat};
             OnAttack = () =>
             {
-                SimAgent<TVector, TTransform> target = EcsPopulationManager.GetEntity(SimAgentTypes.Herbivore, CurrentNode);
+                SimAgent<IVector, ITransform<IVector>> target = EcsPopulationManager.GetEntity(SimAgentTypes.Herbivore, CurrentNode);
                 if (target == null) return;
                 if (target is Herbivore<TVector, TTransform> herbivore) herbivore.Hp--;
             };
@@ -33,25 +33,25 @@ namespace StateMachine.Agents.Simulation
         protected override void ExtraInputs()
         {
             int brain = (int)BrainType.Attack;
-            input[brain][0] = CurrentNode.GetCoordinate().x;
-            input[brain][1] = CurrentNode.GetCoordinate().y;
-            SimAgent target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Herbivore, CurrentNode);
-            input[brain][2] = target.CurrentNode.GetCoordinate().x;
-            input[brain][3] = target.CurrentNode.GetCoordinate().y;
+            input[brain][0] = CurrentNode.GetCoordinate().X;
+            input[brain][1] = CurrentNode.GetCoordinate().Y;
+            SimAgent<IVector, ITransform<IVector>> target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Herbivore, CurrentNode);
+            input[brain][2] = target.CurrentNode.GetCoordinate().X;
+            input[brain][3] = target.CurrentNode.GetCoordinate().Y;
         }
 
         protected override void MovementInputs()
         {
             int brain = (int)BrainType.Movement;
             
-            input[brain][0] = CurrentNode.GetCoordinate().x;
-            input[brain][1] = CurrentNode.GetCoordinate().y;
-            SimAgent target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Herbivore, CurrentNode);
-            input[brain][2] = target.CurrentNode.GetCoordinate().x;
-            input[brain][3] = target.CurrentNode.GetCoordinate().y;
-            SimNode<Vector2> nodeTarget = GetTarget(foodTarget);
-            input[brain][4] = nodeTarget.GetCoordinate().x;
-            input[brain][5] = nodeTarget.GetCoordinate().y;
+            input[brain][0] = CurrentNode.GetCoordinate().X;
+            input[brain][1] = CurrentNode.GetCoordinate().Y;
+            SimAgent<IVector, ITransform<IVector>> target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Herbivore, CurrentNode);
+            input[brain][2] = target.CurrentNode.GetCoordinate().X;
+            input[brain][3] = target.CurrentNode.GetCoordinate().Y;
+            INode<IVector> nodeTarget = GetTarget(foodTarget);
+            input[brain][4] = nodeTarget.GetCoordinate().X;
+            input[brain][5] = nodeTarget.GetCoordinate().Y;
             input[brain][6] = Food;
 
         }

@@ -2,7 +2,7 @@
 
 namespace Pathfinder.Graph
 {
-    public class Sim2Graph : Graph<SimNode<Vector2>, NodeVoronoi, Vector2>
+    public class Sim2Graph : SimGraph<SimNode<Vector2>, NodeVoronoi, Vector2>
     {
         public Sim2Graph(int x, int y, float cellSize) : base(x, y, cellSize)
         {
@@ -21,7 +21,7 @@ namespace Pathfinder.Graph
 
                     var nodeType = new SimNode<Vector2>();
                     nodeType.SetCoordinate(new Vector2(i * cellSize, j * cellSize));
-                    NodesType.Add(nodeType);
+                    NodesType[i, j] = nodeType;
                 }
             }
         }
