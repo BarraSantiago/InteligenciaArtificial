@@ -96,7 +96,8 @@ namespace StateMachine
             ExecuteBehaviour(GetCurrentStateTickBehaviours);
         }
 
-        private void ExecuteBehaviour(BehaviourActions behaviourActions)
+
+        private void ExecuteBehaviour(BehaviourActions behaviourActions, bool multi = false)
         {
             if (behaviourActions.Equals(default(BehaviourActions))) return;
 
@@ -106,35 +107,84 @@ namespace StateMachine
                    (behaviourActions.MultiThreadablesBehaviour != null &&
                     behaviourActions.MultiThreadablesBehaviour.Count > 0))
             {
-                var multithreadableBehaviour = new Task(() =>
+                if (multi)
                 {
-                    if (behaviourActions.MultiThreadablesBehaviour != null)
-                    {
-                        if (!behaviourActions.MultiThreadablesBehaviour.ContainsKey(executionOrder)) return;
-
-                        Parallel.ForEach(behaviourActions.MultiThreadablesBehaviour[executionOrder], parallelOptions,
-                            behaviour => { behaviour?.Invoke(); });
-                        behaviourActions.MultiThreadablesBehaviour.TryRemove(executionOrder, out _);
-                    }
-                });
-
-                multithreadableBehaviour.Start();
-
-                if (behaviourActions.MainThreadBehaviour != null)
-                    if (behaviourActions.MainThreadBehaviour.ContainsKey(executionOrder))
-                    {
-                        foreach (var action in behaviourActions.MainThreadBehaviour[executionOrder]) action.Invoke();
-
-                        behaviourActions.MainThreadBehaviour.Remove(executionOrder);
-                    }
-
-                multithreadableBehaviour.Wait();
+                    ExecuteMultiThreadBehaviours(behaviourActions, executionOrder);
+                }
+                else
+                {
+                    ExecuteMainThreadBehaviours(behaviourActions, executionOrder);
+                }
 
                 executionOrder++;
             }
 
+            behaviourActions.TransitionBehaviour?.Invoke();
+        }
+
+        public void ExecuteBehaviour(BehaviourActions behaviourActions, int executionOrder, bool multi = false)
+        {
+            if (multi)
+            {
+                ExecuteMultiThreadBehaviours(behaviourActions, executionOrder);
+            }
+            else
+            {
+                ExecuteMainThreadBehaviours(behaviourActions, executionOrder);
+            }
+
 
             behaviourActions.TransitionBehaviour?.Invoke();
+        }
+
+        public int GetMainThreadCount()
+        {
+            return GetCurrentStateTickBehaviours.MainThreadBehaviour.Count;
+        }
+
+        public int GetMultiThreadCount()
+        {
+            return GetCurrentStateTickBehaviours.MultiThreadablesBehaviour.Count;
+        }
+
+        public void ExecuteMainThreadBehaviours(BehaviourActions behaviourActions, int executionOrder)
+        {
+            if (behaviourActions.MainThreadBehaviour != null)
+            {
+                if (behaviourActions.MainThreadBehaviour.ContainsKey(executionOrder))
+                {
+                    foreach (var action in behaviourActions.MainThreadBehaviour[executionOrder])
+                    {
+                        action.Invoke();
+                    }
+
+                    behaviourActions.MainThreadBehaviour.Remove(executionOrder);
+                }
+            }
+        }
+
+        public void ExecuteMultiThreadBehaviours(BehaviourActions behaviourActions, int executionOrder)
+        {
+            if (behaviourActions.MultiThreadablesBehaviour == null) return;
+            if (!behaviourActions.MultiThreadablesBehaviour.ContainsKey(executionOrder)) return;
+
+            Parallel.ForEach(behaviourActions.MultiThreadablesBehaviour[executionOrder], parallelOptions,
+                behaviour => { behaviour?.Invoke(); });
+            behaviourActions.MultiThreadablesBehaviour.TryRemove(executionOrder, out _);
+        }
+
+        public void MultiThreadTick(int executionOrder)
+        {
+            if (!_behaviours.ContainsKey(_currentState)) return;
+
+            ExecuteBehaviour(GetCurrentStateTickBehaviours, executionOrder, true);
+        }
+        
+        public void MainThreadTick(int executionOrder)
+        {
+            if (!_behaviours.ContainsKey(_currentState)) return;
+
+            ExecuteBehaviour(GetCurrentStateTickBehaviours, executionOrder, false);
         }
     }
 }

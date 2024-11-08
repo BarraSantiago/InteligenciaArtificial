@@ -41,12 +41,12 @@ namespace StateMachine.Agents.Simulation
         public NodeVoronoi CurrentNode;
         public bool CanReproduce() => Food >= FoodLimit;
         public SimAgentTypes agentType { get; protected set; }
+        public FSM<Behaviours, Flags> Fsm;
 
         protected int movement = 3;
         protected SimNodeType foodTarget;
         protected int FoodLimit = 5;
         protected int Food = 0;
-        protected FSM<Behaviours, Flags> Fsm;
         protected Action OnMove;
         protected Action OnEat;
         protected float dt;
@@ -107,11 +107,10 @@ namespace StateMachine.Agents.Simulation
         public void Tick(float deltaTime)
         {
             dt = deltaTime;
-            UpdateInputs();
             Fsm.Tick();
         }
 
-        protected virtual void UpdateInputs()
+        public virtual void UpdateInputs()
         {
             FindFoodInputs();
             MovementInputs();
