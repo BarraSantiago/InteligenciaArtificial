@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using FlappyIa.GeneticAlg;
-using Flocking;
 using NeuralNetworkDirectory.ECS;
 using NeuralNetworkDirectory.NeuralNet;
 using Pathfinder;
-using Pathfinder.Graph;
 using StateMachine.States.SimStates;
-using UnityEngine;
+using Utils;
 
 namespace StateMachine.Agents.Simulation
 {
@@ -19,7 +15,9 @@ namespace StateMachine.Agents.Simulation
         Scavenger
     }
 
-    public class SimAgent : MonoBehaviour
+    public class SimAgent<TVector, TTransform> 
+        where TVector : IVector, IEquatable<TVector>
+        where TTransform : ITransform<TVector>
     {
         public enum Behaviours
         {
@@ -38,7 +36,8 @@ namespace StateMachine.Agents.Simulation
             OnAttack
         }
 
-        public NodeVoronoi CurrentNode;
+        public TTransform transform;
+        public ICoordinate<TVector> CurrentNode;
         public bool CanReproduce() => Food >= FoodLimit;
         public SimAgentTypes agentType { get; protected set; }
         public FSM<Behaviours, Flags> Fsm;
@@ -51,13 +50,13 @@ namespace StateMachine.Agents.Simulation
         protected Action OnEat;
         protected float dt;
 
-        protected SimNode<Vector2> TargetNode
+        protected SimNode<TVector> TargetNode
         {
             get => targetNode;
             set => targetNode = value;
         }
 
-        private SimNode<Vector2> targetNode;
+        private SimNode<TVector> targetNode;
         Genome[] genomes;
         public float[][] output;
         public float[][] input;
@@ -123,7 +122,7 @@ namespace StateMachine.Agents.Simulation
             int brain = (int)BrainType.Eat;
             input[brain][0] = CurrentNode.GetCoordinate().x;
             input[brain][1] = CurrentNode.GetCoordinate().y;
-            SimNode<Vector2> target = GetTarget(foodTarget);
+            SimNode<TVector> target = GetTarget(foodTarget);
             input[brain][2] = target.GetCoordinate().x;
             input[brain][3] = target.GetCoordinate().y;
         }
@@ -202,8 +201,7 @@ namespace StateMachine.Agents.Simulation
             float speed = CalculateSpeed(output[brain][2]);
 
             targetPos = CalculateNewPosition(targetPos, output[brain], speed);
-
-            if (targetPos != Vector2.zero) CurrentNode = GetNode(targetPos);
+            if (targetPos.Equals(targetPos.zero())) CurrentNode = GetNode(targetPos);
         }
 
         private float CalculateSpeed(float rawSpeed)
@@ -214,7 +212,7 @@ namespace StateMachine.Agents.Simulation
             return rawSpeed;
         }
 
-        private Vector2 CalculateNewPosition(Vector2 targetPos, float[] brainOutput, float speed)
+        private TVector CalculateNewPosition(TVector targetPos, float[] brainOutput, float speed)
         {
             if (brainOutput[0] > 0)
             {
@@ -242,16 +240,17 @@ namespace StateMachine.Agents.Simulation
             return targetPos;
         }
 
-        protected virtual SimNode<Vector2> GetTarget(SimNodeType nodeType = SimNodeType.Empty)
+        // TODO cosas rojas
+        protected virtual SimNode<TVector> GetTarget(SimNodeType nodeType = SimNodeType.Empty)
         {
-            Vector2 position = transform.position;
-            SimNode<Vector2> nearestNode = null;
+            TVector position = transform.position;
+            SimNode<TVector> nearestNode = null;
             float minDistance = float.MaxValue;
 
             foreach (var node in EcsPopulationManager.graph.NodesType)
             {
                 if (node.NodeType != nodeType) continue;
-                float distance = Vector2.Distance(position, node.GetCoordinate());
+                float distance = position.Distance(node.GetCoordinate());
                 if (!(distance < minDistance)) continue;
 
                 minDistance = distance;
@@ -267,7 +266,7 @@ namespace StateMachine.Agents.Simulation
             return nearestNode;
         }
 
-        protected virtual NodeVoronoi GetNode(Vector2 position)
+        protected virtual ICoordinate<TVector> GetNode(TVector position)
         {
             return EcsPopulationManager.graph.CoordNodes[(int)position.x, (int)position.y];
         }

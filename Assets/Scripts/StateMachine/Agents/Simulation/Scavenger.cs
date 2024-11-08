@@ -5,10 +5,12 @@ using Pathfinder;
 using Pathfinder.Graph;
 using StateMachine.States.SimStates;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace StateMachine.Agents.Simulation
 {
-    public class Scavenger : SimAgent
+    public class Scavenger<TVector, TTransform> : SimAgent<TVector,TTransform> 
+        where TTransform : ITransform
     {
         public Boid boid;
         public float Speed;
