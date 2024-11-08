@@ -20,11 +20,7 @@ namespace StateMachine.States.SimStates
             var outputBrain1 = (float[])parameters[5];
             var outputBrain2 = (float[])parameters[6];
 
-            behaviours.AddMultiThreadableBehaviours(0, () =>
-            {
-                onMove?.Invoke();
-                
-            });
+            behaviours.AddMultiThreadableBehaviours(0, () => { onMove?.Invoke(); });
 
             behaviours.AddMainThreadBehaviours(1, () =>
             {
@@ -35,10 +31,10 @@ namespace StateMachine.States.SimStates
 
             behaviours.SetTransitionBehaviour(() =>
             {
-                if(outputBrain1[0] > 0.5f && currentNode != null && currentNode.NodeType == foodTarget) OnFlag?.Invoke(SimAgent.Flags.OnEat);
-                if(outputBrain1[1] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnSearchFood);
+                if (outputBrain1[0] > 0.5f && currentNode != null && currentNode.NodeType == foodTarget)
+                    OnFlag?.Invoke(SimAgent.Flags.OnEat);
+                if (outputBrain1[1] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnSearchFood);
                 SpecialAction(outputBrain2);
-                
             });
             return behaviours;
         }
@@ -57,20 +53,51 @@ namespace StateMachine.States.SimStates
             return default;
         }
     }
-    
+
+    public class SimWalkScavState : SimWalkState
+    {
+        public override BehaviourActions GetTickBehaviour(params object[] parameters)
+        {
+            var behaviours = new BehaviourActions();
+
+            var currentNode = parameters[0] as SimNode<Vector2>;
+            var position = (Transform)parameters[1];
+            var foodTarget = (SimNodeType)parameters[2];
+            var onMove = parameters[3] as Action;
+            var outputBrain1 = (float[])parameters[4];
+
+            behaviours.AddMultiThreadableBehaviours(0, () => { onMove?.Invoke(); });
+
+            behaviours.AddMainThreadBehaviours(1, () =>
+            {
+                if (currentNode == null) return;
+
+                position.position = new Vector3(currentNode.GetCoordinate().x, currentNode.GetCoordinate().y);
+            });
+
+            behaviours.SetTransitionBehaviour(() =>
+            {
+                if (outputBrain1[0] > 0.5f && currentNode != null && currentNode.NodeType == foodTarget)
+                    OnFlag?.Invoke(SimAgent.Flags.OnEat);
+                if (outputBrain1[1] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnSearchFood);
+            });
+            return behaviours;
+        }
+    }
+
     public class SimWalkHerbState : SimWalkState
     {
         protected override void SpecialAction(float[] outputs)
         {
-            if(outputs[0] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnEscape);
+            if (outputs[0] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnEscape);
         }
     }
-    
+
     public class SimWalkCarnState : SimWalkState
     {
         protected override void SpecialAction(float[] outputs)
         {
-            if(outputs[0] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnAttack);
+            if (outputs[0] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnAttack);
         }
     }
 }

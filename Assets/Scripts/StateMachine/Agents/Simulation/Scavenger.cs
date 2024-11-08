@@ -28,6 +28,12 @@ namespace StateMachine.Agents.Simulation
             boid = GetComponent<Boid>();
         }
 
+        protected override void FsmBehaviours()
+        {
+            Fsm.AddBehaviour<SimWalkScavState>(Behaviours.Walk, WalkTickParameters);
+            ExtraBehaviours();
+        }
+
         protected override void MovementInputs()
         {
             int brain = (int)BrainType.ScavengerMovement;
@@ -185,7 +191,7 @@ namespace StateMachine.Agents.Simulation
         protected override object[] WalkTickParameters()
         {
             object[] objects =
-                { CurrentNode, TargetNode, transform, foodTarget, OnMove, output[(int)BrainType.ScavengerMovement] };
+                { CurrentNode, transform, foodTarget, OnMove, output[(int)BrainType.ScavengerMovement] };
 
             return objects;
         }

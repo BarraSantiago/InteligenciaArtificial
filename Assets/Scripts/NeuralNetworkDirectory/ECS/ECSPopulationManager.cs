@@ -133,7 +133,6 @@ namespace NeuralNetworkDirectory.ECS
                 Task.WaitAll(tasks);
             }
 
-
             fitnessManager.Tick();
         }
 
