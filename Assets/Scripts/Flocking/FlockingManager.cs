@@ -1,59 +1,61 @@
 using System.Collections.Generic;
 using NeuralNetworkDirectory.ECS;
-using UnityEngine;
+using Utils;
 
 namespace Flocking
 {
-    public class FlockingManager : MonoBehaviour
+    using SimBoid = Boid<IVector, ITransform<IVector>>;
+
+    public class FlockingManager 
     {
-        public Vector2 Alignment(Boid boid)
+        public IVector Alignment(SimBoid boid)
         {
-            List<Boid> insideRadiusBoids = EcsPopulationManager.GetBoidsInsideRadius(boid);
+            List<SimBoid> insideRadiusBoids = EcsPopulationManager.GetBoidsInsideRadius(boid);
             if (insideRadiusBoids.Count == 0) return boid.transform.up;
 
-            Vector2 avg = Vector2.zero;
-            foreach (Boid b in insideRadiusBoids)
+            IVector avg = MyVector.zero();
+            foreach (SimBoid b in insideRadiusBoids)
             {
-                avg += (Vector2)b.transform.up;
+                avg += (IVector)b.transform.up;
             }
 
             avg /= insideRadiusBoids.Count;
-            return avg.normalized;
+            return avg.Normalized();
         }
 
-        public Vector2 Cohesion(Boid boid)
+        public IVector Cohesion(SimBoid boid)
         {
-            List<Boid> insideRadiusBoids = EcsPopulationManager.GetBoidsInsideRadius(boid);
-            if (insideRadiusBoids.Count == 0) return Vector2.zero;
+            List<SimBoid> insideRadiusBoids = EcsPopulationManager.GetBoidsInsideRadius(boid);
+            if (insideRadiusBoids.Count == 0) return MyVector.zero();
 
-            Vector2 avg = Vector2.zero;
-            foreach (Boid b in insideRadiusBoids)
+            IVector avg = MyVector.zero();
+            foreach (SimBoid b in insideRadiusBoids)
             {
-                avg += (Vector2)b.transform.position;
+                avg += (IVector)b.transform.position;
             }
 
             avg /= insideRadiusBoids.Count;
-            return (avg - (Vector2)boid.transform.position).normalized;
+            return (avg - (IVector)boid.transform.position).Normalized();
         }
 
-        public Vector2 Separation(Boid boid)
+        public IVector Separation(SimBoid boid)
         {
-            List<Boid> insideRadiusBoids = EcsPopulationManager.GetBoidsInsideRadius(boid);
-            if (insideRadiusBoids.Count == 0) return Vector2.zero;
+            List<SimBoid> insideRadiusBoids = EcsPopulationManager.GetBoidsInsideRadius(boid);
+            if (insideRadiusBoids.Count == 0) return MyVector.zero();
 
-            Vector2 avg = Vector2.zero;
-            foreach (Boid b in insideRadiusBoids)
+            IVector avg = MyVector.zero();
+            foreach (SimBoid b in insideRadiusBoids)
             {
-                avg += (Vector2)(boid.transform.position - b.transform.position);
+                avg += (boid.transform.position - b.transform.position);
             }
 
             avg /= insideRadiusBoids.Count;
-            return avg.normalized;
+            return avg.Normalized();
         }
 
-        public Vector2 Direction(Boid boid)
+        public IVector Direction(SimBoid boid)
         {
-            return (boid.target.position - boid.transform.position).normalized;
+            return (boid.target.position - boid.transform.position).Normalized();
         }
     }
 }

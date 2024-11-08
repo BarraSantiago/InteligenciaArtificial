@@ -3,11 +3,14 @@ using NeuralNetworkDirectory.ECS;
 using NeuralNetworkDirectory.NeuralNet;
 using Pathfinder;
 using StateMachine.States.SimStates;
-using UnityEngine;
+using UnityEngine.UIElements;
+using Utils;
 
 namespace StateMachine.Agents.Simulation
 {
-    public class Carnivore : SimAgent
+    public class Carnivore<TVector, TTransform> : SimAgent<TVector,TTransform> 
+        where TTransform : ITransform<TVector>
+        where TVector : IVector, IEquatable<TVector>
     {
         public Action OnAttack { get; set; }
         public override void Init()
@@ -21,10 +24,9 @@ namespace StateMachine.Agents.Simulation
             brainTypes = new[] {BrainType.Movement, BrainType.Attack, BrainType.Eat};
             OnAttack = () =>
             {
-                SimAgent target = EcsPopulationManager.GetEntity(SimAgentTypes.Herbivore, CurrentNode);
+                SimAgent<TVector, TTransform> target = EcsPopulationManager.GetEntity(SimAgentTypes.Herbivore, CurrentNode);
                 if (target == null) return;
-                Herbivore herbivore = target as Herbivore;
-                if (herbivore != null) herbivore.Hp--;
+                if (target is Herbivore<TVector, TTransform> herbivore) herbivore.Hp--;
             };
         }
         

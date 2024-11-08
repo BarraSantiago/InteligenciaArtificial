@@ -2,32 +2,97 @@
 
 namespace Utils
 {
-    public class IVector : IEquatable<IVector>
+    public interface IVector : IEquatable<IVector>
     {
-        public float x;
-        public float y;
+        float X { get; set; }
+        float Y { get; set; }
 
-        private IVector(float x, float y)
+        IVector Normalized();
+        float Distance(IVector other);
+
+        public static MyVector operator *(IVector vector, float scalar)
         {
-            this.x = x;
-            this.y = y;
+            return new MyVector(vector.X * scalar, vector.Y * scalar);
         }
 
-        public IVector zero()
+        public static MyVector operator +(IVector a, IVector b)
         {
-            return new IVector(0, 0);
+            return new MyVector(a.X + b.X, a.Y + b.Y);
         }
-        
-        public float Distance(IVector coordinate)
+
+        public static MyVector operator -(IVector a, IVector b)
         {
-            return (float) System.Math.Sqrt(System.Math.Pow(coordinate.x - x, 2) + System.Math.Pow(coordinate.y - y, 2));
+            return new MyVector(a.X - b.X, a.Y - b.Y);
+        }
+
+        public static MyVector operator /(IVector a, int integer)
+        {
+            return new MyVector(a.X / integer, a.Y / integer);
+        }
+
+        static float Dot(IVector a, IVector b)
+        {
+            return a.X * b.X + a.Y * b.Y;
+        }
+    }
+
+    public class MyVector : IVector, IEquatable<MyVector>
+    {
+        public float X { get; set; }
+        public float Y { get; set; }
+
+        public MyVector(float x, float y)
+        {
+            X = x;
+            Y = y;
+        }
+
+        public IVector Normalized()
+        {
+            float magnitude = (float)Math.Sqrt(X * X + Y * Y);
+            return new MyVector(X / magnitude, Y / magnitude);
+        }
+
+        public float Distance(IVector other)
+        {
+            return (float)Math.Sqrt(Math.Pow(other.X - X, 2) + Math.Pow(other.Y - Y, 2));
+        }
+
+        public static MyVector operator +(MyVector a, MyVector b)
+        {
+            return new MyVector(a.X + b.X, a.Y + b.Y);
+        }
+
+        public static MyVector operator -(MyVector a, MyVector b)
+        {
+            return new MyVector(a.X - b.X, a.Y - b.Y);
+        }
+
+        public static MyVector operator /(MyVector a, float scalar)
+        {
+            return new MyVector(a.X / scalar, a.Y / scalar);
+        }
+
+        public static MyVector operator *(MyVector a, float scalar)
+        {
+            return new MyVector(a.X * scalar, a.Y * scalar);
+        }
+
+        public static float Dot(MyVector a, MyVector b)
+        {
+            return a.X * b.X + a.Y * b.Y;
+        }
+
+        public static MyVector zero()
+        {
+            return new MyVector(0, 0);
         }
 
         public bool Equals(IVector other)
         {
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
-            return x.Equals(other.x) && y.Equals(other.y);
+            return X.Equals(other.X) && Y.Equals(other.Y);
         }
 
         public override bool Equals(object obj)
@@ -35,12 +100,19 @@ namespace Utils
             if (obj is null) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != GetType()) return false;
-            return Equals((IVector)obj);
+            return Equals((MyVector)obj);
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(x, y);
+            return HashCode.Combine(X, Y);
+        }
+
+        public bool Equals(MyVector other)
+        {
+            if (other is null) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return X.Equals(other.X) && Y.Equals(other.Y);
         }
     }
 }

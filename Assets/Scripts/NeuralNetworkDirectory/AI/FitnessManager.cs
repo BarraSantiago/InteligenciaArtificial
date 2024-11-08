@@ -5,15 +5,17 @@ using NeuralNetworkDirectory.ECS;
 using NeuralNetworkDirectory.NeuralNet;
 using Pathfinder;
 using StateMachine.Agents.Simulation;
-using UnityEngine;
+using Utils;
 
 namespace NeuralNetworkDirectory.AI
 {
-    public class FitnessManager
+    public class FitnessManager <TVector, TTransform>
+        where TTransform : ITransform<TVector> 
+        where TVector : IVector, IEquatable<TVector>
     {
-        private static Dictionary<uint, SimAgent> _agents;
+        private static Dictionary<uint, SimAgent<TVector,TTransform>> _agents;
 
-        public FitnessManager(Dictionary<uint, SimAgent> agents)
+        public FitnessManager(Dictionary<uint, SimAgent<TVector,TTransform>> agents)
         {
             _agents = agents;
         }
@@ -113,7 +115,7 @@ namespace NeuralNetworkDirectory.AI
             const float punishment = 0.97f;
             const float safeDistance = 1f;
 
-            var agent = (Scavenger)_agents[agentId];
+            var agent = (Scavenger<TVector,TTransform>)_agents[agentId];
             var neighbors = EcsPopulationManager.GetBoidsInsideRadius(agent.boid);
             var targetPosition = agent.CurrentNode.GetCoordinate();
 
@@ -121,15 +123,15 @@ namespace NeuralNetworkDirectory.AI
             bool isAligningWithFlock = true;
             bool isColliding = false;
 
-            Vector2 averageDirection = Vector2.zero;
+            IVector averageDirection = null;
             int neighborCount = 0;
 
             foreach (var neighbor in neighbors)
             {
-                if (neighbor == agent) continue;
+                if (Equals(neighbor, agent)) continue;
 
-                Vector2 neighborPosition = neighbor.transform.position;
-                float distance = Vector2.Distance(agent.CurrentNode.GetCoordinate(), neighborPosition);
+                var neighborPosition = neighbor.transform.position;
+                float distance = agent.CurrentNode.GetCoordinate().Distance(neighborPosition);
 
                 if (distance < safeDistance) // Assuming 1.0f is the minimum safe distance
                 {
@@ -137,15 +139,15 @@ namespace NeuralNetworkDirectory.AI
                     isMaintainingDistance = false;
                 }
 
-                averageDirection += (Vector2)neighbor.transform.forward;
+                averageDirection += neighbor.transform.forward;
                 neighborCount++;
             }
 
             if (neighborCount > 0)
             {
                 averageDirection /= neighborCount;
-                var agentDirection = agent.transform.forward.normalized;
-                var alignmentDotProduct = Vector2.Dot(agentDirection, averageDirection.normalized);
+                var agentDirection = agent.transform.forward.Normalized();
+                var alignmentDotProduct = IVector.Dot(agentDirection, averageDirection.Normalized());
 
                 if (alignmentDotProduct < 0.9f) // Assuming 0.9f as the threshold for alignment
                 {
@@ -187,7 +189,7 @@ namespace NeuralNetworkDirectory.AI
             var nearestCorpseNode = EcsPopulationManager.GetNearestNode(SimNodeType.Corpse, agent.CurrentNode);
             var nearestCarNode = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivorous, agent.CurrentNode);
 
-            Vector2 targetPosition;
+            IVector targetPosition;
 
             if (nearestCarrionNode != null)
             {
@@ -214,20 +216,20 @@ namespace NeuralNetworkDirectory.AI
             }
         }
 
-        private bool IsMovingTowardsTarget(uint agentId, Vector2 targetPosition)
+        private bool IsMovingTowardsTarget(uint agentId, IVector targetPosition)
         {
             var agent = _agents[agentId];
             var currentPosition = agent.CurrentNode.GetCoordinate();
-            Vector2 currentVelocity = agent.transform.forward;
+            TVector currentVelocity = agent.transform.forward;
 
             // Calculate the direction to the target
-            var directionToTarget = (targetPosition - currentPosition).normalized;
+            var directionToTarget = (targetPosition - currentPosition).Normalized();
 
             // Normalize the current velocity
-            var normalizedVelocity = currentVelocity.normalized;
+            var normalizedVelocity = currentVelocity.Normalized();
 
             // Calculate the dot product between the direction to the target and the agent's velocity
-            var dotProduct = Vector2.Dot(directionToTarget, normalizedVelocity);
+            var dotProduct = IVector.Dot(directionToTarget, normalizedVelocity);
 
             // If the dot product is close to 1, the agent is moving towards the target
             return dotProduct > 0.9f;

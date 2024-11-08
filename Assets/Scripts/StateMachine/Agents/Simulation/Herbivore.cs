@@ -1,12 +1,17 @@
+using System;
 using NeuralNetworkDirectory.ECS;
 using NeuralNetworkDirectory.NeuralNet;
 using Pathfinder;
 using StateMachine.States.SimStates;
 using UnityEngine;
+using UnityEngine.UIElements;
+using Utils;
 
 namespace StateMachine.Agents.Simulation
 {
-    public class Herbivore : SimAgent
+    public class Herbivore<TVector, TTransform> : SimAgent<TVector,TTransform> 
+        where TTransform : ITransform<TVector>
+        where TVector : IVector, IEquatable<TVector>
     {
         public int Hp
         {

@@ -6,5 +6,7 @@ namespace Utils
         where TVector : IVector, IEquatable<TVector>
     {
         public TVector position;
+        public TVector forward;
+        public IVector up;
     }
 }
