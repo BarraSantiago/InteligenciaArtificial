@@ -9,8 +9,8 @@ using Utils;
 
 namespace StateMachine.Agents.Simulation
 {
-    public class Herbivore<TVector, TTransform> : SimAgent<TVector,TTransform> 
-        where TTransform : ITransform<TVector>
+    public class Herbivore<TVector, TTransform> : SimAgent<TVector, TTransform>
+        where TTransform : ITransform<IVector>
         where TVector : IVector, IEquatable<TVector>
     {
         public int Hp
@@ -32,7 +32,7 @@ namespace StateMachine.Agents.Simulation
             base.Init();
             agentType = SimAgentTypes.Herbivore;
             foodTarget = SimNodeType.Bush;
-            brainTypes = new[] {BrainType.Movement, BrainType.Escape, BrainType.Eat};
+            brainTypes = new[] { BrainType.Movement, BrainType.Escape, BrainType.Eat };
 
             hp = InitialHp;
         }
@@ -43,25 +43,51 @@ namespace StateMachine.Agents.Simulation
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
             var target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivorous, CurrentNode);
-            input[brain][2] = target.CurrentNode.GetCoordinate().X;
-            input[brain][3] = target.CurrentNode.GetCoordinate().Y;
+            if (target == null)
+            {
+                input[brain][2] = NoTarget;
+                input[brain][3] = NoTarget;
+            }
+            else
+            {
+                input[brain][2] = target.CurrentNode.GetCoordinate().X;
+                input[brain][3] = target.CurrentNode.GetCoordinate().Y;
+            }
         }
-        
+
         protected override void MovementInputs()
         {
             int brain = (int)BrainType.Movement;
-            
+
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
+
             var target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivorous, CurrentNode);
-            input[brain][2] = target.CurrentNode.GetCoordinate().X;
-            input[brain][3] = target.CurrentNode.GetCoordinate().Y;
+            if (target == null)
+            {
+                input[brain][2] = NoTarget;
+                input[brain][3] = NoTarget;
+            }
+            else
+            {
+                input[brain][2] = target.CurrentNode.GetCoordinate().X;
+                input[brain][3] = target.CurrentNode.GetCoordinate().Y;
+            }
+
             var nodeTarget = GetTarget(foodTarget);
-            input[brain][4] = nodeTarget.GetCoordinate().X;
-            input[brain][5] = nodeTarget.GetCoordinate().Y;
+            if (nodeTarget == null)
+            {
+                input[brain][4] = NoTarget;
+                input[brain][5] = NoTarget;
+            }
+            else
+            {
+                input[brain][4] = nodeTarget.GetCoordinate().X;
+                input[brain][5] = nodeTarget.GetCoordinate().Y;
+            }
+
             input[brain][6] = Food;
             input[brain][7] = Hp;
-
         }
 
         private void Die()

@@ -354,7 +354,6 @@ MonoBehaviour:
   carnivorePrefab: {fileID: 2361122291266281152, guid: cac64144ce4115a47bcfcb557e9cc1f8, type: 3}
   herbivorePrefab: {fileID: 5834816149835595398, guid: 103c23fd25719fe41aaf5f0b17682277, type: 3}
   scavengerPrefab: {fileID: 3408830415718337229, guid: 091a0d9e6f4683241bdf1f0217fe49f9, type: 3}
-  flockingManager: {fileID: 1699039872}
   carnivoreCount: 10
   herbivoreCount: 20
   scavengerCount: 10
@@ -389,7 +388,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1699039873}
-  - component: {fileID: 1699039872}
   m_Layer: 0
   m_Name: FlockingManagere
   m_TagString: Untagged
@@ -397,18 +395,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1699039872
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1699039871}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aec607ab97c71b343b95e42ba2325742, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &1699039873
 Transform:
   m_ObjectHideFlags: 0

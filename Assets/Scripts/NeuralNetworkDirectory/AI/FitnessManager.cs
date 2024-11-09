@@ -10,7 +10,7 @@ using Utils;
 namespace NeuralNetworkDirectory.AI
 {
     public class FitnessManager <TVector, TTransform>
-        where TTransform : ITransform<TVector> 
+        where TTransform : ITransform<IVector> 
         where TVector : IVector, IEquatable<TVector>
     {
         private static Dictionary<uint, SimAgent<TVector,TTransform>> _agents;
@@ -220,7 +220,7 @@ namespace NeuralNetworkDirectory.AI
         {
             var agent = _agents[agentId];
             var currentPosition = agent.CurrentNode.GetCoordinate();
-            TVector currentVelocity = agent.transform.forward;
+            IVector currentVelocity = agent.transform.forward;
 
             // Calculate the direction to the target
             var directionToTarget = (targetPosition - currentPosition).Normalized();

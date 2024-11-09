@@ -25,7 +25,6 @@ namespace NeuralNetworkDirectory.ECS
         [SerializeField] private GameObject carnivorePrefab;
         [SerializeField] private GameObject herbivorePrefab;
         [SerializeField] private GameObject scavengerPrefab;
-        [SerializeField] private FlockingManager flockingManager;
 
         [SerializeField] private int carnivoreCount = 10;
         [SerializeField] private int herbivoreCount = 20;
@@ -44,6 +43,7 @@ namespace NeuralNetworkDirectory.ECS
         private int currentTurn;
         private float accumTime;
         private bool isRunning;
+        private FlockingManager flockingManager = new();
         private Dictionary<uint, GameObject> entities = new();
         private static Dictionary<uint, SimAgentType> _agents = new();
         private static Dictionary<uint, Scavenger<IVector, ITransform<IVector>>> _scavengers = new();
@@ -172,8 +172,27 @@ namespace NeuralNetworkDirectory.ECS
 
             var position = GetRandomPos();
             go = Instantiate(prefab, position, Quaternion.identity);
-            var agent = go.GetComponent<SimAgentType>();
-
+            
+            SimAgentType agent;
+            
+            switch (agentType)
+            {
+                case SimAgentTypes.Carnivorous:
+                    agent = new Carnivore<IVector, ITransform<IVector>>();
+                    break;
+                case SimAgentTypes.Herbivore:
+                    agent = new Herbivore<IVector, ITransform<IVector>>();
+                    break;
+                case SimAgentTypes.Scavenger:
+                    agent = new Scavenger<IVector, ITransform<IVector>>();
+                    break;
+                default:
+                    throw new ArgumentException("Invalid agent type");
+            }
+            
+            agent.Init();
+            agent.CurrentNode = gridManager.GetRandomPosition();
+            
             if (agentType != SimAgentTypes.Scavenger) return agent;
 
             var sca = (Scavenger<IVector, ITransform<IVector>>)agent;
@@ -216,7 +235,6 @@ namespace NeuralNetworkDirectory.ECS
                 _agents[entityID] = agent;
                 entities[entityID] = go;
                 population[entityID] = genomes;
-                agent.Init();
 
                 switch (agentType)
                 {

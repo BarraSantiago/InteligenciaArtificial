@@ -14,7 +14,7 @@ namespace StateMachine.Agents.Simulation
         Herbivore,
         Scavenger
     }
-    
+
     public enum Flags
     {
         OnTargetLost,
@@ -26,7 +26,7 @@ namespace StateMachine.Agents.Simulation
 
     public class SimAgent<TVector, TTransform>
         where TVector : IVector, IEquatable<TVector>
-        where TTransform : ITransform<TVector>
+        where TTransform : ITransform<IVector>
     {
         public enum Behaviours
         {
@@ -35,9 +35,20 @@ namespace StateMachine.Agents.Simulation
             Eat,
             Attack
         }
-        
-        public TTransform transform;
-        public INode<IVector> CurrentNode;
+
+        public TTransform transform = default;
+
+        public INode<IVector> CurrentNode
+        {
+            get => currentNode;
+            set
+            {
+                currentNode = value;
+                transform.position = value.GetCoordinate();
+            }
+        }
+
+        private INode<IVector> currentNode;
         public bool CanReproduce() => Food >= FoodLimit;
         public SimAgentTypes agentType { get; protected set; }
         public FSM<Behaviours, Flags> Fsm;
@@ -49,7 +60,7 @@ namespace StateMachine.Agents.Simulation
         protected Action OnMove;
         protected Action OnEat;
         protected float dt;
-
+        protected const int NoTarget = -99999;
         protected SimNode<TVector> TargetNode
         {
             get => targetNode;
@@ -119,10 +130,19 @@ namespace StateMachine.Agents.Simulation
 
         private void FindFoodInputs()
         {
+            
             int brain = (int)BrainType.Eat;
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
             INode<IVector> target = GetTarget(foodTarget);
+            
+            if (target == null)
+            {
+                input[brain][2] = NoTarget;
+                input[brain][3] = NoTarget;
+                return;
+            }
+
             input[brain][2] = target.GetCoordinate().X;
             input[brain][3] = target.GetCoordinate().Y;
         }
@@ -201,7 +221,7 @@ namespace StateMachine.Agents.Simulation
             float speed = CalculateSpeed(output[brain][2]);
 
             targetPos = CalculateNewPosition(targetPos, output[brain], speed);
-            
+
             if (!targetPos.Equals(null)) CurrentNode = EcsPopulationManager.CoordinateToNode(targetPos);
         }
 
@@ -245,6 +265,5 @@ namespace StateMachine.Agents.Simulation
         {
             return EcsPopulationManager.GetNearestNode(nodeType, CurrentNode);
         }
-
     }
 }

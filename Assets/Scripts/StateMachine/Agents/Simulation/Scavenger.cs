@@ -8,8 +8,8 @@ using Utils;
 
 namespace StateMachine.Agents.Simulation
 {
-    public class Scavenger<TVector, TTransform> : SimAgent<TVector,TTransform> 
-        where TTransform : ITransform<TVector>
+    public class Scavenger<TVector, TTransform> : SimAgent<TVector, TTransform>
+        where TTransform : ITransform<IVector>
         where TVector : IVector, IEquatable<TVector>
     {
         public Boid<IVector, ITransform<IVector>> boid;
@@ -45,12 +45,28 @@ namespace StateMachine.Agents.Simulation
             input[brain][1] = CurrentNode.GetCoordinate().Y;
 
             var target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivorous, CurrentNode);
-            input[brain][2] = target.CurrentNode.GetCoordinate().X;
-            input[brain][3] = target.CurrentNode.GetCoordinate().Y;
+            if (target == null || target.CurrentNode == null)
+            {
+                input[brain][2] = NoTarget;
+                input[brain][3] = NoTarget;
+            }
+            else
+            {
+                input[brain][2] = target.CurrentNode.GetCoordinate().X;
+                input[brain][3] = target.CurrentNode.GetCoordinate().Y;
+            }
 
             INode<IVector> nodeTarget = GetTarget(foodTarget);
-            input[brain][4] = nodeTarget.GetCoordinate().X;
-            input[brain][5] = nodeTarget.GetCoordinate().Y;
+            if (nodeTarget == null)
+            {
+                input[brain][4] = NoTarget;
+                input[brain][5] = NoTarget;
+            }
+            else
+            {
+                input[brain][4] = nodeTarget.GetCoordinate().X;
+                input[brain][5] = nodeTarget.GetCoordinate().Y;
+            }
 
             input[brain][6] = Food;
         }
@@ -93,6 +109,12 @@ namespace StateMachine.Agents.Simulation
 
             // Distance to target
             IVector targetPosition = GetTargetPosition();
+            if(targetPosition == null)
+            {
+                input[brain][14] = NoTarget;
+                input[brain][15] = NoTarget;
+                return;
+            }
             input[brain][14] = targetPosition.X;
             input[brain][15] = targetPosition.Y;
             boid.target.position = targetPosition;
@@ -183,9 +205,19 @@ namespace StateMachine.Agents.Simulation
                 target = EcsPopulationManager.GetNearestNode(SimNodeType.Carrion, CurrentNode);
             }
 
-            target ??= EcsPopulationManager.GetNearestNode(SimNodeType.Corpse, CurrentNode);
+            if (target == null)
+            {
+                target = EcsPopulationManager.GetNearestNode(SimNodeType.Corpse, CurrentNode);
+            }
 
-            target ??= EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivorous, CurrentNode).CurrentNode;
+            if (target == null)
+            {
+                var nearestEntity = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivorous, CurrentNode);
+                if (nearestEntity != null)
+                {
+                    target = nearestEntity.CurrentNode;
+                }
+            }
 
             return target;
         }
