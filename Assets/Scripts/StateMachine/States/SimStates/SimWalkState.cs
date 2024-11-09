@@ -3,6 +3,7 @@ using Pathfinder;
 using StateMachine.Agents.Simulation;
 using States;
 using UnityEngine;
+using Utils;
 
 namespace StateMachine.States.SimStates
 {
@@ -13,8 +14,6 @@ namespace StateMachine.States.SimStates
             var behaviours = new BehaviourActions();
 
             var currentNode = parameters[0] as SimNode<Vector2>;
-            var targetNode = parameters[1] as RTSNode<Vector2>;
-            var position = (Transform)parameters[2];
             var foodTarget = (SimNodeType)parameters[3];
             var onMove = parameters[4] as Action;
             var outputBrain1 = (float[])parameters[5];
@@ -22,12 +21,12 @@ namespace StateMachine.States.SimStates
 
             behaviours.AddMultiThreadableBehaviours(0, () => { onMove?.Invoke(); });
 
-            behaviours.AddMainThreadBehaviours(1, () =>
-            {
-                if (currentNode == null) return;
+            //behaviours.AddMainThreadBehaviours(1, () =>
+            //{
+            //    if (currentNode == null) return;
 
-                position.position = new Vector3(currentNode.GetCoordinate().x, currentNode.GetCoordinate().y);
-            });
+            //    position.position = new Vector3(currentNode.GetCoordinate().x, currentNode.GetCoordinate().y);
+            //});
 
             behaviours.SetTransitionBehaviour(() =>
             {
@@ -61,19 +60,19 @@ namespace StateMachine.States.SimStates
             var behaviours = new BehaviourActions();
 
             var currentNode = parameters[0] as SimNode<Vector2>;
-            var position = (Transform)parameters[1];
             var foodTarget = (SimNodeType)parameters[2];
             var onMove = parameters[3] as Action;
             var outputBrain1 = (float[])parameters[4];
 
             behaviours.AddMultiThreadableBehaviours(0, () => { onMove?.Invoke(); });
 
-            behaviours.AddMainThreadBehaviours(1, () =>
-            {
-                if (currentNode == null) return;
+            // Done by population manager
+            //behaviours.AddMainThreadBehaviours(1, () =>
+            //{
+            //    if (currentNode == null) return;
 
-                position.position = new Vector3(currentNode.GetCoordinate().x, currentNode.GetCoordinate().y);
-            });
+            //    position.position = new Vector3(currentNode.GetCoordinate().x, currentNode.GetCoordinate().y);
+            //});
 
             behaviours.SetTransitionBehaviour(() =>
             {

@@ -9,7 +9,7 @@ using Utils;
 namespace StateMachine.Agents.Simulation
 {
     public class Carnivore<TVector, TTransform> : SimAgent<TVector, TTransform>
-        where TTransform : ITransform<IVector>
+        where TTransform : ITransform<IVector>, new()
         where TVector : IVector, IEquatable<TVector>
     {
         public Action OnAttack { get; set; }

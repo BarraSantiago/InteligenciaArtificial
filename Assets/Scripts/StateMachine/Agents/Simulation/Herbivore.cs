@@ -3,14 +3,12 @@ using NeuralNetworkDirectory.ECS;
 using NeuralNetworkDirectory.NeuralNet;
 using Pathfinder;
 using StateMachine.States.SimStates;
-using UnityEngine;
-using UnityEngine.UIElements;
 using Utils;
 
 namespace StateMachine.Agents.Simulation
 {
     public class Herbivore<TVector, TTransform> : SimAgent<TVector, TTransform>
-        where TTransform : ITransform<IVector>
+        where TTransform : ITransform<IVector>, new()
         where TVector : IVector, IEquatable<TVector>
     {
         public int Hp

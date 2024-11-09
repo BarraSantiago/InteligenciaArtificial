@@ -10,7 +10,7 @@ using Utils;
 namespace NeuralNetworkDirectory.AI
 {
     public class FitnessManager <TVector, TTransform>
-        where TTransform : ITransform<IVector> 
+        where TTransform : ITransform<IVector>, new()
         where TVector : IVector, IEquatable<TVector>
     {
         private static Dictionary<uint, SimAgent<TVector,TTransform>> _agents;

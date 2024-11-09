@@ -40,7 +40,7 @@ namespace Pathfinder.Graph
         {
             int x = random.Next(0, Width);
             int y = random.Next(0, Height);
-            var node = EcsPopulationManager.CoordinateToNode(EcsPopulationManager.graph.CoordNodes[x, y]);
+            var node = EcsPopulationManager.graph.NodesType[x, y];
             return node;
         }
 

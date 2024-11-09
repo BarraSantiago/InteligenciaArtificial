@@ -172,9 +172,9 @@ namespace NeuralNetworkDirectory.ECS
 
             var position = GetRandomPos();
             go = Instantiate(prefab, position, Quaternion.identity);
-            
+
             SimAgentType agent;
-            
+
             switch (agentType)
             {
                 case SimAgentTypes.Carnivorous:
@@ -189,15 +189,26 @@ namespace NeuralNetworkDirectory.ECS
                 default:
                     throw new ArgumentException("Invalid agent type");
             }
-            
-            agent.Init();
-            agent.CurrentNode = gridManager.GetRandomPosition();
-            
-            if (agentType != SimAgentTypes.Scavenger) return agent;
 
-            var sca = (Scavenger<IVector, ITransform<IVector>>)agent;
-            sca.boid.Init(flockingManager.Alignment, flockingManager.Cohesion, flockingManager.Separation,
-                flockingManager.Direction);
+            agent.Init();
+            var randomNode = gridManager.GetRandomPosition();
+
+            if (randomNode != null)
+            {
+                agent.CurrentNode = randomNode;
+            }
+            else
+            {
+                Debug.LogError("Failed to get a random position for the agent.");
+            }
+
+            if (agentType == SimAgentTypes.Scavenger)
+            {
+                var sca = (Scavenger<IVector, ITransform<IVector>>)agent;
+                sca.boid.Init(flockingManager.Alignment, flockingManager.Cohesion, flockingManager.Separation,
+                    flockingManager.Direction);
+            }
+
             return agent;
         }
 
@@ -302,7 +313,7 @@ namespace NeuralNetworkDirectory.ECS
             {
                 Destroy(entity.Value);
             }
-            
+
             population.Clear();
         }
 
@@ -537,7 +548,7 @@ namespace NeuralNetworkDirectory.ECS
             return graph.NodesType.Cast<INode<IVector>>()
                 .FirstOrDefault(node => node.GetCoordinate().Equals(coordinate.GetCoordinate()));
         }
-        
+
         public static INode<IVector> CoordinateToNode(IVector coordinate)
         {
             return graph.NodesType.Cast<INode<IVector>>()
@@ -570,11 +581,17 @@ namespace NeuralNetworkDirectory.ECS
         {
             List<SimBoid> insideRadiusBoids = new List<SimBoid>();
 
-            foreach (Scavenger<IVector, ITransform<IVector>> b in _scavengers.Values)
+            foreach (var scavenger in _scavengers.Values)
             {
-                if (IVector.Distance(boid.transform.position, b.CurrentNode.GetCoordinate()) < boid.detectionRadious)
+                if (scavenger?.CurrentNode == null)
                 {
-                    insideRadiusBoids.Add(b.boid);
+                    continue;
+                }
+
+                if (IVector.Distance(boid.transform.position, scavenger.CurrentNode.GetCoordinate()) <
+                    boid.detectionRadious)
+                {
+                    insideRadiusBoids.Add(scavenger.boid);
                 }
             }
 

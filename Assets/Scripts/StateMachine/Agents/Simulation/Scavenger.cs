@@ -9,7 +9,7 @@ using Utils;
 namespace StateMachine.Agents.Simulation
 {
     public class Scavenger<TVector, TTransform> : SimAgent<TVector, TTransform>
-        where TTransform : ITransform<IVector>
+        where TTransform : ITransform<IVector>, new()
         where TVector : IVector, IEquatable<TVector>
     {
         public Boid<IVector, ITransform<IVector>> boid;
@@ -74,13 +74,23 @@ namespace StateMachine.Agents.Simulation
         protected override void ExtraInputs()
         {
             int brain = (int)BrainType.Flocking;
+            IVector targetPosition = GetTargetPosition();
 
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
 
             // Current direction of the boid
-            input[brain][2] = transform.forward.X;
-            input[brain][3] = transform.forward.Y;
+            if (targetPosition != null)
+            {
+                IVector direction = (targetPosition - CurrentNode.GetCoordinate()).Normalized();
+                input[brain][2] = direction.X;
+                input[brain][3] = direction.Y;
+            }
+            else
+            {
+                input[brain][2] = NoTarget;
+                input[brain][3] = NoTarget;
+            }
 
             // Average position of neighboring boids
             IVector avgNeighborPosition = GetAverageNeighborPosition();
@@ -108,13 +118,13 @@ namespace StateMachine.Agents.Simulation
             input[brain][13] = cohesionVector.Y;
 
             // Distance to target
-            IVector targetPosition = GetTargetPosition();
-            if(targetPosition == null)
+            if (targetPosition == null)
             {
                 input[brain][14] = NoTarget;
                 input[brain][15] = NoTarget;
                 return;
             }
+
             input[brain][14] = targetPosition.X;
             input[brain][15] = targetPosition.Y;
             boid.target.position = targetPosition;
@@ -144,9 +154,9 @@ namespace StateMachine.Agents.Simulation
             var nearBoids = EcsPopulationManager.GetBoidsInsideRadius(boid);
 
             var avg = MyVector.zero();
-            foreach (var boid in nearBoids)
+            foreach (var boid1 in nearBoids)
             {
-                avg += (MyVector)boid.transform.forward;
+                avg += boid1.GetDirection().Normalized() - boid1.transform.position.Normalized();
             }
 
             avg /= nearBoids.Count;
@@ -170,7 +180,13 @@ namespace StateMachine.Agents.Simulation
 
         private IVector GetTargetPosition()
         {
-            return GetTarget(foodTarget).GetCoordinate();
+            var targetNode = GetTarget(foodTarget);
+            if (targetNode == null)
+            {
+                return MyVector.NoTarget(); // or any default value
+            }
+
+            return targetNode.GetCoordinate();
         }
 
         protected override void Move()
@@ -199,11 +215,8 @@ namespace StateMachine.Agents.Simulation
 
         protected override INode<IVector> GetTarget(SimNodeType nodeType = SimNodeType.Empty)
         {
-            INode<IVector> target = null;
-            if (nodeType == SimNodeType.Carrion)
-            {
-                target = EcsPopulationManager.GetNearestNode(SimNodeType.Carrion, CurrentNode);
-            }
+            INode<IVector> target = EcsPopulationManager.GetNearestNode(nodeType, CurrentNode);
+            
 
             if (target == null)
             {

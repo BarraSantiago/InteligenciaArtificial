@@ -102,6 +102,11 @@ namespace Utils
         {
             return new MyVector(0, 0);
         }
+        
+        public static MyVector NoTarget()
+        {
+            return new MyVector(-99999, -99999);
+        }
 
         public bool Equals(IVector other)
         {

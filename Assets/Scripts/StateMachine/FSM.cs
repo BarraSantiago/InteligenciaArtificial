@@ -139,7 +139,13 @@ namespace StateMachine
 
         public int GetMainThreadCount()
         {
-            return GetCurrentStateTickBehaviours.MainThreadBehaviour.Count;
+            var currentStateBehaviours = GetCurrentStateTickBehaviours;
+            if (currentStateBehaviours.MainThreadBehaviour == null)
+            {
+                return 0;
+            }
+
+            return currentStateBehaviours.MainThreadBehaviour.Count;
         }
 
         public int GetMultiThreadCount()
@@ -179,7 +185,7 @@ namespace StateMachine
 
             ExecuteBehaviour(GetCurrentStateTickBehaviours, executionOrder, true);
         }
-        
+
         public void MainThreadTick(int executionOrder)
         {
             if (!_behaviours.ContainsKey(_currentState)) return;

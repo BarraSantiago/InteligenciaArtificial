@@ -26,7 +26,7 @@ namespace StateMachine.Agents.Simulation
 
     public class SimAgent<TVector, TTransform>
         where TVector : IVector, IEquatable<TVector>
-        where TTransform : ITransform<IVector>
+        where TTransform : ITransform<IVector>, new()
     {
         public enum Behaviours
         {
@@ -36,7 +36,7 @@ namespace StateMachine.Agents.Simulation
             Attack
         }
 
-        public TTransform transform = default;
+        public TTransform transform = new();
 
         public INode<IVector> CurrentNode
         {
