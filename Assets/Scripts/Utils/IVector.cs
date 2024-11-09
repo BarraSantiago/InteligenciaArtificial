@@ -10,6 +10,11 @@ namespace Utils
         IVector Normalized();
         float Distance(IVector other);
 
+        public static float Distance(IVector a, IVector b)
+        {
+            return (float)Math.Sqrt(Math.Pow(a.X - b.X, 2) + Math.Pow(a.Y - b.Y, 2));
+        }
+
         public static MyVector operator *(IVector vector, float scalar)
         {
             return new MyVector(vector.X * scalar, vector.Y * scalar);
@@ -47,6 +52,10 @@ namespace Utils
             Y = y;
         }
 
+        public MyVector()
+        {
+        }
+
         public IVector Normalized()
         {
             float magnitude = (float)Math.Sqrt(X * X + Y * Y);
@@ -56,6 +65,12 @@ namespace Utils
         public float Distance(IVector other)
         {
             return (float)Math.Sqrt(Math.Pow(other.X - X, 2) + Math.Pow(other.Y - Y, 2));
+        }
+
+        public static float Distance(IVector a, IVector b)
+        {
+            return (float)Math.Sqrt(Math.Pow(a.X - b.X, 2) + Math.Pow(a.Y - b.Y, 2));
+            
         }
 
         public static MyVector operator +(MyVector a, MyVector b)

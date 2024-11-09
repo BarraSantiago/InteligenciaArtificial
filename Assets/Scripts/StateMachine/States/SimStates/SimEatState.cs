@@ -19,14 +19,14 @@
             
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {
-                if(currentNode is not { food: > 0 } || foodTarget != currentNode.NodeType) return;
+                if(currentNode is not { Food: > 0 } || foodTarget != currentNode.NodeType) return;
                 
                 onEat?.Invoke();
             });
             
             behaviours.SetTransitionBehaviour( () =>
             {
-                if(currentNode is not { food: > 0 } || foodTarget != currentNode.NodeType) OnFlag?.Invoke(SimAgent.Flags.OnSearchFood);
+                if(currentNode is not { Food: > 0 } || foodTarget != currentNode.NodeType) OnFlag?.Invoke(SimAgent.Flags.OnSearchFood);
                 
                 if(outputBrain1[0] > 0.5f && currentNode != null && currentNode.NodeType == foodTarget) OnFlag?.Invoke(SimAgent.Flags.OnEat);
                 if(outputBrain1[1] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnSearchFood);

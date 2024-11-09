@@ -127,7 +127,7 @@ namespace Pathfinder
     {
         private Coordinate coordinate;
         private int cost;
-        public int food;
+        public int Food { get; set; }
 
         private ICollection<INode<Coordinate>> neighbors;
 
@@ -139,7 +139,6 @@ namespace Pathfinder
         {
             coordinate = coord;
         }
-
         public SimNodeType NodeType { get; set; }
 
         public bool Equals(INode<Coordinate> other)

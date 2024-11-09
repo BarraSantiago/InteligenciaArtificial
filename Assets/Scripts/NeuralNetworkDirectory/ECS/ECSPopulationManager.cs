@@ -19,6 +19,7 @@ namespace NeuralNetworkDirectory.ECS
 {
     using SimAgentType = SimAgent<IVector, ITransform<IVector>>;
     using SimBoid = Boid<IVector, ITransform<IVector>>;
+
     public class EcsPopulationManager : MonoBehaviour
     {
         [SerializeField] private GameObject carnivorePrefab;
@@ -49,10 +50,9 @@ namespace NeuralNetworkDirectory.ECS
         private static Dictionary<uint, Herbivore<IVector, ITransform<IVector>>> _herbivores = new();
         private static Dictionary<uint, Carnivore<IVector, ITransform<IVector>>> _carnivores = new();
         private Dictionary<uint, List<Genome>> population = new();
-        private readonly List<SimAgentType> populationGOs = new();
         private GraphManager<IVector, ITransform<IVector>> gridManager;
         private GeneticAlgorithm genAlg;
-        private FitnessManager<IVector, ITransform<IVector>>  fitnessManager;
+        private FitnessManager<IVector, ITransform<IVector>> fitnessManager;
         private int behaviourCount;
 
         public int Generation { get; private set; }
@@ -160,22 +160,7 @@ namespace NeuralNetworkDirectory.ECS
             accumTime = 0.0f;
         }
 
-        private void CreateEntities(int count, SimAgentTypes agentType)
-        {
-            for (var i = 0; i < count; i++)
-            {
-                var entityID = ECSManager.CreateEntity();
-                ECSManager.AddComponent(entityID, new InputComponent());
-                ECSManager.AddComponent(entityID, new NeuralNetComponent());
-                ECSManager.AddComponent(entityID, new OutputComponent());
-
-                var agent = CreateAgent(agentType);
-                _agents[entityID] = agent;
-                entities[entityID] = agent.gameObject;
-            }
-        }
-
-        private SimAgentType CreateAgent(SimAgentTypes agentType)
+        private SimAgentType CreateAgent(SimAgentTypes agentType, out GameObject go)
         {
             GameObject prefab = agentType switch
             {
@@ -186,7 +171,7 @@ namespace NeuralNetworkDirectory.ECS
             };
 
             var position = GetRandomPos();
-            var go = Instantiate(prefab, position, Quaternion.identity);
+            go = Instantiate(prefab, position, Quaternion.identity);
             var agent = go.GetComponent<SimAgentType>();
 
             if (agentType != SimAgentTypes.Scavenger) return agent;
@@ -227,11 +212,10 @@ namespace NeuralNetworkDirectory.ECS
 
                 neuralNetComponent.Layers = brains.SelectMany(brain => brain.Layers).ToList();
 
-                var agent = CreateAgent(prefab);
+                var agent = CreateAgent(agentType, out GameObject go);
                 _agents[entityID] = agent;
-                entities[entityID] = agent.gameObject;
+                entities[entityID] = go;
                 population[entityID] = genomes;
-                populationGOs.Add(agent);
                 agent.Init();
 
                 switch (agentType)
@@ -294,24 +278,13 @@ namespace NeuralNetworkDirectory.ECS
             return layers;
         }
 
-        private SimAgentType CreateAgent(GameObject prefab)
-        {
-            var position = gridManager.GetRandomPosition();
-            var go = Instantiate(prefab, position.GetCoordinate(), Quaternion.identity);
-            var agent = go.GetComponent<SimAgentType>();
-            agent.CurrentNode = NodeToCoordinate(position);
-
-            return agent;
-        }
-
         private void DestroyAgents()
         {
-            foreach (var agent in populationGOs)
+            foreach (var entity in entities)
             {
-                Destroy(agent.gameObject);
+                Destroy(entity.Value);
             }
-
-            populationGOs.Clear();
+            
             population.Clear();
         }
 
@@ -345,7 +318,8 @@ namespace NeuralNetworkDirectory.ECS
 
                 population[entityID] = newGenomesForAgent;
                 ECSManager.GetComponent<NeuralNetComponent>(entityID).Layers = neuralNetComponent.Layers;
-                agent.transform.position = GetRandomPos();
+                var pos = GetRandomPos();
+                agent.transform.position = new MyVector { X = pos.x, Y = pos.z };
             }
         }
 
@@ -481,7 +455,7 @@ namespace NeuralNetworkDirectory.ECS
             });
         }
 
-        public static SimAgentType GetNearestEntity(SimAgentTypes entityType,  ICoordinate<IVector> position)
+        public static SimAgentType GetNearestEntity(SimAgentTypes entityType, ICoordinate<IVector> position)
         {
             SimAgentType nearestAgent = null;
             float minDistance = float.MaxValue;
@@ -542,12 +516,8 @@ namespace NeuralNetworkDirectory.ECS
 
         public static INode<IVector> CoordinateToNode(ICoordinate<IVector> coordinate)
         {
-            return graph.NodesType.FirstOrDefault(node => node.GetCoordinate().Equals(coordinate.GetCoordinate()));
-        }
-
-        public static ICoordinate<IVector> NodeToCoordinate(SimNode<IVector> coordinate)
-        {
-            return graph.CoordNodes[(int)coordinate.GetCoordinate().x, (int)coordinate.GetCoordinate().y];
+            return graph.NodesType.Cast<INode<IVector>>()
+                .FirstOrDefault(node => node.GetCoordinate().Equals(coordinate.GetCoordinate()));
         }
 
         public void StartSimulation()
@@ -589,22 +559,35 @@ namespace NeuralNetworkDirectory.ECS
 
         public static SimNode<IVector> GetNearestNode(SimNodeType carrion, ICoordinate<IVector> currentNode)
         {
-            SimNode<IVector> nearestNode = null;
+            SimNode<MyVector> nearestNode = null;
             float minDistance = float.MaxValue;
+            var nearest = new SimNode<MyVector>();
 
             foreach (var node in graph.NodesType)
             {
                 if (node.NodeType != carrion) continue;
 
-                float distance = IVector.Distance(currentNode.GetCoordinate(), node.GetCoordinate());
+                float distance = IVector.Distance(currentNode.GetCoordinate(), Vec2ToIVector(node.GetCoordinate()));
 
                 if (minDistance > distance) continue;
 
                 minDistance = distance;
-                nearestNode = node;
+                nearest.SetCoordinate(new MyVector(node.GetCoordinate().x, node.GetCoordinate().y));
+
+                nearestNode = nearest;
             }
 
-            return nearestNode;
+            return new SimNode<IVector>(nearestNode.GetCoordinate());
+        }
+
+        public static IVector Vec2ToIVector(Vector2 vec)
+        {
+            return new MyVector(vec.x, vec.y);
+        }
+
+        public static SimNode<IVector> Vec2ToIVector(INode<IVector> node)
+        {
+            return new SimNode<IVector>(node.GetCoordinate());
         }
 
         private int GetHighestBehaviourCount()
