@@ -10,7 +10,7 @@ namespace Pathfinder.Graph
         where TTransform : ITransform<TVector> 
         where TVector : IVector, IEquatable<TVector>
     {
-        public static SimGraph<INode<MyVector>, ICoordinate<MyVector>, MyVector> SimGraph;
+        public static Sim2Graph SimGraph;
         public int Width { get; private set; }
         public int Height { get; private set; }
         private Random random;
@@ -44,7 +44,7 @@ namespace Pathfinder.Graph
             return node;
         }
 
-        public NodeVoronoi GetNode(Vector3 position)
+        public SimCoordinate GetNode(Vector3 position)
         {
             int x = (int)position.x;
             int y = (int)position.z;

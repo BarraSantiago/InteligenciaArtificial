@@ -25,9 +25,9 @@ namespace StateMachine.States.SimStates
 
             behaviours.SetTransitionBehaviour(() =>
             {
-                if(outputBrain1[0] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnEat);
-                if(outputBrain1[1] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnSearchFood);
-                if(outputBrain2[0] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnAttack);
+                if(outputBrain1[0] > 0.5f) OnFlag?.Invoke(Flags.OnEat);
+                if(outputBrain1[1] > 0.5f) OnFlag?.Invoke(Flags.OnSearchFood);
+                if(outputBrain2[0] > 0.5f) OnFlag?.Invoke(Flags.OnAttack);
                 
             });
             return behaviours;

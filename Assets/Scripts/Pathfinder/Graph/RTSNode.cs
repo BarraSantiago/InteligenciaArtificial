@@ -31,6 +31,7 @@ namespace Pathfinder
         public int gold;
 
         private ICollection<INode<Coordinate>> neighbors;
+        private SimNodeType nodeType;
 
         public RTSNode()
         {
@@ -92,6 +93,14 @@ namespace Pathfinder
         {
             cost = newCost;
         }
+
+        SimNodeType INode<Coordinate>.NodeType
+        {
+            get => nodeType;
+            set => nodeType = value;
+        }
+
+        public int Food { get; set; }
 
         public bool Equals(Coordinate other)
         {

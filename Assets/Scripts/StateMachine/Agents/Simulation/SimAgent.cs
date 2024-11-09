@@ -14,8 +14,17 @@ namespace StateMachine.Agents.Simulation
         Herbivore,
         Scavenger
     }
+    
+    public enum Flags
+    {
+        OnTargetLost,
+        OnEscape,
+        OnEat,
+        OnSearchFood,
+        OnAttack
+    }
 
-    public class SimAgent<TVector, TTransform> 
+    public class SimAgent<TVector, TTransform>
         where TVector : IVector, IEquatable<TVector>
         where TTransform : ITransform<TVector>
     {
@@ -26,18 +35,9 @@ namespace StateMachine.Agents.Simulation
             Eat,
             Attack
         }
-
-        public enum Flags
-        {
-            OnTargetLost,
-            OnEscape,
-            OnEat,
-            OnSearchFood,
-            OnAttack
-        }
-
+        
         public TTransform transform;
-        public ICoordinate<IVector> CurrentNode;
+        public INode<IVector> CurrentNode;
         public bool CanReproduce() => Food >= FoodLimit;
         public SimAgentTypes agentType { get; protected set; }
         public FSM<Behaviours, Flags> Fsm;
@@ -83,8 +83,8 @@ namespace StateMachine.Agents.Simulation
             {
                 input[i] = new float[MaxInputs]; // Assuming each brain type requires 4 inputs
                 output[i] = new float[MaxInputs]; // Assuming each brain type produces 4 outputs
-            }           
-            
+            }
+
             Fsm = new FSM<Behaviours, Flags>();
 
             OnMove += Move;
@@ -201,7 +201,8 @@ namespace StateMachine.Agents.Simulation
             float speed = CalculateSpeed(output[brain][2]);
 
             targetPos = CalculateNewPosition(targetPos, output[brain], speed);
-            if (targetPos.Equals(MyVector.zero())) CurrentNode = GetNode(targetPos);
+            
+            if (!targetPos.Equals(null)) CurrentNode = EcsPopulationManager.CoordinateToNode(targetPos);
         }
 
         private float CalculateSpeed(float rawSpeed)
@@ -240,35 +241,10 @@ namespace StateMachine.Agents.Simulation
             return targetPos;
         }
 
-        // TODO cosas rojas
         protected virtual INode<IVector> GetTarget(SimNodeType nodeType = SimNodeType.Empty)
         {
-            TVector position = transform.position;
-            INode<IVector> nearestNode = null;
-            float minDistance = float.MaxValue;
-
-            foreach (var node in EcsPopulationManager.graph.NodesType)
-            {
-                if (node.NodeType != nodeType) continue;
-                float distance = position.Distance(node.GetCoordinate());
-                if (!(distance < minDistance)) continue;
-
-                minDistance = distance;
-                nearestNode = node;
-            }
-
-            if (nodeType != SimNodeType.Corpse || nearestNode != null) return nearestNode;
-
-            var nodeVoronoi = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Herbivore, CurrentNode).CurrentNode;
-            nearestNode = EcsPopulationManager.CoordinateToNode(nodeVoronoi);
-
-
-            return nearestNode;
+            return EcsPopulationManager.GetNearestNode(nodeType, CurrentNode);
         }
 
-        protected virtual ICoordinate<IVector> GetNode(IVector position)
-        {
-            return EcsPopulationManager.graph.CoordNodes[(int)position.X, (int)position.Y];
-        }
     }
 }

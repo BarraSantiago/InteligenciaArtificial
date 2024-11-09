@@ -26,10 +26,10 @@
             
             behaviours.SetTransitionBehaviour( () =>
             {
-                if(currentNode is not { Food: > 0 } || foodTarget != currentNode.NodeType) OnFlag?.Invoke(SimAgent.Flags.OnSearchFood);
+                if(currentNode is not { Food: > 0 } || foodTarget != currentNode.NodeType) OnFlag?.Invoke(Flags.OnSearchFood);
                 
-                if(outputBrain1[0] > 0.5f && currentNode != null && currentNode.NodeType == foodTarget) OnFlag?.Invoke(SimAgent.Flags.OnEat);
-                if(outputBrain1[1] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnSearchFood);
+                if(outputBrain1[0] > 0.5f && currentNode != null && currentNode.NodeType == foodTarget) OnFlag?.Invoke(Flags.OnEat);
+                if(outputBrain1[1] > 0.5f) OnFlag?.Invoke(Flags.OnSearchFood);
                 
                 SpecialAction(outputBrain2);
             });
@@ -56,7 +56,7 @@
     {
         protected override void SpecialAction(float[] outputs)
         {
-            if(outputs[0] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnEscape);
+            if(outputs[0] > 0.5f) OnFlag?.Invoke(Flags.OnEscape);
         }
     }
     
@@ -64,7 +64,7 @@
     {
         protected override void SpecialAction(float[] outputs)
         {
-            if(outputs[0] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnAttack);
+            if(outputs[0] > 0.5f) OnFlag?.Invoke(Flags.OnAttack);
         }
     }
 }

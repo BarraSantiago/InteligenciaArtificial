@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using Utils;
 
 namespace Pathfinder
 {
@@ -19,6 +20,86 @@ namespace Pathfinder
         void SetCoordinate(T coordinate);
         void Zero();
         void Perpendicular();
+    }
+
+    public class SimCoordinate : ICoordinate<IVector>, IEquatable<SimCoordinate>
+    {
+        public IVector coordinate = new MyVector();
+        public bool Equals(IVector other)
+        {
+            var epsilon = 0.0001f;
+            return other != null && Math.Abs(coordinate.X - other.X) < epsilon && Math.Abs(coordinate.Y - other.Y) < epsilon;
+        }
+
+        public void Add(IVector a)
+        {
+            coordinate += a;
+        }
+
+        public IVector Multiply(float b)
+        {
+            return coordinate * b;
+        }
+
+        public float GetX()
+        {
+            return coordinate.X;
+        }
+
+        public float GetY()
+        {
+            return coordinate.Y;
+        }
+
+        public void SetX(float x)
+        {
+            coordinate.X = x;
+        }
+
+        public void SetY(float y)
+        {
+            coordinate.Y = y;
+        }
+
+        public float Distance(IVector b)
+        {
+            return MyVector.Distance(coordinate, b);
+        }
+
+        public float GetMagnitude()
+        {
+            return Mathf.Sqrt(coordinate.X * coordinate.X + coordinate.Y * coordinate.Y);
+        }
+
+        public IVector GetCoordinate()
+        {
+            return coordinate;
+        }
+
+        public void SetCoordinate(float x, float y)
+        {
+        }
+
+        public void SetCoordinate(IVector coordinate)
+        {
+            this.coordinate = coordinate;
+        }
+
+        public void Zero()
+        {
+            coordinate = MyVector.zero();
+        }
+
+        public void Perpendicular()
+        {
+            coordinate = new MyVector(-coordinate.Y, coordinate.X);
+        }
+
+        public bool Equals(SimCoordinate other)
+        {
+            var epsilon = 0.0001f;
+            return other != null && Math.Abs(coordinate.X - other.GetCoordinate().X) < epsilon && Math.Abs(coordinate.Y - other.GetCoordinate().Y) < epsilon;
+        }
     }
 
     public class NodeVoronoi : ICoordinate<Vector2>, IEquatable<NodeVoronoi>

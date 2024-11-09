@@ -185,7 +185,7 @@ namespace StateMachine.Agents.Simulation
 
             target ??= EcsPopulationManager.GetNearestNode(SimNodeType.Corpse, CurrentNode);
 
-            target ??= EcsPopulationManager.CoordinateToNode(EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivorous, CurrentNode).CurrentNode);
+            target ??= EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivorous, CurrentNode).CurrentNode;
 
             return target;
         }

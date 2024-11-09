@@ -40,25 +40,25 @@ namespace StateMachine.Agents.Simulation
         protected override void ExtraInputs()
         {
             int brain = (int)BrainType.Attack;
-            input[brain][0] = CurrentNode.GetCoordinate().x;
-            input[brain][1] = CurrentNode.GetCoordinate().y;
-            SimAgent target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivorous, CurrentNode);
-            input[brain][2] = target.CurrentNode.GetCoordinate().x;
-            input[brain][3] = target.CurrentNode.GetCoordinate().y;
+            input[brain][0] = CurrentNode.GetCoordinate().X;
+            input[brain][1] = CurrentNode.GetCoordinate().Y;
+            var target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivorous, CurrentNode);
+            input[brain][2] = target.CurrentNode.GetCoordinate().X;
+            input[brain][3] = target.CurrentNode.GetCoordinate().Y;
         }
         
         protected override void MovementInputs()
         {
             int brain = (int)BrainType.Movement;
             
-            input[brain][0] = CurrentNode.GetCoordinate().x;
-            input[brain][1] = CurrentNode.GetCoordinate().y;
-            SimAgent target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivorous, CurrentNode);
-            input[brain][2] = target.CurrentNode.GetCoordinate().x;
-            input[brain][3] = target.CurrentNode.GetCoordinate().y;
-            SimNode<Vector2> nodeTarget = GetTarget(foodTarget);
-            input[brain][4] = nodeTarget.GetCoordinate().x;
-            input[brain][5] = nodeTarget.GetCoordinate().y;
+            input[brain][0] = CurrentNode.GetCoordinate().X;
+            input[brain][1] = CurrentNode.GetCoordinate().Y;
+            var target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivorous, CurrentNode);
+            input[brain][2] = target.CurrentNode.GetCoordinate().X;
+            input[brain][3] = target.CurrentNode.GetCoordinate().Y;
+            var nodeTarget = GetTarget(foodTarget);
+            input[brain][4] = nodeTarget.GetCoordinate().X;
+            input[brain][5] = nodeTarget.GetCoordinate().Y;
             input[brain][6] = Food;
             input[brain][7] = Hp;
 
@@ -66,9 +66,9 @@ namespace StateMachine.Agents.Simulation
 
         private void Die()
         {
-            var node = EcsPopulationManager.CoordinateToNode(CurrentNode);
+            var node = CurrentNode;
             node.NodeType = SimNodeType.Corpse;
-            node.food = FoodDropped;
+            node.Food = FoodDropped;
         }
 
         protected override void ExtraBehaviours()

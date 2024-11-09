@@ -5,7 +5,7 @@ namespace Pathfinder.Graph
 {
     public abstract class Graph<TNodeType, TCoordinateNode, TCoordinateType>
         where TNodeType : INode<TCoordinateType>, new()
-        where TCoordinateNode : ICoordinate<TCoordinateType>
+        where TCoordinateNode : ICoordinate<TCoordinateType>, new()
         where TCoordinateType : IEquatable<TCoordinateType>
     {
         public static List<RTSNode<TCoordinateType>> mines = new();

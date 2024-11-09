@@ -32,8 +32,8 @@ namespace StateMachine.States.SimStates
             behaviours.SetTransitionBehaviour(() =>
             {
                 if (outputBrain1[0] > 0.5f && currentNode != null && currentNode.NodeType == foodTarget)
-                    OnFlag?.Invoke(SimAgent.Flags.OnEat);
-                if (outputBrain1[1] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnSearchFood);
+                    OnFlag?.Invoke(Flags.OnEat);
+                if (outputBrain1[1] > 0.5f) OnFlag?.Invoke(Flags.OnSearchFood);
                 SpecialAction(outputBrain2);
             });
             return behaviours;
@@ -78,8 +78,8 @@ namespace StateMachine.States.SimStates
             behaviours.SetTransitionBehaviour(() =>
             {
                 if (outputBrain1[0] > 0.5f && currentNode != null && currentNode.NodeType == foodTarget)
-                    OnFlag?.Invoke(SimAgent.Flags.OnEat);
-                if (outputBrain1[1] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnSearchFood);
+                    OnFlag?.Invoke(Flags.OnEat);
+                if (outputBrain1[1] > 0.5f) OnFlag?.Invoke(Flags.OnSearchFood);
             });
             return behaviours;
         }
@@ -89,7 +89,7 @@ namespace StateMachine.States.SimStates
     {
         protected override void SpecialAction(float[] outputs)
         {
-            if (outputs[0] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnEscape);
+            if (outputs[0] > 0.5f) OnFlag?.Invoke(Flags.OnEscape);
         }
     }
 
@@ -97,7 +97,7 @@ namespace StateMachine.States.SimStates
     {
         protected override void SpecialAction(float[] outputs)
         {
-            if (outputs[0] > 0.5f) OnFlag?.Invoke(SimAgent.Flags.OnAttack);
+            if (outputs[0] > 0.5f) OnFlag?.Invoke(Flags.OnAttack);
         }
     }
 }

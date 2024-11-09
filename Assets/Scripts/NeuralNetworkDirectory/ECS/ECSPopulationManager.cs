@@ -153,9 +153,9 @@ namespace NeuralNetworkDirectory.ECS
             Generation = 0;
             DestroyAgents();
 
-            CreateAgents(herbivorePrefab, herbivoreCount, SimAgentTypes.Herbivore);
-            CreateAgents(carnivorePrefab, carnivoreCount, SimAgentTypes.Carnivorous);
-            CreateAgents(scavengerPrefab, scavengerCount, SimAgentTypes.Scavenger);
+            CreateAgents(herbivoreCount, SimAgentTypes.Herbivore);
+            CreateAgents(carnivoreCount, SimAgentTypes.Carnivorous);
+            CreateAgents(scavengerCount, SimAgentTypes.Scavenger);
 
             accumTime = 0.0f;
         }
@@ -182,7 +182,7 @@ namespace NeuralNetworkDirectory.ECS
             return agent;
         }
 
-        private void CreateAgents(GameObject prefab, int count, SimAgentTypes agentType)
+        private void CreateAgents(int count, SimAgentTypes agentType)
         {
             for (var i = 0; i < count; i++)
             {
@@ -455,7 +455,7 @@ namespace NeuralNetworkDirectory.ECS
             });
         }
 
-        public static SimAgentType GetNearestEntity(SimAgentTypes entityType, ICoordinate<IVector> position)
+        public static SimAgentType GetNearestEntity(SimAgentTypes entityType, INode<IVector> position)
         {
             SimAgentType nearestAgent = null;
             float minDistance = float.MaxValue;
@@ -519,6 +519,12 @@ namespace NeuralNetworkDirectory.ECS
             return graph.NodesType.Cast<INode<IVector>>()
                 .FirstOrDefault(node => node.GetCoordinate().Equals(coordinate.GetCoordinate()));
         }
+        
+        public static INode<IVector> CoordinateToNode(IVector coordinate)
+        {
+            return graph.NodesType.Cast<INode<IVector>>()
+                .FirstOrDefault(node => node.GetCoordinate().Equals(coordinate));
+        }
 
         public void StartSimulation()
         {
@@ -557,27 +563,25 @@ namespace NeuralNetworkDirectory.ECS
             return insideRadiusBoids;
         }
 
-        public static SimNode<IVector> GetNearestNode(SimNodeType carrion, ICoordinate<IVector> currentNode)
+        public static INode<IVector> GetNearestNode(SimNodeType carrion, INode<IVector> currentNode)
         {
-            SimNode<MyVector> nearestNode = null;
+            INode<IVector> nearestNode = null;
             float minDistance = float.MaxValue;
-            var nearest = new SimNode<MyVector>();
 
             foreach (var node in graph.NodesType)
             {
                 if (node.NodeType != carrion) continue;
 
-                float distance = IVector.Distance(currentNode.GetCoordinate(), Vec2ToIVector(node.GetCoordinate()));
+                float distance = IVector.Distance(currentNode.GetCoordinate(), node.GetCoordinate());
 
                 if (minDistance > distance) continue;
 
                 minDistance = distance;
-                nearest.SetCoordinate(new MyVector(node.GetCoordinate().x, node.GetCoordinate().y));
 
-                nearestNode = nearest;
+                nearestNode = node;
             }
 
-            return new SimNode<IVector>(nearestNode.GetCoordinate());
+            return nearestNode;
         }
 
         public static IVector Vec2ToIVector(Vector2 vec)
