@@ -3,7 +3,6 @@ using NeuralNetworkDirectory.ECS;
 using NeuralNetworkDirectory.NeuralNet;
 using Pathfinder;
 using StateMachine.States.SimStates;
-using UnityEngine.UIElements;
 using Utils;
 
 namespace StateMachine.Agents.Simulation

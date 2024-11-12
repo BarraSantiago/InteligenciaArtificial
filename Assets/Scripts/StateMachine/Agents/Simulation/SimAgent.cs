@@ -131,7 +131,6 @@ namespace StateMachine.Agents.Simulation
 
         private void FindFoodInputs()
         {
-            
             int brain = (int)BrainType.Eat;
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;

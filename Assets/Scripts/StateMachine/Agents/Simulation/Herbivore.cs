@@ -37,7 +37,7 @@ namespace StateMachine.Agents.Simulation
 
         protected override void ExtraInputs()
         {
-            int brain = (int)BrainType.Attack;
+            int brain = (int)BrainType.Escape;
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
             var target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivorous, CurrentNode);
