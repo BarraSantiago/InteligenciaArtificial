@@ -12,15 +12,31 @@ namespace StateMachine.Agents.Simulation
         where TTransform : ITransform<IVector>, new()
         where TVector : IVector, IEquatable<TVector>
     {
-        public Boid<IVector, ITransform<IVector>> boid;
+        public Boid<IVector, ITransform<IVector>> boid = new Boid<IVector, ITransform<IVector>>();
         public float cellSize;
         public float Speed;
         public float RotSpeed = 20.0f;
-        private int turnLeftCount;
-        private int turnRightCount;
+        private IVector targetPosition = new MyVector();
+        public override INode<IVector> CurrentNode {
+            get => currentNode;
+            set
+            {
+                currentNode = value;
+                transform.position = value.GetCoordinate();
+                boid.transform.position = value.GetCoordinate();
+                boid.transform.up = (targetPosition - CurrentNode.GetCoordinate()).Normalized();
+            }
+            
+        }
 
         public override void Init()
         {
+            targetPosition = GetTargetPosition();
+            boid = new Boid<IVector, ITransform<IVector>>
+            {
+                transform = transform,
+                target = targetPosition,
+            };
             base.Init();
             agentType = SimAgentTypes.Scavenger;
             foodTarget = SimNodeType.Carrion;
@@ -28,7 +44,6 @@ namespace StateMachine.Agents.Simulation
             movement = 5;
             Speed = movement * cellSize;
             brainTypes = new[] { BrainType.Movement, BrainType.Eat };
-            boid = new Boid<IVector, ITransform<IVector>>();
         }
 
         protected override void FsmBehaviours()
@@ -74,7 +89,7 @@ namespace StateMachine.Agents.Simulation
         protected override void ExtraInputs()
         {
             int brain = (int)BrainType.Flocking;
-            IVector targetPosition = GetTargetPosition();
+            targetPosition = GetTargetPosition();
 
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
@@ -127,7 +142,7 @@ namespace StateMachine.Agents.Simulation
 
             input[brain][14] = targetPosition.X;
             input[brain][15] = targetPosition.Y;
-            boid.target.position = targetPosition;
+            boid.target = targetPosition;
         }
 
         protected override void ExtraBehaviours()
@@ -202,13 +217,9 @@ namespace StateMachine.Agents.Simulation
 
             if (rightForce > leftForce)
             {
-                turnRightCount++;
-                turnLeftCount = 0;
             }
             else
             {
-                turnLeftCount++;
-                turnRightCount = 0;
             }
         }
 

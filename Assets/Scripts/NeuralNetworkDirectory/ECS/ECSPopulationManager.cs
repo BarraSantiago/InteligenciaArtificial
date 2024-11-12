@@ -190,6 +190,7 @@ namespace NeuralNetworkDirectory.ECS
                     throw new ArgumentException("Invalid agent type");
             }
 
+            agent.CurrentNode = new SimNode<IVector>();
             agent.Init();
             var randomNode = gridManager.GetRandomPosition();
 

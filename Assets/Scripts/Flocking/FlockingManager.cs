@@ -55,7 +55,7 @@ namespace Flocking
 
         public IVector Direction(SimBoid boid)
         {
-            return (boid.target.position - boid.transform.position).Normalized();
+            return (boid.target - boid.transform.position).Normalized();
         }
     }
 }

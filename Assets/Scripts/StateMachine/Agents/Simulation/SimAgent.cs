@@ -38,7 +38,7 @@ namespace StateMachine.Agents.Simulation
 
         public TTransform transform = new();
 
-        public INode<IVector> CurrentNode
+        public virtual INode<IVector> CurrentNode
         {
             get => currentNode;
             set
@@ -48,7 +48,7 @@ namespace StateMachine.Agents.Simulation
             }
         }
 
-        private INode<IVector> currentNode;
+        protected INode<IVector> currentNode;
         public bool CanReproduce() => Food >= FoodLimit;
         public SimAgentTypes agentType { get; protected set; }
         public FSM<Behaviours, Flags> Fsm;

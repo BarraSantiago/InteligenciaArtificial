@@ -12,8 +12,8 @@ namespace Flocking
         public float cohesionOffset;
         public float separationOffset;
         public float directionOffset;
-        public TTransform target;
-        public TTransform transform; arreglar    esto
+        public IVector target = new MyVector();
+        public TTransform transform = default;
 
         private Func<Boid<TVector, TTransform>, TVector> alignment;
         private Func<Boid<TVector, TTransform>, TVector> cohesion;
