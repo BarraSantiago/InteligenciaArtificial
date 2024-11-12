@@ -15,20 +15,21 @@ using StateMachine.Agents.Simulation;
 using Utils;
 using Random = UnityEngine.Random;
 
+
 namespace NeuralNetworkDirectory.ECS
 {
     using SimAgentType = SimAgent<IVector, ITransform<IVector>>;
     using SimBoid = Boid<IVector, ITransform<IVector>>;
-
-    public struct NeuronInputCount
-    {
-        public SimAgentTypes agentType;
-        public BrainType brainType;
-        public int inputCount;
-    }
     
     public class EcsPopulationManager : MonoBehaviour
     {
+        public struct NeuronInputCount
+        {
+            public SimAgentTypes agentType;
+            public BrainType brainType;
+            public int inputCount;
+        }
+        
         [SerializeField] private GameObject carnivorePrefab;
         [SerializeField] private GameObject herbivorePrefab;
         [SerializeField] private GameObject scavengerPrefab;
@@ -43,11 +44,11 @@ namespace NeuralNetworkDirectory.ECS
         [SerializeField] private float mutationRate = 0.01f;
 
         public static Sim2Graph graph;
+        public static NeuronInputCount[] inputCounts;
         public int gridWidth = 10;
         public int gridHeight = 10;
         public int generationTurns = 100;
 
-        private NeuronInputCount[] inputCounts;
         private int currentTurn;
         private float accumTime;
         private bool isRunning = true;
@@ -73,17 +74,24 @@ namespace NeuralNetworkDirectory.ECS
             //ECSManager.AddSystem(new NeuralNetSystem());
             inputCounts = new[]
             {
-                new NeuronInputCount { agentType = SimAgentTypes.Carnivorous, brainType = BrainType.Attack,  inputCount = 6 },
-                new NeuronInputCount { agentType = SimAgentTypes.Carnivorous, brainType = BrainType.Eat,  inputCount = 4 },
-                new NeuronInputCount { agentType = SimAgentTypes.Carnivorous, brainType = BrainType.Movement,  inputCount = 7 },
-                new NeuronInputCount { agentType = SimAgentTypes.Herbivore, brainType = BrainType.Eat,  inputCount = 4 },
-                new NeuronInputCount { agentType = SimAgentTypes.Herbivore, brainType = BrainType.Escape,  inputCount = 4 },
-                new NeuronInputCount { agentType = SimAgentTypes.Herbivore, brainType = BrainType.Movement,  inputCount = 8 },
-                new NeuronInputCount { agentType = SimAgentTypes.Scavenger, brainType = BrainType.Eat,  inputCount = 4 },
-                new NeuronInputCount { agentType = SimAgentTypes.Scavenger, brainType = BrainType.Flocking,  inputCount = 16 },
-                new NeuronInputCount { agentType = SimAgentTypes.Scavenger, brainType = BrainType.ScavengerMovement,  inputCount = 7 }
+                new NeuronInputCount
+                    { agentType = SimAgentTypes.Carnivorous, brainType = BrainType.Attack, inputCount = 6 },
+                new NeuronInputCount
+                    { agentType = SimAgentTypes.Carnivorous, brainType = BrainType.Eat, inputCount = 4 },
+                new NeuronInputCount
+                    { agentType = SimAgentTypes.Carnivorous, brainType = BrainType.Movement, inputCount = 7 },
+                new NeuronInputCount { agentType = SimAgentTypes.Herbivore, brainType = BrainType.Eat, inputCount = 4 },
+                new NeuronInputCount
+                    { agentType = SimAgentTypes.Herbivore, brainType = BrainType.Escape, inputCount = 4 },
+                new NeuronInputCount
+                    { agentType = SimAgentTypes.Herbivore, brainType = BrainType.Movement, inputCount = 8 },
+                new NeuronInputCount { agentType = SimAgentTypes.Scavenger, brainType = BrainType.Eat, inputCount = 4 },
+                new NeuronInputCount
+                    { agentType = SimAgentTypes.Scavenger, brainType = BrainType.Flocking, inputCount = 16 },
+                new NeuronInputCount
+                    { agentType = SimAgentTypes.Scavenger, brainType = BrainType.ScavengerMovement, inputCount = 7 }
             };
-            
+
             ECSManager.Init();
             entities = new Dictionary<uint, GameObject>();
             gridManager = new GraphManager<IVector, ITransform<IVector>>(gridWidth, gridHeight);
@@ -136,9 +144,9 @@ namespace NeuralNetworkDirectory.ECS
             Parallel.ForEach(_scavengers, entity =>
             {
                 var outputComponent = ECSManager.GetComponent<OutputComponent>(entity.Key);
-                Debug.Log(outputComponent.outputs == null ? "Output is null" : "Output is not null"); 
+                Debug.Log(outputComponent.outputs == null ? "Output is null" : "Output is not null");
                 var boid = _scavengers[entity.Key]?.boid;
-                Debug.Log(_scavengers[entity.Key].boid == null ? "boid is null" : "boid is not null"); 
+                Debug.Log(_scavengers[entity.Key].boid == null ? "boid is null" : "boid is not null");
 
                 if (boid != null && outputComponent != null)
                 {
@@ -325,7 +333,8 @@ namespace NeuralNetworkDirectory.ECS
 
         private List<NeuronLayer> CreateNeuronLayerList(BrainType brainType, SimAgentTypes agentType)
         {
-            int inputCount = inputCounts.First(input => input.agentType == agentType && input.brainType == brainType).inputCount;
+            int inputCount = inputCounts.First(input => input.agentType == agentType && input.brainType == brainType)
+                .inputCount;
             var layers = new List<NeuronLayer>
             {
                 new(inputCount, 7, 1f, 0.5f) { BrainType = brainType },

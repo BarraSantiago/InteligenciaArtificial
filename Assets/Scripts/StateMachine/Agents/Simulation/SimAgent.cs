@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using FlappyIa.GeneticAlg;
 using NeuralNetworkDirectory.ECS;
 using NeuralNetworkDirectory.NeuralNet;
@@ -93,8 +94,10 @@ namespace StateMachine.Agents.Simulation
             const int MaxInputs = 16;
             for (int i = 0; i < brainTypesCount; i++)
             {
-                input[i] = new float[MaxInputs]; // Assuming each brain type requires 4 inputs
-                output[i] = new float[MaxInputs]; // Assuming each brain type produces 4 outputs
+                var inputCount = EcsPopulationManager.inputCounts
+                    .FirstOrDefault(input => input.agentType == agentType && input.brainType == (BrainType)i).inputCount;
+                input[i] = new float[inputCount]; 
+                output[i] = new float[MaxInputs];
             }
 
             Fsm = new FSM<Behaviours, Flags>();
