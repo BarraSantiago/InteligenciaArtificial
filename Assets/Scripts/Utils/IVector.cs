@@ -54,6 +54,8 @@ namespace Utils
 
         public MyVector()
         {
+            X = 0;
+            Y = 0;
         }
 
         public IVector Normalized()

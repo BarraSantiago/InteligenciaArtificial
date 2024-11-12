@@ -42,7 +42,7 @@ namespace NeuralNetworkDirectory.ECS
 
         private int currentTurn;
         private float accumTime;
-        private bool isRunning;
+        private bool isRunning = true;
         private FlockingManager flockingManager = new();
         private Dictionary<uint, GameObject> entities = new();
         private static Dictionary<uint, SimAgentType> _agents = new();
@@ -190,9 +190,11 @@ namespace NeuralNetworkDirectory.ECS
                     throw new ArgumentException("Invalid agent type");
             }
 
-            agent.CurrentNode = new SimNode<IVector>();
+            var randomNode = new SimNode<IVector>();
+            randomNode.SetCoordinate(new MyVector());
+            agent.CurrentNode = randomNode;
             agent.Init();
-            var randomNode = gridManager.GetRandomPosition();
+            randomNode = (SimNode<IVector>)gridManager.GetRandomPosition();
 
             if (randomNode != null)
             {

@@ -48,7 +48,7 @@ namespace StateMachine.Agents.Simulation
             }
         }
 
-        protected INode<IVector> currentNode;
+        protected INode<IVector> currentNode = new SimNode<IVector>();
         public bool CanReproduce() => Food >= FoodLimit;
         public SimAgentTypes agentType { get; protected set; }
         public FSM<Behaviours, Flags> Fsm;
@@ -84,12 +84,13 @@ namespace StateMachine.Agents.Simulation
 
         public virtual void Init()
         {
+
             int brainTypesCount = Enum.GetValues(typeof(BrainType)).Length;
             input = new float[brainTypesCount][];
             output = new float[brainTypesCount][];
             brainTypes = new BrainType[brainTypesCount];
 
-            const int MaxInputs = 8;
+            const int MaxInputs = 16;
             for (int i = 0; i < brainTypesCount; i++)
             {
                 input[i] = new float[MaxInputs]; // Assuming each brain type requires 4 inputs

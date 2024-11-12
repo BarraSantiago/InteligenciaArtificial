@@ -10,7 +10,6 @@ namespace Pathfinder.Graph
         where TTransform : ITransform<TVector> 
         where TVector : IVector, IEquatable<TVector>
     {
-        public static Sim2Graph SimGraph;
         public int Width { get; private set; }
         public int Height { get; private set; }
         private Random random;
