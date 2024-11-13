@@ -44,6 +44,7 @@ namespace StateMachine.Agents.Simulation
             movement = 5;
             Speed = movement * cellSize;
             brainTypes = new[] { BrainType.Movement, BrainType.Eat };
+            CalculateInputs();
         }
 
         protected override void FsmBehaviours()

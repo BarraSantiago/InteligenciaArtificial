@@ -85,21 +85,6 @@ namespace StateMachine.Agents.Simulation
 
         public virtual void Init()
         {
-
-            int brainTypesCount = Enum.GetValues(typeof(BrainType)).Length;
-            input = new float[brainTypesCount][];
-            output = new float[brainTypesCount][];
-            brainTypes = new BrainType[brainTypesCount];
-
-            const int MaxInputs = 16;
-            for (int i = 0; i < brainTypesCount; i++)
-            {
-                var inputCount = EcsPopulationManager.inputCounts
-                    .FirstOrDefault(input => input.agentType == agentType && input.brainType == (BrainType)i).inputCount;
-                input[i] = new float[inputCount]; 
-                output[i] = new float[MaxInputs];
-            }
-
             Fsm = new FSM<Behaviours, Flags>();
 
             OnMove += Move;
@@ -110,6 +95,23 @@ namespace StateMachine.Agents.Simulation
             FsmTransitions();
 
             //UpdateInputs();
+        }
+
+        protected void CalculateInputs()
+        {
+            int brainTypesCount = Enum.GetValues(typeof(BrainType)).Length;
+            input = new float[brainTypesCount][];
+            output = new float[brainTypesCount][];
+            brainTypes = new BrainType[brainTypesCount];
+
+            const int MaxOutputs = 4;
+            for (int i = 0; i < brainTypesCount; i++)
+            {
+                var inputCount = EcsPopulationManager.inputCounts
+                    .FirstOrDefault(input => input.agentType == agentType && input.brainType == (BrainType)i).inputCount;
+                input[i] = new float[inputCount]; 
+                output[i] = new float[MaxOutputs];
+            }
         }
 
         public virtual void Uninit()
@@ -135,6 +137,9 @@ namespace StateMachine.Agents.Simulation
         private void FindFoodInputs()
         {
             int brain = (int)BrainType.Eat;
+            var inputCount = EcsPopulationManager.inputCounts
+                .FirstOrDefault(input => input.agentType == agentType && input.brainType == (BrainType)brain).inputCount;
+            input[brain] = new float[inputCount]; 
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
             INode<IVector> target = GetTarget(foodTarget);

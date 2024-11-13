@@ -28,6 +28,8 @@ namespace NeuralNetworkDirectory.ECS
             public SimAgentTypes agentType;
             public BrainType brainType;
             public int inputCount;
+            public int outputCount;
+            public int[] hiddenLayersInputs;
         }
         
         [SerializeField] private GameObject carnivorePrefab;
@@ -74,22 +76,15 @@ namespace NeuralNetworkDirectory.ECS
             //ECSManager.AddSystem(new NeuralNetSystem());
             inputCounts = new[]
             {
-                new NeuronInputCount
-                    { agentType = SimAgentTypes.Carnivorous, brainType = BrainType.Attack, inputCount = 6 },
-                new NeuronInputCount
-                    { agentType = SimAgentTypes.Carnivorous, brainType = BrainType.Eat, inputCount = 4 },
-                new NeuronInputCount
-                    { agentType = SimAgentTypes.Carnivorous, brainType = BrainType.Movement, inputCount = 7 },
-                new NeuronInputCount { agentType = SimAgentTypes.Herbivore, brainType = BrainType.Eat, inputCount = 4 },
-                new NeuronInputCount
-                    { agentType = SimAgentTypes.Herbivore, brainType = BrainType.Escape, inputCount = 4 },
-                new NeuronInputCount
-                    { agentType = SimAgentTypes.Herbivore, brainType = BrainType.Movement, inputCount = 8 },
-                new NeuronInputCount { agentType = SimAgentTypes.Scavenger, brainType = BrainType.Eat, inputCount = 4 },
-                new NeuronInputCount
-                    { agentType = SimAgentTypes.Scavenger, brainType = BrainType.Flocking, inputCount = 16 },
-                new NeuronInputCount
-                    { agentType = SimAgentTypes.Scavenger, brainType = BrainType.ScavengerMovement, inputCount = 7 }
+                new NeuronInputCount { agentType = SimAgentTypes.Carnivorous, brainType = BrainType.Eat, inputCount = 4, outputCount = 1, hiddenLayersInputs   = new[] { 1 }},
+                new NeuronInputCount { agentType = SimAgentTypes.Carnivorous, brainType = BrainType.Movement, inputCount = 7, outputCount = 1, hiddenLayersInputs   = new[] { 3 }   },
+                new NeuronInputCount { agentType = SimAgentTypes.Carnivorous, brainType = BrainType.Attack, inputCount = 4, outputCount = 1, hiddenLayersInputs   = new[] { 1 }},
+                new NeuronInputCount { agentType = SimAgentTypes.Herbivore, brainType = BrainType.Eat, inputCount = 4, outputCount = 1, hiddenLayersInputs   = new[] { 1 }},
+                new NeuronInputCount { agentType = SimAgentTypes.Herbivore, brainType = BrainType.Movement, inputCount = 8, outputCount = 1,  hiddenLayersInputs   = new[] { 3 }  },
+                new NeuronInputCount { agentType = SimAgentTypes.Herbivore, brainType = BrainType.Escape, inputCount = 4, outputCount = 1, hiddenLayersInputs   = new[] { 1 }},
+                new NeuronInputCount { agentType = SimAgentTypes.Scavenger, brainType = BrainType.Eat, inputCount = 4, outputCount = 1, hiddenLayersInputs   = new[] { 1 }},
+                new NeuronInputCount { agentType = SimAgentTypes.Scavenger, brainType = BrainType.ScavengerMovement, inputCount = 7, outputCount = 1,  hiddenLayersInputs   = new[] { 3 }   },
+                new NeuronInputCount { agentType = SimAgentTypes.Scavenger, brainType = BrainType.Flocking, inputCount = 16, hiddenLayersInputs   = new[] { 12,8,6,4 } },
             };
 
             ECSManager.Init();
@@ -333,13 +328,17 @@ namespace NeuralNetworkDirectory.ECS
 
         private List<NeuronLayer> CreateNeuronLayerList(BrainType brainType, SimAgentTypes agentType)
         {
-            int inputCount = inputCounts.First(input => input.agentType == agentType && input.brainType == brainType)
-                .inputCount;
-            var layers = new List<NeuronLayer>
+            var inputCount = inputCounts.First(input => input.agentType == agentType && input.brainType == brainType);
+            var layers = new List<NeuronLayer>();
+
+            layers.Add(new NeuronLayer(inputCount.inputCount, inputCount.inputCount, 1f, 0.5f) { BrainType = brainType });
+            
+            for (int i = 0; i < inputCount.hiddenLayersInputs.Length; i++)
             {
-                new(inputCount, 7, 1f, 0.5f) { BrainType = brainType },
-                new(7, 4, 1f, 0.5f) { BrainType = brainType }
-            };
+                layers.Add(new NeuronLayer(layers[^1].OutputsCount, inputCount.hiddenLayersInputs[i], 1f, 0.5f) { BrainType = brainType });
+            }
+            
+            layers.Add(new NeuronLayer(layers[^1].OutputsCount, inputCount.outputCount, 1f, 0.5f) { BrainType = brainType });
             return layers;
         }
 
