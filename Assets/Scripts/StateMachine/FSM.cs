@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using States;
@@ -174,8 +175,16 @@ namespace StateMachine
             if (behaviourActions.MultiThreadablesBehaviour == null) return;
             if (!behaviourActions.MultiThreadablesBehaviour.ContainsKey(executionOrder)) return;
 
-            Parallel.ForEach(behaviourActions.MultiThreadablesBehaviour[executionOrder], parallelOptions,
-                behaviour => { behaviour?.Invoke(); });
+            Parallel.ForEach(behaviourActions.MultiThreadablesBehaviour, behaviour =>
+            {
+                foreach (Action action in behaviour.Value)
+                {
+                    action.Invoke();
+                }
+            });
+
+            //Parallel.ForEach(behaviourActions.MultiThreadablesBehaviour[executionOrder], parallelOptions,
+            //    behaviour => { behaviour?.Invoke(); });
             behaviourActions.MultiThreadablesBehaviour.TryRemove(executionOrder, out _);
         }
 
