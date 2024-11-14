@@ -1,4 +1,5 @@
-﻿using ECS.Patron;
+﻿using System;
+using ECS.Patron;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -32,17 +33,18 @@ namespace NeuralNetworkDirectory.ECS
             {
                 NeuralNetComponent neuralNetwork = neuralNetworkComponents[entityId];
                 float[][] inputs = inputComponents[entityId].inputs;
-                float[][] outputs = new float[outputComponents[entityId].outputsQty][];
+                float[] outputs = Array.Empty<float>();
 
                 Parallel.For(0, outputs.Length, i =>
                 {
                     for (int j = 0; j < neuralNetwork.Layers[i].Count; j++)
                     {
-                        outputs[i] = neuralNetwork.Layers[i][j].Synapsis(inputs[i]);
-                        inputs[i] = outputs[i];
+                        // el input de la siguiente capa es el output de la capa anterior 
+                        outputs = neuralNetwork.Layers[i][j].Synapsis(inputs[i]);
+                        inputs[i] = outputs;
                     }
 
-                    outputComponents[entityId].outputs[i] = outputs[i];
+                    outputComponents[entityId].outputs[i] = outputs;
                 });
             });
         }
