@@ -52,14 +52,11 @@ namespace NeuralNetworkDirectory.AI
             {
                 switch (brainType)
                 {
-                    case BrainType.ScavengerMovement:
-                        ScavengerMovementFC(agentId);
+                    case BrainType.Movement:
                         break;
                     case BrainType.Eat:
-                        ScavengerEatFC(agentId);
                         break;
-                    case BrainType.Flocking:
-                        ScavengerFlockingFC(agentId);
+                    case BrainType.Escape:
                         break;
                     default:
                         throw new ArgumentException("Herbivore doesn't have a brain type: ", nameof(brainType));
@@ -74,13 +71,10 @@ namespace NeuralNetworkDirectory.AI
                 switch (brainType)
                 {
                     case BrainType.Attack:
-                        ScavengerMovementFC(agentId);
                         break;
                     case BrainType.Eat:
-                        ScavengerEatFC(agentId);
                         break;
                     case BrainType.Movement:
-                        ScavengerFlockingFC(agentId);
                         break;
                     default:
                         throw new ArgumentException("Carnivore doesn't have a brain type: ", nameof(brainType));

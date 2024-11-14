@@ -7,6 +7,5 @@ namespace Utils
     {
         public TVector position;
         public TVector forward;
-        public IVector up;
     }
 }

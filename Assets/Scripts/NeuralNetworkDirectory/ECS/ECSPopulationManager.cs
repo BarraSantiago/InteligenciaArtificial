@@ -573,7 +573,7 @@ namespace NeuralNetworkDirectory.ECS
 
                 float distance = IVector.Distance(position.GetCoordinate(), agent.CurrentNode.GetCoordinate());
 
-                if (minDistance > distance) continue;
+                if (minDistance < distance) continue;
 
                 minDistance = distance;
                 nearestAgent = agent;

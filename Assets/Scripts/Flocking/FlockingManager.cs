@@ -11,12 +11,12 @@ namespace Flocking
         public IVector Alignment(SimBoid boid)
         {
             List<SimBoid> insideRadiusBoids = EcsPopulationManager.GetBoidsInsideRadius(boid);
-            if (insideRadiusBoids.Count == 0) return boid.transform.up;
+            if (insideRadiusBoids.Count == 0) return boid.transform.forward;
 
             IVector avg = MyVector.zero();
             foreach (SimBoid b in insideRadiusBoids)
             {
-                avg += (IVector)b.transform.up;
+                avg += (IVector)b.transform.forward;
             }
 
             avg /= insideRadiusBoids.Count;

@@ -25,7 +25,7 @@ namespace StateMachine.Agents.Simulation
                 currentNode = value;
                 transform.position = value.GetCoordinate();
                 boid.transform.position = value.GetCoordinate();
-                boid.transform.up = (targetPosition - CurrentNode.GetCoordinate()).Normalized();
+                boid.transform.forward = (targetPosition - CurrentNode.GetCoordinate()).Normalized();
             }
             
         }
@@ -33,6 +33,7 @@ namespace StateMachine.Agents.Simulation
         public override void Init()
         {
             targetPosition = GetTargetPosition();
+            transform.forward = (targetPosition - CurrentNode.GetCoordinate()).Normalized();
             boid = new Boid<IVector, ITransform<IVector>>
             {
                 transform = transform,
@@ -43,8 +44,8 @@ namespace StateMachine.Agents.Simulation
             foodTarget = SimNodeType.Carrion;
             FoodLimit = 20;
             movement = 5;
-            Speed = movement * cellSize;
-            brainTypes = new[] { BrainType.Movement, BrainType.Eat };
+            Speed = movement * 1;
+            brainTypes = new[] { BrainType.ScavengerMovement, BrainType.Flocking, BrainType.Eat };
             CalculateInputs();
         }
 

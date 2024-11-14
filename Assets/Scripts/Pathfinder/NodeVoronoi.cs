@@ -78,6 +78,7 @@ namespace Pathfinder
 
         public void SetCoordinate(float x, float y)
         {
+            coordinate = new MyVector(x, y);
         }
 
         public void SetCoordinate(IVector coordinate)

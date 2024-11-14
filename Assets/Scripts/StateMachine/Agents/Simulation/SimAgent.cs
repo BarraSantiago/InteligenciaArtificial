@@ -103,8 +103,7 @@ namespace StateMachine.Agents.Simulation
             int brainTypesCount = Enum.GetValues(typeof(BrainType)).Length;
             input = new float[brainTypesCount][];
             output = new float[brainTypesCount][];
-            brainTypes = new BrainType[brainTypesCount];
-
+            
             const int MaxOutputs = 4;
             for (int i = 0; i < brainTypesCount; i++)
             {
