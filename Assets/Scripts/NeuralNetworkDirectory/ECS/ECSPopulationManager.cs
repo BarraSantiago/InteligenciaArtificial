@@ -51,6 +51,7 @@ namespace NeuralNetworkDirectory.ECS
         public int gridHeight = 10;
         public int generationTurns = 100;
 
+        const int CellSize = 1;
         private int currentTurn;
         private float accumTime;
         private bool isRunning = true;
@@ -129,7 +130,7 @@ namespace NeuralNetworkDirectory.ECS
             ECSManager.Init();
             entities = new Dictionary<uint, GameObject>();
             gridManager = new GraphManager<IVector, ITransform<IVector>>(gridWidth, gridHeight);
-            graph = new Sim2Graph(gridWidth, gridHeight, 1);
+            graph = new Sim2Graph(gridWidth, gridHeight, CellSize);
             StartSimulation();
             InitializePlants();
             fitnessManager = new FitnessManager<IVector, ITransform<IVector>>(_agents);
@@ -200,6 +201,12 @@ namespace NeuralNetworkDirectory.ECS
             }
 
             fitnessManager.Tick();
+
+            foreach (var id in _agents.Keys)
+            {
+                var pos = _agents[id].CurrentNode.GetCoordinate();
+                entities[id].transform.position = new Vector3(pos.X, pos.Y);
+            }
         }
 
         private void UpdateBoidOffsets(SimBoid boid, float[] outputs)
@@ -233,7 +240,10 @@ namespace NeuralNetworkDirectory.ECS
                 _ => throw new ArgumentException("Invalid agent type")
             };
 
-            var position = GetRandomPos();
+            var node = gridManager.GetRandomPosition().GetCoordinate();
+            Vector2 position = new Vector2();
+            position.x = node.X;
+            position.y = node.Y;
             go = Instantiate(prefab, position, Quaternion.identity);
 
             SimAgentType agent;
@@ -308,10 +318,10 @@ namespace NeuralNetworkDirectory.ECS
                 neuralNetComponent.Layers = brains.SelectMany(brain => brain.Layers).ToList();
                 neuralNetComponent.Fitness = new float[BrainsAmount];
                 neuralNetComponent.FitnessMod = new float[BrainsAmount];
-                
+
                 for (int j = 0; j < neuralNetComponent.FitnessMod.Length; j++)
                 {
-                     neuralNetComponent.FitnessMod[j] = 1.0f;
+                    neuralNetComponent.FitnessMod[j] = 1.0f;
                 }
 
 
@@ -368,8 +378,8 @@ namespace NeuralNetworkDirectory.ECS
             neuralNetComponent.Layers.Add(CreateNeuronLayerList(brainType, agentType));
             return neuralNetComponent;
         }
-        
-        
+
+
         private List<NeuronLayer> CreateNeuronLayerList(BrainType brainType, SimAgentTypes agentType)
         {
             if (!_inputCountCache.TryGetValue((brainType, agentType), out var inputCount))
@@ -434,8 +444,6 @@ namespace NeuralNetworkDirectory.ECS
 
                 population[entityID] = newGenomesForAgent;
                 ECSManager.GetComponent<NeuralNetComponent>(entityID).Layers = neuralNetComponent.Layers;
-                var pos = GetRandomPos();
-                agent.transform.position = new MyVector { X = pos.x, Y = pos.z };
             }
         }
 
@@ -625,11 +633,6 @@ namespace NeuralNetworkDirectory.ECS
             return target;
         }
 
-        private Vector3 GetRandomPos()
-        {
-            return new Vector3(Random.value * 40.0f - 20.0f, 0.0f, Random.value * 40.0f - 20.0f);
-        }
-
         public static INode<IVector> CoordinateToNode(ICoordinate<IVector> coordinate)
         {
             return graph.NodesType.Cast<INode<IVector>>()
@@ -734,6 +737,29 @@ namespace NeuralNetworkDirectory.ECS
             }
 
             return highestCount;
+        }
+
+        private void OnDrawGizmos()
+        {
+            if (!Application.isPlaying)
+                return;
+
+
+            foreach (var node in graph.NodesType)
+            {
+                Gizmos.color = node.NodeType switch
+                {
+                    SimNodeType.Blocked => Color.black,
+                    SimNodeType.Bush => Color.green,
+                    SimNodeType.Corpse => Color.red,
+                    SimNodeType.Carrion => Color.magenta,
+                    SimNodeType.Empty => Color.white,
+                    _ => Color.white
+                };
+
+                Gizmos.DrawSphere(new Vector3(node.GetCoordinate().X, node.GetCoordinate().Y), (float)CellSize / 5);
+                Gizmos.DrawSphere(new Vector3(node.GetCoordinate().X, node.GetCoordinate().Y), (float)CellSize / 5);
+            }
         }
     }
 }
