@@ -139,9 +139,7 @@ namespace NeuralNetworkDirectory.ECS
             Parallel.ForEach(_scavengers, entity =>
             {
                 var outputComponent = ECSManager.GetComponent<OutputComponent>(entity.Key);
-                Debug.Log(outputComponent.outputs == null ? "Output is null" : "Output is not null");
                 var boid = _scavengers[entity.Key]?.boid;
-                Debug.Log(_scavengers[entity.Key].boid == null ? "boid is null" : "boid is not null");
 
                 if (boid != null && outputComponent != null)
                 {
@@ -311,7 +309,7 @@ namespace NeuralNetworkDirectory.ECS
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(agentType), agentType,
-                        "Not prepared for this agent type");
+                                                          "Not prepared for this agent type");
             }
 
             return brains;

@@ -201,8 +201,10 @@ namespace NeuralNetworkDirectory.AI
             brain.AddFirstNeuronLayer(InputsCount, Bias, P);
 
             for (var i = 0; i < HiddenLayers; i++)
+            {
                 // Add each hidden layer with custom neurons count
                 brain.AddNeuronLayer(NeuronsCountPerHL, Bias, P);
+            }
 
             // Add the output layer with as many neurons as outputs
             brain.AddNeuronLayer(OutputsCount, Bias, P);
