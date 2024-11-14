@@ -61,6 +61,7 @@ namespace NeuralNetworkDirectory.ECS
         private static Dictionary<uint, Herbivore<IVector, ITransform<IVector>>> _herbivores = new();
         private static Dictionary<uint, Carnivore<IVector, ITransform<IVector>>> _carnivores = new();
         private static Dictionary<(BrainType, SimAgentTypes), NeuronInputCount> _inputCountCache;
+        private static readonly int BrainsAmount = Enum.GetValues(typeof(BrainType)).Length;
 
         private Dictionary<uint, List<Genome>> population = new();
         private GraphManager<IVector, ITransform<IVector>> gridManager;
@@ -305,6 +306,14 @@ namespace NeuralNetworkDirectory.ECS
                 }
 
                 neuralNetComponent.Layers = brains.SelectMany(brain => brain.Layers).ToList();
+                neuralNetComponent.Fitness = new float[BrainsAmount];
+                neuralNetComponent.FitnessMod = new float[BrainsAmount];
+                
+                for (int j = 0; j < neuralNetComponent.FitnessMod.Length; j++)
+                {
+                     neuralNetComponent.FitnessMod[j] = 1.0f;
+                }
+
 
                 var agent = CreateAgent(agentType, out GameObject go);
                 _agents[entityID] = agent;
