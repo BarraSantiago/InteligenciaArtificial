@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using NeuralNetworkDirectory.ECS;
 using NeuralNetworkDirectory.NeuralNet;
 using Pathfinder;
@@ -39,6 +40,8 @@ namespace StateMachine.Agents.Simulation
         protected override void ExtraInputs()
         {
             int brain = (int)BrainType.Escape;
+            var inputCount = GetInputCount((BrainType)brain);
+            input[brain] = new float[inputCount];
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
             var target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivorous, CurrentNode);
@@ -57,7 +60,8 @@ namespace StateMachine.Agents.Simulation
         protected override void MovementInputs()
         {
             int brain = (int)BrainType.Movement;
-
+            var inputCount = GetInputCount((BrainType)brain);
+            input[brain] = new float[inputCount];
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
 

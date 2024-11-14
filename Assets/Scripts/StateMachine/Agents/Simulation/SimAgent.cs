@@ -62,6 +62,7 @@ namespace StateMachine.Agents.Simulation
         protected Action OnEat;
         protected float dt;
         protected const int NoTarget = -99999;
+
         protected SimNode<TVector> TargetNode
         {
             get => targetNode;
@@ -107,9 +108,7 @@ namespace StateMachine.Agents.Simulation
             const int MaxOutputs = 4;
             for (int i = 0; i < brainTypesCount; i++)
             {
-                var inputCount = EcsPopulationManager.inputCounts
-                    .FirstOrDefault(input => input.agentType == agentType && input.brainType == (BrainType)i).inputCount;
-                input[i] = new float[inputCount]; 
+                input[i] = new float[GetInputCount((BrainType)i)];
                 output[i] = new float[MaxOutputs];
             }
         }
@@ -137,13 +136,13 @@ namespace StateMachine.Agents.Simulation
         private void FindFoodInputs()
         {
             int brain = (int)BrainType.Eat;
-            var inputCount = EcsPopulationManager.inputCounts
-                .FirstOrDefault(input => input.agentType == agentType && input.brainType == (BrainType)brain).inputCount;
-            input[brain] = new float[inputCount]; 
+            var inputCount = GetInputCount((BrainType)brain);
+            input[brain] = new float[inputCount];
+            
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
             INode<IVector> target = GetTarget(foodTarget);
-            
+
             if (target == null)
             {
                 input[brain][2] = NoTarget;
@@ -272,6 +271,11 @@ namespace StateMachine.Agents.Simulation
         protected virtual INode<IVector> GetTarget(SimNodeType nodeType = SimNodeType.Empty)
         {
             return EcsPopulationManager.GetNearestNode(nodeType, CurrentNode);
+        }
+
+        protected int GetInputCount(BrainType brainType)
+        {
+            return InputCountCache.GetInputCount(agentType, brainType);
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Flocking;
 using NeuralNetworkDirectory.ECS;
 using NeuralNetworkDirectory.NeuralNet;
@@ -56,7 +57,8 @@ namespace StateMachine.Agents.Simulation
         protected override void MovementInputs()
         {
             int brain = (int)BrainType.ScavengerMovement;
-
+            var inputCount = GetInputCount((BrainType)brain);
+            input[brain] = new float[inputCount];
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
 
@@ -90,6 +92,9 @@ namespace StateMachine.Agents.Simulation
         protected override void ExtraInputs()
         {
             int brain = (int)BrainType.Flocking;
+            var inputCount = GetInputCount((BrainType)brain);
+            input[brain] = new float[inputCount];
+            
             targetPosition = GetTargetPosition();
 
             input[brain][0] = CurrentNode.GetCoordinate().X;
