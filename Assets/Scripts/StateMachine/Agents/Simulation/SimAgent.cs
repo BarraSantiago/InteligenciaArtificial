@@ -90,11 +90,11 @@ namespace StateMachine.Agents.Simulation
 
             OnMove += Move;
             OnEat += Eat;
-
+            
             FsmBehaviours();
 
             FsmTransitions();
-
+            Fsm.ForceTransition(Behaviours.Walk);
             //UpdateInputs();
         }
 

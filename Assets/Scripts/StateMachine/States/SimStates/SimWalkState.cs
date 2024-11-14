@@ -19,7 +19,7 @@ namespace StateMachine.States.SimStates
             var outputBrain1 = (float[])parameters[5];
             var outputBrain2 = (float[])parameters[6];
 
-            behaviours.AddMultiThreadableBehaviours(0, () => { onMove?.Invoke(); });
+            behaviours.AddMultiThreadableBehaviours(0, () => { onMove.Invoke(); });
 
             //behaviours.AddMainThreadBehaviours(1, () =>
             //{
@@ -64,7 +64,7 @@ namespace StateMachine.States.SimStates
             var onMove = parameters[3] as Action;
             var outputBrain1 = (float[])parameters[4];
 
-            behaviours.AddMultiThreadableBehaviours(0, () => { onMove?.Invoke(); });
+            behaviours.AddMultiThreadableBehaviours(0, () => { onMove.Invoke(); });
 
             // Done by population manager
             //behaviours.AddMainThreadBehaviours(1, () =>

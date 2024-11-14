@@ -18,11 +18,13 @@ namespace StateMachine.Agents.Simulation
         public float Speed;
         public float RotSpeed = 20.0f;
         private IVector targetPosition = new MyVector();
+        private IVector currentPosition = new MyVector();
         public override INode<IVector> CurrentNode {
             get => currentNode;
             set
             {
-                currentNode = value;
+                currentPosition = value.GetCoordinate();
+                currentNode.SetCoordinate(currentPosition);
                 transform.position = value.GetCoordinate();
                 boid.transform.position = value.GetCoordinate();
                 boid.transform.forward = (targetPosition - CurrentNode.GetCoordinate()).Normalized();
@@ -222,8 +224,13 @@ namespace StateMachine.Agents.Simulation
             //pos += transform.forward * (Math.Abs(rightForce + leftForce) * 0.5f * Speed * dt);
             //transform.position = pos;
 
+            var currentPos = CurrentNode.GetCoordinate();
+            currentPos.X += rightForce;
+            currentPos.Y += leftForce;
+            CurrentNode.SetCoordinate(currentPos);
             if (rightForce > leftForce)
             {
+                
             }
             else
             {
