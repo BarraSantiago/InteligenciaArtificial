@@ -31,8 +31,8 @@ namespace StateMachine.Agents.Simulation
             base.Init();
             agentType = SimAgentTypes.Herbivore;
             foodTarget = SimNodeType.Bush;
-            CalculateInputs();
             brainTypes = new[] { BrainType.Movement, BrainType.Escape, BrainType.Eat };
+            CalculateInputs();
 
             hp = InitialHp;
         }

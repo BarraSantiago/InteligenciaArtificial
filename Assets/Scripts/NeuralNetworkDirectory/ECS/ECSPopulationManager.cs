@@ -61,7 +61,7 @@ namespace NeuralNetworkDirectory.ECS
         private static Dictionary<uint, Scavenger<IVector, ITransform<IVector>>> _scavengers = new();
         private static Dictionary<uint, Herbivore<IVector, ITransform<IVector>>> _herbivores = new();
         private static Dictionary<uint, Carnivore<IVector, ITransform<IVector>>> _carnivores = new();
-        private static Dictionary<(BrainType, SimAgentTypes), NeuronInputCount> _inputCountCache;
+        public static Dictionary<(BrainType, SimAgentTypes), NeuronInputCount> InputCountCache;
         private static readonly int BrainsAmount = Enum.GetValues(typeof(BrainType)).Length;
 
         private Dictionary<uint, List<Genome>> population = new();
@@ -83,7 +83,7 @@ namespace NeuralNetworkDirectory.ECS
                 new NeuronInputCount
                 {
                     agentType = SimAgentTypes.Carnivorous, brainType = BrainType.Eat, inputCount = 4, outputCount = 1,
-                    hiddenLayersInputs = new[] { 1 }
+                    hiddenLayersInputs = new[] { 1,1 }
                 },
                 new NeuronInputCount
                 {
@@ -98,7 +98,7 @@ namespace NeuralNetworkDirectory.ECS
                 new NeuronInputCount
                 {
                     agentType = SimAgentTypes.Herbivore, brainType = BrainType.Eat, inputCount = 4, outputCount = 1,
-                    hiddenLayersInputs = new[] { 1 }
+                    hiddenLayersInputs = new[] { 1,1 }
                 },
                 new NeuronInputCount
                 {
@@ -113,7 +113,7 @@ namespace NeuralNetworkDirectory.ECS
                 new NeuronInputCount
                 {
                     agentType = SimAgentTypes.Scavenger, brainType = BrainType.Eat, inputCount = 4, outputCount = 1,
-                    hiddenLayersInputs = new[] { 1 }
+                    hiddenLayersInputs = new[] { 1,1 }
                 },
                 new NeuronInputCount
                 {
@@ -126,7 +126,7 @@ namespace NeuralNetworkDirectory.ECS
                     hiddenLayersInputs = new[] { 12, 8, 6, 4 }
                 },
             };
-            _inputCountCache = inputCounts.ToDictionary(input => (input.brainType, input.agentType));
+            InputCountCache = inputCounts.ToDictionary(input => (input.brainType, input.agentType));
             ECSManager.Init();
             entities = new Dictionary<uint, GameObject>();
             gridManager = new GraphManager<IVector, ITransform<IVector>>(gridWidth, gridHeight);
@@ -349,6 +349,7 @@ namespace NeuralNetworkDirectory.ECS
         {
             var brains = new List<NeuralNetComponent> { CreateSingleBrain(BrainType.Eat, SimAgentTypes.Herbivore) };
 
+            /*
             switch (agentType)
             {
                 case SimAgentTypes.Herbivore:
@@ -366,7 +367,7 @@ namespace NeuralNetworkDirectory.ECS
                 default:
                     throw new ArgumentOutOfRangeException(nameof(agentType), agentType,
                         "Not prepared for this agent type");
-            }
+            }*/
 
             return brains;
         }
@@ -382,7 +383,7 @@ namespace NeuralNetworkDirectory.ECS
 
         private List<NeuronLayer> CreateNeuronLayerList(BrainType brainType, SimAgentTypes agentType)
         {
-            if (!_inputCountCache.TryGetValue((brainType, agentType), out var inputCount))
+            if (!InputCountCache.TryGetValue((brainType, agentType), out var inputCount))
             {
                 throw new ArgumentException("Invalid brainType or agentType");
             }
@@ -392,7 +393,7 @@ namespace NeuralNetworkDirectory.ECS
                 new(inputCount.inputCount, inputCount.inputCount, 1f, 0.5f) { BrainType = brainType }
             };
 
-            foreach (var hiddenLayerInput in inputCount.hiddenLayersInputs)
+            foreach (int hiddenLayerInput in inputCount.hiddenLayersInputs)
             {
                 layers.Add(new NeuronLayer(layers[^1].OutputsCount, hiddenLayerInput, 1f, 0.5f)
                     { BrainType = brainType });

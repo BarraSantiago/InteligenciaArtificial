@@ -104,11 +104,13 @@ namespace StateMachine.Agents.Simulation
             input = new float[brainTypesCount][];
             output = new float[brainTypesCount][];
             
-            const int MaxOutputs = 4;
             for (int i = 0; i < brainTypesCount; i++)
             {
-                input[i] = new float[GetInputCount((BrainType)i)];
-                output[i] = new float[MaxOutputs];
+                var brainType = (BrainType)i;
+                input[i] = new float[GetInputCount(brainType)];
+                if(!brainTypes.Contains(brainType)) continue;
+                int outputCount = EcsPopulationManager.InputCountCache[(brainType, agentType)].outputCount;
+                output[i] = new float[outputCount];
             }
         }
 

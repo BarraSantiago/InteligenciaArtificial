@@ -33,14 +33,14 @@ namespace NeuralNetworkDirectory.ECS
             {
                 NeuralNetComponent neuralNetwork = neuralNetworkComponents[entityId];
                 float[][] inputs = inputComponents[entityId].inputs;
-                float[] outputs = new float[outputComponents[entityId].outputsQty];
+                float[] outputs = new float[1];
 
                 Parallel.For(0, outputs.Length, i =>
                 {
                     for (int j = 0; j < neuralNetwork.Layers[i].Count; j++)
                     {
                         // el input de la siguiente capa es el output de la capa anterior 
-                        outputs = neuralNetwork.Layers[i][j].Synapsis(inputs[i]);
+                        outputs = neuralNetwork.Layers[i][j].Synapsis(inputs[i], i);
                         inputs[i] = outputs;
                     }
 

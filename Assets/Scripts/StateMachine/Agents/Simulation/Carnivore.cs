@@ -21,9 +21,9 @@ namespace StateMachine.Agents.Simulation
             foodTarget = SimNodeType.Corpse;
             FoodLimit = 1;
             movement = 2;
-            CalculateInputs();
 
             brainTypes = new[] { BrainType.Movement, BrainType.Attack, BrainType.Eat };
+            CalculateInputs();
             OnAttack = () =>
             {
                 SimAgent<IVector, ITransform<IVector>> target =

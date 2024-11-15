@@ -20,14 +20,20 @@ namespace NeuralNetworkDirectory.NeuralNet
 
         public int WeightsCount => weights.Length;
 
-        public float Synapsis(float[] input)
+        public float Synapsis(float[] input, int layer)
         {
             float a = 0;
 
-            for (var i = 0; i < input.Length; i++)
+            if (input.Length > weights.Length)
+            {
+                Debug.Log("Inputs " + input.Length + " Weights " + weights.Length + ". problem in layer " + layer);
+                return 0;
+            }
+            for (int i = 0; i < input.Length; i++)
             {
                 a += weights[i] * input[i];
             }
+            Debug.Log(input.Length > 0 ? "No inputs" : "Same inputs and weights");
 
             a += bias;
 

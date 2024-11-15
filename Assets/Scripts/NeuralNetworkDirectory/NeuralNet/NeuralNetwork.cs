@@ -88,7 +88,7 @@ namespace NeuralNetworkDirectory.NeuralNet
 
             for (var i = 0; i < layers.Count; i++)
             {
-                outputs = layers[i].Synapsis(inputs);
+                //outputs = layers[i].Synapsis(inputs);
                 inputs = outputs;
             }
 
