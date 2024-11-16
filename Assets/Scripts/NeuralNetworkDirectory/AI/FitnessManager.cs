@@ -9,13 +9,13 @@ using Utils;
 
 namespace NeuralNetworkDirectory.AI
 {
-    public class FitnessManager <TVector, TTransform>
+    public class FitnessManager<TVector, TTransform>
         where TTransform : ITransform<IVector>, new()
         where TVector : IVector, IEquatable<TVector>
     {
-        private static Dictionary<uint, SimAgent<TVector,TTransform>> _agents;
+        private static Dictionary<uint, SimAgent<TVector, TTransform>> _agents;
 
-        public FitnessManager(Dictionary<uint, SimAgent<TVector,TTransform>> agents)
+        public FitnessManager(Dictionary<uint, SimAgent<TVector, TTransform>> agents)
         {
             _agents = agents;
         }
@@ -45,7 +45,7 @@ namespace NeuralNetworkDirectory.AI
                     throw new ArgumentOutOfRangeException(nameof(agentType), agentType, null);
             }
         }
-        
+
         private void HerbivoreFitnessCalculator(uint agentId)
         {
             foreach (var brainType in _agents[agentId].brainTypes)
@@ -109,7 +109,7 @@ namespace NeuralNetworkDirectory.AI
             const float punishment = 0.97f;
             const float safeDistance = 1f;
 
-            var agent = (Scavenger<TVector,TTransform>)_agents[agentId];
+            var agent = (Scavenger<TVector, TTransform>)_agents[agentId];
             var neighbors = EcsPopulationManager.GetBoidsInsideRadius(agent.boid);
             var targetPosition = agent.CurrentNode.GetCoordinate();
 
@@ -195,17 +195,18 @@ namespace NeuralNetworkDirectory.AI
             }
             else
             {
+                if (nearestCarNode?.CurrentNode?.GetCoordinate() == null) return;
                 targetPosition = nearestCarNode.CurrentNode.GetCoordinate();
             }
 
+            if (targetPosition == null) return;
+
             if (IsMovingTowardsTarget(agentId, targetPosition))
             {
-                // Reward the agent
                 ECSManager.GetComponent<NeuralNetComponent>(agentId).Reward(reward, BrainType.ScavengerMovement);
             }
             else
             {
-                // Penalize the agent
                 ECSManager.GetComponent<NeuralNetComponent>(agentId).Punish(punishment, BrainType.ScavengerMovement);
             }
         }

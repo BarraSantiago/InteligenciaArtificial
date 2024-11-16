@@ -134,11 +134,11 @@ namespace NeuralNetworkDirectory.ECS
                 new NeuronInputCount
                 {
                     agentType = SimAgentTypes.Scavenger, brainType = BrainType.ScavengerMovement, inputCount = 7,
-                    outputCount = 4, hiddenLayersInputs = new[] { 3 }
+                    outputCount = 2, hiddenLayersInputs = new[] { 3 }
                 },
                 new NeuronInputCount
                 {
-                    agentType = SimAgentTypes.Scavenger, brainType = BrainType.Flocking, inputCount = 16,
+                    agentType = SimAgentTypes.Scavenger, brainType = BrainType.Flocking, inputCount = 16, outputCount = 4,
                     hiddenLayersInputs = new[] { 12, 8, 6, 4 }
                 },
             };

@@ -242,7 +242,7 @@ namespace StateMachine.Agents.Simulation
 
             if (EcsPopulationManager.graph.IsWithinGraphBorders(targetPos))
             {
-                CurrentNode = EcsPopulationManager.graph.NodesType[(int)targetPos.X, (int)targetPos.Y];
+                CurrentNode = EcsPopulationManager.CoordinateToNode(targetPos);
             }
         }
 
