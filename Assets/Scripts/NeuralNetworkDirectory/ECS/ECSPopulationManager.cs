@@ -81,17 +81,17 @@ namespace NeuralNetworkDirectory.ECS
         private void Awake()
         {
             //ECSManager.AddSystem(new NeuralNetSystem());
-            herbBrainTypes[0] = BrainType.Movement;
-            herbBrainTypes[1] = BrainType.Escape;
-            herbBrainTypes[2] = BrainType.Eat;
+            herbBrainTypes[0] = BrainType.Eat;
+            herbBrainTypes[1] = BrainType.Movement;
+            herbBrainTypes[2] = BrainType.Escape;
 
-            scavBrainTypes[0] = BrainType.ScavengerMovement;
-            scavBrainTypes[1] = BrainType.Flocking;
-            scavBrainTypes[2] = BrainType.Eat;
+            scavBrainTypes[0] = BrainType.Eat;
+            scavBrainTypes[1] = BrainType.ScavengerMovement;
+            scavBrainTypes[2] = BrainType.Flocking;
 
-            carnBrainTypes[0] = BrainType.Movement;
-            carnBrainTypes[1] = BrainType.Attack;
-            carnBrainTypes[2] = BrainType.Eat;
+            carnBrainTypes[0] = BrainType.Eat;
+            carnBrainTypes[1] = BrainType.Movement;
+            carnBrainTypes[2] = BrainType.Attack;
 
 
             inputCounts = new[]
@@ -364,22 +364,22 @@ namespace NeuralNetworkDirectory.ECS
 
         private List<NeuralNetComponent> CreateBrain(SimAgentTypes agentType)
         {
-            var brains = new List<NeuralNetComponent> { CreateSingleBrain(BrainType.Eat, SimAgentTypes.Herbivore) };
+            var brains = new List<NeuralNetComponent>{ CreateSingleBrain(BrainType.Eat, SimAgentTypes.Herbivore) };
 
 
             switch (agentType)
             {
                 case SimAgentTypes.Herbivore:
-                    brains.Add(CreateSingleBrain(BrainType.Escape, SimAgentTypes.Herbivore));
                     brains.Add(CreateSingleBrain(BrainType.Movement, SimAgentTypes.Herbivore));
+                    brains.Add(CreateSingleBrain(BrainType.Escape, SimAgentTypes.Herbivore));
                     break;
                 case SimAgentTypes.Carnivorous:
-                    brains.Add(CreateSingleBrain(BrainType.Attack, SimAgentTypes.Carnivorous));
                     brains.Add(CreateSingleBrain(BrainType.Movement, SimAgentTypes.Carnivorous));
+                    brains.Add(CreateSingleBrain(BrainType.Attack, SimAgentTypes.Carnivorous));
                     break;
                 case SimAgentTypes.Scavenger:
-                    brains.Add(CreateSingleBrain(BrainType.Flocking, SimAgentTypes.Scavenger));
                     brains.Add(CreateSingleBrain(BrainType.ScavengerMovement, SimAgentTypes.Scavenger));
+                    brains.Add(CreateSingleBrain(BrainType.Flocking, SimAgentTypes.Scavenger));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(agentType), agentType,

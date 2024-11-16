@@ -29,6 +29,7 @@ namespace NeuralNetworkDirectory.ECS
 
         protected override void Execute(float deltaTime)
         {
+            //arreglar esto
             Parallel.ForEach(queriedEntities, parallelOptions, entityId =>
             {
                 NeuralNetComponent neuralNetwork = neuralNetworkComponents[entityId];
