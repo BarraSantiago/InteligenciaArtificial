@@ -99,7 +99,7 @@ namespace NeuralNetworkDirectory.ECS
                 new NeuronInputCount
                 {
                     agentType = SimAgentTypes.Carnivorous, brainType = BrainType.Eat, inputCount = 4, outputCount = 1,
-                    hiddenLayersInputs = new[] { 1, 1 }
+                    hiddenLayersInputs = new[] { 1 }
                 },
                 new NeuronInputCount
                 {
@@ -129,7 +129,7 @@ namespace NeuralNetworkDirectory.ECS
                 new NeuronInputCount
                 {
                     agentType = SimAgentTypes.Scavenger, brainType = BrainType.Eat, inputCount = 4, outputCount = 1,
-                    hiddenLayersInputs = new[] { 1, 1 }
+                    hiddenLayersInputs = new[] { 1}
                 },
                 new NeuronInputCount
                 {
@@ -364,7 +364,7 @@ namespace NeuralNetworkDirectory.ECS
 
         private List<NeuralNetComponent> CreateBrain(SimAgentTypes agentType)
         {
-            var brains = new List<NeuralNetComponent>{ CreateSingleBrain(BrainType.Eat, SimAgentTypes.Herbivore) };
+            var brains = new List<NeuralNetComponent>{ CreateSingleBrain(BrainType.Eat, agentType) };
 
 
             switch (agentType)
@@ -407,17 +407,17 @@ namespace NeuralNetworkDirectory.ECS
 
             var layers = new List<NeuronLayer>
             {
-                new(inputCount.inputCount, inputCount.inputCount, 1f, 0.5f) { BrainType = brainType }
+                new(inputCount.inputCount, inputCount.inputCount, 1f, 0.5f) { BrainType = brainType, AgentType = agentType}
             };
 
             foreach (int hiddenLayerInput in inputCount.hiddenLayersInputs)
             {
                 layers.Add(new NeuronLayer(layers[^1].OutputsCount, hiddenLayerInput, 1f, 0.5f)
-                    { BrainType = brainType });
+                    { BrainType = brainType, AgentType = agentType });
             }
 
             layers.Add(new NeuronLayer(layers[^1].OutputsCount, inputCount.outputCount, 1f, 0.5f)
-                { BrainType = brainType });
+                { BrainType = brainType, AgentType = agentType });
 
             return layers;
         }

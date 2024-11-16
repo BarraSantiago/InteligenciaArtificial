@@ -215,8 +215,10 @@ namespace StateMachine.Agents.Simulation
 
         protected override void Move()
         {
-            float leftForce = output[GetBrainTypeKeyByValue(BrainType.ScavengerMovement)][0];
-            float rightForce = output[GetBrainTypeKeyByValue(BrainType.ScavengerMovement)][1];
+            int index = GetBrainTypeKeyByValue(BrainType.ScavengerMovement);
+            if(output[index].Length != 2) return;
+            float leftForce = output[index][0];
+            float rightForce = output[index][1];
 
             var pos = transform.position;
             var rotFactor = Math.Clamp(rightForce - leftForce, -1.0f, 1.0f);
