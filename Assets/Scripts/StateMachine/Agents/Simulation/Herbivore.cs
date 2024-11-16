@@ -38,9 +38,9 @@ namespace StateMachine.Agents.Simulation
 
         protected override void ExtraInputs()
         {
-            int brain = (int)BrainType.Escape;
-            var inputCount = GetInputCount((BrainType)brain);
-            brain = GetBrainTypeKeyByValue((BrainType)brain);
+            int brain = GetBrainTypeKeyByValue(BrainType.Escape);
+            var inputCount = GetInputCount(BrainType.Escape);
+            
             input[brain] = new float[inputCount];
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
@@ -59,9 +59,9 @@ namespace StateMachine.Agents.Simulation
 
         protected override void MovementInputs()
         {
-            int brain = (int)BrainType.Movement;
-            var inputCount = GetInputCount((BrainType)brain);
-            brain = GetBrainTypeKeyByValue((BrainType)brain);
+            int brain = GetBrainTypeKeyByValue(BrainType.Movement);
+            var inputCount = GetInputCount(BrainType.Movement);
+            
             input[brain] = new float[inputCount];
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;

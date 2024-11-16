@@ -58,9 +58,9 @@ namespace StateMachine.States.SimStates
             var behaviours = new BehaviourActions();
 
             var currentNode = parameters[0] as SimNode<Vector2>;
-            var foodTarget = (SimNodeType)parameters[2];
-            var onMove = parameters[3] as Action;
-            var outputBrain1 = (float[])parameters[4];
+            var foodTarget = (SimNodeType)parameters[1];
+            var onMove = parameters[2] as Action;
+            var outputBrain1 = (float[])parameters[3];
 
             behaviours.AddMultiThreadableBehaviours(0, () => { onMove.Invoke(); });
 
@@ -68,7 +68,6 @@ namespace StateMachine.States.SimStates
             {
                 if (outputBrain1[0] > 0.5f && currentNode != null && currentNode.NodeType == foodTarget)
                     OnFlag?.Invoke(Flags.OnEat);
-                if (outputBrain1[1] > 0.5f) OnFlag?.Invoke(Flags.OnSearchFood);
             });
             return behaviours;
         }

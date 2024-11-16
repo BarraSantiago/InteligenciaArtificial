@@ -58,9 +58,9 @@ namespace StateMachine.Agents.Simulation
 
         protected override void MovementInputs()
         {
-            int brain = (int)BrainType.ScavengerMovement;
-            var inputCount = GetInputCount((BrainType)brain);
-            brain = GetBrainTypeKeyByValue((BrainType)brain);
+            int brain = GetBrainTypeKeyByValue(BrainType.ScavengerMovement);
+            var inputCount = GetInputCount(BrainType.ScavengerMovement);
+            
             input[brain] = new float[inputCount];
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
@@ -94,9 +94,8 @@ namespace StateMachine.Agents.Simulation
 
         protected override void ExtraInputs()
         {
-            int brain = (int)BrainType.Flocking;
-            var inputCount = GetInputCount((BrainType)brain);
-            brain = GetBrainTypeKeyByValue((BrainType)brain);
+            int brain = GetBrainTypeKeyByValue(BrainType.Flocking);
+            var inputCount = GetInputCount(BrainType.Flocking);
             input[brain] = new float[inputCount];
             
             targetPosition = GetTargetPosition();
@@ -264,7 +263,7 @@ namespace StateMachine.Agents.Simulation
         protected override object[] WalkTickParameters()
         {
             object[] objects =
-                { CurrentNode, transform, foodTarget, OnMove, output[GetBrainTypeKeyByValue(BrainType.ScavengerMovement)] };
+                { CurrentNode, foodTarget, OnMove, output[GetBrainTypeKeyByValue(BrainType.Eat)] };
 
             return objects;
         }

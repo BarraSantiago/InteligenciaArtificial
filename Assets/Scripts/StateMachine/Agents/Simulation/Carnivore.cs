@@ -20,7 +20,7 @@ namespace StateMachine.Agents.Simulation
             foodTarget = SimNodeType.Corpse;
             FoodLimit = 1;
             movement = 2;
-            
+
             CalculateInputs();
             OnAttack = () =>
             {
@@ -33,11 +33,10 @@ namespace StateMachine.Agents.Simulation
 
         protected override void ExtraInputs()
         {
-            int brain = (int)BrainType.Attack;
-            var inputCount = GetInputCount((BrainType)brain);
-            brain = GetBrainTypeKeyByValue((BrainType)brain);
+            int brain = GetBrainTypeKeyByValue(BrainType.Attack);
+            var inputCount = GetInputCount(BrainType.Attack);
             input[brain] = new float[inputCount];
-            
+
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
             SimAgent<IVector, ITransform<IVector>> target =
@@ -55,9 +54,9 @@ namespace StateMachine.Agents.Simulation
 
         protected override void MovementInputs()
         {
-            int brain = (int)BrainType.Movement;
-            var inputCount = GetInputCount((BrainType)brain);
-            brain = GetBrainTypeKeyByValue((BrainType)brain);
+            int brain = GetBrainTypeKeyByValue(BrainType.Movement);
+            var inputCount = GetInputCount(BrainType.Movement);
+
             input[brain] = new float[inputCount];
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
