@@ -204,7 +204,7 @@ namespace StateMachine.Agents.Simulation
                 ? GetBrainTypeKeyByValue(BrainType.Attack) : GetBrainTypeKeyByValue(BrainType.Escape);
             object[] objects =
             {
-                CurrentNode, TargetNode, transform, foodTarget, OnMove, output[GetBrainTypeKeyByValue(BrainType.Movement)],
+                CurrentNode, foodTarget, OnMove, output[GetBrainTypeKeyByValue(BrainType.Eat)],
                     output[extraBrain]
             };
             return objects;
@@ -219,7 +219,10 @@ namespace StateMachine.Agents.Simulation
 
         protected virtual object[] EatTickParameters()
         {
-            object[] objects = { CurrentNode, foodTarget, OnEat, output[0], output[1] };
+            int extraBrain = agentType == SimAgentTypes.Carnivorous
+                ? GetBrainTypeKeyByValue(BrainType.Attack) : GetBrainTypeKeyByValue(BrainType.Escape);
+
+            object[] objects = { CurrentNode, foodTarget, OnEat, output[GetBrainTypeKeyByValue(BrainType.Eat)], output[extraBrain] };
             return objects;
         }
 

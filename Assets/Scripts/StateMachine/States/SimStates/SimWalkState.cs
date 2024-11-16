@@ -14,10 +14,10 @@ namespace StateMachine.States.SimStates
             var behaviours = new BehaviourActions();
 
             var currentNode = parameters[0] as SimNode<Vector2>;
-            var foodTarget = (SimNodeType)parameters[3];
-            var onMove = parameters[4] as Action;
-            var outputBrain1 = (float[])parameters[5];
-            var outputBrain2 = (float[])parameters[6];
+            var foodTarget = (SimNodeType)parameters[1];
+            var onMove = parameters[2] as Action;
+            var outputBrain1 = (float[])parameters[3];
+            var outputBrain2 = (float[])parameters[4];
 
             behaviours.AddMultiThreadableBehaviours(0, () => { onMove.Invoke(); });
 
@@ -30,10 +30,7 @@ namespace StateMachine.States.SimStates
 
             behaviours.SetTransitionBehaviour(() =>
             {
-                if (outputBrain1[0] > 0.5f && currentNode != null && currentNode.NodeType == foodTarget)
-                    OnFlag?.Invoke(Flags.OnEat);
-                // TODO FIX THIS
-                if (outputBrain1[1] > 0.5f) OnFlag?.Invoke(Flags.OnSearchFood);
+                if (outputBrain1[0] > 0.5f && currentNode != null && currentNode.NodeType == foodTarget) OnFlag?.Invoke(Flags.OnEat);
                 SpecialAction(outputBrain2);
             });
             return behaviours;
@@ -66,14 +63,6 @@ namespace StateMachine.States.SimStates
             var outputBrain1 = (float[])parameters[4];
 
             behaviours.AddMultiThreadableBehaviours(0, () => { onMove.Invoke(); });
-
-            // Done by population manager
-            //behaviours.AddMainThreadBehaviours(1, () =>
-            //{
-            //    if (currentNode == null) return;
-
-            //    position.position = new Vector3(currentNode.GetCoordinate().x, currentNode.GetCoordinate().y);
-            //});
 
             behaviours.SetTransitionBehaviour(() =>
             {
