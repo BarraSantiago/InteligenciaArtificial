@@ -29,12 +29,7 @@ namespace StateMachine.Agents.Simulation
         public override void Init()
         {
             base.Init();
-            agentType = SimAgentTypes.Herbivore;
             foodTarget = SimNodeType.Bush;
-            
-            brainTypes[0] = BrainType.Movement;
-            brainTypes[1] = BrainType.Escape;
-            brainTypes[2] = BrainType.Eat;
             
             CalculateInputs();
 

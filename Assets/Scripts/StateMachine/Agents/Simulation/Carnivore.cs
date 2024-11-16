@@ -17,14 +17,9 @@ namespace StateMachine.Agents.Simulation
         public override void Init()
         {
             base.Init();
-            agentType = SimAgentTypes.Carnivorous;
             foodTarget = SimNodeType.Corpse;
             FoodLimit = 1;
             movement = 2;
-
-            brainTypes[0] = BrainType.Movement;
-            brainTypes[1] = BrainType.Attack;
-            brainTypes[2] = BrainType.Eat;
             
             CalculateInputs();
             OnAttack = () =>

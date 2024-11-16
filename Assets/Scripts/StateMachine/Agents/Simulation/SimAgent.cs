@@ -52,7 +52,7 @@ namespace StateMachine.Agents.Simulation
 
         protected INode<IVector> currentNode = new SimNode<IVector>();
         public bool CanReproduce() => Food >= FoodLimit;
-        public SimAgentTypes agentType { get; protected set; }
+        public SimAgentTypes agentType { get; set; }
         public FSM<Behaviours, Flags> Fsm;
 
         protected int movement = 3;
@@ -88,6 +88,12 @@ namespace StateMachine.Agents.Simulation
         public virtual void Init()
         {
             Fsm = new FSM<Behaviours, Flags>();
+            output = new float[brainTypes.Count][];
+            foreach (var brain in brainTypes.Values)
+            {
+                EcsPopulationManager.NeuronInputCount inputsCount = EcsPopulationManager.InputCountCache[(brain, agentType)];
+                output[GetBrainTypeKeyByValue(brain)] = new float[inputsCount.outputCount];
+            }
 
             OnMove += Move;
             OnEat += Eat;

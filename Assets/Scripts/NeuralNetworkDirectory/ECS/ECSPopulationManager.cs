@@ -61,6 +61,9 @@ namespace NeuralNetworkDirectory.ECS
         private static Dictionary<uint, Scavenger<IVector, ITransform<IVector>>> _scavengers = new();
         private static Dictionary<uint, Herbivore<IVector, ITransform<IVector>>> _herbivores = new();
         private static Dictionary<uint, Carnivore<IVector, ITransform<IVector>>> _carnivores = new();
+        private Dictionary<int, BrainType> herbBrainTypes = new();
+        private Dictionary<int, BrainType> scavBrainTypes = new();
+        private Dictionary<int, BrainType> carnBrainTypes = new();
         public static Dictionary<(BrainType, SimAgentTypes), NeuronInputCount> InputCountCache;
         private static readonly int BrainsAmount = Enum.GetValues(typeof(BrainType)).Length;
 
@@ -78,17 +81,30 @@ namespace NeuralNetworkDirectory.ECS
         private void Awake()
         {
             //ECSManager.AddSystem(new NeuralNetSystem());
+            herbBrainTypes[0] = BrainType.Movement;
+            herbBrainTypes[1] = BrainType.Escape;
+            herbBrainTypes[2] = BrainType.Eat;
+
+            scavBrainTypes[0] = BrainType.ScavengerMovement;
+            scavBrainTypes[1] = BrainType.Flocking;
+            scavBrainTypes[2] = BrainType.Eat;
+
+            carnBrainTypes[0] = BrainType.Movement;
+            carnBrainTypes[1] = BrainType.Attack;
+            carnBrainTypes[2] = BrainType.Eat;
+
+
             inputCounts = new[]
             {
                 new NeuronInputCount
                 {
                     agentType = SimAgentTypes.Carnivorous, brainType = BrainType.Eat, inputCount = 4, outputCount = 1,
-                    hiddenLayersInputs = new[] { 1,1 }
+                    hiddenLayersInputs = new[] { 1, 1 }
                 },
                 new NeuronInputCount
                 {
                     agentType = SimAgentTypes.Carnivorous, brainType = BrainType.Movement, inputCount = 7,
-                    outputCount = 1, hiddenLayersInputs = new[] { 3 }
+                    outputCount = 2, hiddenLayersInputs = new[] { 3 }
                 },
                 new NeuronInputCount
                 {
@@ -98,12 +114,12 @@ namespace NeuralNetworkDirectory.ECS
                 new NeuronInputCount
                 {
                     agentType = SimAgentTypes.Herbivore, brainType = BrainType.Eat, inputCount = 4, outputCount = 1,
-                    hiddenLayersInputs = new[] { 1,1 }
+                    hiddenLayersInputs = new[] { 1, 1 }
                 },
                 new NeuronInputCount
                 {
                     agentType = SimAgentTypes.Herbivore, brainType = BrainType.Movement, inputCount = 8,
-                    outputCount = 1, hiddenLayersInputs = new[] { 3 }
+                    outputCount = 2, hiddenLayersInputs = new[] { 3 }
                 },
                 new NeuronInputCount
                 {
@@ -113,12 +129,12 @@ namespace NeuralNetworkDirectory.ECS
                 new NeuronInputCount
                 {
                     agentType = SimAgentTypes.Scavenger, brainType = BrainType.Eat, inputCount = 4, outputCount = 1,
-                    hiddenLayersInputs = new[] { 1,1 }
+                    hiddenLayersInputs = new[] { 1, 1 }
                 },
                 new NeuronInputCount
                 {
                     agentType = SimAgentTypes.Scavenger, brainType = BrainType.ScavengerMovement, inputCount = 7,
-                    outputCount = 1, hiddenLayersInputs = new[] { 3 }
+                    outputCount = 4, hiddenLayersInputs = new[] { 3 }
                 },
                 new NeuronInputCount
                 {
@@ -252,20 +268,27 @@ namespace NeuralNetworkDirectory.ECS
             {
                 case SimAgentTypes.Carnivorous:
                     agent = new Carnivore<IVector, ITransform<IVector>>();
+                    agent.brainTypes = carnBrainTypes;
+                    agent.agentType = SimAgentTypes.Carnivorous;
                     break;
                 case SimAgentTypes.Herbivore:
                     agent = new Herbivore<IVector, ITransform<IVector>>();
+                    agent.brainTypes = herbBrainTypes;
+                    agent.agentType = SimAgentTypes.Herbivore;
                     break;
                 case SimAgentTypes.Scavenger:
                     agent = new Scavenger<IVector, ITransform<IVector>>();
+                    agent.brainTypes = scavBrainTypes;
+                    agent.agentType = SimAgentTypes.Scavenger;
                     break;
                 default:
                     throw new ArgumentException("Invalid agent type");
             }
-
+            
             var randomNode = new SimNode<IVector>();
             randomNode.SetCoordinate(new MyVector());
             agent.CurrentNode = randomNode;
+
             agent.Init();
             randomNode = (SimNode<IVector>)gridManager.GetRandomPosition();
 
@@ -295,7 +318,14 @@ namespace NeuralNetworkDirectory.ECS
                 var neuralNetComponent = new NeuralNetComponent();
                 ECSManager.AddComponent(entityID, new InputComponent());
                 ECSManager.AddComponent(entityID, neuralNetComponent);
-                ECSManager.AddComponent(entityID, new OutputComponent(5));
+                var num = agentType switch
+                {
+                    SimAgentTypes.Carnivorous => carnBrainTypes,
+                    SimAgentTypes.Herbivore => herbBrainTypes,
+                    SimAgentTypes.Scavenger => scavBrainTypes,
+                    _ => throw new ArgumentException("Invalid agent type")
+                };
+                ECSManager.AddComponent(entityID, new OutputComponent(agentType, num));
 
                 var brains = CreateBrain(agentType);
                 var genomes = new List<Genome>();
@@ -329,19 +359,6 @@ namespace NeuralNetworkDirectory.ECS
                 _agents[entityID] = agent;
                 entities[entityID] = go;
                 population[entityID] = genomes;
-
-                switch (agentType)
-                {
-                    case SimAgentTypes.Scavenger:
-                        _scavengers[entityID] = agent as Scavenger<IVector, ITransform<IVector>>;
-                        break;
-                    case SimAgentTypes.Carnivorous:
-                        _carnivores[entityID] = agent as Carnivore<IVector, ITransform<IVector>>;
-                        break;
-                    case SimAgentTypes.Herbivore:
-                        _herbivores[entityID] = agent as Herbivore<IVector, ITransform<IVector>>;
-                        break;
-                }
             }
         }
 
@@ -349,7 +366,7 @@ namespace NeuralNetworkDirectory.ECS
         {
             var brains = new List<NeuralNetComponent> { CreateSingleBrain(BrainType.Eat, SimAgentTypes.Herbivore) };
 
-            
+
             switch (agentType)
             {
                 case SimAgentTypes.Herbivore:

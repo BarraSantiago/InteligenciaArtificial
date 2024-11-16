@@ -32,6 +32,7 @@ namespace StateMachine.States.SimStates
             {
                 if (outputBrain1[0] > 0.5f && currentNode != null && currentNode.NodeType == foodTarget)
                     OnFlag?.Invoke(Flags.OnEat);
+                // TODO FIX THIS
                 if (outputBrain1[1] > 0.5f) OnFlag?.Invoke(Flags.OnSearchFood);
                 SpecialAction(outputBrain2);
             });

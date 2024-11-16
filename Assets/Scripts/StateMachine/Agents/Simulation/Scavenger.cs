@@ -42,15 +42,11 @@ namespace StateMachine.Agents.Simulation
                 target = targetPosition,
             };
             base.Init();
-            agentType = SimAgentTypes.Scavenger;
             foodTarget = SimNodeType.Carrion;
             FoodLimit = 20;
             movement = 5;
             Speed = movement * 1;
-            brainTypes[0] = BrainType.ScavengerMovement;
-            brainTypes[1] = BrainType.Flocking;
-            brainTypes[2] = BrainType.Eat;
-            
+         
             CalculateInputs();
         }
 
