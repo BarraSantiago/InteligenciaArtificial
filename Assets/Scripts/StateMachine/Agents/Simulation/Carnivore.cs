@@ -22,7 +22,10 @@ namespace StateMachine.Agents.Simulation
             FoodLimit = 1;
             movement = 2;
 
-            brainTypes = new[] { BrainType.Movement, BrainType.Attack, BrainType.Eat };
+            brainTypes[0] = BrainType.Movement;
+            brainTypes[1] = BrainType.Attack;
+            brainTypes[2] = BrainType.Eat;
+            
             CalculateInputs();
             OnAttack = () =>
             {
@@ -37,6 +40,7 @@ namespace StateMachine.Agents.Simulation
         {
             int brain = (int)BrainType.Attack;
             var inputCount = GetInputCount((BrainType)brain);
+            brain = GetBrainTypeKeyByValue((BrainType)brain);
             input[brain] = new float[inputCount];
             
             input[brain][0] = CurrentNode.GetCoordinate().X;
@@ -58,6 +62,7 @@ namespace StateMachine.Agents.Simulation
         {
             int brain = (int)BrainType.Movement;
             var inputCount = GetInputCount((BrainType)brain);
+            brain = GetBrainTypeKeyByValue((BrainType)brain);
             input[brain] = new float[inputCount];
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;

@@ -33,7 +33,7 @@ namespace NeuralNetworkDirectory.ECS
             {
                 NeuralNetComponent neuralNetwork = neuralNetworkComponents[entityId];
                 float[][] inputs = inputComponents[entityId].inputs;
-                float[] outputs = new float[1];
+                float[] outputs = new float[3];
 
                 Parallel.For(0, outputs.Length, i =>
                 {

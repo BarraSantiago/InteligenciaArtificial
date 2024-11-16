@@ -31,7 +31,11 @@ namespace StateMachine.Agents.Simulation
             base.Init();
             agentType = SimAgentTypes.Herbivore;
             foodTarget = SimNodeType.Bush;
-            brainTypes = new[] { BrainType.Movement, BrainType.Escape, BrainType.Eat };
+            
+            brainTypes[0] = BrainType.Movement;
+            brainTypes[1] = BrainType.Escape;
+            brainTypes[2] = BrainType.Eat;
+            
             CalculateInputs();
 
             hp = InitialHp;
@@ -41,6 +45,7 @@ namespace StateMachine.Agents.Simulation
         {
             int brain = (int)BrainType.Escape;
             var inputCount = GetInputCount((BrainType)brain);
+            brain = GetBrainTypeKeyByValue((BrainType)brain);
             input[brain] = new float[inputCount];
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
@@ -61,6 +66,7 @@ namespace StateMachine.Agents.Simulation
         {
             int brain = (int)BrainType.Movement;
             var inputCount = GetInputCount((BrainType)brain);
+            brain = GetBrainTypeKeyByValue((BrainType)brain);
             input[brain] = new float[inputCount];
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;

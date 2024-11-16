@@ -26,6 +26,7 @@ namespace NeuralNetworkDirectory.NeuralNet
 
             if (input.Length > weights.Length)
             {
+                // TODO Borrar esto
                 Debug.Log("Inputs " + input.Length + " Weights " + weights.Length + ". problem in layer " + layer);
                 return 0;
             }
@@ -33,7 +34,6 @@ namespace NeuralNetworkDirectory.NeuralNet
             {
                 a += weights[i] * input[i];
             }
-            Debug.Log(input.Length > 0 ? "No inputs" : "Same inputs and weights");
 
             a += bias;
 

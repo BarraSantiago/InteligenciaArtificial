@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using FlappyIa.GeneticAlg;
 using NeuralNetworkDirectory.ECS;
@@ -73,7 +74,7 @@ namespace StateMachine.Agents.Simulation
         Genome[] genomes;
         public float[][] output;
         public float[][] input;
-        public BrainType[] brainTypes;
+        public Dictionary<int, BrainType> brainTypes = new();
 
         public SimAgent()
         {
@@ -90,7 +91,7 @@ namespace StateMachine.Agents.Simulation
 
             OnMove += Move;
             OnEat += Eat;
-            
+
             FsmBehaviours();
 
             FsmTransitions();
@@ -100,15 +101,14 @@ namespace StateMachine.Agents.Simulation
 
         protected void CalculateInputs()
         {
-            int brainTypesCount = Enum.GetValues(typeof(BrainType)).Length;
+            int brainTypesCount = brainTypes.Count;
             input = new float[brainTypesCount][];
             output = new float[brainTypesCount][];
-            
+
             for (int i = 0; i < brainTypesCount; i++)
             {
-                var brainType = (BrainType)i;
+                var brainType = brainTypes[i];
                 input[i] = new float[GetInputCount(brainType)];
-                if(!brainTypes.Contains(brainType)) continue;
                 int outputCount = EcsPopulationManager.InputCountCache[(brainType, agentType)].outputCount;
                 output[i] = new float[outputCount];
             }
@@ -136,10 +136,10 @@ namespace StateMachine.Agents.Simulation
 
         private void FindFoodInputs()
         {
-            int brain = (int)BrainType.Eat;
+            int brain = GetBrainTypeKeyByValue(BrainType.Eat);
             var inputCount = GetInputCount((BrainType)brain);
             input[brain] = new float[inputCount];
-            
+
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
             INode<IVector> target = GetTarget(foodTarget);
@@ -194,11 +194,12 @@ namespace StateMachine.Agents.Simulation
 
         protected virtual object[] WalkTickParameters()
         {
-            int extraBrain = agentType == SimAgentTypes.Carnivorous ? (int)BrainType.Attack : (int)BrainType.Escape;
+            int extraBrain = agentType == SimAgentTypes.Carnivorous
+                ? GetBrainTypeKeyByValue(BrainType.Attack) : GetBrainTypeKeyByValue(BrainType.Escape);
             object[] objects =
             {
-                CurrentNode, TargetNode, transform, foodTarget, OnMove, output[(int)BrainType.Movement],
-                output[extraBrain]
+                CurrentNode, TargetNode, transform, foodTarget, OnMove, output[GetBrainTypeKeyByValue(BrainType.Movement)],
+                    output[extraBrain]
             };
             return objects;
         }
@@ -224,7 +225,7 @@ namespace StateMachine.Agents.Simulation
 
             if (CurrentNode.GetCoordinate().Equals(TargetNode.GetCoordinate())) return;
 
-            int brain = (int)BrainType.Movement;
+            int brain = GetBrainTypeKeyByValue(BrainType.Movement);
             var targetPos = CurrentNode.GetCoordinate();
             float speed = CalculateSpeed(output[brain][2]);
 
@@ -277,6 +278,19 @@ namespace StateMachine.Agents.Simulation
         protected int GetInputCount(BrainType brainType)
         {
             return InputCountCache.GetInputCount(agentType, brainType);
+        }
+
+        public int GetBrainTypeKeyByValue(BrainType value)
+        {
+            foreach (var kvp in brainTypes)
+            {
+                if (EqualityComparer<BrainType>.Default.Equals(kvp.Value, value))
+                {
+                    return kvp.Key;
+                }
+            }
+
+            throw new KeyNotFoundException("The value is not present in the brainTypes dictionary.");
         }
     }
 }

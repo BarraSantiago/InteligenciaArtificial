@@ -189,10 +189,10 @@ namespace NeuralNetworkDirectory.ECS
 
             for (int i = 0; i < behaviourCount; i++)
             {
-                var tasks = _scavengers.Select(entity => Task.Run(() => entity.Value.Fsm.MultiThreadTick(i)))
+                var tasks = _agents.Select(entity => Task.Run(() => entity.Value.Fsm.MultiThreadTick(i)))
                     .ToArray();
 
-                foreach (var entity in _scavengers)
+                foreach (var entity in _agents)
                 {
                     entity.Value.Fsm.MainThreadTick(i);
                 }
@@ -349,7 +349,7 @@ namespace NeuralNetworkDirectory.ECS
         {
             var brains = new List<NeuralNetComponent> { CreateSingleBrain(BrainType.Eat, SimAgentTypes.Herbivore) };
 
-            /*
+            
             switch (agentType)
             {
                 case SimAgentTypes.Herbivore:
@@ -367,7 +367,7 @@ namespace NeuralNetworkDirectory.ECS
                 default:
                     throw new ArgumentOutOfRangeException(nameof(agentType), agentType,
                         "Not prepared for this agent type");
-            }*/
+            }
 
             return brains;
         }
@@ -552,7 +552,7 @@ namespace NeuralNetworkDirectory.ECS
 
                 Parallel.ForEach(agent.brainTypes, brainType =>
                 {
-                    if (!brainData.TryGetValue(brainType, out var neuronDataList)) return;
+                    if (!brainData.TryGetValue(brainType.Value, out var neuronDataList)) return;
 
                     for (var i = 0; i < neuronDataList.Count; i++)
                     {
@@ -724,7 +724,7 @@ namespace NeuralNetworkDirectory.ECS
         {
             int highestCount = 0;
 
-            foreach (var entity in _scavengers.Values)
+            foreach (var entity in _agents.Values)
             {
                 int multiThreadCount = entity.Fsm.GetMultiThreadCount();
                 int mainThreadCount =

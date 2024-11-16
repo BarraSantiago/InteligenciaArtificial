@@ -50,7 +50,7 @@ namespace NeuralNetworkDirectory.AI
         {
             foreach (var brainType in _agents[agentId].brainTypes)
             {
-                switch (brainType)
+                switch (brainType.Value)
                 {
                     case BrainType.Movement:
                         break;
@@ -68,7 +68,7 @@ namespace NeuralNetworkDirectory.AI
         {
             foreach (var brainType in _agents[agentId].brainTypes)
             {
-                switch (brainType)
+                switch (brainType.Value)
                 {
                     case BrainType.Attack:
                         break;
@@ -86,7 +86,7 @@ namespace NeuralNetworkDirectory.AI
         {
             foreach (var brainType in _agents[agentId].brainTypes)
             {
-                switch (brainType)
+                switch (brainType.Value)
                 {
                     case BrainType.ScavengerMovement:
                         ScavengerMovementFC(agentId);

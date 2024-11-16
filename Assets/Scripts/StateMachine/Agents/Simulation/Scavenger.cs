@@ -47,7 +47,10 @@ namespace StateMachine.Agents.Simulation
             FoodLimit = 20;
             movement = 5;
             Speed = movement * 1;
-            brainTypes = new[] { BrainType.ScavengerMovement, BrainType.Flocking, BrainType.Eat };
+            brainTypes[0] = BrainType.ScavengerMovement;
+            brainTypes[1] = BrainType.Flocking;
+            brainTypes[2] = BrainType.Eat;
+            
             CalculateInputs();
         }
 
@@ -61,6 +64,7 @@ namespace StateMachine.Agents.Simulation
         {
             int brain = (int)BrainType.ScavengerMovement;
             var inputCount = GetInputCount((BrainType)brain);
+            brain = GetBrainTypeKeyByValue((BrainType)brain);
             input[brain] = new float[inputCount];
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
@@ -96,6 +100,7 @@ namespace StateMachine.Agents.Simulation
         {
             int brain = (int)BrainType.Flocking;
             var inputCount = GetInputCount((BrainType)brain);
+            brain = GetBrainTypeKeyByValue((BrainType)brain);
             input[brain] = new float[inputCount];
             
             targetPosition = GetTargetPosition();
@@ -215,8 +220,8 @@ namespace StateMachine.Agents.Simulation
 
         protected override void Move()
         {
-            float leftForce = output[(int)BrainType.ScavengerMovement][0];
-            float rightForce = output[(int)BrainType.ScavengerMovement][1];
+            float leftForce = output[GetBrainTypeKeyByValue(BrainType.ScavengerMovement)][0];
+            float rightForce = output[GetBrainTypeKeyByValue(BrainType.ScavengerMovement)][1];
 
             var pos = transform.position;
             var rotFactor = Math.Clamp(rightForce - leftForce, -1.0f, 1.0f);
@@ -263,7 +268,7 @@ namespace StateMachine.Agents.Simulation
         protected override object[] WalkTickParameters()
         {
             object[] objects =
-                { CurrentNode, transform, foodTarget, OnMove, output[(int)BrainType.ScavengerMovement] };
+                { CurrentNode, transform, foodTarget, OnMove, output[GetBrainTypeKeyByValue(BrainType.ScavengerMovement)] };
 
             return objects;
         }
