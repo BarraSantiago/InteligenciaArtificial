@@ -230,13 +230,9 @@ namespace StateMachine.Agents.Simulation
 
         protected virtual void Move()
         {
-            if (CurrentNode == null || TargetNode == null) return;
-
-            if (CurrentNode.GetCoordinate().Equals(TargetNode.GetCoordinate())) return;
-
             int brain = GetBrainTypeKeyByValue(BrainType.Movement);
             var targetPos = CurrentNode.GetCoordinate();
-            float speed = CalculateSpeed(output[brain][2]);
+            float speed = CalculateSpeed(output[brain][^1]);
 
             targetPos = CalculateNewPosition(targetPos, output[brain], speed);
 
