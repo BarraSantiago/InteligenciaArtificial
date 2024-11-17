@@ -11,7 +11,7 @@ namespace StateMachine.Agents.Simulation
 {
     public enum SimAgentTypes
     {
-        Carnivorous,
+        Carnivore,
         Herbivore,
         Scavenger
     }
@@ -109,6 +109,14 @@ namespace StateMachine.Agents.Simulation
             //UpdateInputs();
         }
 
+        public virtual void Reset()
+        {
+            Food = 0;
+            Fsm.ForceTransition(Behaviours.Walk);
+            UpdateInputs();
+            CalculateInputs();
+        }
+
         protected void CalculateInputs()
         {
             int brainTypesCount = brainTypes.Count;
@@ -204,7 +212,7 @@ namespace StateMachine.Agents.Simulation
 
         protected virtual object[] WalkTickParameters()
         {
-            int extraBrain = agentType == SimAgentTypes.Carnivorous
+            int extraBrain = agentType == SimAgentTypes.Carnivore
                 ? GetBrainTypeKeyByValue(BrainType.Attack)
                 : GetBrainTypeKeyByValue(BrainType.Escape);
             object[] objects =
@@ -224,7 +232,7 @@ namespace StateMachine.Agents.Simulation
 
         protected virtual object[] EatTickParameters()
         {
-            int extraBrain = agentType == SimAgentTypes.Carnivorous
+            int extraBrain = agentType == SimAgentTypes.Carnivore
                 ? GetBrainTypeKeyByValue(BrainType.Attack)
                 : GetBrainTypeKeyByValue(BrainType.Escape);
 

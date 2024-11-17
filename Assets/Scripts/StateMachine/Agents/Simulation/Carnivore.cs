@@ -28,6 +28,14 @@ namespace StateMachine.Agents.Simulation
             OnAttack += Attack;
         }
 
+        public override void Reset()
+        {
+            base.Reset();
+            HasAttacked = false;
+            HasKilled = false;
+            DamageDealt = 0;
+        }
+
         protected override void ExtraInputs()
         {
             int brain = GetBrainTypeKeyByValue(BrainType.Attack);

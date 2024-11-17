@@ -47,6 +47,16 @@ namespace StateMachine.Agents.Simulation
 
             CalculateInputs();
         }
+        
+        public override void Reset()
+        {
+            base.Reset();
+            boid = new Boid<IVector, ITransform<IVector>>
+            {
+                transform = Transform,
+                target = targetPosition,
+            };
+        }
 
         protected override void FsmBehaviours()
         {
@@ -63,7 +73,7 @@ namespace StateMachine.Agents.Simulation
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
 
-            var target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivorous, CurrentNode);
+            var target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, CurrentNode);
             if (target == null || target.CurrentNode == null)
             {
                 input[brain][2] = NoTarget;
@@ -251,7 +261,7 @@ namespace StateMachine.Agents.Simulation
 
             if (target == null)
             {
-                var nearestEntity = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivorous, CurrentNode);
+                var nearestEntity = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, CurrentNode);
                 if (nearestEntity != null)
                 {
                     target = nearestEntity.CurrentNode;

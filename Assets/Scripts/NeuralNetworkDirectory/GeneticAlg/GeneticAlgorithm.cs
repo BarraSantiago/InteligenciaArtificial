@@ -8,6 +8,7 @@ namespace FlappyIa.GeneticAlg
 {
     public class Genome
     {
+        // TODO Actualizar este valor de fitness
         public float fitness;
         public float[] genome;
 

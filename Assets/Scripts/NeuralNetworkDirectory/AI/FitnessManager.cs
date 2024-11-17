@@ -32,7 +32,7 @@ namespace NeuralNetworkDirectory.AI
         {
             switch (agentType)
             {
-                case SimAgentTypes.Carnivorous:
+                case SimAgentTypes.Carnivore:
                     CarnivoreFitnessCalculator(agentId);
                     break;
                 case SimAgentTypes.Herbivore:
@@ -74,7 +74,7 @@ namespace NeuralNetworkDirectory.AI
 
             var agent = _agents[agentId] as Herbivore<IVector, ITransform<IVector>>;
             var nearestPredatorNode =
-                EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivorous, agent?.CurrentNode);
+                EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, agent?.CurrentNode);
 
             IVector targetPosition;
 
@@ -100,7 +100,7 @@ namespace NeuralNetworkDirectory.AI
 
             var agent = _agents[agentId];
             var nearestPredatorNode =
-                EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivorous, agent.CurrentNode);
+                EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, agent.CurrentNode);
 
             IVector targetPosition;
 
@@ -281,7 +281,7 @@ namespace NeuralNetworkDirectory.AI
             var agent = _agents[agentId];
             var nearestCarrionNode = EcsPopulationManager.GetNearestNode(SimNodeType.Carrion, agent.CurrentNode);
             var nearestCorpseNode = EcsPopulationManager.GetNearestNode(SimNodeType.Corpse, agent.CurrentNode);
-            var nearestCarNode = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivorous, agent.CurrentNode);
+            var nearestCarNode = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, agent.CurrentNode);
 
             IVector targetPosition;
 
