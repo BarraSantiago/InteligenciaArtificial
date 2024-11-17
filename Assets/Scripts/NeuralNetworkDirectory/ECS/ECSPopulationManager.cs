@@ -55,7 +55,7 @@ namespace NeuralNetworkDirectory.ECS
         private int currentTurn;
         private float accumTime;
         private bool isRunning = true;
-        private FlockingManager flockingManager = new();
+        public static FlockingManager flockingManager = new();
         private Dictionary<uint, GameObject> entities = new();
         private static Dictionary<uint, SimAgentType> _agents = new();
         private static Dictionary<uint, Scavenger<IVector, ITransform<IVector>>> _scavengers = new();

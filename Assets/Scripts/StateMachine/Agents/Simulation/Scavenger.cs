@@ -47,7 +47,7 @@ namespace StateMachine.Agents.Simulation
 
             CalculateInputs();
         }
-        
+
         public override void Reset()
         {
             base.Reset();
@@ -56,6 +56,8 @@ namespace StateMachine.Agents.Simulation
                 transform = Transform,
                 target = targetPosition,
             };
+            boid.Init(EcsPopulationManager.flockingManager.Alignment, EcsPopulationManager.flockingManager.Cohesion,
+                EcsPopulationManager.flockingManager.Separation, EcsPopulationManager.flockingManager.Direction);
         }
 
         protected override void FsmBehaviours()
@@ -111,7 +113,6 @@ namespace StateMachine.Agents.Simulation
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
 
-            // Current direction of the boid
             if (targetPosition != null)
             {
                 IVector direction = (targetPosition - CurrentNode.GetCoordinate()).Normalized();
@@ -124,32 +125,42 @@ namespace StateMachine.Agents.Simulation
                 input[brain][3] = NoTarget;
             }
 
-            // Average position of neighboring boids
             IVector avgNeighborPosition = GetAverageNeighborPosition();
             input[brain][4] = avgNeighborPosition.X;
             input[brain][5] = avgNeighborPosition.Y;
 
-            // Average direction of neighboring boids
             IVector avgNeighborVelocity = GetAverageNeighborDirection();
             input[brain][6] = avgNeighborVelocity.X;
             input[brain][7] = avgNeighborVelocity.Y;
 
-            // Separation vector
             IVector separationVector = GetSeparationVector();
             input[brain][8] = separationVector.X;
             input[brain][9] = separationVector.Y;
 
-            // Alignment vector
             IVector alignmentVector = GetAlignmentVector();
-            input[brain][10] = alignmentVector.X;
-            input[brain][11] = alignmentVector.Y;
+            if (alignmentVector == null)
+            {
+                input[brain][10] = NoTarget;
+                input[brain][11] = NoTarget;
+            }
+            else
+            {
+                input[brain][10] = alignmentVector.X;
+                input[brain][11] = alignmentVector.Y;
+            }
 
-            // Cohesion vector
             IVector cohesionVector = GetCohesionVector();
-            input[brain][12] = cohesionVector.X;
-            input[brain][13] = cohesionVector.Y;
+            if (cohesionVector == null)
+            {
+                input[brain][12] = NoTarget;
+                input[brain][13] = NoTarget;
+            }
+            else
+            {
+                input[brain][12] = cohesionVector.X;
+                input[brain][13] = cohesionVector.Y;
+            }
 
-            // Distance to target
             if (targetPosition == null)
             {
                 input[brain][14] = NoTarget;
@@ -237,9 +248,9 @@ namespace StateMachine.Agents.Simulation
             var currentPos = new MyVector(Transform.position.X, Transform.position.Y);
             currentPos.X += rightForce;
             currentPos.Y += leftForce;
-            
+
             SetPosition(currentPos);
-            
+
             if (rightForce > leftForce)
             {
             }

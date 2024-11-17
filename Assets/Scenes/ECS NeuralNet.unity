@@ -253,7 +253,7 @@ MonoBehaviour:
   herbivoreCount: 1
   scavengerCount: 1
   eliteCount: 0
-  generationDuration: 20
+  generationDuration: 5
   mutationChance: 0.1
   mutationRate: 0.01
   gridWidth: 50

@@ -113,7 +113,6 @@ namespace StateMachine.Agents.Simulation
         {
             Food = 0;
             Fsm.ForceTransition(Behaviours.Walk);
-            UpdateInputs();
             CalculateInputs();
         }
 
