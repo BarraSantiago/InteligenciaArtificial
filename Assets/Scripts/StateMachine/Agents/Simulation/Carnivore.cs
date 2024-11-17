@@ -13,7 +13,10 @@ namespace StateMachine.Agents.Simulation
         where TVector : IVector, IEquatable<TVector>
     {
         public Action OnAttack { get; set; }
+        public bool HasAttacked { get; private set; }
+        public bool HasKilled { get; private set; }
 
+        public int DamageDealt { get; private set; } = 0;
         public override void Init()
         {
             base.Init();
@@ -22,13 +25,7 @@ namespace StateMachine.Agents.Simulation
             movement = 2;
 
             CalculateInputs();
-            OnAttack = () =>
-            {
-                SimAgent<IVector, ITransform<IVector>> target =
-                    EcsPopulationManager.GetEntity(SimAgentTypes.Herbivore, CurrentNode);
-                if (target == null) return;
-                if (target is Herbivore<TVector, TTransform> herbivore) herbivore.Hp--;
-            };
+            OnAttack += Attack;
         }
 
         protected override void ExtraInputs()
@@ -101,8 +98,30 @@ namespace StateMachine.Agents.Simulation
 
         private object[] AttackEnterParameters()
         {
-            object[] objects = { CurrentNode, OnAttack, output[0], output[1] };
+            object[] objects = { OnAttack, output[0], output[1] };
             return objects;
+        }
+
+
+        private void Attack()
+        {
+            SimAgent<IVector, ITransform<IVector>> target =
+                EcsPopulationManager.GetEntity(SimAgentTypes.Herbivore, CurrentNode);
+            if (target is not Herbivore<TVector, TTransform> herbivore ||
+                !Approximatly(herbivore.CurrentNode.GetCoordinate(), currentNode.GetCoordinate(), 0.1f)) return;
+            
+            herbivore.Hp--;
+            HasAttacked = true;
+            DamageDealt++;
+            if (herbivore.Hp <= 0)
+            {
+                HasKilled = true;
+            }
+        }
+
+        private bool Approximatly(IVector coord1, IVector coord2, float tolerance)
+        {
+            return Math.Abs(coord1.X - coord2.X) <= tolerance && Math.Abs(coord1.Y - coord2.Y) <= tolerance;
         }
     }
 }

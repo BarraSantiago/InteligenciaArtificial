@@ -12,23 +12,19 @@ namespace StateMachine.States.SimStates
         {
             var behaviours = new BehaviourActions();
 
-            var currentNode = parameters[0] as SimNode<Vector2>;
-            var onAttack = parameters[1] as Action;
-            var outputBrain1 = (float[])parameters[2];
-            var outputBrain2 = (float[])parameters[3];
+            var onAttack = parameters[0] as Action;
+            var outputBrain1 = (float[])parameters[1];
+            var outputBrain2 = (float[])parameters[2];
 
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {
                 onAttack?.Invoke();
-                
             });
 
             behaviours.SetTransitionBehaviour(() =>
             {
                 if(outputBrain1[0] > 0.5f) OnFlag?.Invoke(Flags.OnEat);
-                if(outputBrain1[1] > 0.5f) OnFlag?.Invoke(Flags.OnSearchFood);
                 if(outputBrain2[0] > 0.5f) OnFlag?.Invoke(Flags.OnAttack);
-                
             });
             return behaviours;
         }

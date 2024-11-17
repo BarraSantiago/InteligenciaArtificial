@@ -57,8 +57,8 @@ namespace StateMachine.Agents.Simulation
 
         protected int movement = 3;
         protected SimNodeType foodTarget;
-        protected int FoodLimit = 5;
-        protected int Food = 0;
+        public int FoodLimit { get; protected set; }= 5;
+        public int Food { get; protected set; }= 0;
         protected Action OnMove;
         protected Action OnEat;
         protected float dt;
