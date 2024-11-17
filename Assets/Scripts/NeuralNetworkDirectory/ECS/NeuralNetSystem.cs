@@ -37,7 +37,9 @@ namespace NeuralNetworkDirectory.ECS
                 float[][] inputs = inputComponents[entityId].inputs;
                 float[] outputs = new float[3];
 
-                Parallel.For(0, MaxBrains, i =>
+                // TODO Parallel for rompe los outputs, cada tanto se saltea el for j o le da de output informacion de otra layer.
+                //Parallel.For(0, MaxBrains, i =>
+                for (int i = 0; i < MaxBrains; i++)
                 {
                     for (int j = 0; j < neuralNetwork.Layers[i].Count; j++)
                     {
@@ -47,10 +49,10 @@ namespace NeuralNetworkDirectory.ECS
                     }
 
                     // TODO Check why outputs dont match
-                    if(neuralNetwork.Layers[i][^1].OutputsCount != outputs.Length) return;
+                    if (neuralNetwork.Layers[i][^1].OutputsCount != outputs.Length) return;
 
                     outputComponents[entityId].outputs[i] = outputs;
-                });
+                }
             });
         }
 
