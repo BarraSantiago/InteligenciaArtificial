@@ -727,16 +727,6 @@ namespace NeuralNetworkDirectory.ECS
             return nearestNode;
         }
 
-        public static IVector Vec2ToIVector(Vector2 vec)
-        {
-            return new MyVector(vec.x, vec.y);
-        }
-
-        public static SimNode<IVector> Vec2ToIVector(INode<IVector> node)
-        {
-            return new SimNode<IVector>(node.GetCoordinate());
-        }
-
         private int GetHighestBehaviourCount()
         {
             int highestCount = 0;
