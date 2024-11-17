@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using FlappyIa.GeneticAlg;
 using NeuralNetworkDirectory.ECS;
 using NeuralNetworkDirectory.NeuralNet;
@@ -38,18 +37,22 @@ namespace StateMachine.Agents.Simulation
             Attack
         }
 
-        public TTransform transform = new();
+        public virtual TTransform Transform
+        {
+            get => transform;
+            set => transform = value;
+        }
 
         public virtual INode<IVector> CurrentNode
         {
-            get => currentNode;
-            set
+            get
             {
-                currentNode = value;
-                transform.position = value.GetCoordinate();
+                return EcsPopulationManager.graph.NodesType[(int)Transform.position.X, (int)Transform.position.Y];
             }
+            private set { }
         }
 
+        protected TTransform transform = new TTransform();
         protected INode<IVector> currentNode = new SimNode<IVector>();
         public bool CanReproduce() => Food >= FoodLimit;
         public SimAgentTypes agentType { get; set; }
@@ -57,8 +60,8 @@ namespace StateMachine.Agents.Simulation
 
         protected int movement = 3;
         protected SimNodeType foodTarget;
-        public int FoodLimit { get; protected set; }= 5;
-        public int Food { get; protected set; }= 0;
+        public int FoodLimit { get; protected set; } = 5;
+        public int Food { get; protected set; } = 0;
         protected Action OnMove;
         protected Action OnEat;
         protected float dt;
@@ -235,18 +238,16 @@ namespace StateMachine.Agents.Simulation
         protected virtual void Move()
         {
             int brain = GetBrainTypeKeyByValue(BrainType.Movement);
-            var targetPos = CurrentNode.GetCoordinate();
             float speed = CalculateSpeed(output[brain][^1]);
 
+            IVector targetPos = new MyVector(CurrentNode.GetCoordinate().X, CurrentNode.GetCoordinate().Y);
             targetPos = CalculateNewPosition(targetPos, output[brain], speed);
 
-            if (EcsPopulationManager.graph.IsWithinGraphBorders(targetPos))
-            {
-                CurrentNode = EcsPopulationManager.CoordinateToNode(targetPos);
-            }
-        }
+            if (!EcsPopulationManager.graph.IsWithinGraphBorders(targetPos)) return;
 
-        
+            var newPos = EcsPopulationManager.CoordinateToNode(targetPos);
+            if (newPos != null) SetPosition(newPos.GetCoordinate());
+        }
 
         private float CalculateSpeed(float rawSpeed)
         {
@@ -292,6 +293,12 @@ namespace StateMachine.Agents.Simulation
         protected int GetInputCount(BrainType brainType)
         {
             return InputCountCache.GetInputCount(agentType, brainType);
+        }
+        
+        public void SetPosition(IVector position)
+        {
+            if(!EcsPopulationManager.graph.IsWithinGraphBorders(position)) return;
+            Transform.position = position;
         }
 
         public int GetBrainTypeKeyByValue(BrainType value)

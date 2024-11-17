@@ -13,7 +13,6 @@ using Pathfinder;
 using Pathfinder.Graph;
 using StateMachine.Agents.Simulation;
 using Utils;
-using Random = UnityEngine.Random;
 
 
 namespace NeuralNetworkDirectory.ECS
@@ -255,11 +254,8 @@ namespace NeuralNetworkDirectory.ECS
                 SimAgentTypes.Scavenger => scavengerPrefab,
                 _ => throw new ArgumentException("Invalid agent type")
             };
-
-            var node = gridManager.GetRandomPosition().GetCoordinate();
-            Vector2 position = new Vector2();
-            position.x = node.X;
-            position.y = node.Y;
+            var randomNode = gridManager.GetRandomPosition();
+            var position = new Vector3(randomNode.GetCoordinate().X, randomNode.GetCoordinate().Y);
             go = Instantiate(prefab, position, Quaternion.identity);
 
             SimAgentType agent;
@@ -285,21 +281,8 @@ namespace NeuralNetworkDirectory.ECS
                     throw new ArgumentException("Invalid agent type");
             }
             
-            var randomNode = new SimNode<IVector>();
-            randomNode.SetCoordinate(new MyVector());
-            agent.CurrentNode = randomNode;
-
+            agent.SetPosition(randomNode.GetCoordinate());
             agent.Init();
-            randomNode = (SimNode<IVector>)gridManager.GetRandomPosition();
-
-            if (randomNode != null)
-            {
-                agent.CurrentNode = randomNode;
-            }
-            else
-            {
-                Debug.LogError("Failed to get a random position for the agent.");
-            }
 
             if (agentType != SimAgentTypes.Scavenger) return agent;
 
@@ -659,8 +642,11 @@ namespace NeuralNetworkDirectory.ECS
 
         public static INode<IVector> CoordinateToNode(IVector coordinate)
         {
-            return graph.NodesType.Cast<INode<IVector>>()
-                .FirstOrDefault(node => node.GetCoordinate().Equals(coordinate));
+            if(coordinate.X < 0 || coordinate.Y < 0 || coordinate.X >= graph.MaxX || coordinate.Y >= graph.MaxY)
+            {
+                return null;
+            }
+            return graph.NodesType[(int)coordinate.X, (int)coordinate.Y];
         }
 
         public void StartSimulation()

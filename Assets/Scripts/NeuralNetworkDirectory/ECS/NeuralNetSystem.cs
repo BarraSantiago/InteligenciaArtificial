@@ -30,7 +30,6 @@ namespace NeuralNetworkDirectory.ECS
         protected override void Execute(float deltaTime)
         {
             const int MaxBrains = 3;
-            //arreglar esto
             Parallel.ForEach(queriedEntities, parallelOptions, entityId =>
             {
                 NeuralNetComponent neuralNetwork = neuralNetworkComponents[entityId];
@@ -43,12 +42,10 @@ namespace NeuralNetworkDirectory.ECS
                 {
                     for (int j = 0; j < neuralNetwork.Layers[i].Count; j++)
                     {
-                        // el input de la siguiente capa es el output de la capa anterior 
                         outputs = neuralNetwork.Layers[i][j].Synapsis(inputs[i], i);
                         inputs[i] = outputs;
                     }
 
-                    // TODO Check why outputs dont match
                     if (neuralNetwork.Layers[i][^1].OutputsCount != outputs.Length) return;
 
                     outputComponents[entityId].outputs[i] = outputs;

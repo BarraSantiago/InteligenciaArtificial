@@ -253,7 +253,7 @@ namespace NeuralNetworkDirectory.AI
             if (neighborCount > 0)
             {
                 averageDirection /= neighborCount;
-                var agentDirection = agent.transform.forward.Normalized();
+                var agentDirection = agent.Transform.forward.Normalized();
                 var alignmentDotProduct = IVector.Dot(agentDirection, averageDirection.Normalized());
 
                 if (alignmentDotProduct < 0.9f)
@@ -328,9 +328,10 @@ namespace NeuralNetworkDirectory.AI
         {
             var agent = _agents[agentId];
             var currentPosition = agent.CurrentNode.GetCoordinate();
-            IVector agentDirection = agent.transform.forward.Normalized();
+            IVector agentDirection = agent.Transform.forward?.Normalized();
 
             var directionToTarget = (targetPosition - currentPosition).Normalized();
+            if(directionToTarget == null || agentDirection == null) return false;
             var dotProduct = IVector.Dot(directionToTarget, agentDirection);
 
             return dotProduct > 0.9f;

@@ -5,10 +5,10 @@ namespace Pathfinder.Graph
 {
     public class Sim2Graph : SimGraph<SimNode<IVector>, SimCoordinate, IVector>
     {
-        private int MinX => 0;
-        private int MaxX => CoordNodes.GetLength(0);
-        private int MinY => 0;
-        private int MaxY => CoordNodes.GetLength(1);
+        public int MinX => 0;
+        public int MaxX => CoordNodes.GetLength(0);
+        public int MinY => 0;
+        public int MaxY => CoordNodes.GetLength(1);
         public Sim2Graph(int x, int y, float cellSize) : base(x, y, cellSize)
         {
         }

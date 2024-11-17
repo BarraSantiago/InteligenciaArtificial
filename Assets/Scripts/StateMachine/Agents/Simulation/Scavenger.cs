@@ -18,27 +18,25 @@ namespace StateMachine.Agents.Simulation
         public float Speed;
         public float RotSpeed = 20.0f;
         private IVector targetPosition = new MyVector();
-        private IVector currentPosition = new MyVector();
-        public override INode<IVector> CurrentNode {
-            get => currentNode;
+
+        public override TTransform Transform
+        {
+            get => transform;
             set
             {
-                currentPosition = value.GetCoordinate();
-                currentNode.SetCoordinate(currentPosition);
-                transform.position = value.GetCoordinate();
-                boid.transform.position = value.GetCoordinate();
-                boid.transform.forward = (targetPosition - CurrentNode.GetCoordinate()).Normalized();
+                transform = value;
+                boid.transform.position = value.position;
+                boid.transform.forward = (targetPosition - value.position).Normalized();
             }
-            
         }
 
         public override void Init()
         {
             targetPosition = GetTargetPosition();
-            transform.forward = (targetPosition - CurrentNode.GetCoordinate()).Normalized();
+            Transform.forward = (targetPosition - CurrentNode.GetCoordinate()).Normalized();
             boid = new Boid<IVector, ITransform<IVector>>
             {
-                transform = transform,
+                transform = Transform,
                 target = targetPosition,
             };
             base.Init();
@@ -46,7 +44,7 @@ namespace StateMachine.Agents.Simulation
             FoodLimit = 20;
             movement = 5;
             Speed = movement * 1;
-         
+
             CalculateInputs();
         }
 
@@ -60,7 +58,7 @@ namespace StateMachine.Agents.Simulation
         {
             int brain = GetBrainTypeKeyByValue(BrainType.ScavengerMovement);
             var inputCount = GetInputCount(BrainType.ScavengerMovement);
-            
+
             input[brain] = new float[inputCount];
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
@@ -97,7 +95,7 @@ namespace StateMachine.Agents.Simulation
             int brain = GetBrainTypeKeyByValue(BrainType.Flocking);
             var inputCount = GetInputCount(BrainType.Flocking);
             input[brain] = new float[inputCount];
-            
+
             targetPosition = GetTargetPosition();
 
             input[brain][0] = CurrentNode.GetCoordinate().X;
@@ -216,23 +214,24 @@ namespace StateMachine.Agents.Simulation
         protected override void Move()
         {
             int index = GetBrainTypeKeyByValue(BrainType.ScavengerMovement);
-            if(output[index].Length != 2) return;
+            if (output[index].Length != 2) return;
             float leftForce = output[index][0];
             float rightForce = output[index][1];
 
-            var pos = transform.position;
+            var pos = Transform.position;
             var rotFactor = Math.Clamp(rightForce - leftForce, -1.0f, 1.0f);
             //transform.rotation *= Quaternion.AngleAxis(rotFactor * RotSpeed * dt, Vector3.up);
             //pos += transform.forward * (Math.Abs(rightForce + leftForce) * 0.5f * Speed * dt);
             //transform.position = pos;
 
-            var currentPos = CurrentNode.GetCoordinate();
+            var currentPos = new MyVector(Transform.position.X, Transform.position.Y);
             currentPos.X += rightForce;
             currentPos.Y += leftForce;
-            CurrentNode.SetCoordinate(currentPos);
+            
+            SetPosition(currentPos);
+            
             if (rightForce > leftForce)
             {
-                
             }
             else
             {
@@ -243,7 +242,7 @@ namespace StateMachine.Agents.Simulation
         protected override INode<IVector> GetTarget(SimNodeType nodeType = SimNodeType.Empty)
         {
             INode<IVector> target = EcsPopulationManager.GetNearestNode(nodeType, CurrentNode);
-            
+
 
             if (target == null)
             {
