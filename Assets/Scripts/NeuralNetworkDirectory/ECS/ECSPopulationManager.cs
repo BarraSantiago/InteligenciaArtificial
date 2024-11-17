@@ -61,9 +61,9 @@ namespace NeuralNetworkDirectory.ECS
         private static Dictionary<uint, Scavenger<IVector, ITransform<IVector>>> _scavengers = new();
         private static Dictionary<uint, Herbivore<IVector, ITransform<IVector>>> _herbivores = new();
         private static Dictionary<uint, Carnivore<IVector, ITransform<IVector>>> _carnivores = new();
-        private Dictionary<int, BrainType> herbBrainTypes = new();
-        private Dictionary<int, BrainType> scavBrainTypes = new();
-        private Dictionary<int, BrainType> carnBrainTypes = new();
+        private static Dictionary<int, BrainType> herbBrainTypes = new();
+        private static Dictionary<int, BrainType> scavBrainTypes = new();
+        private static Dictionary<int, BrainType> carnBrainTypes = new();
         public static Dictionary<(BrainType, SimAgentTypes), NeuronInputCount> InputCountCache;
         private static readonly int BrainsAmount = Enum.GetValues(typeof(BrainType)).Length;
 
@@ -514,10 +514,11 @@ namespace NeuralNetworkDirectory.ECS
                 var agentId = agentEntry.Key;
                 var brainDict = agentEntry.Value;
 
-                if (_agents[agentId].agentType == agentType && brainDict.ContainsKey(brainType))
-                {
-                    genomes.AddRange(brainDict[brainType]);
-                }
+                if (_agents[agentId].agentType != agentType || !brainDict.ContainsKey(brainType)) continue;
+                
+                genomes.AddRange(brainDict[brainType]);
+                genomes[^1].fitness = ECSManager.GetComponent<NeuralNetComponent>(agentId).Fitness[_agents[agentId]
+                    .GetBrainTypeKeyByValue(brainType)];
             }
 
             return genomes;
@@ -757,6 +758,26 @@ namespace NeuralNetworkDirectory.ECS
             }
 
             return highestCount;
+        }
+        
+        public static int GetBrainTypeKeyByValue(BrainType value, SimAgentTypes agentType)
+        {
+            var brainTypes = agentType switch
+            {
+                SimAgentTypes.Carnivore => carnBrainTypes,
+                SimAgentTypes.Herbivore => herbBrainTypes,
+                SimAgentTypes.Scavenger => scavBrainTypes,
+                _ => throw new ArgumentException("Invalid agent type")
+            };
+            foreach (var kvp in brainTypes)
+            {
+                if (EqualityComparer<BrainType>.Default.Equals(kvp.Value, value))
+                {
+                    return kvp.Key;
+                }
+            }
+
+            throw new KeyNotFoundException("The value is not present in the brainTypes dictionary.");
         }
 
         private void OnDrawGizmos()

@@ -249,9 +249,9 @@ MonoBehaviour:
   carnivorePrefab: {fileID: 2361122291266281152, guid: cac64144ce4115a47bcfcb557e9cc1f8, type: 3}
   herbivorePrefab: {fileID: 5834816149835595398, guid: 103c23fd25719fe41aaf5f0b17682277, type: 3}
   scavengerPrefab: {fileID: 3408830415718337229, guid: 091a0d9e6f4683241bdf1f0217fe49f9, type: 3}
-  carnivoreCount: 1
-  herbivoreCount: 1
-  scavengerCount: 1
+  carnivoreCount: 5
+  herbivoreCount: 5
+  scavengerCount: 5
   eliteCount: 0
   generationDuration: 5
   mutationChance: 0.1
