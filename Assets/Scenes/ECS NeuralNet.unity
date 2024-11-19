@@ -246,9 +246,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a112d98ecacf488a9c8d9a9c4c832381, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  carnivorePrefab: {fileID: 2361122291266281152, guid: cac64144ce4115a47bcfcb557e9cc1f8, type: 3}
-  herbivorePrefab: {fileID: 5834816149835595398, guid: 103c23fd25719fe41aaf5f0b17682277, type: 3}
-  scavengerPrefab: {fileID: 3408830415718337229, guid: 091a0d9e6f4683241bdf1f0217fe49f9, type: 3}
+  carnivoreMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  carnivoreMat: {fileID: 2100000, guid: 04b67b1aa6af44245889bf0bfb8b412a, type: 2}
+  herbivoreMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+  herbivoreMat: {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  scavengerMesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+  scavengerMat: {fileID: 2100000, guid: f053c779a3c9ee941a2859146417e7a0, type: 2}
   carnivoreCount: 1
   herbivoreCount: 1
   scavengerCount: 1
