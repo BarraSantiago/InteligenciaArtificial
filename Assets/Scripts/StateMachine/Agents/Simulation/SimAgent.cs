@@ -65,7 +65,7 @@ namespace StateMachine.Agents.Simulation
         protected Action OnMove;
         protected Action OnEat;
         protected float dt;
-        protected const int NoTarget = -99999;
+        protected const int NoTarget = -1;
 
         protected SimNode<TVector> TargetNode
         {

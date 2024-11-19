@@ -169,5 +169,14 @@ namespace ECS.Patron
         {
             flags[typeof(TFlagType)].TryRemove(entityID, out _);
         }
+
+        public static void RemoveEntity(uint agentId)
+        {
+            entities.TryRemove(agentId, out _);
+            foreach (var component in components)
+                component.Value.TryRemove(agentId, out _);
+            foreach (var flag in flags)
+                flag.Value.TryRemove(agentId, out _);
+        }
     }
 }

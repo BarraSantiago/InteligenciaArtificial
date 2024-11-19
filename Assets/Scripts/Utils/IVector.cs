@@ -111,7 +111,7 @@ namespace Utils
 
         public static MyVector NoTarget()
         {
-            return new MyVector(-99999, -99999);
+            return new MyVector(-1, -1);
         }
 
         public bool Equals(IVector other)

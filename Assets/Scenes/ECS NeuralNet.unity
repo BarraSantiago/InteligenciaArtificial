@@ -249,16 +249,18 @@ MonoBehaviour:
   carnivorePrefab: {fileID: 2361122291266281152, guid: cac64144ce4115a47bcfcb557e9cc1f8, type: 3}
   herbivorePrefab: {fileID: 5834816149835595398, guid: 103c23fd25719fe41aaf5f0b17682277, type: 3}
   scavengerPrefab: {fileID: 3408830415718337229, guid: 091a0d9e6f4683241bdf1f0217fe49f9, type: 3}
-  carnivoreCount: 5
-  herbivoreCount: 5
-  scavengerCount: 5
+  carnivoreCount: 1
+  herbivoreCount: 1
+  scavengerCount: 1
   eliteCount: 0
-  generationDuration: 5
+  generationDuration: 3
   mutationChance: 0.1
   mutationRate: 0.01
+  Generation: 0
   gridWidth: 50
   gridHeight: 50
   generationTurns: 100
+  speed: 1
 --- !u!4 &1659154293
 Transform:
   m_ObjectHideFlags: 0
@@ -335,7 +337,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 8.781166
+  orthographic size: 25
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -360,7 +362,7 @@ Transform:
   m_GameObject: {fileID: 1801325625}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4, y: 4, z: -13.42}
+  m_LocalPosition: {x: 25, y: 25, z: -13.42}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

@@ -39,8 +39,7 @@ namespace Pathfinder.Graph
         {
             int x = random.Next(0, Width);
             int y = random.Next(0, Height);
-            var node = EcsPopulationManager.graph.NodesType[x, y];
-            return node;
+            return EcsPopulationManager.graph.NodesType[x, y];
         }
 
         public SimCoordinate GetNode(Vector3 position)

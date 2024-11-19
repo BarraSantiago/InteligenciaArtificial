@@ -105,6 +105,7 @@ namespace StateMachine.Agents.Simulation
             var node = CurrentNode;
             node.NodeType = SimNodeType.Corpse;
             node.Food = FoodDropped;
+            EcsPopulationManager.RemoveEntity(this as SimAgent<IVector, ITransform<IVector>>);
         }
 
         protected override void ExtraBehaviours()
