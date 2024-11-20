@@ -50,7 +50,6 @@ namespace StateMachine.Agents.Simulation
         }
 
         protected TTransform transform = new TTransform();
-        protected INode<IVector> currentNode = new SimNode<IVector>();
         public bool CanReproduce() => Food >= FoodLimit;
         public SimAgentTypes agentType { get; set; }
         public FSM<Behaviours, Flags> Fsm;
@@ -237,7 +236,13 @@ namespace StateMachine.Agents.Simulation
             return objects;
         }
 
-        private void Eat() => Food++;
+        private void Eat()
+        {
+            if (CurrentNode.Food <= 0) return;
+            Food++;
+            CurrentNode.Food--;
+            if(CurrentNode.Food <= 0) CurrentNode.NodeType = SimNodeType.Empty;
+        }
 
         protected virtual void Move()
         {

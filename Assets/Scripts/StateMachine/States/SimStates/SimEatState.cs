@@ -71,7 +71,8 @@ namespace StateMachine.States.SimStates
                 distanceToFood = new MyVector(foodNode.GetCoordinate().X - currentPos.X,
                     foodNode.GetCoordinate().Y - currentPos.Y);
 
-                if (foodNode is not { Food: > 0 } || distanceToFood.Magnitude() > maxDistance.Magnitude()) return;
+                if (foodNode is not { Food: > 0 } || foodNode.NodeType != SimNodeType.Carrion ||
+                    distanceToFood.Magnitude() > maxDistance.Magnitude()) return;
 
                 onEat?.Invoke();
             });

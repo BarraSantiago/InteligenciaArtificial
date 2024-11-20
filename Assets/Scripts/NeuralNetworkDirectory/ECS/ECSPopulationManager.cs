@@ -472,20 +472,26 @@ namespace NeuralNetworkDirectory.ECS
             ECSManager.GetSystem<NeuralNetSystem>().Deinitialize();
             if (Generation % 5 == 0) Save("NeuronData", Generation);
 
+            if (remainingPopulation)
+            {
+                foreach (var agent in _agents.Values)
+                {
+                    Debug.Log(agent.agentType + " survived.");
+                }
+            }
+
             CleanMap();
             InitializePlants();
 
-           
-            
             FillPopulation();
 
             if (!remainingPopulation)
             {
                 _population.Clear();
-                
+
                 return;
             }
-            
+
             Dictionary<SimAgentTypes, Dictionary<BrainType, Genome[]>> genomes = new()
             {
                 [SimAgentTypes.Scavenger] = new Dictionary<BrainType, Genome[]>(),
@@ -499,14 +505,13 @@ namespace NeuralNetworkDirectory.ECS
                 [SimAgentTypes.Carnivore] = new Dictionary<BrainType, int>()
             };
 
-            _population.Clear();
-
             CreateNewGenomes(genomes);
-            
+
             BrainsHandler(indexes, genomes);
         }
 
-        private void BrainsHandler(Dictionary<SimAgentTypes, Dictionary<BrainType, int>> indexes, Dictionary<SimAgentTypes, Dictionary<BrainType, Genome[]>> genomes)
+        private void BrainsHandler(Dictionary<SimAgentTypes, Dictionary<BrainType, int>> indexes,
+            Dictionary<SimAgentTypes, Dictionary<BrainType, Genome[]>> genomes)
         {
             foreach (KeyValuePair<uint, SimAgentType> agent in _agents)
             {
@@ -532,16 +537,23 @@ namespace NeuralNetworkDirectory.ECS
                         _population[agent.Key][brain] = new List<Genome>();
                     }
 
-                    neuralNetComponent.SetWeights(brainId, genomes[agentType][brain][index].genome);
-                    _population[agent.Key][brain].Add(genomes[agentType][brain][index]);
-                    agent.Value.Transform = new ITransform<IVector>(new MyVector(
-                        gridManager.GetRandomPosition().GetCoordinate().X,
-                        gridManager.GetRandomPosition().GetCoordinate().Y));
-                    agent.Value.Reset();
-
-                    if (!_agents.ContainsKey(agent.Key))
+                    if (index < genomes[agentType][brain].Length)
                     {
-                        CreateAgent(agentType);
+                        neuralNetComponent.SetWeights(brainId, genomes[agentType][brain][index].genome);
+                        _population[agent.Key][brain].Add(genomes[agentType][brain][index]);
+                        agent.Value.Transform = new ITransform<IVector>(new MyVector(
+                            gridManager.GetRandomPosition().GetCoordinate().X,
+                            gridManager.GetRandomPosition().GetCoordinate().Y));
+                        agent.Value.Reset();
+
+                        if (!_agents.ContainsKey(agent.Key))
+                        {
+                            CreateAgent(agentType);
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"Index {index} is out of bounds for genomes array of length {genomes[agentType][brain].Length}");
                     }
                 }
             }
@@ -599,7 +611,7 @@ namespace NeuralNetworkDirectory.ECS
 
         private void InitializePlants()
         {
-            for (int i = 0; i < plantCount; i++)
+            for (int i = 0; i < plantCount * 5; i++)
             {
                 var plantPosition = gridManager.GetRandomPosition();
                 plantPosition.NodeType = SimNodeType.Bush;
@@ -800,18 +812,18 @@ namespace NeuralNetworkDirectory.ECS
             return insideRadiusBoids;
         }
 
-        public static INode<IVector> GetNearestNode(SimNodeType carrion, IVector position)
+        public static INode<IVector> GetNearestNode(SimNodeType nodeType, IVector position)
         {
             INode<IVector> nearestNode = null;
             float minDistance = float.MaxValue;
 
             foreach (var node in graph.NodesType)
             {
-                if (node.NodeType != carrion) continue;
+                if (node.NodeType != nodeType) continue;
 
                 float distance = IVector.Distance(position, node.GetCoordinate());
 
-                if (minDistance > distance) continue;
+                if (minDistance < distance) continue;
 
                 minDistance = distance;
 

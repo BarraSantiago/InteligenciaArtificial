@@ -47,6 +47,12 @@ namespace NeuralNetworkDirectory.NeuralNet
 
             return fromId + weights.Length;
         }
+        
+        private float Tanh(float a)
+        {
+            return (float)Math.Tanh(a);
+        }
+
 
         public float[] GetWeights()
         {

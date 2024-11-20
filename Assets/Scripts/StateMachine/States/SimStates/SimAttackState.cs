@@ -1,8 +1,6 @@
 ﻿using System;
-using Pathfinder;
 using StateMachine.Agents.Simulation;
 using States;
-using UnityEngine;
 
 namespace StateMachine.States.SimStates
 {

@@ -100,7 +100,7 @@ namespace StateMachine.Agents.Simulation
         {
             Fsm.AddBehaviour<SimEatCarnState>(Behaviours.Eat, EatTickParameters);
 
-            Fsm.AddBehaviour<SimWalkCarnState>(Behaviours.Walk, AttackEnterParameters);
+            Fsm.AddBehaviour<SimWalkCarnState>(Behaviours.Walk, WalkTickParameters);
 
             Fsm.AddBehaviour<SimAttackState>(Behaviours.Attack, AttackEnterParameters);
         }
@@ -123,7 +123,7 @@ namespace StateMachine.Agents.Simulation
             SimAgent<IVector, ITransform<IVector>> target =
                 EcsPopulationManager.GetEntity(SimAgentTypes.Herbivore, CurrentNode);
             if (target is not Herbivore<TVector, TTransform> herbivore ||
-                !Approximatly(herbivore.CurrentNode.GetCoordinate(), currentNode.GetCoordinate(), 0.1f)) return;
+                !Approximatly(herbivore.Transform.position, transform.position, 0.1f)) return;
 
             herbivore.Hp--;
             HasAttacked = true;
@@ -141,14 +141,14 @@ namespace StateMachine.Agents.Simulation
 
         protected override void EatTransitions()
         {
-            Fsm.SetTransition(Behaviours.Eat, Flags.OnEat, Behaviours.Attack);
+            Fsm.SetTransition(Behaviours.Eat, Flags.OnEat, Behaviours.Eat);
             Fsm.SetTransition(Behaviours.Eat, Flags.OnSearchFood, Behaviours.Walk);
             Fsm.SetTransition(Behaviours.Eat, Flags.OnAttack, Behaviours.Attack);
         }
 
         protected override void WalkTransitions()
         {
-            Fsm.SetTransition(Behaviours.Walk, Flags.OnEat, Behaviours.Attack);
+            Fsm.SetTransition(Behaviours.Walk, Flags.OnEat, Behaviours.Eat);
             Fsm.SetTransition(Behaviours.Walk, Flags.OnAttack, Behaviours.Attack);
         }
 
