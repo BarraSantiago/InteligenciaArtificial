@@ -60,7 +60,7 @@ namespace NeuralNetworkDirectory.ECS
         public static Dictionary<(BrainType, SimAgentTypes), NeuronInputCount> InputCountCache;
         public static FlockingManager flockingManager = new();
 
-        private const float Bias = 1.0f;
+        private const float Bias = 0.0f;
         private const float SigmoidP = .5f;
         private bool isRunning = true;
         private static int missingHerbivores;
@@ -229,7 +229,7 @@ namespace NeuralNetworkDirectory.ECS
             {
                 var outputComponent = ECSManager.GetComponent<OutputComponent>(entity.Key);
                 if (outputComponent == null || !_agents.ContainsKey(entity.Key)) return;
-
+                
                 _agents[entity.Key].output = outputComponent.outputs;
             });
 
@@ -777,11 +777,9 @@ namespace NeuralNetworkDirectory.ECS
                     continue;
                 }
 
-                if (IVector.Distance(boid.transform.position, scavenger.Transform.position) <
-                    boid.detectionRadious)
-                {
-                    insideRadiusBoids.Add(scavenger.boid);
-                }
+                if (IVector.Distance(boid.transform.position, scavenger.Transform.position) > boid.detectionRadious) continue;
+                if(boid == scavenger.boid) continue;
+                insideRadiusBoids.Add(scavenger.boid);
             }
 
             return insideRadiusBoids;

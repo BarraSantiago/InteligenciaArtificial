@@ -45,10 +45,7 @@ namespace StateMachine.Agents.Simulation
 
         public virtual INode<IVector> CurrentNode
         {
-            get
-            {
-                return EcsPopulationManager.graph.NodesType[(int)Transform.position.X, (int)Transform.position.Y];
-            }
+            get { return EcsPopulationManager.graph.NodesType[(int)Transform.position.X, (int)Transform.position.Y]; }
             private set { }
         }
 
@@ -245,10 +242,9 @@ namespace StateMachine.Agents.Simulation
         protected virtual void Move()
         {
             int brain = GetBrainTypeKeyByValue(BrainType.Movement);
-            float speed = CalculateSpeed(output[brain][^1]);
 
             IVector targetPos = new MyVector(CurrentNode.GetCoordinate().X, CurrentNode.GetCoordinate().Y);
-            targetPos = CalculateNewPosition(targetPos, output[brain], speed);
+            targetPos = CalculateNewPosition(targetPos, output[brain]);
 
             if (!EcsPopulationManager.graph.IsWithinGraphBorders(targetPos)) return;
 
@@ -259,31 +255,33 @@ namespace StateMachine.Agents.Simulation
         private float CalculateSpeed(float rawSpeed)
         {
             if (rawSpeed < 1) return movement;
-            if (rawSpeed < 0) return movement - 1;
-            if (rawSpeed < -0.6) return movement - 2;
+            if (rawSpeed < 0.5) return movement - 1;
+            if (rawSpeed < 0.2) return movement - 2;
             return rawSpeed;
         }
 
-        private IVector CalculateNewPosition(IVector targetPos, float[] brainOutput, float speed)
+        private IVector CalculateNewPosition(IVector targetPos, float[] brainOutput)
         {
-            if (brainOutput[0] > 0)
+            float speed = CalculateSpeed(Math.Abs(brainOutput[^1]));
+            
+            if (brainOutput[0] > 0.5)
             {
-                if (brainOutput[^1] > 0.1) // Right
+                if (brainOutput[^1] > 0.5) // Right
                 {
                     targetPos.X += speed;
                 }
-                else if (brainOutput[^1] < -0.1) // Left
+                else //if (brainOutput[^1] < -0.1) // Left
                 {
                     targetPos.X -= speed;
                 }
             }
             else
             {
-                if (brainOutput[^1] > 0.1) // Up
+                if (brainOutput[^1] > 0.5) // Up
                 {
                     targetPos.Y += speed;
                 }
-                else if (brainOutput[^1] < -0.1) // Down
+                else// if (brainOutput[^1] < -0.1) // Down
                 {
                     targetPos.Y -= speed;
                 }
@@ -301,10 +299,10 @@ namespace StateMachine.Agents.Simulation
         {
             return InputCountCache.GetInputCount(agentType, brainType);
         }
-        
+
         public virtual void SetPosition(IVector position)
         {
-            if(!EcsPopulationManager.graph.IsWithinGraphBorders(position)) return;
+            if (!EcsPopulationManager.graph.IsWithinGraphBorders(position)) return;
             Transform.position = position;
         }
 

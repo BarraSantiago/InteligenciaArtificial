@@ -63,7 +63,6 @@ namespace StateMachine.Agents.Simulation
                 EcsPopulationManager.flockingManager.Separation, EcsPopulationManager.flockingManager.Direction);
         }
 
-        
 
         protected override void MovementInputs()
         {
@@ -172,11 +171,15 @@ namespace StateMachine.Agents.Simulation
             boid.target = targetPosition;
         }
 
-        
 
         private IVector GetAverageNeighborPosition()
         {
             var nearBoids = EcsPopulationManager.GetBoidsInsideRadius(boid);
+
+            if (nearBoids.Count == 0)
+            {
+                return MyVector.zero();
+            }
 
             var avg = MyVector.zero();
             foreach (var boid in nearBoids)
@@ -191,6 +194,11 @@ namespace StateMachine.Agents.Simulation
         private IVector GetAverageNeighborDirection()
         {
             var nearBoids = EcsPopulationManager.GetBoidsInsideRadius(boid);
+
+            if (nearBoids.Count == 0)
+            {
+                return MyVector.zero();
+            }
 
             var avg = MyVector.zero();
             foreach (var boid1 in nearBoids)
@@ -236,10 +244,14 @@ namespace StateMachine.Agents.Simulation
             float rightForce = output[index][1];
 
             var pos = Transform.position;
-            var rotFactor = Math.Clamp(rightForce - leftForce, -1.0f, 1.0f);
+            //var rotFactor = Math.Clamp(rightForce - leftForce, -1.0f, 1.0f);
             //transform.rotation *= Quaternion.AngleAxis(rotFactor * RotSpeed * dt, Vector3.up);
             //pos += transform.forward * (Math.Abs(rightForce + leftForce) * 0.5f * Speed * dt);
             //transform.position = pos;
+
+            leftForce = (leftForce - 0.5f) * 2.0f;
+
+            rightForce = (rightForce - 0.5f) * 2.0f;
 
             var currentPos = new MyVector(Transform.position.X, Transform.position.Y);
             currentPos.X += rightForce;
@@ -269,13 +281,6 @@ namespace StateMachine.Agents.Simulation
             }
 
             SetPosition(currentPos);
-
-            if (rightForce > leftForce)
-            {
-            }
-            else
-            {
-            }
         }
 
         public override void SetPosition(IVector position)
@@ -312,7 +317,7 @@ namespace StateMachine.Agents.Simulation
             Fsm.AddBehaviour<SimWalkScavState>(Behaviours.Walk, WalkTickParameters);
             ExtraBehaviours();
         }
-        
+
         protected override void ExtraBehaviours()
         {
             Fsm.AddBehaviour<SimEatScavState>(Behaviours.Eat, EatTickParameters);
@@ -329,7 +334,7 @@ namespace StateMachine.Agents.Simulation
             };
             return objects;
         }
-        
+
         protected override object[] WalkTickParameters()
         {
             object[] objects =

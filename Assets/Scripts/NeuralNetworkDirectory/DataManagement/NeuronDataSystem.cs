@@ -13,6 +13,7 @@ namespace NeuralNetworkDirectory.DataManagement
     {
         public static void SaveNeurons(List<AgentNeuronData> agentsData, string directoryPath, int generation)
         {
+            /*
             var groupedData = agentsData
                 .GroupBy(agent => new { agent.AgentType, agent.BrainType })
                 .ToDictionary(group => group.Key, group => group.ToList());
@@ -26,7 +27,7 @@ namespace NeuralNetworkDirectory.DataManagement
                 string filePath = Path.Combine(agentTypeDirectory, fileName);
                 string json = "";// = JsonSerializer.Serialize(group.Value);
                 File.WriteAllText(filePath, json);
-            }
+            }*/
         }
         
         public static Dictionary<SimAgentTypes, Dictionary<BrainType, List<AgentNeuronData>>> LoadLatestNeurons(string directoryPath)

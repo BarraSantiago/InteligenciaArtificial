@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+﻿using System;
 
 namespace NeuralNetworkDirectory.NeuralNet
 {
@@ -12,8 +12,8 @@ namespace NeuralNetworkDirectory.NeuralNet
         {
             weights = new float[weightsCount];
 
-            for (var i = 0; i < weights.Length; i++) weights[i] = Random.Range(-1.0f, 1.0f);
-
+            var random = new System.Random();
+            for (var i = 0; i < weights.Length; i++) weights[i] = (float)(random.NextDouble() * 2.0 - 1.0);
             this.bias = bias;
             this.p = p;
         }
@@ -24,12 +24,13 @@ namespace NeuralNetworkDirectory.NeuralNet
         {
             float a = 0;
 
-            if (input.Length > weights.Length)
-            {
-                // TODO Borrar esto
-                Debug.Log("Inputs " + input.Length + " Weights " + weights.Length + ". problem in layer " + layer);
-                return 0;
-            }
+            //if (input.Length > weights.Length)
+            //{
+            //    // TODO Borrar esto
+            //    Debug.Log("Inputs " + input.Length + " Weights " + weights.Length + ". problem in layer " + layer);
+            //    return 0;
+            //}
+
             for (int i = 0; i < input.Length; i++)
             {
                 a += weights[i] * input[i];
@@ -54,7 +55,7 @@ namespace NeuralNetworkDirectory.NeuralNet
 
         private float Sigmoid(float a)
         {
-            return 1.0f / (1.0f + Mathf.Exp(-a / p));
+            return 1.0f / (1.0f + (float)Math.Exp(-a / p));
         }
     }
 }

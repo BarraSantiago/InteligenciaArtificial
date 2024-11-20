@@ -35,7 +35,8 @@ namespace Flocking
             }
 
             avg /= insideRadiusBoids.Count;
-            return (avg - (IVector)boid.transform.position).Normalized();
+            var average = avg - (IVector)boid.transform.position;
+            return (average).Normalized();
         }
 
         public IVector Separation(SimBoid boid)
