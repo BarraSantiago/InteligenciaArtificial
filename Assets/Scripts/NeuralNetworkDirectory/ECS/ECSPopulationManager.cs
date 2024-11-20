@@ -107,7 +107,7 @@ namespace NeuralNetworkDirectory.ECS
                 new NeuronInputCount
                 {
                     agentType = SimAgentTypes.Carnivore, brainType = BrainType.Movement, inputCount = 7,
-                    outputCount = 2, hiddenLayersInputs = new[] { 3 }
+                    outputCount = 3, hiddenLayersInputs = new[] { 3 }
                 },
                 new NeuronInputCount
                 {
