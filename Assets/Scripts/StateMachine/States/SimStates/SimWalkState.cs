@@ -59,14 +59,21 @@ namespace StateMachine.States.SimStates
             var behaviours = new BehaviourActions();
 
             var position = parameters[0] as IVector;
-            var onMove = parameters[1] as Action;
-            var outputBrain1 = (float[])parameters[2];
+            var nearestFood = parameters[1] as IVector;
+            var onMove = parameters[2] as Action;
+            var outputBrain1 = (float[])parameters[3];
+            IVector distanceToFood = new MyVector();
+            IVector maxDistance = new MyVector(4,4);
 
-            behaviours.AddMultiThreadableBehaviours(0, () => { onMove.Invoke(); });
+            behaviours.AddMultiThreadableBehaviours(0, () =>
+            {
+                onMove.Invoke();
+                distanceToFood = new MyVector(nearestFood.X - position.X, nearestFood.Y - position.Y);
+            });
 
             behaviours.SetTransitionBehaviour(() =>
             {
-                if (outputBrain1[0] > 0.5f && position != null)
+                if (outputBrain1[0] > 0.5f && distanceToFood.Magnitude() < maxDistance.Magnitude())
                     OnFlag?.Invoke(Flags.OnEat);
             });
             return behaviours;

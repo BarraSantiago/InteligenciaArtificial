@@ -39,10 +39,25 @@ namespace Utils
         {
             return new MyVector(a.X / integer, a.Y / integer);
         }
+        
+        public static bool operator <(IVector a, IVector b)
+        {
+            return (a.X < b.X  && a.Y < b.Y );
+        }
+
+        public static bool operator >(IVector a, IVector b)
+        {
+            return (a.X > b.X && a.Y > b.Y);
+        }
 
         static float Dot(IVector a, IVector b)
         {
             return a.X * b.X + a.Y * b.Y;
+        }
+        
+        public float Magnitude()
+        {
+            return (float)Math.Sqrt(X * X + Y * Y);
         }
     }
 

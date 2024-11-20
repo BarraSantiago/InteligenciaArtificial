@@ -15,6 +15,7 @@ namespace StateMachine.States.SimStates
             var onAttack = parameters[0] as Action;
             var outputBrain1 = (float[])parameters[1];
             var outputBrain2 = (float[])parameters[2];
+            var outputBrain3 = (float)parameters[3];
 
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {
@@ -25,6 +26,7 @@ namespace StateMachine.States.SimStates
             {
                 if(outputBrain1[0] > 0.5f) OnFlag?.Invoke(Flags.OnEat);
                 if(outputBrain2[0] > 0.5f) OnFlag?.Invoke(Flags.OnAttack);
+                if(outputBrain3 > 0.5f) OnFlag?.Invoke(Flags.OnSearchFood);
             });
             return behaviours;
         }

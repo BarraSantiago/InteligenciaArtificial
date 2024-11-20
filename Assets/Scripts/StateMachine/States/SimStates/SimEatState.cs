@@ -1,10 +1,11 @@
-﻿ using System;
- using Pathfinder;
- using StateMachine.Agents.Simulation;
- using States;
- using UnityEngine;
+﻿using System;
+using Pathfinder;
+using StateMachine.Agents.Simulation;
+using States;
+using UnityEngine;
+using Utils;
 
- namespace StateMachine.States.SimStates
+namespace StateMachine.States.SimStates
 {
     public class SimEatState : State
     {
@@ -16,23 +17,25 @@
             var onEat = parameters[2] as Action;
             var outputBrain1 = (float[])parameters[3];
             var outputBrain2 = (float[])parameters[4];
-            
+
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {
-                if(currentNode is not { Food: > 0 } || foodTarget != currentNode.NodeType) return;
-                
+                if (currentNode is not { Food: > 0 } || foodTarget != currentNode.NodeType) return;
+
                 onEat?.Invoke();
             });
-            
-            behaviours.SetTransitionBehaviour( () =>
+
+            behaviours.SetTransitionBehaviour(() =>
             {
-                if(currentNode is not { Food: > 0 } || foodTarget != currentNode.NodeType) OnFlag?.Invoke(Flags.OnSearchFood);
-                
-                if(outputBrain1[0] > 0.5f && currentNode != null && currentNode.NodeType == foodTarget) OnFlag?.Invoke(Flags.OnEat);
-                
+                if (currentNode is not { Food: > 0 } || foodTarget != currentNode.NodeType)
+                    OnFlag?.Invoke(Flags.OnSearchFood);
+
+                if (outputBrain1[0] > 0.5f && currentNode != null && currentNode.NodeType == foodTarget)
+                    OnFlag?.Invoke(Flags.OnEat);
+
                 SpecialAction(outputBrain2);
             });
-            
+
             return behaviours;
         }
 
@@ -50,20 +53,56 @@
             return default;
         }
     }
-    
+
+    public class SimEatScavState : SimEatState
+    {
+        public override BehaviourActions GetTickBehaviour(params object[] parameters)
+        {
+            var behaviours = new BehaviourActions();
+            var currentPos = parameters[0] as IVector;
+            var foodNode = parameters[1] as SimNode<Vector2>;
+            var onEat = parameters[2] as Action;
+            var outputBrain1 = (float[])parameters[3];
+
+            IVector distanceToFood = new MyVector();
+            IVector maxDistance = new MyVector(4, 4);
+
+            behaviours.AddMultiThreadableBehaviours(0, () =>
+            {
+                distanceToFood = new MyVector(foodNode.GetCoordinate().x - currentPos.X,
+                    foodNode.GetCoordinate().y - currentPos.Y);
+
+                if (foodNode is not { Food: > 0 } || distanceToFood.Magnitude() > maxDistance.Magnitude()) return;
+
+                onEat?.Invoke();
+            });
+
+            behaviours.SetTransitionBehaviour(() =>
+            {
+                if (foodNode is not { Food: > 0 } || distanceToFood.Magnitude() > maxDistance.Magnitude())
+                    OnFlag?.Invoke(Flags.OnSearchFood);
+
+                if (outputBrain1[0] > 0.5f && currentPos != null &&
+                    distanceToFood.Magnitude() <= maxDistance.Magnitude()) OnFlag?.Invoke(Flags.OnEat);
+            });
+
+            return behaviours;
+        }
+    }
+
     public class SimEatHerbState : SimEatState
     {
         protected override void SpecialAction(float[] outputs)
         {
-            if(outputs[0] > 0.5f) OnFlag?.Invoke(Flags.OnEscape);
+            if (outputs[0] > 0.5f) OnFlag?.Invoke(Flags.OnEscape);
         }
     }
-    
+
     public class SimEatCarnState : SimEatState
     {
         protected override void SpecialAction(float[] outputs)
         {
-            if(outputs[0] > 0.5f) OnFlag?.Invoke(Flags.OnAttack);
+            if (outputs[0] > 0.5f) OnFlag?.Invoke(Flags.OnAttack);
         }
     }
 }
