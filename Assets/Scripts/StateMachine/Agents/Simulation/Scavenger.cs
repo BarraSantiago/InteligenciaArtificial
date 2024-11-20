@@ -63,11 +63,7 @@ namespace StateMachine.Agents.Simulation
                 EcsPopulationManager.flockingManager.Separation, EcsPopulationManager.flockingManager.Direction);
         }
 
-        protected override void FsmBehaviours()
-        {
-            Fsm.AddBehaviour<SimWalkScavState>(Behaviours.Walk, WalkTickParameters);
-            ExtraBehaviours();
-        }
+        
 
         protected override void MovementInputs()
         {
@@ -176,22 +172,7 @@ namespace StateMachine.Agents.Simulation
             boid.target = targetPosition;
         }
 
-        protected override void ExtraBehaviours()
-        {
-            Fsm.AddBehaviour<SimEatScavState>(Behaviours.Eat, EatTickParameters);
-        }
-
-        protected override object[] EatTickParameters()
-        {
-            object[] objects =
-            {
-                Transform.position,
-                EcsPopulationManager.graph.NodesType[(int)targetPosition.X, (int)targetPosition.Y],
-                OnEat,
-                output[GetBrainTypeKeyByValue(BrainType.Eat)]
-            };
-            return objects;
-        }
+        
 
         private IVector GetAverageNeighborPosition()
         {
@@ -326,6 +307,29 @@ namespace StateMachine.Agents.Simulation
             return target;
         }
 
+        protected override void FsmBehaviours()
+        {
+            Fsm.AddBehaviour<SimWalkScavState>(Behaviours.Walk, WalkTickParameters);
+            ExtraBehaviours();
+        }
+        
+        protected override void ExtraBehaviours()
+        {
+            Fsm.AddBehaviour<SimEatScavState>(Behaviours.Eat, EatTickParameters);
+        }
+
+        protected override object[] EatTickParameters()
+        {
+            object[] objects =
+            {
+                Transform.position,
+                EcsPopulationManager.graph.NodesType[(int)targetPosition.X, (int)targetPosition.Y],
+                OnEat,
+                output[GetBrainTypeKeyByValue(BrainType.Eat)]
+            };
+            return objects;
+        }
+        
         protected override object[] WalkTickParameters()
         {
             object[] objects =
@@ -343,6 +347,7 @@ namespace StateMachine.Agents.Simulation
         protected override void WalkTransitions()
         {
             Fsm.SetTransition(Behaviours.Walk, Flags.OnEat, Behaviours.Eat);
+            Fsm.SetTransition(Behaviours.Walk, Flags.OnSearchFood, Behaviours.Walk);
         }
     }
 }
