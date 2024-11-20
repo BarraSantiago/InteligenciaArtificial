@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using NeuralNetworkDirectory.ECS;
 using NeuralNetworkDirectory.NeuralNet;
+using NeuralNetworkDirectory.PopulationManager;
 using Pathfinder;
 using StateMachine.States.SimStates;
 using Utils;
@@ -46,7 +47,7 @@ namespace StateMachine.Agents.Simulation
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
             SimAgent<IVector, ITransform<IVector>> target =
-                EcsPopulationManager.GetNearestEntity(SimAgentTypes.Herbivore, Transform.position);
+                EntitiesManager.GetNearestEntity(SimAgentTypes.Herbivore, Transform.position);
             if (target == null)
             {
                 input[brain][2] = NoTarget;
@@ -67,7 +68,7 @@ namespace StateMachine.Agents.Simulation
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
             SimAgent<IVector, ITransform<IVector>> target =
-                EcsPopulationManager.GetNearestEntity(SimAgentTypes.Herbivore, Transform.position);
+                EntitiesManager.GetNearestEntity(SimAgentTypes.Herbivore, Transform.position);
             INode<IVector> nodeTarget = GetTarget(foodTarget);
 
 
@@ -121,7 +122,7 @@ namespace StateMachine.Agents.Simulation
         private void Attack()
         {
             SimAgent<IVector, ITransform<IVector>> target =
-                EcsPopulationManager.GetEntity(SimAgentTypes.Herbivore, CurrentNode);
+                EntitiesManager.GetEntity(SimAgentTypes.Herbivore, CurrentNode);
             if (target is not Herbivore<TVector, TTransform> herbivore ||
                 !Approximatly(herbivore.CurrentNode.GetCoordinate(), currentNode.GetCoordinate(), 0.1f)) return;
 

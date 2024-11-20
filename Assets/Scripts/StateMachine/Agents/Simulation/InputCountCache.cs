@@ -2,6 +2,7 @@
 using System.Linq;
 using NeuralNetworkDirectory.ECS;
 using NeuralNetworkDirectory.NeuralNet;
+using NeuralNetworkDirectory.PopulationManager;
 
 namespace StateMachine.Agents.Simulation
 {
@@ -14,7 +15,7 @@ namespace StateMachine.Agents.Simulation
             var key = (agentType, brainType);
             if (cache.TryGetValue(key, out int inputCount)) return inputCount;
             
-            inputCount = EcsPopulationManager.inputCounts
+            inputCount = DataContainer.inputCounts
                 .FirstOrDefault(input => input.agentType == agentType && input.brainType == brainType).inputCount;
             cache[key] = inputCount;
 

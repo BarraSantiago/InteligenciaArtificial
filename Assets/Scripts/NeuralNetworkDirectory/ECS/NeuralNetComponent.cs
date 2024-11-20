@@ -1,6 +1,7 @@
 ﻿using ECS.Patron;
 using System.Collections.Generic;
 using NeuralNetworkDirectory.NeuralNet;
+using NeuralNetworkDirectory.PopulationManager;
 using StateMachine.Agents.Simulation;
 
 namespace NeuralNetworkDirectory.ECS
@@ -20,14 +21,14 @@ namespace NeuralNetworkDirectory.ECS
         
         public void Reward(float reward, BrainType brainType)
         {
-            int id = EcsPopulationManager.GetBrainTypeKeyByValue(brainType, Layers[0][0].AgentType);
+            int id = DataContainer.GetBrainTypeKeyByValue(brainType, Layers[0][0].AgentType);
             FitnessMod[id] = IncreaseFitnessMod(FitnessMod[id]);
             Fitness[id] += reward * FitnessMod[id];
         }
         
         public void Punish(float punishment, BrainType brainType)
         {
-            int id = EcsPopulationManager.GetBrainTypeKeyByValue(brainType, Layers[0][0].AgentType);
+            int id = DataContainer.GetBrainTypeKeyByValue(brainType, Layers[0][0].AgentType);
 
             FitnessMod[id] = DecreaseFitnessMod(FitnessMod[id]);
             Fitness[id] /= punishment + 0.05f * FitnessMod[id];

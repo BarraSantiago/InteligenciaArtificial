@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 namespace NeuralNetworkDirectory.NeuralNet
 {
@@ -6,7 +7,7 @@ namespace NeuralNetworkDirectory.NeuralNet
     {
         private readonly float bias;
         private readonly float p;
-        private readonly float[] weights;
+        private float[] weights;
 
         public Neuron(int weightsCount, float bias, float p)
         {
@@ -24,12 +25,12 @@ namespace NeuralNetworkDirectory.NeuralNet
         {
             float a = 0;
 
-            //if (input.Length > weights.Length)
-            //{
-            //    // TODO Borrar esto
-            //    Debug.Log("Inputs " + input.Length + " Weights " + weights.Length + ". problem in layer " + layer);
-            //    return 0;
-            //}
+            if (input.Length > weights.Length)
+            {
+                // TODO Borrar esto
+                Debug.Log("Inputs " + input.Length + " Weights " + weights.Length + ". problem in layer " + layer);
+                return 0;
+            }
 
             for (int i = 0; i < input.Length; i++)
             {

@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using NeuralNetworkDirectory.ECS;
 using NeuralNetworkDirectory.NeuralNet;
+using NeuralNetworkDirectory.PopulationManager;
 using Pathfinder;
 using StateMachine.States.SimStates;
 using Utils;
@@ -50,7 +51,7 @@ namespace StateMachine.Agents.Simulation
             input[brain] = new float[inputCount];
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
-            var target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, Transform.position);
+            var target = EntitiesManager.GetNearestEntity(SimAgentTypes.Carnivore, Transform.position);
             if (target == null)
             {
                 input[brain][2] = NoTarget;
@@ -72,7 +73,7 @@ namespace StateMachine.Agents.Simulation
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
 
-            var target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, Transform.position);
+            var target = EntitiesManager.GetNearestEntity(SimAgentTypes.Carnivore, Transform.position);
             if (target == null)
             {
                 input[brain][2] = NoTarget;
@@ -105,7 +106,7 @@ namespace StateMachine.Agents.Simulation
             var node = CurrentNode;
             node.NodeType = SimNodeType.Corpse;
             node.Food = FoodDropped;
-            EcsPopulationManager.RemoveEntity(this as SimAgent<IVector, ITransform<IVector>>);
+            DataContainer.RemoveEntity(this as SimAgent<IVector, ITransform<IVector>>);
         }
 
         protected override void EatTransitions()

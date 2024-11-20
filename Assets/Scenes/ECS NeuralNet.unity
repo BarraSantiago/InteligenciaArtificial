@@ -252,18 +252,15 @@ MonoBehaviour:
   herbivoreMat: {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
   scavengerMesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
   scavengerMat: {fileID: 2100000, guid: f053c779a3c9ee941a2859146417e7a0, type: 2}
-  carnivoreCount: 1
-  herbivoreCount: 0
-  scavengerCount: 1
+  graphSize: 50
+  carnivoreCount: 5
+  herbivoreCount: 5
+  scavengerCount: 5
   eliteCount: 0
-  generationDuration: 3
+  generationDuration: 10
   mutationChance: 0.1
   mutationRate: 0.01
   Generation: 0
-  gridWidth: 50
-  gridHeight: 50
-  generationTurns: 100
-  speed: 1
 --- !u!4 &1659154293
 Transform:
   m_ObjectHideFlags: 0
@@ -340,7 +337,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 25
+  orthographic size: 28.79
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2

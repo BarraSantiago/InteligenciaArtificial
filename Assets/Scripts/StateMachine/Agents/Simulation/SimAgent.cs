@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using FlappyIa.GeneticAlg;
 using NeuralNetworkDirectory.ECS;
 using NeuralNetworkDirectory.NeuralNet;
+using NeuralNetworkDirectory.PopulationManager;
 using Pathfinder;
+using Pathfinder.Graph;
 using StateMachine.States.SimStates;
+using UnityEngine;
 using Utils;
 
 namespace StateMachine.Agents.Simulation
@@ -45,7 +48,7 @@ namespace StateMachine.Agents.Simulation
 
         public virtual INode<IVector> CurrentNode
         {
-            get { return EcsPopulationManager.graph.NodesType[(int)Transform.position.X, (int)Transform.position.Y]; }
+            get { return DataContainer.graph.NodesType[(int)Transform.position.X, (int)Transform.position.Y]; }
             private set { }
         }
 
@@ -91,8 +94,8 @@ namespace StateMachine.Agents.Simulation
             output = new float[brainTypes.Count][];
             foreach (var brain in brainTypes.Values)
             {
-                EcsPopulationManager.NeuronInputCount inputsCount =
-                    EcsPopulationManager.InputCountCache[(brain, agentType)];
+                DataContainer.NeuronInputCount inputsCount =
+                    DataContainer.InputCountCache[(brain, agentType)];
                 output[GetBrainTypeKeyByValue(brain)] = new float[inputsCount.outputCount];
             }
 
@@ -123,7 +126,7 @@ namespace StateMachine.Agents.Simulation
             {
                 var brainType = brainTypes[i];
                 input[i] = new float[GetInputCount(brainType)];
-                int outputCount = EcsPopulationManager.InputCountCache[(brainType, agentType)].outputCount;
+                int outputCount = DataContainer.InputCountCache[(brainType, agentType)].outputCount;
                 output[i] = new float[outputCount];
             }
         }
@@ -237,7 +240,11 @@ namespace StateMachine.Agents.Simulation
             return objects;
         }
 
-        private void Eat() => Food++;
+        private void Eat()
+        {
+            Food++;
+            Debug.Log(agentType + " ate");
+        }
 
         protected virtual void Move()
         {
@@ -246,9 +253,9 @@ namespace StateMachine.Agents.Simulation
             IVector targetPos = new MyVector(CurrentNode.GetCoordinate().X, CurrentNode.GetCoordinate().Y);
             targetPos = CalculateNewPosition(targetPos, output[brain]);
 
-            if (!EcsPopulationManager.graph.IsWithinGraphBorders(targetPos)) return;
+            if (!DataContainer.graph.IsWithinGraphBorders(targetPos)) return;
 
-            var newPos = EcsPopulationManager.CoordinateToNode(targetPos);
+            var newPos = GraphManager<IVector, ITransform<IVector>>.CoordinateToNode(targetPos);
             if (newPos != null) SetPosition(newPos.GetCoordinate());
         }
 
@@ -292,7 +299,7 @@ namespace StateMachine.Agents.Simulation
 
         protected virtual INode<IVector> GetTarget(SimNodeType nodeType = SimNodeType.Empty)
         {
-            return EcsPopulationManager.GetNearestNode(nodeType, transform.position);
+            return EntitiesManager.GetNearestNode(nodeType, transform.position);
         }
 
         protected int GetInputCount(BrainType brainType)
@@ -302,7 +309,7 @@ namespace StateMachine.Agents.Simulation
 
         public virtual void SetPosition(IVector position)
         {
-            if (!EcsPopulationManager.graph.IsWithinGraphBorders(position)) return;
+            if (!DataContainer.graph.IsWithinGraphBorders(position)) return;
             Transform.position = position;
         }
 

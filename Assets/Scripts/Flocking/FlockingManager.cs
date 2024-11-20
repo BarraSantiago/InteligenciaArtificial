@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using NeuralNetworkDirectory.ECS;
+using NeuralNetworkDirectory.PopulationManager;
 using Utils;
 
 namespace Flocking
@@ -10,7 +11,7 @@ namespace Flocking
     {
         public IVector Alignment(SimBoid boid)
         {
-            List<SimBoid> insideRadiusBoids = EcsPopulationManager.GetBoidsInsideRadius(boid);
+            List<SimBoid> insideRadiusBoids = EntitiesManager.GetBoidsInsideRadius(boid);
             if (insideRadiusBoids.Count == 0) return boid.transform.forward;
 
             IVector avg = MyVector.zero();
@@ -25,7 +26,7 @@ namespace Flocking
 
         public IVector Cohesion(SimBoid boid)
         {
-            List<SimBoid> insideRadiusBoids = EcsPopulationManager.GetBoidsInsideRadius(boid);
+            List<SimBoid> insideRadiusBoids = EntitiesManager.GetBoidsInsideRadius(boid);
             if (insideRadiusBoids.Count == 0) return MyVector.zero();
 
             IVector avg = MyVector.zero();
@@ -41,7 +42,7 @@ namespace Flocking
 
         public IVector Separation(SimBoid boid)
         {
-            List<SimBoid> insideRadiusBoids = EcsPopulationManager.GetBoidsInsideRadius(boid);
+            List<SimBoid> insideRadiusBoids = EntitiesManager.GetBoidsInsideRadius(boid);
             if (insideRadiusBoids.Count == 0) return MyVector.zero();
 
             IVector avg = MyVector.zero();

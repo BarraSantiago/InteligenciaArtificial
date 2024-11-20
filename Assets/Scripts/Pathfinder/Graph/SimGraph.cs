@@ -12,7 +12,7 @@ namespace Pathfinder.Graph
         public static TCoordinateNode OriginPosition;
         public static float CellSize;
         public TCoordinateNode[,] CoordNodes;
-        public readonly TNodeType[,] NodesType;
+        public TNodeType[,] NodesType;
 
         public SimGraph(int x, int y, float cellSize)
         {

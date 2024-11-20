@@ -3,6 +3,7 @@ using System.Linq;
 using Flocking;
 using NeuralNetworkDirectory.ECS;
 using NeuralNetworkDirectory.NeuralNet;
+using NeuralNetworkDirectory.PopulationManager;
 using Pathfinder;
 using StateMachine.States.SimStates;
 using Utils;
@@ -59,8 +60,8 @@ namespace StateMachine.Agents.Simulation
                 transform = Transform,
                 target = targetPosition,
             };
-            boid.Init(EcsPopulationManager.flockingManager.Alignment, EcsPopulationManager.flockingManager.Cohesion,
-                EcsPopulationManager.flockingManager.Separation, EcsPopulationManager.flockingManager.Direction);
+            boid.Init(DataContainer.flockingManager.Alignment, DataContainer.flockingManager.Cohesion,
+                DataContainer.flockingManager.Separation, DataContainer.flockingManager.Direction);
         }
 
 
@@ -73,7 +74,7 @@ namespace StateMachine.Agents.Simulation
             input[brain][0] = Transform.position.X;
             input[brain][1] = Transform.position.Y;
 
-            var target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, Transform.position);
+            var target = EntitiesManager.GetNearestEntity(SimAgentTypes.Carnivore, Transform.position);
             if (target == null || target.CurrentNode == null)
             {
                 input[brain][2] = NoTarget;
@@ -174,7 +175,7 @@ namespace StateMachine.Agents.Simulation
 
         private IVector GetAverageNeighborPosition()
         {
-            var nearBoids = EcsPopulationManager.GetBoidsInsideRadius(boid);
+            var nearBoids = EntitiesManager.GetBoidsInsideRadius(boid);
 
             if (nearBoids.Count == 0)
             {
@@ -193,7 +194,7 @@ namespace StateMachine.Agents.Simulation
 
         private IVector GetAverageNeighborDirection()
         {
-            var nearBoids = EcsPopulationManager.GetBoidsInsideRadius(boid);
+            var nearBoids = EntitiesManager.GetBoidsInsideRadius(boid);
 
             if (nearBoids.Count == 0)
             {
@@ -257,26 +258,26 @@ namespace StateMachine.Agents.Simulation
             currentPos.X += rightForce;
             currentPos.Y += leftForce;
 
-            if (!EcsPopulationManager.graph.IsWithinGraphBorders(currentPos))
+            if (!DataContainer.graph.IsWithinGraphBorders(currentPos))
             {
-                if (currentPos.X < EcsPopulationManager.graph.MinX)
+                if (currentPos.X < DataContainer.graph.MinX)
                 {
-                    currentPos.X = EcsPopulationManager.graph.MaxX;
+                    currentPos.X = DataContainer.graph.MaxX;
                 }
 
-                if (currentPos.X > EcsPopulationManager.graph.MaxX)
+                if (currentPos.X > DataContainer.graph.MaxX)
                 {
-                    currentPos.X = EcsPopulationManager.graph.MinX;
+                    currentPos.X = DataContainer.graph.MinX;
                 }
 
-                if (currentPos.Y < EcsPopulationManager.graph.MinY)
+                if (currentPos.Y < DataContainer.graph.MinY)
                 {
-                    currentPos.Y = EcsPopulationManager.graph.MaxY;
+                    currentPos.Y = DataContainer.graph.MaxY;
                 }
 
-                if (currentPos.Y > EcsPopulationManager.graph.MaxY)
+                if (currentPos.Y > DataContainer.graph.MaxY)
                 {
-                    currentPos.Y = EcsPopulationManager.graph.MinY;
+                    currentPos.Y = DataContainer.graph.MinY;
                 }
             }
 
@@ -292,17 +293,17 @@ namespace StateMachine.Agents.Simulation
 
         protected override INode<IVector> GetTarget(SimNodeType nodeType = SimNodeType.Empty)
         {
-            INode<IVector> target = EcsPopulationManager.GetNearestNode(nodeType, Transform.position);
+            INode<IVector> target = EntitiesManager.GetNearestNode(nodeType, Transform.position);
 
 
             if (target == null)
             {
-                target = EcsPopulationManager.GetNearestNode(SimNodeType.Corpse, Transform.position);
+                target = EntitiesManager.GetNearestNode(SimNodeType.Corpse, Transform.position);
             }
 
             if (target == null)
             {
-                var nearestEntity = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, Transform.position);
+                var nearestEntity = EntitiesManager.GetNearestEntity(SimAgentTypes.Carnivore, Transform.position);
                 if (nearestEntity != null)
                 {
                     target = nearestEntity.CurrentNode;
@@ -328,7 +329,7 @@ namespace StateMachine.Agents.Simulation
             object[] objects =
             {
                 Transform.position,
-                EcsPopulationManager.graph.NodesType[(int)targetPosition.X, (int)targetPosition.Y],
+                DataContainer.graph.NodesType[(int)targetPosition.X, (int)targetPosition.Y],
                 OnEat,
                 output[GetBrainTypeKeyByValue(BrainType.Eat)]
             };

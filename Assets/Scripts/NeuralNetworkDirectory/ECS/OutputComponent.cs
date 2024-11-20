@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ECS.Patron;
 using NeuralNetworkDirectory.NeuralNet;
+using NeuralNetworkDirectory.PopulationManager;
 using StateMachine.Agents.Simulation;
 
 namespace NeuralNetworkDirectory.ECS
@@ -14,7 +15,7 @@ namespace NeuralNetworkDirectory.ECS
             outputs = new float[outputsQty][];
             foreach (var brain in num.Values)
             {
-                EcsPopulationManager.NeuronInputCount inputsCount = EcsPopulationManager.InputCountCache[(brain, agentType)];
+                DataContainer.NeuronInputCount inputsCount = DataContainer.InputCountCache[(brain, agentType)];
                 outputs[GetBrainTypeKeyByValue(brain, num)] = new float[inputsCount.outputCount];
             }
         }
