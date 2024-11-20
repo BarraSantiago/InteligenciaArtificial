@@ -74,7 +74,7 @@ namespace NeuralNetworkDirectory.AI
 
             var agent = _agents[agentId] as Herbivore<IVector, ITransform<IVector>>;
             var nearestPredatorNode =
-                EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, agent?.CurrentNode);
+                EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, agent?.Transform.position);
 
             IVector targetPosition;
 
@@ -100,7 +100,7 @@ namespace NeuralNetworkDirectory.AI
 
             var agent = _agents[agentId];
             var nearestPredatorNode =
-                EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, agent.CurrentNode);
+                EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, agent.Transform.position);
 
             IVector targetPosition;
 
@@ -146,7 +146,7 @@ namespace NeuralNetworkDirectory.AI
 
             var agent = _agents[agentId] as Carnivore<IVector, ITransform<IVector>>;
             var nearestHerbivoreNode =
-                EcsPopulationManager.GetNearestEntity(SimAgentTypes.Herbivore, agent.CurrentNode);
+                EcsPopulationManager.GetNearestEntity(SimAgentTypes.Herbivore, agent.Transform.position);
 
             IVector targetPosition;
 
@@ -175,8 +175,8 @@ namespace NeuralNetworkDirectory.AI
 
             var agent = _agents[agentId];
             var nearestHerbivoreNode =
-                EcsPopulationManager.GetNearestEntity(SimAgentTypes.Herbivore, agent.CurrentNode);
-            var nearestCorpseNode = EcsPopulationManager.GetNearestNode(SimNodeType.Corpse, agent.CurrentNode);
+                EcsPopulationManager.GetNearestEntity(SimAgentTypes.Herbivore, agent.Transform.position);
+            var nearestCorpseNode = EcsPopulationManager.GetNearestNode(SimNodeType.Corpse, agent.Transform.position);
 
             if (nearestHerbivoreNode?.CurrentNode?.GetCoordinate() == null) return;
 
@@ -224,7 +224,7 @@ namespace NeuralNetworkDirectory.AI
 
             var agent = (Scavenger<TVector, TTransform>)_agents[agentId];
             var neighbors = EcsPopulationManager.GetBoidsInsideRadius(agent.boid);
-            var targetPosition = agent.CurrentNode.GetCoordinate();
+            var targetPosition = agent.Transform.position;
 
             bool isMaintainingDistance = true;
             bool isAligningWithFlock = true;
@@ -238,7 +238,7 @@ namespace NeuralNetworkDirectory.AI
                 if (Equals(neighbor, agent)) continue;
 
                 var neighborPosition = neighbor.transform.position;
-                float distance = agent.CurrentNode.GetCoordinate().Distance(neighborPosition);
+                float distance = agent.Transform.position.Distance(neighborPosition);
 
                 if (distance < safeDistance)
                 {
@@ -253,7 +253,7 @@ namespace NeuralNetworkDirectory.AI
             if (neighborCount > 0)
             {
                 averageDirection /= neighborCount;
-                var agentDirection = agent.Transform.forward.Normalized();
+                var agentDirection = agent.boid.transform.forward.Normalized();
                 var alignmentDotProduct = IVector.Dot(agentDirection, averageDirection.Normalized());
 
                 if (alignmentDotProduct < 0.9f)
@@ -279,9 +279,9 @@ namespace NeuralNetworkDirectory.AI
 
             int brainId = (int)BrainType.ScavengerMovement;
             var agent = _agents[agentId];
-            var nearestCarrionNode = EcsPopulationManager.GetNearestNode(SimNodeType.Carrion, agent.CurrentNode);
-            var nearestCorpseNode = EcsPopulationManager.GetNearestNode(SimNodeType.Corpse, agent.CurrentNode);
-            var nearestCarNode = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, agent.CurrentNode);
+            var nearestCarrionNode = EcsPopulationManager.GetNearestNode(SimNodeType.Carrion, agent.Transform.position);
+            var nearestCorpseNode = EcsPopulationManager.GetNearestNode(SimNodeType.Corpse, agent.Transform.position);
+            var nearestCarNode = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, agent.Transform.position);
 
             IVector targetPosition;
 
@@ -327,7 +327,7 @@ namespace NeuralNetworkDirectory.AI
         private bool IsMovingTowardsTarget(uint agentId, IVector targetPosition)
         {
             var agent = _agents[agentId];
-            var currentPosition = agent.CurrentNode.GetCoordinate();
+            var currentPosition = agent.Transform.position;
             IVector agentDirection = agent.Transform.forward?.Normalized();
 
             var directionToTarget = (targetPosition - currentPosition).Normalized();

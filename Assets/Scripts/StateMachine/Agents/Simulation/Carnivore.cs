@@ -45,7 +45,7 @@ namespace StateMachine.Agents.Simulation
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
             SimAgent<IVector, ITransform<IVector>> target =
-                EcsPopulationManager.GetNearestEntity(SimAgentTypes.Herbivore, CurrentNode);
+                EcsPopulationManager.GetNearestEntity(SimAgentTypes.Herbivore, Transform.position);
             if (target == null)
             {
                 input[brain][2] = NoTarget;
@@ -66,7 +66,7 @@ namespace StateMachine.Agents.Simulation
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
             SimAgent<IVector, ITransform<IVector>> target =
-                EcsPopulationManager.GetNearestEntity(SimAgentTypes.Herbivore, CurrentNode);
+                EcsPopulationManager.GetNearestEntity(SimAgentTypes.Herbivore, Transform.position);
             INode<IVector> nodeTarget = GetTarget(foodTarget);
 
 

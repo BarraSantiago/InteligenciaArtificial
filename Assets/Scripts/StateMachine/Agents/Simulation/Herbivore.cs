@@ -50,7 +50,7 @@ namespace StateMachine.Agents.Simulation
             input[brain] = new float[inputCount];
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
-            var target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, CurrentNode);
+            var target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, Transform.position);
             if (target == null)
             {
                 input[brain][2] = NoTarget;
@@ -72,7 +72,7 @@ namespace StateMachine.Agents.Simulation
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
 
-            var target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, CurrentNode);
+            var target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, Transform.position);
             if (target == null)
             {
                 input[brain][2] = NoTarget;

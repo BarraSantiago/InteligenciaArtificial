@@ -30,7 +30,8 @@ namespace StateMachine.States.SimStates
 
             behaviours.SetTransitionBehaviour(() =>
             {
-                if (outputBrain1[0] > 0.5f && currentNode != null && currentNode.NodeType == foodTarget) OnFlag?.Invoke(Flags.OnEat);
+                if (outputBrain1[0] > 0.5f && currentNode != null && currentNode.NodeType == foodTarget)
+                    OnFlag?.Invoke(Flags.OnEat);
                 SpecialAction(outputBrain2);
             });
             return behaviours;
@@ -57,16 +58,15 @@ namespace StateMachine.States.SimStates
         {
             var behaviours = new BehaviourActions();
 
-            var currentNode = parameters[0] as SimNode<Vector2>;
-            var foodTarget = (SimNodeType)parameters[1];
-            var onMove = parameters[2] as Action;
-            var outputBrain1 = (float[])parameters[3];
+            var position = parameters[0] as IVector;
+            var onMove = parameters[1] as Action;
+            var outputBrain1 = (float[])parameters[2];
 
             behaviours.AddMultiThreadableBehaviours(0, () => { onMove.Invoke(); });
 
             behaviours.SetTransitionBehaviour(() =>
             {
-                if (outputBrain1[0] > 0.5f && currentNode != null && currentNode.NodeType == foodTarget)
+                if (outputBrain1[0] > 0.5f && position != null)
                     OnFlag?.Invoke(Flags.OnEat);
             });
             return behaviours;

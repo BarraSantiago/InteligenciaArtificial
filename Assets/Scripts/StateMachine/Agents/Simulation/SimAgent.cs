@@ -157,8 +157,8 @@ namespace StateMachine.Agents.Simulation
             var inputCount = GetInputCount(BrainType.Eat);
             input[brain] = new float[inputCount];
 
-            input[brain][0] = CurrentNode.GetCoordinate().X;
-            input[brain][1] = CurrentNode.GetCoordinate().Y;
+            input[brain][0] = Transform.position.X;
+            input[brain][1] = Transform.position.Y;
             INode<IVector> target = GetTarget(foodTarget);
 
             if (target == null)
@@ -294,7 +294,7 @@ namespace StateMachine.Agents.Simulation
 
         protected virtual INode<IVector> GetTarget(SimNodeType nodeType = SimNodeType.Empty)
         {
-            return EcsPopulationManager.GetNearestNode(nodeType, CurrentNode);
+            return EcsPopulationManager.GetNearestNode(nodeType, transform.position);
         }
 
         protected int GetInputCount(BrainType brainType)
@@ -302,7 +302,7 @@ namespace StateMachine.Agents.Simulation
             return InputCountCache.GetInputCount(agentType, brainType);
         }
         
-        public void SetPosition(IVector position)
+        public virtual void SetPosition(IVector position)
         {
             if(!EcsPopulationManager.graph.IsWithinGraphBorders(position)) return;
             Transform.position = position;

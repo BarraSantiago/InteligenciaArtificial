@@ -253,7 +253,7 @@ MonoBehaviour:
   scavengerMesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
   scavengerMat: {fileID: 2100000, guid: f053c779a3c9ee941a2859146417e7a0, type: 2}
   carnivoreCount: 1
-  herbivoreCount: 1
+  herbivoreCount: 0
   scavengerCount: 1
   eliteCount: 0
   generationDuration: 3

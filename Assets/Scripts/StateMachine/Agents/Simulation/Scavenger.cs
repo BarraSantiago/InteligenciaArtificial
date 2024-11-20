@@ -33,12 +33,15 @@ namespace StateMachine.Agents.Simulation
         public override void Init()
         {
             targetPosition = GetTargetPosition();
-            Transform.forward = (targetPosition - CurrentNode.GetCoordinate()).Normalized();
+            Transform.forward = (targetPosition - Transform.position).Normalized();
             boid = new Boid<IVector, ITransform<IVector>>
             {
                 transform = Transform,
                 target = targetPosition,
             };
+
+            boid.transform.forward ??= MyVector.zero();
+
             base.Init();
             foodTarget = SimNodeType.Carrion;
             FoodLimit = 20;
@@ -72,10 +75,10 @@ namespace StateMachine.Agents.Simulation
             var inputCount = GetInputCount(BrainType.ScavengerMovement);
 
             input[brain] = new float[inputCount];
-            input[brain][0] = CurrentNode.GetCoordinate().X;
-            input[brain][1] = CurrentNode.GetCoordinate().Y;
+            input[brain][0] = Transform.position.X;
+            input[brain][1] = Transform.position.Y;
 
-            var target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, CurrentNode);
+            var target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, Transform.position);
             if (target == null || target.CurrentNode == null)
             {
                 input[brain][2] = NoTarget;
@@ -83,8 +86,8 @@ namespace StateMachine.Agents.Simulation
             }
             else
             {
-                input[brain][2] = target.CurrentNode.GetCoordinate().X;
-                input[brain][3] = target.CurrentNode.GetCoordinate().Y;
+                input[brain][2] = target.Transform.position.X;
+                input[brain][3] = target.Transform.position.Y;
             }
 
             INode<IVector> nodeTarget = GetTarget(foodTarget);
@@ -110,12 +113,12 @@ namespace StateMachine.Agents.Simulation
 
             targetPosition = GetTargetPosition();
 
-            input[brain][0] = CurrentNode.GetCoordinate().X;
-            input[brain][1] = CurrentNode.GetCoordinate().Y;
+            input[brain][0] = Transform.position.X;
+            input[brain][1] = Transform.position.Y;
 
             if (targetPosition != null)
             {
-                IVector direction = (targetPosition - CurrentNode.GetCoordinate()).Normalized();
+                IVector direction = (targetPosition - Transform.position).Normalized();
                 input[brain][2] = direction.X;
                 input[brain][3] = direction.Y;
             }
@@ -259,20 +262,26 @@ namespace StateMachine.Agents.Simulation
             }
         }
 
+        public override void SetPosition(IVector position)
+        {
+            base.SetPosition(position);
+            boid.transform.position = position;
+            boid.transform.forward = (targetPosition - position).Normalized();
+        }
 
         protected override INode<IVector> GetTarget(SimNodeType nodeType = SimNodeType.Empty)
         {
-            INode<IVector> target = EcsPopulationManager.GetNearestNode(nodeType, CurrentNode);
+            INode<IVector> target = EcsPopulationManager.GetNearestNode(nodeType, Transform.position);
 
 
             if (target == null)
             {
-                target = EcsPopulationManager.GetNearestNode(SimNodeType.Corpse, CurrentNode);
+                target = EcsPopulationManager.GetNearestNode(SimNodeType.Corpse, Transform.position);
             }
 
             if (target == null)
             {
-                var nearestEntity = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, CurrentNode);
+                var nearestEntity = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, Transform.position);
                 if (nearestEntity != null)
                 {
                     target = nearestEntity.CurrentNode;
@@ -285,7 +294,7 @@ namespace StateMachine.Agents.Simulation
         protected override object[] WalkTickParameters()
         {
             object[] objects =
-                { CurrentNode, foodTarget, OnMove, output[GetBrainTypeKeyByValue(BrainType.Eat)] };
+                { Transform.position, OnMove, output[GetBrainTypeKeyByValue(BrainType.Eat)] };
 
             return objects;
         }
