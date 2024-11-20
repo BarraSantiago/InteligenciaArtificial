@@ -11,6 +11,11 @@ namespace ECS.Patron
 
         public abstract void Initialize();
 
+        public virtual void Deinitialize()
+        {
+            
+        }
+
         protected abstract void PreExecute(float deltaTime);
 
         protected abstract void Execute(float deltaTime);

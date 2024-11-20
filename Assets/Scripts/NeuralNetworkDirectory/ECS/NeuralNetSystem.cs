@@ -18,6 +18,14 @@ namespace NeuralNetworkDirectory.ECS
             parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 32 };
         }
 
+        public override void Deinitialize()
+        {
+            neuralNetworkComponents = null;
+            outputComponents = null;
+            inputComponents = null;
+            queriedEntities = null;
+        }
+
         protected override void PreExecute(float deltaTime)
         {
             neuralNetworkComponents ??= ECSManager.GetComponents<NeuralNetComponent>();

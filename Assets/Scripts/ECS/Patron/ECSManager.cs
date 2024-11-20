@@ -178,5 +178,10 @@ namespace ECS.Patron
             foreach (var flag in flags)
                 flag.Value.TryRemove(agentId, out _);
         }
+
+        public static ECSSystem GetSystem<T>()
+        {
+            return systems[typeof(T)];
+        }
     }
 }

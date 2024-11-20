@@ -60,6 +60,8 @@ namespace NeuralNetworkDirectory.ECS
         public static Dictionary<(BrainType, SimAgentTypes), NeuronInputCount> InputCountCache;
         public static FlockingManager flockingManager = new();
 
+        private const float Bias = 1.0f;
+        private const float SigmoidP = .5f;
         private bool isRunning = true;
         private static int missingHerbivores;
         private static int missingCarnivores;
@@ -440,17 +442,17 @@ namespace NeuralNetworkDirectory.ECS
 
             var layers = new List<NeuronLayer>
             {
-                new(inputCount.inputCount, inputCount.inputCount, 1f, 0.5f)
+                new(inputCount.inputCount, inputCount.inputCount, Bias, SigmoidP)
                     { BrainType = brainType, AgentType = agentType }
             };
 
             foreach (int hiddenLayerInput in inputCount.hiddenLayersInputs)
             {
-                layers.Add(new NeuronLayer(layers[^1].OutputsCount, hiddenLayerInput, 1f, 0.5f)
+                layers.Add(new NeuronLayer(layers[^1].OutputsCount, hiddenLayerInput, Bias, SigmoidP)
                     { BrainType = brainType, AgentType = agentType });
             }
 
-            layers.Add(new NeuronLayer(layers[^1].OutputsCount, inputCount.outputCount, 1f, 0.5f)
+            layers.Add(new NeuronLayer(layers[^1].OutputsCount, inputCount.outputCount, Bias, SigmoidP)
                 { BrainType = brainType, AgentType = agentType });
 
             return layers;
@@ -467,9 +469,10 @@ namespace NeuralNetworkDirectory.ECS
 
             PurgingSpecials();
 
+            ECSManager.GetSystem<NeuralNetSystem>().Deinitialize();
             if (Generation % 5 == 0) Save("NeuronData", Generation);
 
-            CleanPlants();
+            CleanMap();
             InitializePlants();
 
             FillPopulation();
@@ -587,18 +590,13 @@ namespace NeuralNetworkDirectory.ECS
                 var plantPosition = gridManager.GetRandomPosition();
                 plantPosition.NodeType = SimNodeType.Bush;
                 plantPosition.Food = 5;
-                plantPosition = gridManager.GetRandomPosition();
-                plantPosition.NodeType = SimNodeType.Carrion;
-                plantPosition.Food = 20;
             }
         }
 
-        private void CleanPlants()
+        private void CleanMap()
         {
             foreach (var node in graph.NodesType)
             {
-                if (node.NodeType != SimNodeType.Bush) continue;
-
                 node.Food = 0;
                 node.NodeType = SimNodeType.Empty;
             }
