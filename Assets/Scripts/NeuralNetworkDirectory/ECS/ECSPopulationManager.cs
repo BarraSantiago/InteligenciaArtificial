@@ -587,6 +587,9 @@ namespace NeuralNetworkDirectory.ECS
                 var plantPosition = gridManager.GetRandomPosition();
                 plantPosition.NodeType = SimNodeType.Bush;
                 plantPosition.Food = 5;
+                plantPosition = gridManager.GetRandomPosition();
+                plantPosition.NodeType = SimNodeType.Carrion;
+                plantPosition.Food = 20;
             }
         }
 

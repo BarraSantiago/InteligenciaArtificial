@@ -184,7 +184,12 @@ namespace StateMachine.Agents.Simulation
         protected override object[] EatTickParameters()
         {
             object[] objects =
-                { Transform.position, foodTarget, OnEat, output[GetBrainTypeKeyByValue(BrainType.Eat)] };
+            {
+                Transform.position,
+                EcsPopulationManager.graph.NodesType[(int)targetPosition.X, (int)targetPosition.Y],
+                OnEat,
+                output[GetBrainTypeKeyByValue(BrainType.Eat)]
+            };
             return objects;
         }
 

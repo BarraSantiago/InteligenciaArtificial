@@ -2,7 +2,6 @@
 using Pathfinder;
 using StateMachine.Agents.Simulation;
 using States;
-using UnityEngine;
 using Utils;
 
 namespace StateMachine.States.SimStates
@@ -12,7 +11,7 @@ namespace StateMachine.States.SimStates
         public override BehaviourActions GetTickBehaviour(params object[] parameters)
         {
             var behaviours = new BehaviourActions();
-            var currentNode = parameters[0] as SimNode<Vector2>;
+            var currentNode = parameters[0] as SimNode<IVector>;
             var foodTarget = (SimNodeType)parameters[1];
             var onEat = parameters[2] as Action;
             var outputBrain1 = (float[])parameters[3];
@@ -60,7 +59,7 @@ namespace StateMachine.States.SimStates
         {
             var behaviours = new BehaviourActions();
             var currentPos = parameters[0] as IVector;
-            var foodNode = parameters[1] as SimNode<Vector2>;
+            var foodNode = parameters[1] as SimNode<IVector>;
             var onEat = parameters[2] as Action;
             var outputBrain1 = (float[])parameters[3];
 
@@ -69,8 +68,8 @@ namespace StateMachine.States.SimStates
 
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {
-                distanceToFood = new MyVector(foodNode.GetCoordinate().x - currentPos.X,
-                    foodNode.GetCoordinate().y - currentPos.Y);
+                distanceToFood = new MyVector(foodNode.GetCoordinate().X - currentPos.X,
+                    foodNode.GetCoordinate().Y - currentPos.Y);
 
                 if (foodNode is not { Food: > 0 } || distanceToFood.Magnitude() > maxDistance.Magnitude()) return;
 
