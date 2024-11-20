@@ -17,6 +17,7 @@ namespace StateMachine.Agents.Simulation
         public bool HasKilled { get; private set; }
 
         public int DamageDealt { get; private set; } = 0;
+
         public override void Init()
         {
             base.Init();
@@ -106,7 +107,13 @@ namespace StateMachine.Agents.Simulation
 
         private object[] AttackEnterParameters()
         {
-            object[] objects = { OnAttack, output[0], output[1] };
+            object[] objects =
+            {
+                OnAttack, 
+                output[GetBrainTypeKeyByValue(BrainType.Eat)],
+                output[GetBrainTypeKeyByValue(BrainType.Attack)], 
+                output[GetBrainTypeKeyByValue(BrainType.Movement)][2]
+            };
             return objects;
         }
 
@@ -117,7 +124,7 @@ namespace StateMachine.Agents.Simulation
                 EcsPopulationManager.GetEntity(SimAgentTypes.Herbivore, CurrentNode);
             if (target is not Herbivore<TVector, TTransform> herbivore ||
                 !Approximatly(herbivore.CurrentNode.GetCoordinate(), currentNode.GetCoordinate(), 0.1f)) return;
-            
+
             herbivore.Hp--;
             HasAttacked = true;
             DamageDealt++;
@@ -130,6 +137,26 @@ namespace StateMachine.Agents.Simulation
         private bool Approximatly(IVector coord1, IVector coord2, float tolerance)
         {
             return Math.Abs(coord1.X - coord2.X) <= tolerance && Math.Abs(coord1.Y - coord2.Y) <= tolerance;
+        }
+
+        protected override void EatTransitions()
+        {
+            Fsm.SetTransition(Behaviours.Eat, Flags.OnEat, Behaviours.Attack);
+            Fsm.SetTransition(Behaviours.Eat, Flags.OnSearchFood, Behaviours.Walk);
+            Fsm.SetTransition(Behaviours.Eat, Flags.OnAttack, Behaviours.Attack);
+        }
+
+        protected override void WalkTransitions()
+        {
+            Fsm.SetTransition(Behaviours.Walk, Flags.OnEat, Behaviours.Attack);
+            Fsm.SetTransition(Behaviours.Walk, Flags.OnAttack, Behaviours.Attack);
+        }
+
+        protected override void ExtraTransitions()
+        {
+            Fsm.SetTransition(Behaviours.Attack, Flags.OnAttack, Behaviours.Attack);
+            Fsm.SetTransition(Behaviours.Attack, Flags.OnEat, Behaviours.Eat);
+            Fsm.SetTransition(Behaviours.Attack, Flags.OnSearchFood, Behaviours.Walk);
         }
     }
 }

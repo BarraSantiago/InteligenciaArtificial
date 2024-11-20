@@ -90,16 +90,16 @@ namespace StateMachine.Agents.Simulation
                 input[brain][3] = target.Transform.position.Y;
             }
 
-            INode<IVector> nodeTarget = GetTarget(foodTarget);
-            if (nodeTarget == null)
+            targetPosition = GetTargetPosition();
+            if (targetPosition == null)
             {
                 input[brain][4] = NoTarget;
                 input[brain][5] = NoTarget;
             }
             else
             {
-                input[brain][4] = nodeTarget.GetCoordinate().X;
-                input[brain][5] = nodeTarget.GetCoordinate().Y;
+                input[brain][4] = targetPosition.X;
+                input[brain][5] = targetPosition.Y;
             }
 
             input[brain][6] = Food;
@@ -178,7 +178,14 @@ namespace StateMachine.Agents.Simulation
 
         protected override void ExtraBehaviours()
         {
-            Fsm.AddBehaviour<SimEatState>(Behaviours.Eat, EatTickParameters);
+            Fsm.AddBehaviour<SimEatScavState>(Behaviours.Eat, EatTickParameters);
+        }
+
+        protected override object[] EatTickParameters()
+        {
+            object[] objects =
+                { Transform.position, foodTarget, OnEat, output[GetBrainTypeKeyByValue(BrainType.Eat)] };
+            return objects;
         }
 
         private IVector GetAverageNeighborPosition()
@@ -252,6 +259,29 @@ namespace StateMachine.Agents.Simulation
             currentPos.X += rightForce;
             currentPos.Y += leftForce;
 
+            if (!EcsPopulationManager.graph.IsWithinGraphBorders(currentPos))
+            {
+                if (currentPos.X < EcsPopulationManager.graph.MinX)
+                {
+                    currentPos.X = EcsPopulationManager.graph.MaxX;
+                }
+
+                if (currentPos.X > EcsPopulationManager.graph.MaxX)
+                {
+                    currentPos.X = EcsPopulationManager.graph.MinX;
+                }
+
+                if (currentPos.Y < EcsPopulationManager.graph.MinY)
+                {
+                    currentPos.Y = EcsPopulationManager.graph.MaxY;
+                }
+
+                if (currentPos.Y > EcsPopulationManager.graph.MaxY)
+                {
+                    currentPos.Y = EcsPopulationManager.graph.MinY;
+                }
+            }
+
             SetPosition(currentPos);
 
             if (rightForce > leftForce)
@@ -294,9 +324,20 @@ namespace StateMachine.Agents.Simulation
         protected override object[] WalkTickParameters()
         {
             object[] objects =
-                { Transform.position, OnMove, output[GetBrainTypeKeyByValue(BrainType.Eat)] };
+                { Transform.position, targetPosition, OnMove, output[GetBrainTypeKeyByValue(BrainType.Eat)] };
 
             return objects;
+        }
+
+        protected override void EatTransitions()
+        {
+            Fsm.SetTransition(Behaviours.Eat, Flags.OnEat, Behaviours.Eat);
+            Fsm.SetTransition(Behaviours.Eat, Flags.OnSearchFood, Behaviours.Walk);
+        }
+
+        protected override void WalkTransitions()
+        {
+            Fsm.SetTransition(Behaviours.Walk, Flags.OnEat, Behaviours.Eat);
         }
     }
 }

@@ -108,11 +108,27 @@ namespace StateMachine.Agents.Simulation
             EcsPopulationManager.RemoveEntity(this as SimAgent<IVector, ITransform<IVector>>);
         }
 
+        protected override void EatTransitions()
+        {
+            Fsm.SetTransition(Behaviours.Eat, Flags.OnEat, Behaviours.Eat);
+            Fsm.SetTransition(Behaviours.Eat, Flags.OnSearchFood, Behaviours.Walk);
+            Fsm.SetTransition(Behaviours.Eat, Flags.OnEscape, Behaviours.Walk);
+        }
+
+        protected override void WalkTransitions()
+        {
+            Fsm.SetTransition(Behaviours.Walk, Flags.OnEat, Behaviours.Eat);
+            Fsm.SetTransition(Behaviours.Walk, Flags.OnEscape, Behaviours.Walk);
+        }
+
+        protected override void ExtraTransitions()
+        {
+        }
+
         protected override void ExtraBehaviours()
         {
             Fsm.AddBehaviour<SimEatHerbState>(Behaviours.Eat, EatTickParameters);
-
-            Fsm.AddBehaviour<SimWalkHerbState>(Behaviours.Escape, WalkTickParameters);
+            Fsm.AddBehaviour<SimWalkHerbState>(Behaviours.Walk, WalkTickParameters);
         }
     }
 }
