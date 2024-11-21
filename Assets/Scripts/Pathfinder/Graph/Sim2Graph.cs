@@ -1,10 +1,16 @@
-﻿using UnityEngine;
+﻿using System.Threading.Tasks;
+using UnityEngine;
 using Utils;
 
 namespace Pathfinder.Graph
 {
     public class Sim2Graph : SimGraph<SimNode<IVector>, SimCoordinate, IVector>
     {
+        private readonly ParallelOptions parallelOptions = new ParallelOptions
+        {
+            MaxDegreeOfParallelism = 32
+        };
+
         public int MinX => 0;
         public int MaxX => CoordNodes.GetLength(0);
         public int MinY => 0;
@@ -16,7 +22,8 @@ namespace Pathfinder.Graph
         public override void CreateGraph(int x, int y, float cellSize)
         {
             CoordNodes = new SimCoordinate[x, y];
-            for (var i = 0; i < x; i++)
+            
+            Parallel.For(0, x, parallelOptions, i =>
             {
                 for (var j = 0; j < y; j++)
                 {
@@ -28,7 +35,7 @@ namespace Pathfinder.Graph
                     nodeType.SetCoordinate(new MyVector(i * cellSize, j * cellSize));
                     NodesType[i, j] = nodeType;
                 }
-            }
+            });
         }
         
         public bool IsWithinGraphBorders(IVector position)
