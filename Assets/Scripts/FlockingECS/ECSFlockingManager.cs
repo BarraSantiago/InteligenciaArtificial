@@ -20,6 +20,10 @@ namespace FlockingECS
         private Mesh prefabMesh;
         private UnityEngine.Vector3 prefabScale;
         private PositionComponent<Vector3> targetPositionComponent;
+        private ParallelOptions parallelOptions = new()
+        {
+            MaxDegreeOfParallelism = 32
+        };
 
         private void Start()
         {
@@ -60,7 +64,7 @@ namespace FlockingECS
                 meshes -= MAX_OBJS_PER_DRAWCALL;
             }
 
-            Parallel.For(0, entities.Count, i =>
+            Parallel.For(0, entities.Count, parallelOptions, i =>
             {
                 var position = ECSManager.GetComponent<PositionComponent<Vector3>>(entities[i]);
                 var pos =

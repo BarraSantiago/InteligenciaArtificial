@@ -15,6 +15,10 @@ public class ECSExample_ECSWithoutGOs : MonoBehaviour
     private Material prefabMaterial;
     private Mesh prefabMesh;
     private Vector3 prefabScale;
+    private ParallelOptions parallelOptions = new()
+    {
+        MaxDegreeOfParallelism = 32
+    };
 
     private void Start()
     {
@@ -52,7 +56,7 @@ public class ECSExample_ECSWithoutGOs : MonoBehaviour
             meshes -= MAX_OBJS_PER_DRAWCALL;
         }
 
-        Parallel.For(0, entities.Count, i =>
+        Parallel.For(0, entities.Count, parallelOptions, i =>
         {
             var position = ECSManager.GetComponent<PositionComponent<Vector3>>(entities[i]);
             var rotation = ECSManager.GetComponent<RotationComponent>(entities[i]);

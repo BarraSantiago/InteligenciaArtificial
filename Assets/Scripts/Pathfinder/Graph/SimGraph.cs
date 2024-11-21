@@ -14,7 +14,10 @@ namespace Pathfinder.Graph
         public static float CellSize;
         public TCoordinateNode[,] CoordNodes;
         public readonly TNodeType[,] NodesType;
-
+        private ParallelOptions parallelOptions = new()
+        {
+            MaxDegreeOfParallelism = 32
+        };
         public SimGraph(int x, int y, float cellSize)
         {
             MapDimensions = new TCoordinateNode();
@@ -35,7 +38,7 @@ namespace Pathfinder.Graph
         {
             var neighbors = new List<INode<TCoordinateType>>();
 
-            Parallel.For(0, CoordNodes.GetLength(0), i =>
+            Parallel.For(0, CoordNodes.GetLength(0), parallelOptions, i =>
             {
                 for (var j = 0; j < CoordNodes.GetLength(1); j++)
                 {

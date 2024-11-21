@@ -19,8 +19,12 @@ namespace StateMachine.States.SimStates
             var outputBrain1 = (float[])parameters[3];
             var outputBrain2 = (float[])parameters[4];
 
-            behaviours.AddMultiThreadableBehaviours(0, () => { onMove.Invoke(); });
+            behaviours.AddMultiThreadableBehaviours(0, () =>
+            {
+                onMove.Invoke();
+            });
 
+            
             //behaviours.AddMainThreadBehaviours(1, () =>
             //{
             //    if (currentNode == null) return;
@@ -31,12 +35,10 @@ namespace StateMachine.States.SimStates
             behaviours.SetTransitionBehaviour(() =>
             {
                 if (outputBrain1[0] > 0.5f && currentNode != null && currentNode.NodeType == foodTarget) OnFlag?.Invoke(Flags.OnEat);
-                Debug.Log(outputBrain2[0] > 0.5f);
                 if (outputBrain2[0] > 0.5f) OnFlag?.Invoke(Flags.OnAttack);
             });
             return behaviours;
         }
-
         public override BehaviourActions GetOnEnterBehaviour(params object[] parameters)
         {
             return default;

@@ -352,7 +352,7 @@ namespace StateMachine.Agents.Simulation
         protected override void WalkTransitions()
         {
             Fsm.SetTransition(Behaviours.Walk, Flags.OnEat, Behaviours.Eat);
-            //Fsm.SetTransition(Behaviours.Walk, Flags.OnSearchFood, Behaviours.Walk);
+            Fsm.SetTransition(Behaviours.Walk, Flags.OnSearchFood, Behaviours.Walk);
         }
     }
 }

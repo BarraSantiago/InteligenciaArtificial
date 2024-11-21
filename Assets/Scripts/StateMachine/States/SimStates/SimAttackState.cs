@@ -10,10 +10,10 @@ namespace StateMachine.States.SimStates
         {
             var behaviours = new BehaviourActions();
 
-            var onAttack = parameters[0] as Action;
-            var outputBrain1 = (float[])parameters[1];
-            var outputBrain2 = (float[])parameters[2];
-            var outputBrain3 = (float)parameters[3];
+            var onAttack = parameters[5] as Action;
+            var outputBrain1 = (float[])parameters[6];
+            var outputBrain2 = (float[])parameters[7];
+            var outputBrain3 = (float)parameters[8];
 
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {

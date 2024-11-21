@@ -2,6 +2,7 @@
 using Pathfinder;
 using StateMachine.Agents.Simulation;
 using States;
+using UnityEngine;
 using Utils;
 
 namespace StateMachine.States.SimStates
@@ -91,7 +92,10 @@ namespace StateMachine.States.SimStates
             var outputBrain1 = (float[])parameters[3];
             var outputBrain2 = (float[])parameters[4];
 
-            behaviours.AddMultiThreadableBehaviours(0, () => { onMove.Invoke(); });
+            behaviours.AddMultiThreadableBehaviours(0, () =>
+            {
+                onMove.Invoke();
+            });
 
             //behaviours.AddMainThreadBehaviours(1, () =>
             //{

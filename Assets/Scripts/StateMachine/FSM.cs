@@ -177,7 +177,7 @@ namespace StateMachine
             if (behaviourActions.MultiThreadablesBehaviour == null) return;
             if (!behaviourActions.MultiThreadablesBehaviour.ContainsKey(executionOrder)) return;
 
-            Parallel.ForEach(behaviourActions.MultiThreadablesBehaviour, behaviour =>
+            Parallel.ForEach(behaviourActions.MultiThreadablesBehaviour, parallelOptions, behaviour =>
             {
                 foreach (Action action in behaviour.Value)
                 {

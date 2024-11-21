@@ -82,6 +82,11 @@ namespace NeuralNetworkDirectory.ECS
         private static Dictionary<int, BrainType> carnBrainTypes = new();
         private static readonly int BrainsAmount = Enum.GetValues(typeof(BrainType)).Length;
 
+        private ParallelOptions parallelOptions = new()
+        {
+            MaxDegreeOfParallelism = 32
+        };
+
         #endregion
 
         private void Awake()
@@ -213,9 +218,9 @@ namespace NeuralNetworkDirectory.ECS
 
         private void EntitiesTurn(float dt)
         {
-            Parallel.ForEach(_agents.Values, entity => { entity.UpdateInputs(); });
+            Parallel.ForEach(_agents.Values, parallelOptions, entity => { entity.UpdateInputs(); });
 
-            Parallel.ForEach(_agents, entity =>
+            Parallel.ForEach(_agents, parallelOptions, entity =>
             {
                 var inputComponent = ECSManager.GetComponent<InputComponent>(entity.Key);
                 if (inputComponent != null && _agents.TryGetValue(entity.Key, out var agent))
@@ -226,7 +231,7 @@ namespace NeuralNetworkDirectory.ECS
 
             ECSManager.Tick(dt);
 
-            Parallel.ForEach(_agents, entity =>
+            Parallel.ForEach(_agents, parallelOptions, entity =>
             {
                 var outputComponent = ECSManager.GetComponent<OutputComponent>(entity.Key);
                 if (outputComponent == null || !_agents.TryGetValue(entity.Key, out var agent)) return;
@@ -234,7 +239,7 @@ namespace NeuralNetworkDirectory.ECS
                 agent.output = outputComponent.outputs;
             });
 
-            Parallel.ForEach(_scavengers, entity =>
+            Parallel.ForEach(_scavengers, parallelOptions, entity =>
             {
                 var outputComponent = ECSManager.GetComponent<OutputComponent>(entity.Key);
                 var boid = _scavengers[entity.Key]?.boid;
@@ -245,6 +250,7 @@ namespace NeuralNetworkDirectory.ECS
                         [GetBrainTypeKeyByValue(BrainType.Flocking, SimAgentTypes.Scavenger)]);
                 }
             });
+
 
             for (int i = 0; i < behaviourCount; i++)
             {
@@ -631,7 +637,7 @@ namespace NeuralNetworkDirectory.ECS
 
             var entitiesCopy = _agents.ToList();
 
-            Parallel.ForEach(entitiesCopy, entity =>
+            Parallel.ForEach(entitiesCopy, parallelOptions, entity =>
             {
                 var netComponent = ECSManager.GetComponent<NeuralNetComponent>(entity.Key);
                 for (int i = 0; i < netComponent.Layers.Count; i++)
@@ -660,14 +666,14 @@ namespace NeuralNetworkDirectory.ECS
         {
             var loadedData = NeuronDataSystem.LoadLatestNeurons(directoryPath);
 
-            Parallel.ForEach(_agents, entity =>
+            Parallel.ForEach(_agents, parallelOptions, entity =>
             {
                 var netComponent = ECSManager.GetComponent<NeuralNetComponent>(entity.Key);
                 var agent = _agents[entity.Key];
 
                 if (!loadedData.TryGetValue(agent.agentType, out var brainData)) return;
 
-                Parallel.ForEach(agent.brainTypes, brainType =>
+                Parallel.ForEach(agent.brainTypes, parallelOptions, brainType =>
                 {
                     if (!brainData.TryGetValue(brainType.Value, out var neuronDataList)) return;
 

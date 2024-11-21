@@ -123,6 +123,12 @@ namespace StateMachine.Agents.Simulation
 
         protected override void ExtraTransitions()
         {
+            
+        }
+
+        protected override void FsmBehaviours()
+        {
+            ExtraBehaviours();
         }
 
         protected override void ExtraBehaviours()

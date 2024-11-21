@@ -102,7 +102,6 @@ namespace StateMachine.Agents.Simulation
 
             FsmTransitions();
             Fsm.ForceTransition(Behaviours.Walk);
-            //UpdateInputs();
         }
 
         public virtual void Reset()

@@ -107,8 +107,14 @@ namespace StateMachine.Agents.Simulation
 
         private object[] AttackEnterParameters()
         {
+            int extraBrain = GetBrainTypeKeyByValue(BrainType.Attack);
             object[] objects =
             {
+                CurrentNode, 
+                foodTarget, 
+                OnMove, 
+                output[GetBrainTypeKeyByValue(BrainType.Eat)],
+                output[extraBrain],
                 OnAttack, 
                 output[GetBrainTypeKeyByValue(BrainType.Eat)],
                 output[GetBrainTypeKeyByValue(BrainType.Attack)], 
@@ -139,6 +145,11 @@ namespace StateMachine.Agents.Simulation
             return Math.Abs(coord1.X - coord2.X) <= tolerance && Math.Abs(coord1.Y - coord2.Y) <= tolerance;
         }
 
+        protected override void FsmBehaviours()
+        {
+            ExtraBehaviours();
+        }
+
         protected override void EatTransitions()
         {
             Fsm.SetTransition(Behaviours.Eat, Flags.OnEat, Behaviours.Eat);
@@ -150,6 +161,7 @@ namespace StateMachine.Agents.Simulation
         {
             Fsm.SetTransition(Behaviours.Walk, Flags.OnEat, Behaviours.Eat);
             Fsm.SetTransition(Behaviours.Walk, Flags.OnAttack, Behaviours.Attack);
+            Fsm.SetTransition(Behaviours.Walk, Flags.OnSearchFood, Behaviours.Walk);
         }
 
         protected override void ExtraTransitions()

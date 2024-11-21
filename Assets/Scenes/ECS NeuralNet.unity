@@ -263,7 +263,7 @@ MonoBehaviour:
   gridWidth: 25
   gridHeight: 25
   generationTurns: 100
-  speed: 1
+  speed: 3
 --- !u!4 &1659154293
 Transform:
   m_ObjectHideFlags: 0

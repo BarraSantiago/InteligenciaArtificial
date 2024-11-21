@@ -19,6 +19,7 @@ namespace StateMachine.States.SimStates
 
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {
+                if(foodTarget == null) return;
                 if (currentNode is not { Food: > 0 } || foodTarget != currentNode.NodeType) return;
 
                 onEat?.Invoke();

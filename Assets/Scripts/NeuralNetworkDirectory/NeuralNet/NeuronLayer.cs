@@ -22,6 +22,10 @@ namespace NeuralNetworkDirectory.NeuralNet
         private Neuron[] neurons;
         private float[] outputs;
         private int totalWeights;
+        private ParallelOptions parallelOptions = new()
+        {
+            MaxDegreeOfParallelism = 32
+        };
 
         public NeuronLayer(int inputsCount, int neuronsCount, float bias, float p)
         {
@@ -79,7 +83,7 @@ namespace NeuralNetworkDirectory.NeuralNet
 
         public float[] Synapsis(float[] inputs, int i)
         {
-            Parallel.For(0, neurons.Length, j =>
+            Parallel.For(0, neurons.Length, parallelOptions, j =>
             {
                 outputs[j] = neurons[j].Synapsis(inputs, i);
             });
