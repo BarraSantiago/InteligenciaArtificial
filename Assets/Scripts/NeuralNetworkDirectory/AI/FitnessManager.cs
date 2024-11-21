@@ -61,6 +61,9 @@ namespace NeuralNetworkDirectory.AI
                     case BrainType.Escape:
                         HerbivoreEscapeFC(agentId);
                         break;
+                    case BrainType.ScavengerMovement:
+                    case BrainType.Attack:
+                    case BrainType.Flocking:
                     default:
                         throw new ArgumentException("Herbivore doesn't have a brain type: ", nameof(brainType));
                 }
@@ -83,8 +86,7 @@ namespace NeuralNetworkDirectory.AI
 
             if (!IsMovingTowardsTarget(agentId, targetPosition))
             {
-                float rewardMod = (float)agent?.Hp * 2 / 2;
-                ECSManager.GetComponent<NeuralNetComponent>(agentId).Reward(reward * rewardMod, BrainType.Escape);
+                ECSManager.GetComponent<NeuralNetComponent>(agentId).Reward(reward, BrainType.Escape);
             }
 
             if (agent?.Hp < 2)
@@ -102,12 +104,10 @@ namespace NeuralNetworkDirectory.AI
             var nearestPredatorNode =
                 EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, agent.Transform.position);
 
-            IVector targetPosition;
-
             if (nearestPredatorNode?.CurrentNode?.GetCoordinate() == null) return;
-            targetPosition = nearestPredatorNode.CurrentNode.GetCoordinate();
+            var targetPosition = nearestPredatorNode.CurrentNode.GetCoordinate();
 
-            if (IsMovingTowardsTarget(agentId, targetPosition))
+            if (!IsMovingTowardsTarget(agentId, targetPosition))
             {
                 ECSManager.GetComponent<NeuralNetComponent>(agentId).Reward(reward, BrainType.Movement);
             }
@@ -132,6 +132,9 @@ namespace NeuralNetworkDirectory.AI
                     case BrainType.Movement:
                         CarnivoreMovementFC(agentId);
                         break;
+                    case BrainType.ScavengerMovement:
+                    case BrainType.Escape:
+                    case BrainType.Flocking:
                     default:
                         throw new ArgumentException("Carnivore doesn't have a brain type: ", nameof(brainType));
                 }
@@ -144,14 +147,12 @@ namespace NeuralNetworkDirectory.AI
             const float reward = 10;
             const float punishment = 0.90f;
 
-            var agent = _agents[agentId] as Carnivore<IVector, ITransform<IVector>>;
+            if(_agents[agentId] is not Carnivore<IVector, ITransform<IVector>> agent) return;
             var nearestHerbivoreNode =
                 EcsPopulationManager.GetNearestEntity(SimAgentTypes.Herbivore, agent.Transform.position);
 
-            IVector targetPosition;
-
             if (nearestHerbivoreNode?.CurrentNode?.GetCoordinate() == null) return;
-            targetPosition = nearestHerbivoreNode.CurrentNode.GetCoordinate();
+            var targetPosition = nearestHerbivoreNode.CurrentNode.GetCoordinate();
 
             if (IsMovingTowardsTarget(agentId, targetPosition))
             {
@@ -184,7 +185,7 @@ namespace NeuralNetworkDirectory.AI
             var corpsePosition = nearestCorpseNode?.GetCoordinate();
 
             if (IsMovingTowardsTarget(agentId, herbPosition) ||
-                corpsePosition != null && IsMovingTowardsTarget(agentId, corpsePosition))
+                (corpsePosition != null && IsMovingTowardsTarget(agentId, corpsePosition)))
             {
                 ECSManager.GetComponent<NeuralNetComponent>(agentId).Reward(reward, BrainType.Movement);
             }
@@ -209,6 +210,9 @@ namespace NeuralNetworkDirectory.AI
                     case BrainType.Flocking:
                         ScavengerFlockingFC(agentId);
                         break;
+                    case BrainType.Movement:
+                    case BrainType.Attack:
+                    case BrainType.Escape:
                     default:
                         throw new ArgumentException("Scavenger doesn't have a brain type: ", nameof(brainType));
                 }
@@ -224,7 +228,7 @@ namespace NeuralNetworkDirectory.AI
 
             var agent = (Scavenger<TVector, TTransform>)_agents[agentId];
             var neighbors = EcsPopulationManager.GetBoidsInsideRadius(agent.boid);
-            var targetPosition = agent.Transform.position;
+            var targetPosition = agent.GetTarget(SimNodeType.Carrion).GetCoordinate();
 
             bool isMaintainingDistance = true;
             bool isAligningWithFlock = true;
@@ -235,7 +239,7 @@ namespace NeuralNetworkDirectory.AI
 
             foreach (var neighbor in neighbors)
             {
-                if (Equals(neighbor, agent)) continue;
+                if (Equals(neighbor, agent.boid)) continue;
 
                 var neighborPosition = neighbor.transform.position;
                 float distance = agent.Transform.position.Distance(neighborPosition);
@@ -253,7 +257,7 @@ namespace NeuralNetworkDirectory.AI
             if (neighborCount > 0)
             {
                 averageDirection /= neighborCount;
-                var agentDirection = agent.boid.transform.forward.Normalized();
+                var agentDirection = agent.boid.transform.forward;
                 var alignmentDotProduct = IVector.Dot(agentDirection, averageDirection.Normalized());
 
                 if (alignmentDotProduct < 0.9f)
@@ -262,11 +266,12 @@ namespace NeuralNetworkDirectory.AI
                 }
             }
 
-            if (isMaintainingDistance && isAligningWithFlock && IsMovingTowardsTarget(agentId, targetPosition))
+            if (isMaintainingDistance || isAligningWithFlock || IsMovingTowardsTarget(agentId, targetPosition))
             {
                 ECSManager.GetComponent<NeuralNetComponent>(agentId).Reward(reward, BrainType.Flocking);
             }
-            else if (isColliding || !IsMovingTowardsTarget(agentId, targetPosition))
+            
+            if (isColliding || !IsMovingTowardsTarget(agentId, targetPosition))
             {
                 ECSManager.GetComponent<NeuralNetComponent>(agentId).Punish(punishment, BrainType.Flocking);
             }
@@ -278,7 +283,8 @@ namespace NeuralNetworkDirectory.AI
             const float punishment = 0.90f;
 
             int brainId = (int)BrainType.ScavengerMovement;
-            var agent = _agents[agentId];
+            var agent = (Scavenger<TVector, TTransform>)_agents[agentId];
+            var neighbors = EcsPopulationManager.GetBoidsInsideRadius(agent.boid).Count;
             var nearestCarrionNode = EcsPopulationManager.GetNearestNode(SimNodeType.Carrion, agent.Transform.position);
             var nearestCorpseNode = EcsPopulationManager.GetNearestNode(SimNodeType.Corpse, agent.Transform.position);
             var nearestCarNode = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, agent.Transform.position);
@@ -301,6 +307,11 @@ namespace NeuralNetworkDirectory.AI
 
             if (targetPosition == null) return;
 
+            if(neighbors > 0)
+            {
+                ECSManager.GetComponent<NeuralNetComponent>(agentId).Reward(reward/5+neighbors, BrainType.ScavengerMovement);
+            }
+            
             if (IsMovingTowardsTarget(agentId, targetPosition))
             {
                 ECSManager.GetComponent<NeuralNetComponent>(agentId).Reward(reward, BrainType.ScavengerMovement);
@@ -328,7 +339,7 @@ namespace NeuralNetworkDirectory.AI
         {
             var agent = _agents[agentId];
             var currentPosition = agent.Transform.position;
-            IVector agentDirection = agent.Transform.forward?.Normalized();
+            IVector agentDirection = agent.Transform.forward;
 
             var directionToTarget = (targetPosition - currentPosition).Normalized();
             if(directionToTarget == null || agentDirection == null) return false;
