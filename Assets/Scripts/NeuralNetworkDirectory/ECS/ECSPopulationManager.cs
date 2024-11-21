@@ -218,9 +218,14 @@ namespace NeuralNetworkDirectory.ECS
 
         private void EntitiesTurn(float dt)
         {
-            Parallel.ForEach(_agents.Values, parallelOptions, entity => { entity.UpdateInputs(); });
+            var agentsCopy = _agents.ToArray();
 
-            Parallel.ForEach(_agents, parallelOptions, entity =>
+            Parallel.ForEach(agentsCopy, parallelOptions, entity =>
+            {
+                entity.Value.UpdateInputs();
+            });
+
+            Parallel.ForEach(agentsCopy, parallelOptions, entity =>
             {
                 var inputComponent = ECSManager.GetComponent<InputComponent>(entity.Key);
                 if (inputComponent != null && _agents.TryGetValue(entity.Key, out var agent))
@@ -231,7 +236,7 @@ namespace NeuralNetworkDirectory.ECS
 
             ECSManager.Tick(dt);
 
-            Parallel.ForEach(_agents, parallelOptions, entity =>
+            Parallel.ForEach(agentsCopy, parallelOptions, entity =>
             {
                 var outputComponent = ECSManager.GetComponent<OutputComponent>(entity.Key);
                 if (outputComponent == null || !_agents.TryGetValue(entity.Key, out var agent)) return;
@@ -251,14 +256,13 @@ namespace NeuralNetworkDirectory.ECS
                 }
             });
 
-
             for (int i = 0; i < behaviourCount; i++)
             {
                 var i1 = i;
-                var tasks = _agents.Select(entity =>
+                var tasks = agentsCopy.Select(entity =>
                     Task.Run(() => entity.Value.Fsm.MultiThreadTick(i1))).ToArray();
 
-                foreach (var entity in _agents)
+                foreach (var entity in agentsCopy)
                 {
                     entity.Value.Fsm.MainThreadTick(i);
                 }
