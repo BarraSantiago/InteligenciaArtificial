@@ -29,6 +29,12 @@ namespace StateMachine.Agents.Simulation
             OnAttack += Attack;
         }
 
+        public override void Uninit()
+        {
+            base.Uninit();
+            OnAttack -= Attack;
+        }
+
         public override void Reset()
         {
             base.Reset();
@@ -140,6 +146,18 @@ namespace StateMachine.Agents.Simulation
             }
         }
 
+        protected override void Eat()
+        {
+            if (CurrentNode.Food <= 0) return;
+            Food++;
+            CurrentNode.Food--;
+            
+            if (CurrentNode.Food > 0) return;
+            
+            CurrentNode.NodeType = SimNodeType.Carrion;
+            CurrentNode.Food = 30;
+        }
+        
         private bool Approximatly(IVector coord1, IVector coord2, float tolerance)
         {
             return Math.Abs(coord1.X - coord2.X) <= tolerance && Math.Abs(coord1.Y - coord2.Y) <= tolerance;

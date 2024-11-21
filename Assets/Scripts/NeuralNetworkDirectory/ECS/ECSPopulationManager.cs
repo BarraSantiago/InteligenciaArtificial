@@ -238,9 +238,9 @@ namespace NeuralNetworkDirectory.ECS
                 if (outputComponent == null || !_agents.TryGetValue(entity.Key, out var agent)) return;
 
                 agent.output = outputComponent.outputs;
-                
-                if(agent.agentType != SimAgentTypes.Scavenger) return;
-                
+
+                if (agent.agentType != SimAgentTypes.Scavenger) return;
+
                 var boid = _scavengers[entity.Key]?.boid;
 
                 if (boid != null)
@@ -502,10 +502,10 @@ namespace NeuralNetworkDirectory.ECS
             InitializePlants();
 
             FillPopulation();
-            _population.Clear();
 
             if (!remainingPopulation)
             {
+                _population.Clear();
                 return;
             }
 
@@ -736,12 +736,13 @@ namespace NeuralNetworkDirectory.ECS
 
         public static SimAgentType GetEntity(SimAgentTypes entityType, INode<IVector> position)
         {
+            if (position == null) return null;
             SimAgentType result = null;
             var agentsCopy = _agents.Values.ToArray();
 
             foreach (var agent in agentsCopy)
             {
-                if (agent.agentType != entityType ||
+                if (agent.agentType != entityType || agent.Transform?.position == null ||
                     !agent.Transform.position.Equals(position.GetCoordinate())) continue;
                 result = agent;
                 break;
@@ -932,7 +933,8 @@ namespace NeuralNetworkDirectory.ECS
             {
                 RemoveEntity(_agents[agentId]);
             }
-            agentsToRemove.Clear(); 
+
+            agentsToRemove.Clear();
         }
 
 

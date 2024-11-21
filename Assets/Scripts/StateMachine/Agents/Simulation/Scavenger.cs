@@ -242,6 +242,16 @@ namespace StateMachine.Agents.Simulation
             return targetNode.GetCoordinate();
         }
 
+        protected override void Eat()
+        {
+            var node = EcsPopulationManager.graph.NodesType[(int)targetPosition.X, (int)targetPosition.Y];
+            if (node.Food <= 0) return;
+            Food++;
+            node.Food--;
+            if (node.Food <= 0) node.NodeType = SimNodeType.Empty;
+
+        }
+
         protected override void Move()
         {
             int index = GetBrainTypeKeyByValue(BrainType.ScavengerMovement);

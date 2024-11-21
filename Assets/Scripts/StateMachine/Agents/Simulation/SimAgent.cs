@@ -249,7 +249,7 @@ namespace StateMachine.Agents.Simulation
             return objects;
         }
 
-        private void Eat()
+        protected virtual void Eat()
         {
             if (CurrentNode.Food <= 0) return;
             Food++;
