@@ -58,12 +58,21 @@ namespace StateMachine.States.SimStates
     {
         public override BehaviourActions GetTickBehaviour(params object[] parameters)
         {
+            if (parameters == null || parameters.Length < 3)
+            {
+                throw new ArgumentException("Invalid parameters passed to SimEatScavState");
+            }
             var behaviours = new BehaviourActions();
             var currentPos = parameters[0] as IVector;
             var foodNode = parameters[1] as SimNode<IVector>;
             var onEat = parameters[2] as Action;
             var outputBrain1 = (float[])parameters[3];
-
+            
+            if (onEat == null)
+            {
+                throw new ArgumentException("Invalid parameters passed to GetTickBehaviour");
+            }
+            
             IVector distanceToFood = new MyVector();
             IVector maxDistance = new MyVector(4, 4);
 

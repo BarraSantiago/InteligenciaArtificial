@@ -220,10 +220,7 @@ namespace NeuralNetworkDirectory.ECS
         {
             var agentsCopy = _agents.ToArray();
 
-            Parallel.ForEach(agentsCopy, parallelOptions, entity =>
-            {
-                entity.Value.UpdateInputs();
-            });
+            Parallel.ForEach(agentsCopy, parallelOptions, entity => { entity.Value.UpdateInputs(); });
 
             Parallel.ForEach(agentsCopy, parallelOptions, entity =>
             {
@@ -637,6 +634,7 @@ namespace NeuralNetworkDirectory.ECS
 
         private void Save(string directoryPath, int generation)
         {
+            /*
             var agentsData = new List<AgentNeuronData>();
 
             var entitiesCopy = _agents.ToList();
@@ -663,7 +661,7 @@ namespace NeuralNetworkDirectory.ECS
                 }
 
                 NeuronDataSystem.SaveNeurons(agentsData, directoryPath, generation);
-            });
+            });*/
         }
 
         public void Load(string directoryPath)
@@ -729,19 +727,18 @@ namespace NeuralNetworkDirectory.ECS
 
         public static SimAgentType GetEntity(SimAgentTypes entityType, INode<IVector> position)
         {
-            SimAgentType target = null;
+            SimAgentType result = null;
+            var agentsCopy = _agents.Values.ToArray();
 
-            foreach (var agent in _agents.Values)
+            foreach (var agent in agentsCopy)
             {
-                if (agent.agentType != entityType) continue;
-
-                if (!position.GetCoordinate().Equals(agent.CurrentNode.GetCoordinate())) continue;
-
-                target = agent;
+                if (agent.agentType != entityType ||
+                    !agent.Transform.position.Equals(position.GetCoordinate())) continue;
+                result = agent;
                 break;
             }
 
-            return target;
+            return result;
         }
 
         public static SimAgentType GetEntity(SimAgentTypes entityType, ICoordinate<IVector> position)

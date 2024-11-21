@@ -8,6 +8,11 @@ namespace StateMachine.States.SimStates
     {
         public override BehaviourActions GetTickBehaviour(params object[] parameters)
         {
+            if (parameters == null || parameters.Length < 9)
+            {
+                throw new ArgumentException("Invalid parameters passed to GetTickBehaviour");
+            }
+            
             var behaviours = new BehaviourActions();
 
             var onAttack = parameters[5] as Action;
@@ -15,6 +20,11 @@ namespace StateMachine.States.SimStates
             var outputBrain2 = (float[])parameters[7];
             var outputBrain3 = (float)parameters[8];
 
+            if (outputBrain1 == null || outputBrain2 == null)
+            {
+                throw new ArgumentException("Invalid parameters passed to GetTickBehaviour");
+            }
+            
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {
                 onAttack?.Invoke();
