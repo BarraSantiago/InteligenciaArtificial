@@ -93,7 +93,7 @@ namespace StateMachine.States.SimStates
             var outputBrain1 = (float[])parameters[3];
             var outputBrain2 = (float[])parameters[4];
 
-            behaviours.AddMultiThreadableBehaviours(0, () => { onMove.Invoke(); });
+            behaviours.AddMultiThreadableBehaviours(0, () => { onMove?.Invoke(); });
 
             //behaviours.AddMainThreadBehaviours(1, () =>
             //{

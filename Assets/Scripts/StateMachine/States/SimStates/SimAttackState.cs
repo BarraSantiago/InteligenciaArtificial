@@ -10,7 +10,7 @@ namespace StateMachine.States.SimStates
         {
             if (parameters == null || parameters.Length < 9)
             {
-                throw new ArgumentException("Invalid parameters passed to GetTickBehaviour");
+                return default;
             }
             
             var behaviours = new BehaviourActions();
@@ -22,7 +22,7 @@ namespace StateMachine.States.SimStates
 
             if (outputBrain1 == null || outputBrain2 == null)
             {
-                throw new ArgumentException("Invalid parameters passed to GetTickBehaviour");
+                return default;
             }
             
             behaviours.AddMultiThreadableBehaviours(0, () =>

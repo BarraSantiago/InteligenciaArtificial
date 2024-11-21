@@ -60,7 +60,7 @@ namespace StateMachine.States.SimStates
         {
             if (parameters == null || parameters.Length < 3)
             {
-                throw new ArgumentException("Invalid parameters passed to SimEatScavState");
+                return default;
             }
             var behaviours = new BehaviourActions();
             var currentPos = parameters[0] as IVector;
@@ -68,16 +68,17 @@ namespace StateMachine.States.SimStates
             var onEat = parameters[2] as Action;
             var outputBrain1 = (float[])parameters[3];
             
-            if (onEat == null)
-            {
-                throw new ArgumentException("Invalid parameters passed to GetTickBehaviour");
-            }
+           
             
             IVector distanceToFood = new MyVector();
             IVector maxDistance = new MyVector(4, 4);
 
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {
+                if (currentPos == null || foodNode == null || onEat == null || outputBrain1 == null)
+                {
+                    return;
+                }
                 distanceToFood = new MyVector(foodNode.GetCoordinate().X - currentPos.X,
                     foodNode.GetCoordinate().Y - currentPos.Y);
 

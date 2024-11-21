@@ -24,6 +24,11 @@ namespace StateMachine.Agents.Simulation
             get => transform;
             set
             {
+                transform ??= new TTransform();
+                transform.position ??= new MyVector(0, 0);
+                value ??= new TTransform();
+                value.position ??= new MyVector(0, 0);
+                
                 transform.forward = (transform.position - value.position).Normalized();
                 transform = value;
                 boid.transform.position = value.position;
