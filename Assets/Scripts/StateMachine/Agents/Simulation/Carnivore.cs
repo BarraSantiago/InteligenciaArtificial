@@ -46,7 +46,7 @@ namespace StateMachine.Agents.Simulation
         protected override void ExtraInputs()
         {
             int brain = GetBrainTypeKeyByValue(BrainType.Attack);
-            var inputCount = GetInputCount(BrainType.Attack);
+            int inputCount = GetInputCount(BrainType.Attack);
             input[brain] = new float[inputCount];
 
             input[brain][0] = CurrentNode.GetCoordinate().X;
@@ -67,7 +67,7 @@ namespace StateMachine.Agents.Simulation
         protected override void MovementInputs()
         {
             int brain = GetBrainTypeKeyByValue(BrainType.Movement);
-            var inputCount = GetInputCount(BrainType.Movement);
+            int inputCount = GetInputCount(BrainType.Movement);
 
             input[brain] = new float[inputCount];
             input[brain][0] = CurrentNode.GetCoordinate().X;
@@ -116,14 +116,14 @@ namespace StateMachine.Agents.Simulation
             int extraBrain = GetBrainTypeKeyByValue(BrainType.Attack);
             object[] objects =
             {
-                CurrentNode, 
-                foodTarget, 
-                OnMove, 
+                CurrentNode,
+                foodTarget,
+                OnMove,
                 output[GetBrainTypeKeyByValue(BrainType.Eat)],
                 output[extraBrain],
-                OnAttack, 
+                OnAttack,
                 output[GetBrainTypeKeyByValue(BrainType.Eat)],
-                output[GetBrainTypeKeyByValue(BrainType.Attack)], 
+                output[GetBrainTypeKeyByValue(BrainType.Attack)],
                 output[GetBrainTypeKeyByValue(BrainType.Movement)][2]
             };
             return objects;
@@ -134,30 +134,36 @@ namespace StateMachine.Agents.Simulation
         {
             SimAgent<IVector, ITransform<IVector>> target =
                 EcsPopulationManager.GetEntity(SimAgentTypes.Herbivore, CurrentNode);
-            if (target is not Herbivore<TVector, TTransform> herbivore ||
-                !Approximatly(herbivore.Transform.position, transform.position, 0.1f)) return;
-
-            herbivore.Hp--;
-            HasAttacked = true;
-            DamageDealt++;
-            if (herbivore.Hp <= 0)
+            lock (target)
             {
-                HasKilled = true;
+                if (target is not Herbivore<TVector, TTransform> herbivore ||
+                    !Approximatly(herbivore.Transform.position, transform.position, 0.1f)) return;
+
+                herbivore.Hp--;
+                HasAttacked = true;
+                DamageDealt++;
+                if (herbivore.Hp <= 0)
+                {
+                    HasKilled = true;
+                }
             }
         }
 
         protected override void Eat()
         {
-            if (CurrentNode.Food <= 0) return;
-            Food++;
-            CurrentNode.Food--;
-            
-            if (CurrentNode.Food > 0) return;
-            
-            CurrentNode.NodeType = SimNodeType.Carrion;
-            CurrentNode.Food = 30;
+            lock (CurrentNode)
+            {
+                if (CurrentNode.Food <= 0) return;
+                Food++;
+                CurrentNode.Food--;
+
+                if (CurrentNode.Food > 0) return;
+
+                CurrentNode.NodeType = SimNodeType.Carrion;
+                CurrentNode.Food = 30;
+            }
         }
-        
+
         private bool Approximatly(IVector coord1, IVector coord2, float tolerance)
         {
             return Math.Abs(coord1.X - coord2.X) <= tolerance && Math.Abs(coord1.Y - coord2.Y) <= tolerance;

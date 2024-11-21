@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Flocking;
 using NeuralNetworkDirectory.ECS;
@@ -28,7 +29,7 @@ namespace StateMachine.Agents.Simulation
                 transform.position ??= new MyVector(0, 0);
                 value ??= new TTransform();
                 value.position ??= new MyVector(0, 0);
-                
+
                 transform.forward = (transform.position - value.position).Normalized();
                 transform = value;
                 boid.transform.position = value.position;
@@ -73,13 +74,13 @@ namespace StateMachine.Agents.Simulation
         protected override void MovementInputs()
         {
             int brain = GetBrainTypeKeyByValue(BrainType.ScavengerMovement);
-            var inputCount = GetInputCount(BrainType.ScavengerMovement);
+            int inputCount = GetInputCount(BrainType.ScavengerMovement);
 
             input[brain] = new float[inputCount];
             input[brain][0] = Transform.position.X;
             input[brain][1] = Transform.position.Y;
 
-            var target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, Transform.position);
+            SimAgent<IVector, ITransform<IVector>> target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, Transform.position);
             if (target == null || target.CurrentNode == null)
             {
                 input[brain][2] = NoTarget;
@@ -109,7 +110,7 @@ namespace StateMachine.Agents.Simulation
         protected override void ExtraInputs()
         {
             int brain = GetBrainTypeKeyByValue(BrainType.Flocking);
-            var inputCount = GetInputCount(BrainType.Flocking);
+            int inputCount = GetInputCount(BrainType.Flocking);
             input[brain] = new float[inputCount];
 
             targetPosition = GetTargetPosition();
@@ -180,15 +181,15 @@ namespace StateMachine.Agents.Simulation
 
         private IVector GetAverageNeighborPosition()
         {
-            var nearBoids = EcsPopulationManager.GetBoidsInsideRadius(boid);
+            List<Boid<IVector, ITransform<IVector>>> nearBoids = EcsPopulationManager.GetBoidsInsideRadius(boid);
 
             if (nearBoids.Count == 0)
             {
                 return MyVector.zero();
             }
 
-            var avg = MyVector.zero();
-            foreach (var boid in nearBoids)
+            MyVector avg = MyVector.zero();
+            foreach (Boid<IVector, ITransform<IVector>> boid in nearBoids)
             {
                 avg += (MyVector)boid.transform.position;
             }
@@ -199,15 +200,15 @@ namespace StateMachine.Agents.Simulation
 
         private IVector GetAverageNeighborDirection()
         {
-            var nearBoids = EcsPopulationManager.GetBoidsInsideRadius(boid);
+            List<Boid<IVector, ITransform<IVector>>> nearBoids = EcsPopulationManager.GetBoidsInsideRadius(boid);
 
             if (nearBoids.Count == 0)
             {
                 return MyVector.zero();
             }
 
-            var avg = MyVector.zero();
-            foreach (var boid1 in nearBoids)
+            MyVector avg = MyVector.zero();
+            foreach (Boid<IVector, ITransform<IVector>> boid1 in nearBoids)
             {
                 avg += boid1.GetDirection().Normalized() - boid1.transform.position.Normalized();
             }
@@ -233,7 +234,7 @@ namespace StateMachine.Agents.Simulation
 
         private IVector GetTargetPosition()
         {
-            var targetNode = GetTarget(foodTarget);
+            INode<IVector> targetNode = GetTarget(foodTarget);
             if (targetNode == null)
             {
                 return MyVector.NoTarget(); // or any default value
@@ -244,12 +245,14 @@ namespace StateMachine.Agents.Simulation
 
         protected override void Eat()
         {
-            var node = EcsPopulationManager.graph.NodesType[(int)targetPosition.X, (int)targetPosition.Y];
-            if (node.Food <= 0) return;
-            Food++;
-            node.Food--;
-            if (node.Food <= 0) node.NodeType = SimNodeType.Empty;
-
+            SimNode<IVector> node = EcsPopulationManager.graph.NodesType[(int)targetPosition.X, (int)targetPosition.Y];
+            lock (node)
+            {
+                if (node.Food <= 0) return;
+                Food++;
+                node.Food--;
+                if (node.Food <= 0) node.NodeType = SimNodeType.Empty;
+            }
         }
 
         protected override void Move()
@@ -259,7 +262,7 @@ namespace StateMachine.Agents.Simulation
             float leftForce = output[index][0];
             float rightForce = output[index][1];
 
-            var pos = Transform.position;
+            IVector pos = Transform.position;
             //var rotFactor = Math.Clamp(rightForce - leftForce, -1.0f, 1.0f);
             //transform.rotation *= Quaternion.AngleAxis(rotFactor * RotSpeed * dt, Vector3.up);
             //pos += transform.forward * (Math.Abs(rightForce + leftForce) * 0.5f * Speed * dt);
@@ -269,7 +272,7 @@ namespace StateMachine.Agents.Simulation
 
             rightForce = (rightForce - 0.5f) * 2.0f;
 
-            var currentPos = new MyVector(Transform.position.X, Transform.position.Y);
+            MyVector currentPos = new MyVector(Transform.position.X, Transform.position.Y);
             currentPos.X += rightForce;
             currentPos.Y += leftForce;
 
@@ -316,7 +319,7 @@ namespace StateMachine.Agents.Simulation
 
             if (target == null)
             {
-                var nearestEntity = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, Transform.position);
+                SimAgent<IVector, ITransform<IVector>> nearestEntity = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, Transform.position);
                 if (nearestEntity != null)
                 {
                     target = nearestEntity.CurrentNode;

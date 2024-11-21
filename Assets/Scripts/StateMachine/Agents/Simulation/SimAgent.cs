@@ -102,7 +102,7 @@ namespace StateMachine.Agents.Simulation
         {
             Fsm = new FSM<Behaviours, Flags>();
             output = new float[brainTypes.Count][];
-            foreach (var brain in brainTypes.Values)
+            foreach (BrainType brain in brainTypes.Values)
             {
                 EcsPopulationManager.NeuronInputCount inputsCount =
                     EcsPopulationManager.InputCountCache[(brain, agentType)];
@@ -133,7 +133,7 @@ namespace StateMachine.Agents.Simulation
 
             for (int i = 0; i < brainTypesCount; i++)
             {
-                var brainType = brainTypes[i];
+                BrainType brainType = brainTypes[i];
                 input[i] = new float[GetInputCount(brainType)];
                 int outputCount = EcsPopulationManager.InputCountCache[(brainType, agentType)].outputCount;
                 output[i] = new float[outputCount];
@@ -163,7 +163,7 @@ namespace StateMachine.Agents.Simulation
         private void FindFoodInputs()
         {
             int brain = GetBrainTypeKeyByValue(BrainType.Eat);
-            var inputCount = GetInputCount(BrainType.Eat);
+            int inputCount = GetInputCount(BrainType.Eat);
             input[brain] = new float[inputCount];
 
             input[brain][0] = Transform.position.X;
@@ -251,10 +251,14 @@ namespace StateMachine.Agents.Simulation
 
         protected virtual void Eat()
         {
-            if (CurrentNode.Food <= 0) return;
-            Food++;
-            CurrentNode.Food--;
-            if (CurrentNode.Food <= 0) CurrentNode.NodeType = SimNodeType.Empty;
+            INode<IVector> currNode = CurrentNode;
+            lock (currNode)
+            {
+                if (currNode.Food <= 0) return;
+                Food++;
+                currNode.Food--;
+                if (currNode.Food <= 0) currNode.NodeType = SimNodeType.Empty;
+            }
         }
 
         protected virtual void Move()
@@ -268,7 +272,7 @@ namespace StateMachine.Agents.Simulation
             {
                 if (currentPos.X < EcsPopulationManager.graph.MinX)
                 {
-                    currentPos.X = EcsPopulationManager.graph.MaxX-1;
+                    currentPos.X = EcsPopulationManager.graph.MaxX - 1;
                 }
 
                 if (currentPos.X > EcsPopulationManager.graph.MaxX)
@@ -278,7 +282,7 @@ namespace StateMachine.Agents.Simulation
 
                 if (currentPos.Y < EcsPopulationManager.graph.MinY)
                 {
-                    currentPos.Y = EcsPopulationManager.graph.MaxY-1;
+                    currentPos.Y = EcsPopulationManager.graph.MaxY - 1;
                 }
 
                 if (currentPos.Y > EcsPopulationManager.graph.MaxY)
@@ -287,7 +291,7 @@ namespace StateMachine.Agents.Simulation
                 }
             }
 
-            var newPos = EcsPopulationManager.CoordinateToNode(currentPos);
+            INode<IVector> newPos = EcsPopulationManager.CoordinateToNode(currentPos);
             if (newPos != null) SetPosition(newPos.GetCoordinate());
         }
 
@@ -302,7 +306,7 @@ namespace StateMachine.Agents.Simulation
         private IVector CalculateNewPosition(IVector targetPos, float[] brainOutput)
         {
             if (brainOutput.Length < 2) return default;
-            
+
             float horizontalMovement = brainOutput[0];
             float verticalMovement = brainOutput[1];
 
@@ -347,7 +351,7 @@ namespace StateMachine.Agents.Simulation
 
         public int GetBrainTypeKeyByValue(BrainType value)
         {
-            foreach (var kvp in brainTypes)
+            foreach (KeyValuePair<int, BrainType> kvp in brainTypes)
             {
                 if (EqualityComparer<BrainType>.Default.Equals(kvp.Value, value))
                 {
