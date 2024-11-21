@@ -52,6 +52,7 @@ namespace Utils
 
         static float Dot(IVector a, IVector b)
         {
+            if(a == null || b == null) return 0;
             return a.X * b.X + a.Y * b.Y;
         }
         

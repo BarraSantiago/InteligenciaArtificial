@@ -501,14 +501,15 @@ namespace NeuralNetworkDirectory.ECS
             CleanMap();
             InitializePlants();
 
-            FillPopulation();
 
             if (!remainingPopulation)
             {
+                FillPopulation();
+
                 _population.Clear();
                 return;
             }
-
+            
             Dictionary<SimAgentTypes, Dictionary<BrainType, Genome[]>> genomes = new()
             {
                 [SimAgentTypes.Scavenger] = new Dictionary<BrainType, Genome[]>(),
@@ -521,10 +522,14 @@ namespace NeuralNetworkDirectory.ECS
                 [SimAgentTypes.Herbivore] = new Dictionary<BrainType, int>(),
                 [SimAgentTypes.Carnivore] = new Dictionary<BrainType, int>()
             };
+            
 
             CreateNewGenomes(genomes);
-
+            FillPopulation();
             BrainsHandler(indexes, genomes);
+            
+            genomes.Clear();
+            indexes.Clear();
         }
 
         private void BrainsHandler(Dictionary<SimAgentTypes, Dictionary<BrainType, int>> indexes,
@@ -923,7 +928,7 @@ namespace NeuralNetworkDirectory.ECS
                     }
                 }
 
-                if (agent.Food < agent.FoodLimit)
+                if (agent.CanReproduce)
                 {
                     agentsToRemove.Add(agentEntry.Key);
                 }

@@ -64,7 +64,7 @@ namespace StateMachine.Agents.Simulation
             EcsPopulationManager.graph.NodesType[(int)Transform.position.X, (int)Transform.position.Y];
 
         protected TTransform transform = new TTransform();
-        public bool CanReproduce() => Food >= FoodLimit;
+        public bool CanReproduce => Food >= FoodLimit;
         public SimAgentTypes agentType { get; set; }
         public FSM<Behaviours, Flags> Fsm;
 
