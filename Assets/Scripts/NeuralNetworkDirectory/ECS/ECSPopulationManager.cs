@@ -220,10 +220,9 @@ namespace NeuralNetworkDirectory.ECS
         {
             var agentsCopy = _agents.ToArray();
 
-            Parallel.ForEach(agentsCopy, parallelOptions, entity => { entity.Value.UpdateInputs(); });
-
             Parallel.ForEach(agentsCopy, parallelOptions, entity =>
             {
+                entity.Value.UpdateInputs();
                 var inputComponent = ECSManager.GetComponent<InputComponent>(entity.Key);
                 if (inputComponent != null && _agents.TryGetValue(entity.Key, out var agent))
                 {
@@ -239,32 +238,42 @@ namespace NeuralNetworkDirectory.ECS
                 if (outputComponent == null || !_agents.TryGetValue(entity.Key, out var agent)) return;
 
                 agent.output = outputComponent.outputs;
-            });
-
-            Parallel.ForEach(_scavengers, parallelOptions, entity =>
-            {
-                var outputComponent = ECSManager.GetComponent<OutputComponent>(entity.Key);
+                
+                if(agent.agentType != SimAgentTypes.Scavenger) return;
+                
                 var boid = _scavengers[entity.Key]?.boid;
 
-                if (boid != null && outputComponent != null)
+                if (boid != null)
                 {
                     UpdateBoidOffsets(boid, outputComponent.outputs
                         [GetBrainTypeKeyByValue(BrainType.Flocking, SimAgentTypes.Scavenger)]);
                 }
             });
 
+            int batchSize = 10;
             for (int i = 0; i < behaviourCount; i++)
             {
                 var i1 = i;
-                var tasks = agentsCopy.Select(entity =>
-                    Task.Run(() => entity.Value.Fsm.MultiThreadTick(i1))).ToArray();
+                var tasks = new List<Task>();
+
+                for (int j = 0; j < agentsCopy.Length; j += batchSize)
+                {
+                    var batch = agentsCopy.Skip(j).Take(batchSize).ToArray();
+                    tasks.Add(Task.Run(() =>
+                    {
+                        foreach (var entity in batch)
+                        {
+                            entity.Value.Fsm.MultiThreadTick(i1);
+                        }
+                    }));
+                }
 
                 foreach (var entity in agentsCopy)
                 {
                     entity.Value.Fsm.MainThreadTick(i);
                 }
 
-                Task.WaitAll(tasks);
+                Task.WaitAll(tasks.ToArray());
             }
 
             fitnessManager.Tick();
@@ -923,11 +932,13 @@ namespace NeuralNetworkDirectory.ECS
             {
                 RemoveEntity(_agents[agentId]);
             }
+            agentsToRemove.Clear(); 
         }
 
 
         public static void RemoveEntity(SimAgentType simAgent)
         {
+            simAgent.Uninit();
             CountMissing(simAgent.agentType);
             uint agentId = _agents.FirstOrDefault(agent => agent.Value == simAgent).Key;
             _agents.Remove(agentId);
