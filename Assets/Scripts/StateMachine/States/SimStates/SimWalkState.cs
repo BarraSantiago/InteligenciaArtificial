@@ -67,7 +67,8 @@ namespace StateMachine.States.SimStates
 
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {
-                onMove.Invoke();
+                onMove?.Invoke();
+                if (nearestFood == null || position == null) return;
                 distanceToFood = new MyVector(nearestFood.X - position.X, nearestFood.Y - position.Y);
             });
 
@@ -92,10 +93,7 @@ namespace StateMachine.States.SimStates
             var outputBrain1 = (float[])parameters[3];
             var outputBrain2 = (float[])parameters[4];
 
-            behaviours.AddMultiThreadableBehaviours(0, () =>
-            {
-                onMove.Invoke();
-            });
+            behaviours.AddMultiThreadableBehaviours(0, () => { onMove.Invoke(); });
 
             //behaviours.AddMainThreadBehaviours(1, () =>
             //{
@@ -123,5 +121,4 @@ namespace StateMachine.States.SimStates
             return default;
         }
     }
-
 }

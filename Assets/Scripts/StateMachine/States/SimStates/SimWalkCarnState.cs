@@ -21,7 +21,7 @@ namespace StateMachine.States.SimStates
 
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {
-                onMove.Invoke();
+                onMove?.Invoke();
             });
 
             

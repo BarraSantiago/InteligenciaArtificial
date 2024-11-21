@@ -40,14 +40,15 @@ namespace StateMachine.Agents.Simulation
         public virtual TTransform Transform
         {
             get => transform;
-            set => transform = value;
+            set
+            {
+                transform.forward = (transform.position - value.position).Normalized();
+                transform = value;
+            }
         }
 
-        public virtual INode<IVector> CurrentNode
-        {
-            get { return EcsPopulationManager.graph.NodesType[(int)Transform.position.X, (int)Transform.position.Y]; }
-            private set { }
-        }
+        public virtual INode<IVector> CurrentNode =>
+            EcsPopulationManager.graph.NodesType[(int)Transform.position.X, (int)Transform.position.Y];
 
         protected TTransform transform = new TTransform();
         public bool CanReproduce() => Food >= FoodLimit;
@@ -240,7 +241,7 @@ namespace StateMachine.Agents.Simulation
             if (CurrentNode.Food <= 0) return;
             Food++;
             CurrentNode.Food--;
-            if(CurrentNode.Food <= 0) CurrentNode.NodeType = SimNodeType.Empty;
+            if (CurrentNode.Food <= 0) CurrentNode.NodeType = SimNodeType.Empty;
         }
 
         protected virtual void Move()
@@ -267,7 +268,7 @@ namespace StateMachine.Agents.Simulation
         private IVector CalculateNewPosition(IVector targetPos, float[] brainOutput)
         {
             float speed = CalculateSpeed(Math.Abs(brainOutput[^1]));
-            
+
             if (brainOutput[0] > 0.5)
             {
                 if (brainOutput[^1] > 0.5) // Right
@@ -285,7 +286,7 @@ namespace StateMachine.Agents.Simulation
                 {
                     targetPos.Y += speed;
                 }
-                else// if (brainOutput[^1] < -0.1) // Down
+                else // if (brainOutput[^1] < -0.1) // Down
                 {
                     targetPos.Y -= speed;
                 }
@@ -294,7 +295,7 @@ namespace StateMachine.Agents.Simulation
             return targetPos;
         }
 
-        protected virtual INode<IVector> GetTarget(SimNodeType nodeType = SimNodeType.Empty)
+        public virtual INode<IVector> GetTarget(SimNodeType nodeType = SimNodeType.Empty)
         {
             return EcsPopulationManager.GetNearestNode(nodeType, transform.position);
         }
@@ -307,7 +308,7 @@ namespace StateMachine.Agents.Simulation
         public virtual void SetPosition(IVector position)
         {
             if (!EcsPopulationManager.graph.IsWithinGraphBorders(position)) return;
-            Transform.position = position;
+            Transform = (TTransform)new ITransform<IVector>(position);
         }
 
         public int GetBrainTypeKeyByValue(BrainType value)
