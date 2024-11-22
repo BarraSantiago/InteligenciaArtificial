@@ -18,6 +18,8 @@ namespace StateMachine.Agents.Simulation
 
         public int DamageDealt { get; private set; } = 0;
 
+        private SimAgent<IVector, ITransform<IVector>> target;
+
         public override void Init()
         {
             base.Init();
@@ -42,6 +44,14 @@ namespace StateMachine.Agents.Simulation
             HasKilled = false;
             DamageDealt = 0;
         }
+        
+        public override void UpdateInputs()
+        {
+            target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Herbivore, Transform.position);
+            FindFoodInputs();
+            MovementInputs();
+            ExtraInputs();
+        }
 
         protected override void ExtraInputs()
         {
@@ -51,8 +61,7 @@ namespace StateMachine.Agents.Simulation
 
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
-            SimAgent<IVector, ITransform<IVector>> target =
-                EcsPopulationManager.GetNearestEntity(SimAgentTypes.Herbivore, Transform.position);
+           
             if (target == null)
             {
                 input[brain][2] = NoTarget;
@@ -72,8 +81,7 @@ namespace StateMachine.Agents.Simulation
             input[brain] = new float[inputCount];
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
-            SimAgent<IVector, ITransform<IVector>> target =
-                EcsPopulationManager.GetNearestEntity(SimAgentTypes.Herbivore, Transform.position);
+            
             INode<IVector> nodeTarget = GetTarget(foodTarget);
 
 
@@ -132,13 +140,12 @@ namespace StateMachine.Agents.Simulation
 
         private void Attack()
         {
-            SimAgent<IVector, ITransform<IVector>> target =
-                EcsPopulationManager.GetEntity(SimAgentTypes.Herbivore, CurrentNode);
+            if (target is not Herbivore<TVector, TTransform> herbivore ||
+                !Approximatly(herbivore.Transform.position, transform.position, 0.2f)) return;
+
             lock (target)
             {
-                if (target is not Herbivore<TVector, TTransform> herbivore ||
-                    !Approximatly(herbivore.Transform.position, transform.position, 0.1f)) return;
-
+                
                 herbivore.Hp--;
                 HasAttacked = true;
                 DamageDealt++;

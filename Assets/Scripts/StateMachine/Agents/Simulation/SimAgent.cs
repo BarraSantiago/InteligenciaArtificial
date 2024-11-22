@@ -18,7 +18,6 @@ namespace StateMachine.Agents.Simulation
 
     public enum Flags
     {
-        OnTargetLost,
         OnEscape,
         OnEat,
         OnSearchFood,
@@ -160,7 +159,7 @@ namespace StateMachine.Agents.Simulation
         }
 
 
-        private void FindFoodInputs()
+        protected void FindFoodInputs()
         {
             int brain = GetBrainTypeKeyByValue(BrainType.Eat);
             int inputCount = GetInputCount(BrainType.Eat);
