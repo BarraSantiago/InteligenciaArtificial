@@ -235,12 +235,8 @@ namespace StateMachine.Agents.Simulation
         private IVector GetTargetPosition()
         {
             INode<IVector> targetNode = GetTarget(foodTarget);
-            if (targetNode == null)
-            {
-                return MyVector.NoTarget(); // or any default value
-            }
-
-            return targetNode.GetCoordinate();
+            
+            return targetNode == null ? MyVector.NoTarget() : targetNode.GetCoordinate();
         }
 
         protected override void Eat()
@@ -309,21 +305,16 @@ namespace StateMachine.Agents.Simulation
 
         public override INode<IVector> GetTarget(SimNodeType nodeType = SimNodeType.Empty)
         {
-            INode<IVector> target = EcsPopulationManager.GetNearestNode(nodeType, Transform.position);
+            INode<IVector> target = EcsPopulationManager.GetNearestNode(nodeType, Transform.position) ??
+                                    EcsPopulationManager.GetNearestNode(SimNodeType.Corpse, Transform.position);
 
 
-            if (target == null)
+            if (target != null) return target;
+            
+            SimAgent<IVector, ITransform<IVector>> nearestEntity = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, Transform.position);
+            if (nearestEntity != null)
             {
-                target = EcsPopulationManager.GetNearestNode(SimNodeType.Corpse, Transform.position);
-            }
-
-            if (target == null)
-            {
-                SimAgent<IVector, ITransform<IVector>> nearestEntity = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, Transform.position);
-                if (nearestEntity != null)
-                {
-                    target = nearestEntity.CurrentNode;
-                }
+                target = nearestEntity.CurrentNode;
             }
 
             return target;
@@ -364,12 +355,17 @@ namespace StateMachine.Agents.Simulation
         {
             Fsm.SetTransition(Behaviours.Eat, Flags.OnEat, Behaviours.Eat);
             Fsm.SetTransition(Behaviours.Eat, Flags.OnSearchFood, Behaviours.Walk);
+            Fsm.SetTransition(Behaviours.Eat, Flags.OnAttack, Behaviours.Walk);
+            Fsm.SetTransition(Behaviours.Eat, Flags.OnEscape, Behaviours.Walk);
+            
         }
 
         protected override void WalkTransitions()
         {
             Fsm.SetTransition(Behaviours.Walk, Flags.OnEat, Behaviours.Eat);
             Fsm.SetTransition(Behaviours.Walk, Flags.OnSearchFood, Behaviours.Walk);
+            Fsm.SetTransition(Behaviours.Walk, Flags.OnAttack, Behaviours.Walk);
+            Fsm.SetTransition(Behaviours.Walk, Flags.OnEscape, Behaviours.Walk);
         }
     }
 }
