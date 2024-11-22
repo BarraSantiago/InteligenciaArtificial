@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using ECS.Patron;
 using FlappyIa.GeneticAlg;
@@ -166,33 +167,61 @@ namespace NeuralNetworkDirectory.ECS
 
         private void Update()
         {
-            foreach (uint id in _agents.Keys)
+            Matrix4x4[] carnivoreMatrices = new Matrix4x4[carnivoreCount];
+            Matrix4x4[] herbivoreMatrices = new Matrix4x4[herbivoreCount];
+            Matrix4x4[] scavengerMatrices = new Matrix4x4[scavengerCount];
+
+            int carnivoreIndex = 0;
+            int herbivoreIndex = 0;
+            int scavengerIndex = 0;
+
+            Parallel.ForEach(_agents.Keys, id =>
             {
                 IVector pos = _agents[id].Transform.position;
-                Mesh mesh = new Mesh();
-                Material material = herbivoreMat;
+                Vector3 position = new Vector3(pos.X, pos.Y);
+                Matrix4x4 matrix = Matrix4x4.Translate(position);
+
                 switch (_agents[id].agentType)
                 {
                     case SimAgentTypes.Carnivore:
-                        mesh = carnivoreMesh;
-                        material = carnivoreMat;
+                        int carnIndex = Interlocked.Increment(ref carnivoreIndex) - 1;
+                        if (carnIndex < carnivoreMatrices.Length)
+                        {
+                            carnivoreMatrices[carnIndex] = matrix;
+                        }
                         break;
                     case SimAgentTypes.Herbivore:
-                        mesh = herbivoreMesh;
-                        material = herbivoreMat;
+                        int herbIndex = Interlocked.Increment(ref herbivoreIndex) - 1;
+                        if (herbIndex < herbivoreMatrices.Length)
+                        {
+                            herbivoreMatrices[herbIndex] = matrix;
+                        }
                         break;
                     case SimAgentTypes.Scavenger:
-                        mesh = scavengerMesh;
-                        material = scavengerMat;
+                        int scavIndex = Interlocked.Increment(ref scavengerIndex) - 1;
+                        if (scavIndex < scavengerMatrices.Length)
+                        {
+                            scavengerMatrices[scavIndex] = matrix;
+                        }
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
+            });
 
-                Vector3 position = new Vector3(pos.X, pos.Y);
-                RenderParams renderParams = new RenderParams(material);
+            if (carnivoreMatrices.Length > 0)
+            {
+                Graphics.DrawMeshInstanced(carnivoreMesh, 0, carnivoreMat, carnivoreMatrices);
+            }
 
-                Graphics.RenderMesh(renderParams, mesh, 0, Matrix4x4.Translate(position));
+            if (herbivoreMatrices.Length > 0)
+            {
+                Graphics.DrawMeshInstanced(herbivoreMesh, 0, herbivoreMat, herbivoreMatrices);
+            }
+
+            if (scavengerMatrices.Length > 0)
+            {
+                Graphics.DrawMeshInstanced(scavengerMesh, 0, scavengerMat, scavengerMatrices);
             }
         }
 
