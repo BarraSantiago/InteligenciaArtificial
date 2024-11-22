@@ -38,7 +38,7 @@ namespace NeuralNetworkDirectory.NeuralNet
 
             a += bias;
 
-            return Sigmoid(a);
+            return Tanh(a);
         }
 
         public int SetWeights(float[] newWeights, int fromId)

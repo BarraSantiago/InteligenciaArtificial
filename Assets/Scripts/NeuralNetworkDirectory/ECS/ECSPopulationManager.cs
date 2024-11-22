@@ -189,6 +189,7 @@ namespace NeuralNetworkDirectory.ECS
                         {
                             carnivoreMatrices[carnIndex] = matrix;
                         }
+
                         break;
                     case SimAgentTypes.Herbivore:
                         int herbIndex = Interlocked.Increment(ref herbivoreIndex) - 1;
@@ -196,6 +197,7 @@ namespace NeuralNetworkDirectory.ECS
                         {
                             herbivoreMatrices[herbIndex] = matrix;
                         }
+
                         break;
                     case SimAgentTypes.Scavenger:
                         int scavIndex = Interlocked.Increment(ref scavengerIndex) - 1;
@@ -203,6 +205,7 @@ namespace NeuralNetworkDirectory.ECS
                         {
                             scavengerMatrices[scavIndex] = matrix;
                         }
+
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -232,12 +235,12 @@ namespace NeuralNetworkDirectory.ECS
 
             float dt = Time.fixedDeltaTime;
 
-
-            for (int i = 0; i < Mathf.Clamp(speed / 100.0f * 50, 1, 50); i++)
+            float clampSpeed = Mathf.Clamp(speed / 100.0f * 50, 1, 50);
+            for (int i = 0; i < clampSpeed; i++)
             {
                 EntitiesTurn(dt);
 
-                accumTime += dt;
+                accumTime += dt * clampSpeed;
                 if (!(accumTime >= generationDuration)) return;
                 accumTime -= generationDuration;
                 Epoch();
@@ -307,9 +310,65 @@ namespace NeuralNetworkDirectory.ECS
                 {
                     task.Dispose();
                 }
+
+                tasks.Clear();
             }
 
             fitnessManager.Tick();
+        }
+
+        private void Epoch()
+        {
+            Generation++;
+
+            PurgingSpecials();
+            bool remainingPopulation = _agents.Count > 0;
+            ECSManager.GetSystem<NeuralNetSystem>().Deinitialize();
+            if (Generation % 5 == 0) Save("NeuronData", Generation);
+
+            if (remainingPopulation)
+            {
+                foreach (SimAgentType agent in _agents.Values)
+                {
+                    Debug.Log(agent.agentType + " survived.");
+                }
+            }
+
+            CleanMap();
+            InitializePlants();
+
+
+            if (!remainingPopulation)
+            {
+                FillPopulation();
+
+                _population.Clear();
+                return;
+            }
+
+            Dictionary<SimAgentTypes, Dictionary<BrainType, Genome[]>> genomes = new()
+            {
+                [SimAgentTypes.Scavenger] = new Dictionary<BrainType, Genome[]>(),
+                [SimAgentTypes.Herbivore] = new Dictionary<BrainType, Genome[]>(),
+                [SimAgentTypes.Carnivore] = new Dictionary<BrainType, Genome[]>()
+            };
+            Dictionary<SimAgentTypes, Dictionary<BrainType, int>> indexes = new()
+            {
+                [SimAgentTypes.Scavenger] = new Dictionary<BrainType, int>(),
+                [SimAgentTypes.Herbivore] = new Dictionary<BrainType, int>(),
+                [SimAgentTypes.Carnivore] = new Dictionary<BrainType, int>()
+            };
+
+
+            CreateNewGenomes(genomes);
+            FillPopulation();
+            BrainsHandler(indexes, genomes);
+
+            genomes.Clear();
+            indexes.Clear();
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
         }
 
         private void UpdateBoidOffsets(SimBoid boid, float[] outputs)
@@ -521,56 +580,6 @@ namespace NeuralNetworkDirectory.ECS
             _population.Clear();
         }
 
-        private void Epoch()
-        {
-            Generation++;
-
-            PurgingSpecials();
-            bool remainingPopulation = _agents.Count > 0;
-            ECSManager.GetSystem<NeuralNetSystem>().Deinitialize();
-            if (Generation % 5 == 0) Save("NeuronData", Generation);
-
-            if (remainingPopulation)
-            {
-                foreach (SimAgentType agent in _agents.Values)
-                {
-                    Debug.Log(agent.agentType + " survived.");
-                }
-            }
-
-            CleanMap();
-            InitializePlants();
-
-
-            if (!remainingPopulation)
-            {
-                FillPopulation();
-
-                _population.Clear();
-                return;
-            }
-
-            Dictionary<SimAgentTypes, Dictionary<BrainType, Genome[]>> genomes = new()
-            {
-                [SimAgentTypes.Scavenger] = new Dictionary<BrainType, Genome[]>(),
-                [SimAgentTypes.Herbivore] = new Dictionary<BrainType, Genome[]>(),
-                [SimAgentTypes.Carnivore] = new Dictionary<BrainType, Genome[]>()
-            };
-            Dictionary<SimAgentTypes, Dictionary<BrainType, int>> indexes = new()
-            {
-                [SimAgentTypes.Scavenger] = new Dictionary<BrainType, int>(),
-                [SimAgentTypes.Herbivore] = new Dictionary<BrainType, int>(),
-                [SimAgentTypes.Carnivore] = new Dictionary<BrainType, int>()
-            };
-
-
-            CreateNewGenomes(genomes);
-            FillPopulation();
-            BrainsHandler(indexes, genomes);
-
-            genomes.Clear();
-            indexes.Clear();
-        }
 
         private void BrainsHandler(Dictionary<SimAgentTypes, Dictionary<BrainType, int>> indexes,
             Dictionary<SimAgentTypes, Dictionary<BrainType, Genome[]>> genomes)

@@ -158,16 +158,18 @@ namespace StateMachine.Agents.Simulation
 
         protected override void Eat()
         {
-            lock (CurrentNode)
+            INode<IVector> node = CurrentNode;
+            
+            lock (node)
             {
-                if (CurrentNode.Food <= 0) return;
+                if (node.Food <= 0) return;
                 Food++;
-                CurrentNode.Food--;
+                node.Food--;
 
-                if (CurrentNode.Food > 0) return;
+                if (node.Food > 0) return;
 
-                CurrentNode.NodeType = SimNodeType.Carrion;
-                CurrentNode.Food = 30;
+                node.NodeType = SimNodeType.Carrion;
+                node.Food = 30;
             }
         }
 

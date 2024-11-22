@@ -10,27 +10,32 @@ namespace StateMachine.States.SimStates
     {
         public override BehaviourActions GetTickBehaviour(params object[] parameters)
         {
+            if (parameters == null || parameters.Length < 5)
+            {
+                throw new ArgumentException("Invalid parameters for GetTickBehaviour");
+            }
+
             BehaviourActions behaviours = new BehaviourActions();
             SimNode<IVector> currentNode = parameters[0] as SimNode<IVector>;
             SimNodeType foodTarget = (SimNodeType)parameters[1];
             Action onEat = parameters[2] as Action;
-            float[] outputBrain1 = (float[])parameters[3];
-            float[] outputBrain2 = (float[])parameters[4];
+            float[] outputBrain1 = parameters[3] as float[];
+            float[] outputBrain2 = parameters[4] as float[];
 
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {
-                if(foodTarget == null) return;
-                if (currentNode is not { Food: > 0 } || foodTarget != currentNode.NodeType) return;
+                if (foodTarget == null || currentNode == null || onEat == null) return;
+                if (currentNode.Food <= 0 || foodTarget != currentNode.NodeType) return;
 
                 onEat?.Invoke();
             });
 
             behaviours.SetTransitionBehaviour(() =>
             {
-                if (currentNode is not { Food: > 0 } || foodTarget != currentNode.NodeType)
+                if (currentNode == null || currentNode.Food <= 0 || foodTarget != currentNode.NodeType)
                     OnFlag?.Invoke(Flags.OnSearchFood);
 
-                if (outputBrain1[0] > 0.5f && currentNode != null && currentNode.NodeType == foodTarget)
+                if (outputBrain1 != null && outputBrain1[0] > 0.5f && currentNode != null && currentNode.NodeType == foodTarget)
                     OnFlag?.Invoke(Flags.OnEat);
 
                 SpecialAction(outputBrain2);
@@ -58,18 +63,17 @@ namespace StateMachine.States.SimStates
     {
         public override BehaviourActions GetTickBehaviour(params object[] parameters)
         {
-            if (parameters == null || parameters.Length < 3)
+            if (parameters == null || parameters.Length < 4)
             {
-                return default;
+                throw new ArgumentException("Invalid parameters for GetTickBehaviour");
             }
+
             BehaviourActions behaviours = new BehaviourActions();
             IVector currentPos = parameters[0] as IVector;
             SimNode<IVector> foodNode = parameters[1] as SimNode<IVector>;
             Action onEat = parameters[2] as Action;
-            float[] outputBrain1 = (float[])parameters[3];
-            
-           
-            
+            float[] outputBrain1 = parameters[3] as float[];
+
             IVector distanceToFood = new MyVector();
             IVector maxDistance = new MyVector(4, 4);
 
@@ -82,7 +86,7 @@ namespace StateMachine.States.SimStates
                 distanceToFood = new MyVector(foodNode.GetCoordinate().X - currentPos.X,
                     foodNode.GetCoordinate().Y - currentPos.Y);
 
-                if (foodNode is not { Food: > 0 } || foodNode.NodeType != SimNodeType.Carrion ||
+                if (foodNode.Food <= 0 || foodNode.NodeType != SimNodeType.Carrion ||
                     distanceToFood.Magnitude() > maxDistance.Magnitude()) return;
 
                 onEat?.Invoke();
@@ -90,10 +94,10 @@ namespace StateMachine.States.SimStates
 
             behaviours.SetTransitionBehaviour(() =>
             {
-                if (foodNode is not { Food: > 0 } || distanceToFood.Magnitude() > maxDistance.Magnitude())
+                if (foodNode == null || foodNode.Food <= 0 || distanceToFood.Magnitude() > maxDistance.Magnitude())
                     OnFlag?.Invoke(Flags.OnSearchFood);
 
-                if (outputBrain1[0] > 0.5f && currentPos != null &&
+                if (outputBrain1 != null && outputBrain1[0] > 0.5f && currentPos != null &&
                     distanceToFood.Magnitude() <= maxDistance.Magnitude()) OnFlag?.Invoke(Flags.OnEat);
             });
 
@@ -105,7 +109,7 @@ namespace StateMachine.States.SimStates
     {
         protected override void SpecialAction(float[] outputs)
         {
-            if (outputs[0] > 0.5f) OnFlag?.Invoke(Flags.OnEscape);
+            if (outputs != null && outputs[0] > 0.5f) OnFlag?.Invoke(Flags.OnEscape);
         }
     }
 
@@ -113,7 +117,7 @@ namespace StateMachine.States.SimStates
     {
         protected override void SpecialAction(float[] outputs)
         {
-            if (outputs[0] > 0.5f) OnFlag?.Invoke(Flags.OnAttack);
+            if (outputs != null && outputs[0] > 0.5f) OnFlag?.Invoke(Flags.OnAttack);
         }
     }
 }

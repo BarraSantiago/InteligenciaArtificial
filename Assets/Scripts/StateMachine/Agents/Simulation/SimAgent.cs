@@ -294,40 +294,12 @@ namespace StateMachine.Agents.Simulation
             if (newPos != null) SetPosition(newPos.GetCoordinate());
         }
 
-        private float CalculateSpeed(float rawSpeed)
-        {
-            if (rawSpeed < 1) return movement;
-            if (rawSpeed < 0.5) return movement - 1;
-            if (rawSpeed < 0.2) return movement - 2;
-            return rawSpeed;
-        }
-
         private IVector CalculateNewPosition(IVector targetPos, float[] brainOutput)
         {
             if (brainOutput.Length < 2) return default;
 
-            float horizontalMovement = brainOutput[0];
-            float verticalMovement = brainOutput[1];
-
-            // Calculate horizontal movement
-            if (horizontalMovement > 0.5f)
-            {
-                targetPos.X += movement * (horizontalMovement - 0.5f) * 2;
-            }
-            else
-            {
-                targetPos.X -= movement * (0.5f - horizontalMovement) * 2;
-            }
-
-            // Calculate vertical movement
-            if (verticalMovement > 0.5f)
-            {
-                targetPos.Y += movement * (verticalMovement - 0.5f) * 2;
-            }
-            else
-            {
-                targetPos.Y -= movement * (0.5f - verticalMovement) * 2;
-            }
+            targetPos.X += movement * brainOutput[0];
+            targetPos.Y += movement * brainOutput[1];
 
             return targetPos;
         }

@@ -16,10 +16,10 @@ namespace StateMachine.States.SimStates
             SimNode<IVector> currentNode = parameters[0] as SimNode<IVector>;
             SimNodeType foodTarget = (SimNodeType)parameters[1];
             Action onMove = parameters[2] as Action;
-            float[] outputBrain1 = (float[])parameters[3];
-            float[] outputBrain2 = (float[])parameters[4];
+            float[] outputBrain1 = parameters[3] as float[];
+            float[] outputBrain2 = parameters[4] as float[];
 
-            behaviours.AddMultiThreadableBehaviours(0, () => { onMove.Invoke(); });
+            behaviours.AddMultiThreadableBehaviours(0, () => { onMove?.Invoke(); });
 
             //behaviours.AddMainThreadBehaviours(1, () =>
             //{
@@ -30,6 +30,7 @@ namespace StateMachine.States.SimStates
 
             behaviours.SetTransitionBehaviour(() =>
             {
+                if(outputBrain1 == null || outputBrain2 == null) return;
                 if (outputBrain1[0] > 0.5f && currentNode != null && currentNode.NodeType == foodTarget)
                     OnFlag?.Invoke(Flags.OnEat);
                 SpecialAction(outputBrain2);
@@ -61,7 +62,7 @@ namespace StateMachine.States.SimStates
             IVector position = parameters[0] as IVector;
             IVector nearestFood = parameters[1] as IVector;
             Action onMove = parameters[2] as Action;
-            float[] outputBrain1 = (float[])parameters[3];
+            float[] outputBrain1 = parameters[3] as float[];
             IVector distanceToFood = new MyVector();
             IVector maxDistance = new MyVector(4, 4);
 
@@ -74,6 +75,7 @@ namespace StateMachine.States.SimStates
 
             behaviours.SetTransitionBehaviour(() =>
             {
+                if(outputBrain1 == null) return;
                 if (outputBrain1[0] > 0.5f && distanceToFood.Magnitude() < maxDistance.Magnitude())
                     OnFlag?.Invoke(Flags.OnEat);
             });
@@ -90,8 +92,8 @@ namespace StateMachine.States.SimStates
             SimNode<IVector> currentNode = parameters[0] as SimNode<IVector>;
             SimNodeType foodTarget = (SimNodeType)parameters[1];
             Action onMove = parameters[2] as Action;
-            float[] outputBrain1 = (float[])parameters[3];
-            float[] outputBrain2 = (float[])parameters[4];
+            float[] outputBrain1 = parameters[3] as float[];
+            float[] outputBrain2 = parameters[4] as float[];
 
             behaviours.AddMultiThreadableBehaviours(0, () => { onMove?.Invoke(); });
 
@@ -104,6 +106,7 @@ namespace StateMachine.States.SimStates
 
             behaviours.SetTransitionBehaviour(() =>
             {
+                if(outputBrain1 == null || outputBrain2 == null) return;
                 if (outputBrain1[0] > 0.5f && currentNode != null && currentNode.NodeType == foodTarget)
                     OnFlag?.Invoke(Flags.OnEat);
                 if (outputBrain2[0] > 0.5f) OnFlag?.Invoke(Flags.OnEscape);

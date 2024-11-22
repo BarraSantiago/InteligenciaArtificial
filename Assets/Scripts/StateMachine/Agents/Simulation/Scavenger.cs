@@ -80,7 +80,8 @@ namespace StateMachine.Agents.Simulation
             input[brain][0] = Transform.position.X;
             input[brain][1] = Transform.position.Y;
 
-            SimAgent<IVector, ITransform<IVector>> target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, Transform.position);
+            SimAgent<IVector, ITransform<IVector>> target =
+                EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, Transform.position);
             if (target == null || target.CurrentNode == null)
             {
                 input[brain][2] = NoTarget;
@@ -235,7 +236,7 @@ namespace StateMachine.Agents.Simulation
         private IVector GetTargetPosition()
         {
             INode<IVector> targetNode = GetTarget(foodTarget);
-            
+
             return targetNode == null ? MyVector.NoTarget() : targetNode.GetCoordinate();
         }
 
@@ -258,19 +259,9 @@ namespace StateMachine.Agents.Simulation
             float leftForce = output[index][0];
             float rightForce = output[index][1];
 
-            IVector pos = Transform.position;
-            //var rotFactor = Math.Clamp(rightForce - leftForce, -1.0f, 1.0f);
-            //transform.rotation *= Quaternion.AngleAxis(rotFactor * RotSpeed * dt, Vector3.up);
-            //pos += transform.forward * (Math.Abs(rightForce + leftForce) * 0.5f * Speed * dt);
-            //transform.position = pos;
-
-            leftForce = (leftForce - 0.5f) * 2.0f;
-
-            rightForce = (rightForce - 0.5f) * 2.0f;
-
             MyVector currentPos = new MyVector(Transform.position.X, Transform.position.Y);
-            currentPos.X += rightForce;
-            currentPos.Y += leftForce;
+            currentPos.X += rightForce * movement;
+            currentPos.Y += leftForce * movement;
 
             if (!EcsPopulationManager.graph.IsWithinGraphBorders(currentPos))
             {
@@ -310,8 +301,9 @@ namespace StateMachine.Agents.Simulation
 
 
             if (target != null) return target;
-            
-            SimAgent<IVector, ITransform<IVector>> nearestEntity = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, Transform.position);
+
+            SimAgent<IVector, ITransform<IVector>> nearestEntity =
+                EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, Transform.position);
             if (nearestEntity != null)
             {
                 target = nearestEntity.CurrentNode;
@@ -357,7 +349,6 @@ namespace StateMachine.Agents.Simulation
             Fsm.SetTransition(Behaviours.Eat, Flags.OnSearchFood, Behaviours.Walk);
             Fsm.SetTransition(Behaviours.Eat, Flags.OnAttack, Behaviours.Walk);
             Fsm.SetTransition(Behaviours.Eat, Flags.OnEscape, Behaviours.Walk);
-            
         }
 
         protected override void WalkTransitions()
