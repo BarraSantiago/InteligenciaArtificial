@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using ECS.Patron;
 using NeuralNetworkDirectory.NeuralNet;
 using StateMachine.Agents.Simulation;
@@ -12,7 +11,7 @@ namespace NeuralNetworkDirectory.ECS
         {
             this.outputsQty = 3;
             outputs = new float[outputsQty][];
-            foreach (var brain in num.Values)
+            foreach (BrainType brain in num.Values)
             {
                 EcsPopulationManager.NeuronInputCount inputsCount = EcsPopulationManager.InputCountCache[(brain, agentType)];
                 outputs[GetBrainTypeKeyByValue(brain, num)] = new float[inputsCount.outputCount];
@@ -21,7 +20,7 @@ namespace NeuralNetworkDirectory.ECS
 
         public int GetBrainTypeKeyByValue(BrainType value, Dictionary<int, BrainType> brainTypes)
         {
-            foreach (var kvp in brainTypes)
+            foreach (KeyValuePair<int, BrainType> kvp in brainTypes)
             {
                 if (EqualityComparer<BrainType>.Default.Equals(kvp.Value, value))
                 {

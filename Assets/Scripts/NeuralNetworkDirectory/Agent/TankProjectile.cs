@@ -23,7 +23,7 @@ namespace Agent
         {
             if (collision.gameObject.CompareTag("Tank"))
             {
-                var tank = collision.gameObject.GetComponent<TankBase>();
+                TankBase tank = collision.gameObject.GetComponent<TankBase>();
 
                 if (tank.TakeDamage(damage)) OnTankKilled.Invoke(tankId, teamId, tank.team);
             }

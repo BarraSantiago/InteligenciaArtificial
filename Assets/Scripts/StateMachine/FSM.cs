@@ -25,13 +25,13 @@ namespace StateMachine
 
         public FSM()
         {
-            var states = Enum.GetValues(typeof(EnumState)).Length;
-            var flags = Enum.GetValues(typeof(EnumFlag)).Length;
+            int states = Enum.GetValues(typeof(EnumState)).Length;
+            int flags = Enum.GetValues(typeof(EnumFlag)).Length;
             _behaviours = new Dictionary<int, State>();
             _transitions = new (int, Action)[states, flags];
 
-            for (var i = 0; i < states; i++)
-            for (var j = 0; j < flags; j++)
+            for (int i = 0; i < states; i++)
+            for (int j = 0; j < flags; j++)
                 _transitions[i, j] = (UNNASIGNED_TRANSITION, null);
 
             _behaviourTickParameters = new Dictionary<int, Func<object[]>>();
@@ -58,7 +58,7 @@ namespace StateMachine
         public void AddBehaviour<T>(EnumState stateIndexEnum, Func<object[]> onTickParameters = null,
             Func<object[]> onEnterParameters = null, Func<object[]> onExitParameters = null) where T : State, new()
         {
-            var stateIndex = Convert.ToInt32(stateIndexEnum);
+            int stateIndex = Convert.ToInt32(stateIndexEnum);
 
             if (_behaviours.ContainsKey(stateIndex)) return;
 
@@ -84,7 +84,7 @@ namespace StateMachine
 
             _transitions[_currentState, Convert.ToInt32(flag)].onTransition?.Invoke();
 
-            var currentState = _transitions[_currentState, Convert.ToInt32(flag)].destinationInState;
+            int currentState = _transitions[_currentState, Convert.ToInt32(flag)].destinationInState;
             if(currentState == UNNASIGNED_TRANSITION) return;
             _currentState = _transitions[_currentState, Convert.ToInt32(flag)].destinationInState;
 
@@ -104,7 +104,7 @@ namespace StateMachine
         {
             if (behaviourActions.Equals(default(BehaviourActions))) return;
 
-            var executionOrder = 0;
+            int executionOrder = 0;
 
             while ((behaviourActions.MainThreadBehaviour != null && behaviourActions.MainThreadBehaviour.Count > 0) ||
                    (behaviourActions.MultiThreadablesBehaviour != null &&
@@ -142,7 +142,7 @@ namespace StateMachine
 
         public int GetMainThreadCount()
         {
-            var currentStateBehaviours = GetCurrentStateTickBehaviours;
+            BehaviourActions currentStateBehaviours = GetCurrentStateTickBehaviours;
             if (currentStateBehaviours.MainThreadBehaviour == null)
             {
                 return 0;
@@ -162,7 +162,7 @@ namespace StateMachine
             {
                 if (behaviourActions.MainThreadBehaviour.ContainsKey(executionOrder))
                 {
-                    foreach (var action in behaviourActions.MainThreadBehaviour[executionOrder])
+                    foreach (Action action in behaviourActions.MainThreadBehaviour[executionOrder])
                     {
                         action.Invoke();
                     }

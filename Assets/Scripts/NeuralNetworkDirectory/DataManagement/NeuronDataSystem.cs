@@ -32,22 +32,22 @@ namespace NeuralNetworkDirectory.DataManagement
         
         public static Dictionary<SimAgentTypes, Dictionary<BrainType, List<AgentNeuronData>>> LoadLatestNeurons(string directoryPath)
         {
-            var agentsData = new Dictionary<SimAgentTypes, Dictionary<BrainType, List<AgentNeuronData>>>();
-            var directories = Directory.GetDirectories(directoryPath);
+            Dictionary<SimAgentTypes, Dictionary<BrainType, List<AgentNeuronData>>> agentsData = new Dictionary<SimAgentTypes, Dictionary<BrainType, List<AgentNeuronData>>>();
+            string[] directories = Directory.GetDirectories(directoryPath);
 
-            foreach (var agentTypeDirectory in directories)
+            foreach (string agentTypeDirectory in directories)
             {
-                var agentType = Enum.Parse<SimAgentTypes>(Path.GetFileName(agentTypeDirectory));
+                SimAgentTypes agentType = Enum.Parse<SimAgentTypes>(Path.GetFileName(agentTypeDirectory));
                 agentsData[agentType] = new Dictionary<BrainType, List<AgentNeuronData>>();
 
-                var files = Directory.GetFiles(agentTypeDirectory, "gen*.json");
+                string[] files = Directory.GetFiles(agentTypeDirectory, "gen*.json");
                 if (files.Length == 0)
                     continue;
 
-                var latestFile = files.OrderByDescending(f =>
+                string latestFile = files.OrderByDescending(f =>
                 {
-                    var fileName = Path.GetFileName(f);
-                    var match = Regex.Match(fileName, @"gen(\d+)");
+                    string fileName = Path.GetFileName(f);
+                    Match match = Regex.Match(fileName, @"gen(\d+)");
                     if (match.Success)
                     {
                         return int.Parse(match.Groups[1].Value);
@@ -55,10 +55,10 @@ namespace NeuralNetworkDirectory.DataManagement
                     return 0;
                 }).First();
 
-                var json = File.ReadAllText(latestFile);
-                var agentDataList = new AgentNeuronData[0];//  JsonSerializer.Deserialize<List<AgentNeuronData>>(json);
+                string json = File.ReadAllText(latestFile);
+                AgentNeuronData[] agentDataList = new AgentNeuronData[0];//  JsonSerializer.Deserialize<List<AgentNeuronData>>(json);
 
-                foreach (var agentData in agentDataList)
+                foreach (AgentNeuronData agentData in agentDataList)
                 {
                     if (!agentsData[agentType].ContainsKey(agentData.BrainType))
                     {

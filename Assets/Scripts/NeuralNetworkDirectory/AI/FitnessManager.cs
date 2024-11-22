@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ECS.Patron;
+using Flocking;
 using NeuralNetworkDirectory.ECS;
 using NeuralNetworkDirectory.NeuralNet;
 using Pathfinder;
@@ -22,7 +23,7 @@ namespace NeuralNetworkDirectory.AI
 
         public void Tick()
         {
-            foreach (var agent in _agents)
+            foreach (KeyValuePair<uint, SimAgent<TVector, TTransform>> agent in _agents)
             {
                 CalculateFitness(agent.Value.agentType, agent.Key);
             }
@@ -48,7 +49,7 @@ namespace NeuralNetworkDirectory.AI
 
         private void HerbivoreFitnessCalculator(uint agentId)
         {
-            foreach (var brainType in _agents[agentId].brainTypes)
+            foreach (KeyValuePair<int, BrainType> brainType in _agents[agentId].brainTypes)
             {
                 switch (brainType.Value)
                 {
@@ -75,8 +76,8 @@ namespace NeuralNetworkDirectory.AI
             const float reward = 10;
             const float punishment = 0.90f;
 
-            var agent = _agents[agentId] as Herbivore<IVector, ITransform<IVector>>;
-            var nearestPredatorNode =
+            Herbivore<IVector, ITransform<IVector>> agent = _agents[agentId] as Herbivore<IVector, ITransform<IVector>>;
+            SimAgent<IVector, ITransform<IVector>> nearestPredatorNode =
                 EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, agent?.Transform.position);
 
             IVector targetPosition;
@@ -100,12 +101,12 @@ namespace NeuralNetworkDirectory.AI
             const float reward = 10;
             const float punishment = 0.90f;
 
-            var agent = _agents[agentId];
-            var nearestPredatorNode =
+            SimAgent<TVector, TTransform> agent = _agents[agentId];
+            SimAgent<IVector, ITransform<IVector>> nearestPredatorNode =
                 EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, agent.Transform.position);
 
             if (nearestPredatorNode?.CurrentNode?.GetCoordinate() == null) return;
-            var targetPosition = nearestPredatorNode.CurrentNode.GetCoordinate();
+            IVector targetPosition = nearestPredatorNode.CurrentNode.GetCoordinate();
 
             if (!IsMovingTowardsTarget(agentId, targetPosition))
             {
@@ -119,7 +120,7 @@ namespace NeuralNetworkDirectory.AI
 
         private void CarnivoreFitnessCalculator(uint agentId)
         {
-            foreach (var brainType in _agents[agentId].brainTypes)
+            foreach (KeyValuePair<int, BrainType> brainType in _agents[agentId].brainTypes)
             {
                 switch (brainType.Value)
                 {
@@ -148,11 +149,11 @@ namespace NeuralNetworkDirectory.AI
             const float punishment = 0.90f;
 
             if(_agents[agentId] is not Carnivore<IVector, ITransform<IVector>> agent) return;
-            var nearestHerbivoreNode =
+            SimAgent<IVector, ITransform<IVector>> nearestHerbivoreNode =
                 EcsPopulationManager.GetNearestEntity(SimAgentTypes.Herbivore, agent.Transform.position);
 
             if (nearestHerbivoreNode?.CurrentNode?.GetCoordinate() == null) return;
-            var targetPosition = nearestHerbivoreNode.CurrentNode.GetCoordinate();
+            IVector targetPosition = nearestHerbivoreNode.CurrentNode.GetCoordinate();
 
             if (IsMovingTowardsTarget(agentId, targetPosition))
             {
@@ -174,15 +175,15 @@ namespace NeuralNetworkDirectory.AI
             const float reward = 10;
             const float punishment = 0.90f;
 
-            var agent = _agents[agentId];
-            var nearestHerbivoreNode =
+            SimAgent<TVector, TTransform> agent = _agents[agentId];
+            SimAgent<IVector, ITransform<IVector>> nearestHerbivoreNode =
                 EcsPopulationManager.GetNearestEntity(SimAgentTypes.Herbivore, agent.Transform.position);
-            var nearestCorpseNode = EcsPopulationManager.GetNearestNode(SimNodeType.Corpse, agent.Transform.position);
+            INode<IVector> nearestCorpseNode = EcsPopulationManager.GetNearestNode(SimNodeType.Corpse, agent.Transform.position);
 
             if (nearestHerbivoreNode?.CurrentNode?.GetCoordinate() == null) return;
 
-            var herbPosition = nearestHerbivoreNode.CurrentNode.GetCoordinate();
-            var corpsePosition = nearestCorpseNode?.GetCoordinate();
+            IVector herbPosition = nearestHerbivoreNode.CurrentNode.GetCoordinate();
+            IVector corpsePosition = nearestCorpseNode?.GetCoordinate();
 
             if (IsMovingTowardsTarget(agentId, herbPosition) ||
                 (corpsePosition != null && IsMovingTowardsTarget(agentId, corpsePosition)))
@@ -197,7 +198,7 @@ namespace NeuralNetworkDirectory.AI
 
         private void ScavengerFitnessCalculator(uint agentId)
         {
-            foreach (var brainType in _agents[agentId].brainTypes)
+            foreach (KeyValuePair<int, BrainType> brainType in _agents[agentId].brainTypes)
             {
                 switch (brainType.Value)
                 {
@@ -226,9 +227,9 @@ namespace NeuralNetworkDirectory.AI
             const float punishment = 0.90f;
             const float safeDistance = 1f;
 
-            var agent = (Scavenger<TVector, TTransform>)_agents[agentId];
-            var neighbors = EcsPopulationManager.GetBoidsInsideRadius(agent.boid);
-            var targetPosition = agent.GetTarget(SimNodeType.Carrion).GetCoordinate();
+            Scavenger<TVector, TTransform> agent = (Scavenger<TVector, TTransform>)_agents[agentId];
+            List<Boid<IVector, ITransform<IVector>>> neighbors = EcsPopulationManager.GetBoidsInsideRadius(agent.boid);
+            IVector targetPosition = agent.GetTarget(SimNodeType.Carrion).GetCoordinate();
 
             bool isMaintainingDistance = true;
             bool isAligningWithFlock = true;
@@ -237,11 +238,11 @@ namespace NeuralNetworkDirectory.AI
             IVector averageDirection = null;
             int neighborCount = 0;
 
-            foreach (var neighbor in neighbors)
+            foreach (Boid<IVector, ITransform<IVector>> neighbor in neighbors)
             {
                 if (Equals(neighbor, agent.boid)) continue;
 
-                var neighborPosition = neighbor.transform.position;
+                IVector neighborPosition = neighbor.transform.position;
                 float distance = agent.Transform.position.Distance(neighborPosition);
 
                 if (distance < safeDistance)
@@ -257,8 +258,8 @@ namespace NeuralNetworkDirectory.AI
             if (neighborCount > 0)
             {
                 averageDirection /= neighborCount;
-                var agentDirection = agent.boid.transform.forward;
-                var alignmentDotProduct = IVector.Dot(agentDirection, averageDirection.Normalized());
+                IVector agentDirection = agent.boid.transform.forward;
+                float alignmentDotProduct = IVector.Dot(agentDirection, averageDirection.Normalized());
 
                 if (alignmentDotProduct < 0.9f)
                 {
@@ -283,11 +284,11 @@ namespace NeuralNetworkDirectory.AI
             const float punishment = 0.90f;
 
             int brainId = (int)BrainType.ScavengerMovement;
-            var agent = (Scavenger<TVector, TTransform>)_agents[agentId];
-            var neighbors = EcsPopulationManager.GetBoidsInsideRadius(agent.boid).Count;
-            var nearestCarrionNode = EcsPopulationManager.GetNearestNode(SimNodeType.Carrion, agent.Transform.position);
-            var nearestCorpseNode = EcsPopulationManager.GetNearestNode(SimNodeType.Corpse, agent.Transform.position);
-            var nearestCarNode = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, agent.Transform.position);
+            Scavenger<TVector, TTransform> agent = (Scavenger<TVector, TTransform>)_agents[agentId];
+            int neighbors = EcsPopulationManager.GetBoidsInsideRadius(agent.boid).Count;
+            INode<IVector> nearestCarrionNode = EcsPopulationManager.GetNearestNode(SimNodeType.Carrion, agent.Transform.position);
+            INode<IVector> nearestCorpseNode = EcsPopulationManager.GetNearestNode(SimNodeType.Corpse, agent.Transform.position);
+            SimAgent<IVector, ITransform<IVector>> nearestCarNode = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, agent.Transform.position);
 
             IVector targetPosition;
 
@@ -327,7 +328,7 @@ namespace NeuralNetworkDirectory.AI
             const float reward = 10;
             const float punishment = 0.90f;
 
-            var agent = _agents[agentId];
+            SimAgent<TVector, TTransform> agent = _agents[agentId];
 
             if (agent.Food <= 0) return;
 
@@ -337,13 +338,13 @@ namespace NeuralNetworkDirectory.AI
 
         private bool IsMovingTowardsTarget(uint agentId, IVector targetPosition)
         {
-            var agent = _agents[agentId];
-            var currentPosition = agent.Transform.position;
+            SimAgent<TVector, TTransform> agent = _agents[agentId];
+            IVector currentPosition = agent.Transform.position;
             IVector agentDirection = agent.Transform.forward;
 
-            var directionToTarget = (targetPosition - currentPosition).Normalized();
+            IVector directionToTarget = (targetPosition - currentPosition).Normalized();
             if(directionToTarget == null || agentDirection == null) return false;
-            var dotProduct = IVector.Dot(directionToTarget, agentDirection);
+            float dotProduct = IVector.Dot(directionToTarget, agentDirection);
 
             return dotProduct > 0.9f;
         }

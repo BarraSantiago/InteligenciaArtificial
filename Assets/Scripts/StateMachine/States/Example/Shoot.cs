@@ -12,13 +12,13 @@ namespace States.Archer
 
         public override BehaviourActions GetTickBehaviour(params object[] parameters)
         {
-            var behaviours = new BehaviourActions();
+            BehaviourActions behaviours = new BehaviourActions();
 
-            var arrowPrefab = parameters[0] as GameObject;
-            var ownerTransform = parameters[1] as Transform;
-            var targetTransform = parameters[2] as Transform;
-            var shootForce = Convert.ToSingle(parameters[3]);
-            var lostDistance = Convert.ToSingle(parameters[4]);
+            GameObject arrowPrefab = parameters[0] as GameObject;
+            Transform ownerTransform = parameters[1] as Transform;
+            Transform targetTransform = parameters[2] as Transform;
+            float shootForce = Convert.ToSingle(parameters[3]);
+            float lostDistance = Convert.ToSingle(parameters[4]);
 
             behaviours.AddMainThreadBehaviours(0, () =>
             {
@@ -51,11 +51,11 @@ namespace States.Archer
         private static void ShootArrow(GameObject arrowPrefab, Transform ownerTransform, Transform targetTransform,
             float shootForce)
         {
-            var arrow = Helper.InstantiatePrefab(arrowPrefab, ownerTransform.position, ownerTransform.rotation);
+            GameObject arrow = Helper.InstantiatePrefab(arrowPrefab, ownerTransform.position, ownerTransform.rotation);
 
-            var direction = (targetTransform.position - ownerTransform.position).normalized;
+            Vector3 direction = (targetTransform.position - ownerTransform.position).normalized;
 
-            var arrowRigidbody = arrow.GetComponent<Rigidbody>();
+            Rigidbody arrowRigidbody = arrow.GetComponent<Rigidbody>();
 
             arrowRigidbody.AddForce(direction * shootForce, ForceMode.Impulse);
         }

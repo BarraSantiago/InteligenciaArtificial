@@ -11,7 +11,7 @@ namespace FlappyIa.Bird
 
         protected override void OnThink(float dt, BirdBehaviour birdBehaviour, Obstacle obstacle, Coin coin)
         {
-            var inputs = new float[4];
+            float[] inputs = new float[4];
             inputs[0] = (obstacle.transform.position - birdBehaviour.transform.position).x / 10.0f;
             inputs[1] = (obstacle.transform.position - birdBehaviour.transform.position).y / 10.0f;
             inputs[2] = (coin.transform.position - coin.transform.position).x / 10.0f;
@@ -22,8 +22,8 @@ namespace FlappyIa.Bird
             outputs = brain.Synapsis(inputs);
             if (outputs[0] < 0.5f) birdBehaviour.Flap();
 
-            var diff = obstacle.transform.position - birdBehaviour.transform.position;
-            var sqrDistance = diff.sqrMagnitude;
+            Vector3 diff = obstacle.transform.position - birdBehaviour.transform.position;
+            float sqrDistance = diff.sqrMagnitude;
 
             if (sqrDistance <= 1.0f * 1.0f && lastObstacleId != obstacle.id)
             {

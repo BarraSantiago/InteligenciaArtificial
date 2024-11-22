@@ -16,8 +16,8 @@ namespace Agent
 
         protected override void OnThink(float dt)
         {
-            var dirToMine = GetDirToMine(goodMine);
-            var dirToBadMine = GetDirToMine(badMine);
+            Vector3 dirToMine = GetDirToMine(goodMine);
+            Vector3 dirToBadMine = GetDirToMine(badMine);
 
             inputs[0] = dirToMine.x;
             inputs[1] = dirToMine.z;
@@ -26,7 +26,7 @@ namespace Agent
             inputs[4] = transform.forward.x;
             inputs[5] = transform.forward.z;
 
-            var output = brain.Synapsis(inputs);
+            float[] output = brain.Synapsis(inputs);
 
             SetForces(output[0], output[1], dt);
             //if (output[2] > 0.5f) Shoot();

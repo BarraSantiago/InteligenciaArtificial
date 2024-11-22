@@ -8,10 +8,10 @@ namespace StateMachine.States.RTSStates
     {
         public override BehaviourActions GetTickBehaviour(params object[] parameters)
         {
-            var behaviours = new BehaviourActions();
-            var food = Convert.ToInt32(parameters[0]);
-            var onDeliverFood = parameters[1] as Action;
-            var retreat = Convert.ToBoolean(parameters[2]);
+            BehaviourActions behaviours = new BehaviourActions();
+            int food = Convert.ToInt32(parameters[0]);
+            Action onDeliverFood = parameters[1] as Action;
+            bool retreat = Convert.ToBoolean(parameters[2]);
 
             behaviours.AddMultiThreadableBehaviours(0, () => { onDeliverFood?.Invoke(); });
 

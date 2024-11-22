@@ -37,10 +37,10 @@ namespace FlappyIa.Obstacles
 
         public void Reset()
         {
-            for (var i = 0; i < obstacles.Count; i++)
+            for (int i = 0; i < obstacles.Count; i++)
                 Destroy(obstacles[i].gameObject);
 
-            for (var i = 0; i < coins.Count; i++)
+            for (int i = 0; i < coins.Count; i++)
                 Destroy(coins[i].gameObject);
 
             obstacles.Clear();
@@ -58,7 +58,7 @@ namespace FlappyIa.Obstacles
 
         public Obstacle GetNextObstacle(Vector3 pos)
         {
-            for (var i = 0; i < obstacles.Count; i++)
+            for (int i = 0; i < obstacles.Count; i++)
                 if (pos.x < obstacles[i].transform.position.x + 2f)
                     return obstacles[i];
 
@@ -67,10 +67,10 @@ namespace FlappyIa.Obstacles
 
         public Coin GetNextCoin(Vector3 pos)
         {
-            var nearestCoin = coins[0];
-            var nearestDist = float.MaxValue;
+            Coin nearestCoin = coins[0];
+            float nearestDist = float.MaxValue;
 
-            foreach (var coin in coins)
+            foreach (Coin coin in coins)
                 if (coin.transform.position.x > pos.x && coin.transform.position.x - pos.x < nearestDist)
                 {
                     nearestCoin = coin;
@@ -82,7 +82,7 @@ namespace FlappyIa.Obstacles
 
         public bool IsColliding(Vector3 pos)
         {
-            var collider = Physics2D.OverlapBox(pos, new Vector2(0.3f, 0.3f), 0);
+            Collider2D collider = Physics2D.OverlapBox(pos, new Vector2(0.3f, 0.3f), 0);
 
             if (collider)
                 return true;
@@ -92,9 +92,9 @@ namespace FlappyIa.Obstacles
 
         public void CheckAndInstatiate()
         {
-            for (var i = 0; i < obstacles.Count; i++) obstacles[i].CheckToDestroy();
+            for (int i = 0; i < obstacles.Count; i++) obstacles[i].CheckToDestroy();
 
-            for (var i = 0; i < coins.Count; i++) coins[i].CheckToDestroy();
+            for (int i = 0; i < coins.Count; i++) coins[i].CheckToDestroy();
 
             while (obstacles.Count < MIN_COUNT)
                 InstantiateObstacle();
@@ -107,9 +107,9 @@ namespace FlappyIa.Obstacles
         {
             obstaclePos.x += DISTANCE_BETWEEN_OBSTACLES;
             obstaclePos.y = Random.Range(-HEIGHT_RANDOM, HEIGHT_RANDOM);
-            var go = Instantiate(obstaclePrefab, obstaclePos, Quaternion.identity);
+            GameObject go = Instantiate(obstaclePrefab, obstaclePos, Quaternion.identity);
 
-            var obstacle = go.GetComponent<Obstacle>();
+            Obstacle obstacle = go.GetComponent<Obstacle>();
             obstacle.OnDestroy += OnObstacleDestroy;
             obstacles.Add(obstacle);
         }
@@ -118,9 +118,9 @@ namespace FlappyIa.Obstacles
         {
             coinPos.x += DISTANCE_BETWEEN_OBSTACLES;
             coinPos.y = Random.Range(-HEIGHT_RANDOM, HEIGHT_RANDOM);
-            var coinGo = Instantiate(coinPrefab, coinPos, Quaternion.identity);
+            GameObject coinGo = Instantiate(coinPrefab, coinPos, Quaternion.identity);
             coinGo.transform.SetParent(transform, false);
-            var coin = coinGo.GetComponent<Coin>();
+            Coin coin = coinGo.GetComponent<Coin>();
             coin.id = coins.Count;
             coin.OnDestroy += OnCoinDestroy;
             coins.Add(coin);

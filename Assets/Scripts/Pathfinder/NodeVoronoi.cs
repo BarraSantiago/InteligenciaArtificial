@@ -27,7 +27,7 @@ namespace Pathfinder
         public IVector coordinate = new MyVector();
         public bool Equals(IVector other)
         {
-            var epsilon = 0.0001f;
+            const float epsilon = 0.0001f;
             return other != null && Math.Abs(coordinate.X - other.X) < epsilon && Math.Abs(coordinate.Y - other.Y) < epsilon;
         }
 
@@ -98,7 +98,7 @@ namespace Pathfinder
 
         public bool Equals(SimCoordinate other)
         {
-            var epsilon = 0.0001f;
+            const float epsilon = 0.0001f;
             return other != null && Math.Abs(coordinate.X - other.GetCoordinate().X) < epsilon && Math.Abs(coordinate.Y - other.GetCoordinate().Y) < epsilon;
         }
     }

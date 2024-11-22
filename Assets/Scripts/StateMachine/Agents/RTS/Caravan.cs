@@ -59,7 +59,7 @@ namespace StateMachine.Agents.RTS
                         return;
                     }
 
-                    var target = GameManager.MinesWithMiners[0];
+                    RTSNode<Vector2> target = GameManager.MinesWithMiners[0];
                     if (target == null) return;
 
                     TargetRtsNode =
@@ -102,7 +102,7 @@ namespace StateMachine.Agents.RTS
                         return;
                     }
 
-                    var target = GameManager.MinesWithMiners[0];
+                    RTSNode<Vector2> target = GameManager.MinesWithMiners[0];
                     if (target == null) return;
 
                     TargetRtsNode =

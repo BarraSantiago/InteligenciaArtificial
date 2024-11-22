@@ -30,7 +30,7 @@ namespace FlappyIa.Camera
 
         public void UpdateCamera()
         {
-            var follow = Vector3.zero;
+            Vector3 follow = Vector3.zero;
             /*
             if (PopulationManager.Instance)
             {
@@ -42,7 +42,7 @@ namespace FlappyIa.Camera
             else
                 follow = agent.transform.position;*/
 
-            var pos = transform.position;
+            Vector3 pos = transform.position;
             pos.x = follow.x;
             transform.position = pos;
         }

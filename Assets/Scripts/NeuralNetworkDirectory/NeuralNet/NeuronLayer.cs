@@ -46,7 +46,7 @@ namespace NeuralNetworkDirectory.NeuralNet
         {
             neurons = new Neuron[neuronsCount];
 
-            for (var i = 0; i < neurons.Length; i++)
+            for (int i = 0; i < neurons.Length; i++)
             {
                 neurons[i] = new Neuron(InputsCount, Bias, p);
                 totalWeights += InputsCount;
@@ -57,21 +57,21 @@ namespace NeuralNetworkDirectory.NeuralNet
 
         public int SetWeights(float[] weights, int fromId)
         {
-            for (var i = 0; i < neurons.Length; i++) fromId = neurons[i].SetWeights(weights, fromId);
+            for (int i = 0; i < neurons.Length; i++) fromId = neurons[i].SetWeights(weights, fromId);
 
             return fromId;
         }
 
         public float[] GetWeights()
         {
-            var weights = new float[totalWeights];
-            var id = 0;
+            float[] weights = new float[totalWeights];
+            int id = 0;
 
-            for (var i = 0; i < neurons.Length; i++)
+            for (int i = 0; i < neurons.Length; i++)
             {
-                var ws = neurons[i].GetWeights();
+                float[] ws = neurons[i].GetWeights();
 
-                for (var j = 0; j < ws.Length; j++)
+                for (int j = 0; j < ws.Length; j++)
                 {
                     weights[id] = ws[j];
                     id++;

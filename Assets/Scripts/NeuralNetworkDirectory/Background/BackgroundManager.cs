@@ -34,9 +34,9 @@ namespace FlappyIa.Background
 
             float posx = -4;
 
-            foreach (var go in frames)
+            foreach (GameObject go in frames)
             {
-                var pos = go.transform.position;
+                Vector3 pos = go.transform.position;
                 pos.x = posx;
                 go.transform.position = pos;
                 posx += 7.2f;
@@ -50,9 +50,9 @@ namespace FlappyIa.Background
 
         private void Update()
         {
-            var delta = camera1.transform.position.x - lastCameraPos;
+            float delta = camera1.transform.position.x - lastCameraPos;
 
-            var parallax = transform.position;
+            Vector3 parallax = transform.position;
             parallax.x += delta * 0.2f;
             transform.position = parallax;
 
@@ -62,9 +62,9 @@ namespace FlappyIa.Background
             accumPos += delta;
 
             if (!(accumPos >= 7.2f)) return;
-            foreach (var go in frames)
+            foreach (GameObject go in frames)
             {
-                var pos = go.transform.position;
+                Vector3 pos = go.transform.position;
                 pos.x += 7.2f;
                 go.transform.position = pos;
             }

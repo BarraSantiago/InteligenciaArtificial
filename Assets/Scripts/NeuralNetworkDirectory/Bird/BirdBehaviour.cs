@@ -19,14 +19,14 @@ namespace FlappyIa.Bird
 
         public void Flap()
         {
-            var newSpeed = Speed;
+            Vector3 newSpeed = Speed;
             newSpeed.y = FLAP_SPEED;
             Speed = newSpeed;
         }
 
         public void UpdateBird(float dt)
         {
-            var newSpeed = Speed;
+            Vector3 newSpeed = Speed;
             newSpeed.x = MOVEMENT_SPEED;
             newSpeed.y -= GRAVITY * dt;
             Speed = newSpeed;

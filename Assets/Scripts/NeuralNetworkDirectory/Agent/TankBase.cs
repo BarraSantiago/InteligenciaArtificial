@@ -80,8 +80,8 @@ namespace NeuralNetworkDirectory.Agent
 
         protected void SetForces(float leftForce, float rightForce, float dt)
         {
-            var pos = transform.position;
-            var rotFactor = Mathf.Clamp(rightForce - leftForce, -1.0f, 1.0f);
+            Vector3 pos = transform.position;
+            float rotFactor = Mathf.Clamp(rightForce - leftForce, -1.0f, 1.0f);
             transform.rotation *= Quaternion.AngleAxis(rotFactor * RotSpeed * dt, Vector3.up);
             pos += transform.forward * (Mathf.Abs(rightForce + leftForce) * 0.5f * Speed * dt);
             transform.position = pos;

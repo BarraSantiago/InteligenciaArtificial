@@ -44,7 +44,7 @@ namespace FlappyIa.UI
 
         private void Start()
         {
-            var populations = FindObjectsOfType<PopulationManager>();
+            PopulationManager[] populations = FindObjectsOfType<PopulationManager>();
             populationManager1 = populations[0];
             populationManager2 = populations[1];
 

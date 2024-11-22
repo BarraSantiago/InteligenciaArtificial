@@ -35,7 +35,7 @@ namespace Flocking
             }
 
             avg /= insideRadiusBoids.Count;
-            var average = avg - (IVector)boid.transform.position;
+            MyVector average = avg - (IVector)boid.transform.position;
             return (average).Normalized();
         }
 

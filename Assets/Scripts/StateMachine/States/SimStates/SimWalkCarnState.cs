@@ -11,13 +11,13 @@ namespace StateMachine.States.SimStates
     {
         public override BehaviourActions GetTickBehaviour(params object[] parameters)
         {
-            var behaviours = new BehaviourActions();
+            BehaviourActions behaviours = new BehaviourActions();
 
-            var currentNode = parameters[0] as SimNode<IVector>;
-            var foodTarget = (SimNodeType)parameters[1];
-            var onMove = parameters[2] as Action;
-            var outputBrain1 = (float[])parameters[3];
-            var outputBrain2 = (float[])parameters[4];
+            SimNode<IVector> currentNode = parameters[0] as SimNode<IVector>;
+            SimNodeType foodTarget = (SimNodeType)parameters[1];
+            Action onMove = parameters[2] as Action;
+            float[] outputBrain1 = (float[])parameters[3];
+            float[] outputBrain2 = (float[])parameters[4];
 
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {

@@ -12,9 +12,9 @@ public class ECSExample_NoECS : MonoBehaviour
     private void Start()
     {
         entities = new List<GameObject>();
-        for (var i = 0; i < entityCount; i++)
+        for (int i = 0; i < entityCount; i++)
         {
-            var go = Instantiate(prefab, new Vector3(0, -i, 0), Quaternion.identity);
+            GameObject go = Instantiate(prefab, new Vector3(0, -i, 0), Quaternion.identity);
             go.AddComponent<MovementMonoBehaviour>().velocity = velocity;
             entities.Add(go);
         }

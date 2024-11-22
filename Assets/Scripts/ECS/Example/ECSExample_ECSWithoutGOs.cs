@@ -24,9 +24,9 @@ public class ECSExample_ECSWithoutGOs : MonoBehaviour
     {
         ECSManager.Init();
         entities = new List<uint>();
-        for (var i = 0; i < entityCount; i++)
+        for (int i = 0; i < entityCount; i++)
         {
-            var entityID = ECSManager.CreateEntity();
+            uint entityID = ECSManager.CreateEntity();
             ECSManager.AddComponent(entityID, new PositionComponent<Vector3>(new Vector3(0, -i, 0)));
             ECSManager.AddComponent(entityID,
                 new VelocityComponent<Vector3>(velocity, Vector3.right));
@@ -48,9 +48,9 @@ public class ECSExample_ECSWithoutGOs : MonoBehaviour
 
     private void LateUpdate()
     {
-        var drawMatrix = new List<Matrix4x4[]>();
-        var meshes = entities.Count;
-        for (var i = 0; i < entities.Count; i += MAX_OBJS_PER_DRAWCALL)
+        List<Matrix4x4[]> drawMatrix = new List<Matrix4x4[]>();
+        int meshes = entities.Count;
+        for (int i = 0; i < entities.Count; i += MAX_OBJS_PER_DRAWCALL)
         {
             drawMatrix.Add(new Matrix4x4[meshes > MAX_OBJS_PER_DRAWCALL ? MAX_OBJS_PER_DRAWCALL : meshes]);
             meshes -= MAX_OBJS_PER_DRAWCALL;
@@ -58,13 +58,13 @@ public class ECSExample_ECSWithoutGOs : MonoBehaviour
 
         Parallel.For(0, entities.Count, parallelOptions, i =>
         {
-            var position = ECSManager.GetComponent<PositionComponent<Vector3>>(entities[i]);
-            var rotation = ECSManager.GetComponent<RotationComponent>(entities[i]);
+            PositionComponent<Vector3> position = ECSManager.GetComponent<PositionComponent<Vector3>>(entities[i]);
+            RotationComponent rotation = ECSManager.GetComponent<RotationComponent>(entities[i]);
             drawMatrix[i / MAX_OBJS_PER_DRAWCALL][i % MAX_OBJS_PER_DRAWCALL]
                 .SetTRS(new Vector3(position.Position.x, position.Position.y, position.Position.z),
                     Quaternion.Euler(rotation.X, rotation.Y, rotation.Z), prefabScale);
         });
-        for (var i = 0; i < drawMatrix.Count; i++)
+        for (int i = 0; i < drawMatrix.Count; i++)
             Graphics.DrawMeshInstanced(prefabMesh, 0, prefabMaterial, drawMatrix[i]);
     }
 }

@@ -45,12 +45,12 @@ namespace StateMachine.Agents.Simulation
         protected override void ExtraInputs()
         {
             int brain = GetBrainTypeKeyByValue(BrainType.Escape);
-            var inputCount = GetInputCount(BrainType.Escape);
+            int inputCount = GetInputCount(BrainType.Escape);
             
             input[brain] = new float[inputCount];
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
-            var target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, Transform.position);
+            SimAgent<IVector, ITransform<IVector>> target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, Transform.position);
             if (target == null)
             {
                 input[brain][2] = NoTarget;
@@ -66,13 +66,13 @@ namespace StateMachine.Agents.Simulation
         protected override void MovementInputs()
         {
             int brain = GetBrainTypeKeyByValue(BrainType.Movement);
-            var inputCount = GetInputCount(BrainType.Movement);
+            int inputCount = GetInputCount(BrainType.Movement);
             
             input[brain] = new float[inputCount];
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
 
-            var target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, Transform.position);
+            SimAgent<IVector, ITransform<IVector>> target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, Transform.position);
             if (target == null)
             {
                 input[brain][2] = NoTarget;
@@ -84,7 +84,7 @@ namespace StateMachine.Agents.Simulation
                 input[brain][3] = target.CurrentNode.GetCoordinate().Y;
             }
 
-            var nodeTarget = GetTarget(foodTarget);
+            INode<IVector> nodeTarget = GetTarget(foodTarget);
             if (nodeTarget == null)
             {
                 input[brain][4] = NoTarget;
@@ -102,7 +102,7 @@ namespace StateMachine.Agents.Simulation
 
         private void Die()
         {
-            var node = CurrentNode;
+            INode<IVector> node = CurrentNode;
             node.NodeType = SimNodeType.Corpse;
             node.Food = FoodDropped;
             EcsPopulationManager.RemoveEntity(this as SimAgent<IVector, ITransform<IVector>>);

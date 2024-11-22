@@ -25,13 +25,13 @@ namespace Pathfinder.Graph
             
             Parallel.For(0, x, parallelOptions, i =>
             {
-                for (var j = 0; j < y; j++)
+                for (int j = 0; j < y; j++)
                 {
-                    var node = new SimCoordinate();
+                    SimCoordinate node = new SimCoordinate();
                     node.SetCoordinate(i * cellSize, j * cellSize);
                     CoordNodes[i, j] = node;
 
-                    var nodeType = new SimNode<IVector>();
+                    SimNode<IVector> nodeType = new SimNode<IVector>();
                     nodeType.SetCoordinate(new MyVector(i * cellSize, j * cellSize));
                     NodesType[i, j] = nodeType;
                 }

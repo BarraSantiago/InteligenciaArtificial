@@ -65,9 +65,9 @@ namespace Game
 
             MakeMap();
 
-            for (var i = 0; i < minersQuantity; i++) CreateMiner();
+            for (int i = 0; i < minersQuantity; i++) CreateMiner();
 
-            for (var i = 0; i < caravansQuantity; i++) CreateCaravan();
+            for (int i = 0; i < caravansQuantity; i++) CreateCaravan();
         }
 
         private void OnDrawGizmos()
@@ -75,11 +75,11 @@ namespace Game
             if (!Application.isPlaying)
                 return;
 
-            foreach (var sector in voronoi.SectorsToDraw())
+            foreach (Sector<NodeVoronoi, Vector2> sector in voronoi.SectorsToDraw())
             {
                 Handles.color = color;
-                var list = new List<Vector3>();
-                foreach (var nodeVoronoi in sector.PointsToDraw())
+                List<Vector3> list = new List<Vector3>();
+                foreach (NodeVoronoi nodeVoronoi in sector.PointsToDraw())
                     list.Add(new Vector3(nodeVoronoi.GetX(), nodeVoronoi.GetY()));
                 Handles.DrawAAConvexPolygon(list.ToArray());
 
@@ -88,7 +88,7 @@ namespace Game
             }
 
 
-            foreach (var node in Graph.NodesType)
+            foreach (RTSNode<Vector2> node in Graph.NodesType)
             {
                 Gizmos.color = node.RtsNodeType switch
                 {
@@ -133,10 +133,10 @@ namespace Game
         {
             const int midCost = 2;
 
-            foreach (var node in CaravanNodes.Where(node => node.RtsNodeType == RTSNodeType.Forest))
+            foreach (RTSNode<Vector2> node in CaravanNodes.Where(node => node.RtsNodeType == RTSNodeType.Forest))
                 node.SetCost(midCost);
 
-            foreach (var node in MinerNodes.Where(node => node.RtsNodeType == RTSNodeType.Gravel))
+            foreach (RTSNode<Vector2> node in MinerNodes.Where(node => node.RtsNodeType == RTSNodeType.Gravel))
                 node.SetCost(midCost);
         }
 
@@ -160,25 +160,25 @@ namespace Game
         private void SetupObstacles()
         {
             const int obscacleChance = 10;
-            var total = mapWidth * mapHeight;
-            for (var i = 0; i < total; i++)
+            int total = mapWidth * mapHeight;
+            for (int i = 0; i < total; i++)
                 if (Random.Range(0, 100) < obscacleChance)
                 {
                     Graph.NodesType[i].RtsNodeType = RTSNodeType.Blocked;
                     Graph.NodesType[i].SetCost(1000);
                 }
 
-            for (var i = 0; i < total; i++)
+            for (int i = 0; i < total; i++)
                 if (Random.Range(0, 100) < obscacleChance)
                     Graph.NodesType[i].RtsNodeType = RTSNodeType.Forest;
-            for (var i = 0; i < total; i++)
+            for (int i = 0; i < total; i++)
                 if (Random.Range(0, 100) < obscacleChance)
                     Graph.NodesType[i].RtsNodeType = RTSNodeType.Gravel;
         }
 
         private void VoronoiSetup()
         {
-            var voronoiNodes = new List<NodeVoronoi>();
+            List<NodeVoronoi> voronoiNodes = new List<NodeVoronoi>();
 
             //foreach (var t in GraphType.mines)
             //voronoiNodes.Add(Graph.CoordNodes.Find((node, index) => node.GetCoordinate().Equals(t.GetCoordinate())));
@@ -208,7 +208,7 @@ namespace Game
         private int CreateTownCenter(out Vector3 townCenterPosition)
         {
             //var townCenterNode = Random.Range(0, Graph.CoordNodes.Count);
-            var townCenterNode = 5;
+            int townCenterNode = 5;
             Graph.NodesType[townCenterNode].RtsNodeType = RTSNodeType.TownCenter;
             townCenterPosition = new Vector3(Graph.CoordNodes[townCenterNode, 5].GetCoordinate().x,
                 Graph.CoordNodes[townCenterNode, 5].GetCoordinate().y);
@@ -227,8 +227,8 @@ namespace Game
 
         private void CreateCaravan()
         {
-            var caravan = Instantiate(caravanPrefab, townCenterPosition, Quaternion.identity);
-            var agent = caravan.GetComponent<Caravan>();
+            GameObject caravan = Instantiate(caravanPrefab, townCenterPosition, Quaternion.identity);
+            Caravan agent = caravan.GetComponent<Caravan>();
             agent.CurrentRtsNode = Graph.NodesType[towncenterNode];
             agent.Voronoi = voronoi;
             agent.Pathfinder = CaravanPathfinder;
@@ -237,8 +237,8 @@ namespace Game
 
         private void CreateMiner()
         {
-            var miner = Instantiate(minerPrefab, townCenterPosition, Quaternion.identity);
-            var agent = miner.GetComponent<Miner>();
+            GameObject miner = Instantiate(minerPrefab, townCenterPosition, Quaternion.identity);
+            Miner agent = miner.GetComponent<Miner>();
             agent.CurrentRtsNode = Graph.NodesType[towncenterNode];
             RTSAgent.TownCenter = Graph.NodesType[towncenterNode];
             agent.Pathfinder = MinerPathfinder;
@@ -253,7 +253,7 @@ namespace Game
 
         private void RemakeVoronoi()
         {
-            var voronoiNodes = new List<NodeVoronoi>();
+            List<NodeVoronoi> voronoiNodes = new List<NodeVoronoi>();
 
             Graph.NodesType.ForEach(node =>
             {
@@ -263,7 +263,7 @@ namespace Game
             GraphType.mines.RemoveAll(node => node.gold <= 0);
 
 
-            foreach (var mine in GraphType.mines)
+            foreach (RTSNode<Vector2> mine in GraphType.mines)
             {
                 //if (mine.gold > 0)
                 //    voronoiNodes.Add(Graph.CoordNodes.Find(node => node.GetCoordinate() == mine.GetCoordinate()));

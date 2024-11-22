@@ -13,12 +13,12 @@ namespace StateMachine.States.SimStates
                 return default;
             }
             
-            var behaviours = new BehaviourActions();
+            BehaviourActions behaviours = new BehaviourActions();
 
-            var onAttack = parameters[5] as Action;
-            var outputBrain1 = (float[])parameters[6];
-            var outputBrain2 = (float[])parameters[7];
-            var outputBrain3 = (float)parameters[8];
+            Action onAttack = parameters[5] as Action;
+            float[] outputBrain1 = (float[])parameters[6];
+            float[] outputBrain2 = (float[])parameters[7];
+            float outputBrain3 = (float)parameters[8];
 
             if (outputBrain1 == null || outputBrain2 == null)
             {

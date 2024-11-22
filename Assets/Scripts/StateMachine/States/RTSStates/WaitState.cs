@@ -10,13 +10,13 @@ namespace StateMachine.States.RTSStates
     {
         public override BehaviourActions GetTickBehaviour(params object[] parameters)
         {
-            var behaviours = new BehaviourActions();
+            BehaviourActions behaviours = new BehaviourActions();
 
-            var retreat = (bool)parameters[0];
+            bool retreat = (bool)parameters[0];
             int? food = Convert.ToInt32(parameters[1]);
             int? gold = Convert.ToInt32(parameters[2]);
-            var currentNode = (RTSNode<Vector2>)parameters[3];
-            var OnWait = parameters[4] as Action;
+            RTSNode<Vector2> currentNode = (RTSNode<Vector2>)parameters[3];
+            Action OnWait = parameters[4] as Action;
 
 
             behaviours.AddMultiThreadableBehaviours(0, () => { OnWait?.Invoke(); });
@@ -50,10 +50,10 @@ namespace StateMachine.States.RTSStates
 
         public override BehaviourActions GetOnEnterBehaviour(params object[] parameters)
         {
-            var behaviours = new BehaviourActions();
+            BehaviourActions behaviours = new BehaviourActions();
 
-            var currentNode = parameters[0] as RTSNode<Vector2>;
-            var onReachMine = parameters[1] as Action<RTSNode<Vector2>>;
+            RTSNode<Vector2> currentNode = parameters[0] as RTSNode<Vector2>;
+            Action<RTSNode<Vector2>> onReachMine = parameters[1] as Action<RTSNode<Vector2>>;
 
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {
@@ -65,11 +65,11 @@ namespace StateMachine.States.RTSStates
 
         public override BehaviourActions GetOnExitBehaviour(params object[] parameters)
         {
-            var behaviours = new BehaviourActions();
+            BehaviourActions behaviours = new BehaviourActions();
 
             if (parameters == null) return default;
-            var currentNode = parameters[0] as RTSNode<Vector2>;
-            var onLeaveMine = parameters[1] as Action<RTSNode<Vector2>>;
+            RTSNode<Vector2> currentNode = parameters[0] as RTSNode<Vector2>;
+            Action<RTSNode<Vector2>> onLeaveMine = parameters[1] as Action<RTSNode<Vector2>>;
 
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {

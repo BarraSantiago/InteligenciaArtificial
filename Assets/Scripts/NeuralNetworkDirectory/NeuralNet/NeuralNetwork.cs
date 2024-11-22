@@ -42,7 +42,7 @@ namespace NeuralNetworkDirectory.NeuralNet
                 return false;
             }
 
-            var layer = new NeuronLayer(inputsCount, neuronsCount, bias, p);
+            NeuronLayer layer = new NeuronLayer(inputsCount, neuronsCount, bias, p);
 
             totalWeightsCount += (inputsCount + 1) * neuronsCount;
 
@@ -58,21 +58,21 @@ namespace NeuralNetworkDirectory.NeuralNet
 
         public void SetWeights(float[] newWeights)
         {
-            var fromId = 0;
+            int fromId = 0;
 
-            for (var i = 0; i < layers.Count; i++) fromId = layers[i].SetWeights(newWeights, fromId);
+            for (int i = 0; i < layers.Count; i++) fromId = layers[i].SetWeights(newWeights, fromId);
         }
 
         public float[] GetWeights()
         {
-            var weights = new float[totalWeightsCount];
-            var id = 0;
+            float[] weights = new float[totalWeightsCount];
+            int id = 0;
 
-            for (var i = 0; i < layers.Count; i++)
+            for (int i = 0; i < layers.Count; i++)
             {
-                var ws = layers[i].GetWeights();
+                float[] ws = layers[i].GetWeights();
 
-                for (var j = 0; j < ws.Length; j++)
+                for (int j = 0; j < ws.Length; j++)
                 {
                     weights[id] = ws[j];
                     id++;
@@ -86,7 +86,7 @@ namespace NeuralNetworkDirectory.NeuralNet
         {
             float[] outputs = null;
 
-            for (var i = 0; i < layers.Count; i++)
+            for (int i = 0; i < layers.Count; i++)
             {
                 //outputs = layers[i].Synapsis(inputs);
                 inputs = outputs;

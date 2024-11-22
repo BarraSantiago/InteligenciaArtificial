@@ -29,10 +29,10 @@ namespace Pathfinder.Voronoi
             // 1. Calculo la distancia entre "position" y el origen del límite
             // 2. Tomo el valor absoluto para asegurarme de tener una distancia positiva
             // 3. Multiplico esta distancia por 2 para extender el límite más allá de la distancia original
-            var distance = new TCoordinate();
+            TCoordinate distance = new TCoordinate();
             distance.SetCoordinate(Math.Abs(position.GetX() - origin.GetX()) * 2f,
                 Math.Abs(position.GetY() - origin.GetY()) * 2f);
-            var limit = new TCoordinate();
+            TCoordinate limit = new TCoordinate();
             limit.SetCoordinate(position.GetCoordinate());
 
             switch (direction)

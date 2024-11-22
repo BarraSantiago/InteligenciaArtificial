@@ -32,11 +32,11 @@ namespace FlockingECS.System
         {
             Parallel.ForEach(queriedEntities, parallelOptions, i =>
             {
-                var alignment = Multiply(flockComponents[i].Alignment, offsetComponent.alignmentWeight);
-                var cohesion = Multiply(flockComponents[i].Cohesion, offsetComponent.cohesionWeight);
-                var separation = Multiply(flockComponents[i].Separation, offsetComponent.separationWeight);
-                var direction = Multiply(flockComponents[i].Direction, offsetComponent.directionWeight);
-                var ACS = VectorHelper<TVector>.AddVectors(alignment, cohesion, separation, direction);
+                TVector alignment = Multiply(flockComponents[i].Alignment, offsetComponent.alignmentWeight);
+                TVector cohesion = Multiply(flockComponents[i].Cohesion, offsetComponent.cohesionWeight);
+                TVector separation = Multiply(flockComponents[i].Separation, offsetComponent.separationWeight);
+                TVector direction = Multiply(flockComponents[i].Direction, offsetComponent.directionWeight);
+                TVector ACS = VectorHelper<TVector>.AddVectors(alignment, cohesion, separation, direction);
 
                 ACS = VectorHelper<TVector>.NormalizeVector(ACS);
 

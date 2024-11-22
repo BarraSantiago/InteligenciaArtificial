@@ -14,18 +14,18 @@ namespace Pathfinder
 
         public List<TNodeType> FindPath(TNodeType startNode, TNodeType destinationNode)
         {
-            var nodes =
+            Dictionary<TNodeType, (TNodeType Parent, int AcumulativeCost, int Heuristic)> nodes =
                 Graph.ToDictionary(key => key, _ => (Parent: default(TNodeType), AcumulativeCost: 0, Heuristic: 0));
 
-            var startCoor = new TCoordinate();
+            TCoordinate startCoor = new TCoordinate();
             startCoor.SetCoordinate(startNode.GetCoordinate());
 
-            var openList = new List<TNodeType> { startNode };
-            var closedList = new List<TNodeType>();
+            List<TNodeType> openList = new List<TNodeType> { startNode };
+            List<TNodeType> closedList = new List<TNodeType>();
 
             while (openList.Count > 0)
             {
-                var currentNode = openList.OrderBy(node => nodes[node].AcumulativeCost + nodes[node].Heuristic).First();
+                TNodeType currentNode = openList.OrderBy(node => nodes[node].AcumulativeCost + nodes[node].Heuristic).First();
                 openList.Remove(currentNode);
                 closedList.Add(currentNode);
 
@@ -35,13 +35,13 @@ namespace Pathfinder
                 {
                     if (!nodes.ContainsKey(neighbor) || IsBlocked(neighbor) || closedList.Contains(neighbor)) continue;
 
-                    var aproxAcumulativeCost = nodes[currentNode].AcumulativeCost
+                    int aproxAcumulativeCost = nodes[currentNode].AcumulativeCost
                                                + MoveToNeighborCost(currentNode, neighbor);
 
                     if (openList.Contains(neighbor) && aproxAcumulativeCost >= nodes[neighbor].AcumulativeCost)
                         continue;
 
-                    var neighborCoor = new TCoordinate();
+                    TCoordinate neighborCoor = new TCoordinate();
                     neighborCoor.SetCoordinate(neighbor.GetCoordinate());
 
                     nodes[neighbor] = (currentNode, aproxAcumulativeCost, Distance(neighborCoor, startCoor));
@@ -54,14 +54,14 @@ namespace Pathfinder
 
             List<TNodeType> GeneratePath(TNodeType startNode, TNodeType goalNode)
             {
-                var path = new List<TNodeType>();
-                var currentNode = goalNode;
+                List<TNodeType> path = new List<TNodeType>();
+                TNodeType currentNode = goalNode;
 
                 while (!NodesEquals(currentNode, startNode))
                 {
                     path.Add(currentNode);
 
-                    foreach (var node in nodes.Keys.ToList().Where(node => NodesEquals(currentNode, node)))
+                    foreach (TNodeType node in nodes.Keys.ToList().Where(node => NodesEquals(currentNode, node)))
                     {
                         currentNode = nodes[node].Parent;
                         break;

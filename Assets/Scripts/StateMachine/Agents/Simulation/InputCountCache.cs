@@ -11,7 +11,7 @@ namespace StateMachine.Agents.Simulation
 
         public static int GetInputCount(SimAgentTypes agentType, BrainType brainType)
         {
-            var key = (agentType, brainType);
+            (SimAgentTypes agentType, BrainType brainType) key = (agentType, brainType);
             if (cache.TryGetValue(key, out int inputCount)) return inputCount;
             
             inputCount = EcsPopulationManager.inputCounts

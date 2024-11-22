@@ -31,9 +31,9 @@ namespace FlockingECS
             InitComponents();
 
             entities = new List<uint>();
-            for (var i = 0; i < entityCount; i++)
+            for (int i = 0; i < entityCount; i++)
             {
-                var entityID = ECSManager.CreateEntity();
+                uint entityID = ECSManager.CreateEntity();
                 ECSManager.AddComponent(entityID, new PositionComponent<Vector3>(new Vector3(0, -i, 0)));
                 ECSManager.AddComponent(entityID,
                     new FlockComponent<Vector3>(Vector3.Zero, Vector3.Zero, Vector3.Zero, Vector3.Zero));
@@ -56,9 +56,9 @@ namespace FlockingECS
 
         private void LateUpdate()
         {
-            var drawMatrix = new List<Matrix4x4[]>();
-            var meshes = entities.Count;
-            for (var i = 0; i < entities.Count; i += MAX_OBJS_PER_DRAWCALL)
+            List<Matrix4x4[]> drawMatrix = new List<Matrix4x4[]>();
+            int meshes = entities.Count;
+            for (int i = 0; i < entities.Count; i += MAX_OBJS_PER_DRAWCALL)
             {
                 drawMatrix.Add(new Matrix4x4[meshes > MAX_OBJS_PER_DRAWCALL ? MAX_OBJS_PER_DRAWCALL : meshes]);
                 meshes -= MAX_OBJS_PER_DRAWCALL;
@@ -66,8 +66,8 @@ namespace FlockingECS
 
             Parallel.For(0, entities.Count, parallelOptions, i =>
             {
-                var position = ECSManager.GetComponent<PositionComponent<Vector3>>(entities[i]);
-                var pos =
+                PositionComponent<Vector3> position = ECSManager.GetComponent<PositionComponent<Vector3>>(entities[i]);
+                UnityEngine.Vector3 pos =
                     new UnityEngine.Vector3(position.Position.X, position.Position.Y, position.Position.Z);
 
                 if (float.IsNaN(pos.x) || float.IsNaN(pos.y) || float.IsNaN(pos.z) ||
@@ -80,7 +80,7 @@ namespace FlockingECS
                 drawMatrix[i / MAX_OBJS_PER_DRAWCALL][i % MAX_OBJS_PER_DRAWCALL]
                     .SetTRS(pos, Quaternion.identity, prefabScale);
             });
-            foreach (var t in drawMatrix) Graphics.DrawMeshInstanced(prefabMesh, 0, prefabMaterial, t);
+            foreach (Matrix4x4[] t in drawMatrix) Graphics.DrawMeshInstanced(prefabMesh, 0, prefabMaterial, t);
         }
 
         private void InitializeSystems()

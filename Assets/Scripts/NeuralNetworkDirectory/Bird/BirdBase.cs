@@ -44,9 +44,9 @@ namespace NeuralNetworkDirectory.Bird
         {
             if (state != State.Alive) return;
 
-            var obstacle = ObstacleManager.Instance.GetNextObstacle(transform.position);
+            Obstacle obstacle = ObstacleManager.Instance.GetNextObstacle(transform.position);
 
-            var coin = ObstacleManager.Instance.GetNextCoin(transform.position);
+            Coin coin = ObstacleManager.Instance.GetNextCoin(transform.position);
 
 
             if (!obstacle || !coin)

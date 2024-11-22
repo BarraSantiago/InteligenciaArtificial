@@ -13,9 +13,9 @@ namespace NeuralNetworkDirectory.ECS
         
         public void SetWeights(int index, float[] newWeights)
         {
-            var fromId = 0;
+            int fromId = 0;
 
-            for (var i = 0; i < Layers[index].Count; i++) fromId = Layers[index][i].SetWeights(newWeights, fromId);
+            for (int i = 0; i < Layers[index].Count; i++) fromId = Layers[index][i].SetWeights(newWeights, fromId);
         }
         
         public void Reward(float reward, BrainType brainType)

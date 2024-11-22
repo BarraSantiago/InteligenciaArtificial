@@ -11,13 +11,13 @@ namespace StateMachine.States.RTSStates
     {
         public override BehaviourActions GetTickBehaviour(params object[] parameters)
         {
-            var behaviours = new BehaviourActions();
+            BehaviourActions behaviours = new BehaviourActions();
 
-            var currentNode = parameters[0] as RTSNode<Vector2>;
-            var targetNode = parameters[1] as RTSNode<Vector2>;
-            var retreat = (bool)parameters[2];
-            var position = (Transform)parameters[3];
-            var onMove = parameters[4] as Action;
+            RTSNode<Vector2> currentNode = parameters[0] as RTSNode<Vector2>;
+            RTSNode<Vector2> targetNode = parameters[1] as RTSNode<Vector2>;
+            bool retreat = (bool)parameters[2];
+            Transform position = (Transform)parameters[3];
+            Action onMove = parameters[4] as Action;
 
             behaviours.AddMultiThreadableBehaviours(0, () => { onMove?.Invoke(); });
 
@@ -69,14 +69,14 @@ namespace StateMachine.States.RTSStates
 
         public override BehaviourActions GetOnEnterBehaviour(params object[] parameters)
         {
-            var behaviours = new BehaviourActions();
+            BehaviourActions behaviours = new BehaviourActions();
 
-            var currentNode = parameters[0] as RTSNode<Vector2>;
-            var targetNode = parameters[1] as RTSNode<Vector2>;
-            var path = (List<RTSNode<Vector2>>)parameters[2];
-            var pathfinder =
+            RTSNode<Vector2> currentNode = parameters[0] as RTSNode<Vector2>;
+            RTSNode<Vector2> targetNode = parameters[1] as RTSNode<Vector2>;
+            List<RTSNode<Vector2>> path = (List<RTSNode<Vector2>>)parameters[2];
+            Pathfinder<RTSNode<Vector2>, Vector2, NodeVoronoi> pathfinder =
                 parameters[3] as Pathfinder<RTSNode<Vector2>, Vector2, NodeVoronoi>;
-            var type = (RTSAgent.AgentTypes)parameters[4];
+            RTSAgent.AgentTypes type = (RTSAgent.AgentTypes)parameters[4];
 
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {

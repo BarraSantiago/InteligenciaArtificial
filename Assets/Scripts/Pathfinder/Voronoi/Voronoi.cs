@@ -20,31 +20,31 @@ namespace Pathfinder.Voronoi
         private void InitLimits()
         {
             // Calculo los limites del mapa con sus dimensiones, distancia entre nodos y punto de origen
-            var mapSize = new TCoordinate();
+            TCoordinate mapSize = new TCoordinate();
             mapSize.SetCoordinate(
                 Graph<RTSNode<TCoordinateType>, TCoordinate, TCoordinateType>.MapDimensions.GetCoordinate());
             mapSize.Multiply(Graph<RTSNode<TCoordinateType>, TCoordinate, TCoordinateType>.CellSize);
-            var offset = new TCoordinate();
+            TCoordinate offset = new TCoordinate();
             offset.SetCoordinate(
                 Graph<RTSNode<TCoordinateType>, TCoordinate, TCoordinateType>.OriginPosition.GetCoordinate());
 
 
-            var coordinateUp = new TCoordinate();
+            TCoordinate coordinateUp = new TCoordinate();
             coordinateUp.SetCoordinate(0, mapSize.GetY());
             coordinateUp.Add(offset.GetCoordinate());
             limits.Add(new Limit<TCoordinate, TCoordinateType>(coordinateUp, Direction.Up));
 
-            var coordinateDown = new TCoordinate();
+            TCoordinate coordinateDown = new TCoordinate();
             coordinateDown.SetCoordinate(mapSize.GetX(), 0f);
             coordinateDown.Add(offset.GetCoordinate());
             limits.Add(new Limit<TCoordinate, TCoordinateType>(coordinateDown, Direction.Down));
 
-            var coordinateRight = new TCoordinate();
+            TCoordinate coordinateRight = new TCoordinate();
             coordinateRight.SetCoordinate(mapSize.GetX(), mapSize.GetY());
             coordinateRight.Add(offset.GetCoordinate());
             limits.Add(new Limit<TCoordinate, TCoordinateType>(coordinateRight, Direction.Right));
 
-            var coordinateLeft = new TCoordinate();
+            TCoordinate coordinateLeft = new TCoordinate();
             coordinateLeft.SetCoordinate(0, 0);
             coordinateLeft.Add(offset.GetCoordinate());
             limits.Add(new Limit<TCoordinate, TCoordinateType>(coordinateLeft, Direction.Left));
@@ -55,27 +55,27 @@ namespace Pathfinder.Voronoi
             sectors.Clear();
             if (goldMines.Count <= 0) return;
 
-            foreach (var mine in goldMines)
+            foreach (TCoordinate mine in goldMines)
             {
                 // Agrego las minas de oro como sectores
-                var node = new RTSNode<TCoordinateType>();
+                RTSNode<TCoordinateType> node = new RTSNode<TCoordinateType>();
                 node.SetCoordinate(mine.GetCoordinate());
                 sectors.Add(new Sector<TCoordinate, TCoordinateType>(node));
             }
 
-            foreach (var sector in sectors)
-                // Agrego los limites a cada sector
+                // Agrega los limites a cada sector
+            foreach (Sector<TCoordinate, TCoordinateType> sector in sectors)
                 sector.AddSegmentLimits(limits);
 
-            for (var i = 0; i < goldMines.Count; i++)
-            for (var j = 0; j < goldMines.Count; j++)
+            for (int i = 0; i < goldMines.Count; i++)
+            for (int j = 0; j < goldMines.Count; j++)
             {
                 // Agrego los segmentos entre cada sector (menos entre si mismo)
                 if (i == j) continue;
                 sectors[i].AddSegment(goldMines[i], goldMines[j]);
             }
 
-            foreach (var sector in sectors)
+            foreach (Sector<TCoordinate, TCoordinateType> sector in sectors)
                 // Calculo las intersecciones
                 sector.SetIntersections();
         }

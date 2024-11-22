@@ -26,7 +26,7 @@ public class SimulationScreen : MonoBehaviour
     // Start is called before the first frame update
     private void Start()
     {
-        var populations = FindObjectsOfType<PopulationManager>();
+        PopulationManager[] populations = FindObjectsOfType<PopulationManager>();
         populationManager1 = populations[0];
         populationManager2 = populations[1];
         timerSlider.onValueChanged.AddListener(OnTimerChange);

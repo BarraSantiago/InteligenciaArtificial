@@ -11,13 +11,13 @@ namespace StateMachine.States.SimStates
     {
         public override BehaviourActions GetTickBehaviour(params object[] parameters)
         {
-            var behaviours = new BehaviourActions();
+            BehaviourActions behaviours = new BehaviourActions();
 
-            var currentNode = parameters[0] as SimNode<IVector>;
-            var foodTarget = (SimNodeType)parameters[1];
-            var onMove = parameters[2] as Action;
-            var outputBrain1 = (float[])parameters[3];
-            var outputBrain2 = (float[])parameters[4];
+            SimNode<IVector> currentNode = parameters[0] as SimNode<IVector>;
+            SimNodeType foodTarget = (SimNodeType)parameters[1];
+            Action onMove = parameters[2] as Action;
+            float[] outputBrain1 = (float[])parameters[3];
+            float[] outputBrain2 = (float[])parameters[4];
 
             behaviours.AddMultiThreadableBehaviours(0, () => { onMove.Invoke(); });
 
@@ -56,12 +56,12 @@ namespace StateMachine.States.SimStates
     {
         public override BehaviourActions GetTickBehaviour(params object[] parameters)
         {
-            var behaviours = new BehaviourActions();
+            BehaviourActions behaviours = new BehaviourActions();
 
-            var position = parameters[0] as IVector;
-            var nearestFood = parameters[1] as IVector;
-            var onMove = parameters[2] as Action;
-            var outputBrain1 = (float[])parameters[3];
+            IVector position = parameters[0] as IVector;
+            IVector nearestFood = parameters[1] as IVector;
+            Action onMove = parameters[2] as Action;
+            float[] outputBrain1 = (float[])parameters[3];
             IVector distanceToFood = new MyVector();
             IVector maxDistance = new MyVector(4, 4);
 
@@ -85,13 +85,13 @@ namespace StateMachine.States.SimStates
     {
         public override BehaviourActions GetTickBehaviour(params object[] parameters)
         {
-            var behaviours = new BehaviourActions();
+            BehaviourActions behaviours = new BehaviourActions();
 
-            var currentNode = parameters[0] as SimNode<IVector>;
-            var foodTarget = (SimNodeType)parameters[1];
-            var onMove = parameters[2] as Action;
-            var outputBrain1 = (float[])parameters[3];
-            var outputBrain2 = (float[])parameters[4];
+            SimNode<IVector> currentNode = parameters[0] as SimNode<IVector>;
+            SimNodeType foodTarget = (SimNodeType)parameters[1];
+            Action onMove = parameters[2] as Action;
+            float[] outputBrain1 = (float[])parameters[3];
+            float[] outputBrain2 = (float[])parameters[4];
 
             behaviours.AddMultiThreadableBehaviours(0, () => { onMove?.Invoke(); });
 

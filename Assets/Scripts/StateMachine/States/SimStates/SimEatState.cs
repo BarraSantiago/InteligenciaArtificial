@@ -10,12 +10,12 @@ namespace StateMachine.States.SimStates
     {
         public override BehaviourActions GetTickBehaviour(params object[] parameters)
         {
-            var behaviours = new BehaviourActions();
-            var currentNode = parameters[0] as SimNode<IVector>;
-            var foodTarget = (SimNodeType)parameters[1];
-            var onEat = parameters[2] as Action;
-            var outputBrain1 = (float[])parameters[3];
-            var outputBrain2 = (float[])parameters[4];
+            BehaviourActions behaviours = new BehaviourActions();
+            SimNode<IVector> currentNode = parameters[0] as SimNode<IVector>;
+            SimNodeType foodTarget = (SimNodeType)parameters[1];
+            Action onEat = parameters[2] as Action;
+            float[] outputBrain1 = (float[])parameters[3];
+            float[] outputBrain2 = (float[])parameters[4];
 
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {
@@ -62,11 +62,11 @@ namespace StateMachine.States.SimStates
             {
                 return default;
             }
-            var behaviours = new BehaviourActions();
-            var currentPos = parameters[0] as IVector;
-            var foodNode = parameters[1] as SimNode<IVector>;
-            var onEat = parameters[2] as Action;
-            var outputBrain1 = (float[])parameters[3];
+            BehaviourActions behaviours = new BehaviourActions();
+            IVector currentPos = parameters[0] as IVector;
+            SimNode<IVector> foodNode = parameters[1] as SimNode<IVector>;
+            Action onEat = parameters[2] as Action;
+            float[] outputBrain1 = (float[])parameters[3];
             
            
             

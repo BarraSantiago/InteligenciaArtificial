@@ -35,10 +35,10 @@ namespace FlockingECS.System
         {
             Parallel.ForEach(queriedEntities, parallelOptions, entityId =>
             {
-                var position = positionComponents[entityId];
-                var flock = flockComponents[entityId];
+                PositionComponent<TVector> position = positionComponents[entityId];
+                FlockComponent<TVector> flock = flockComponents[entityId];
 
-                var direction = VectorHelper<TVector>.SubtractVectors(targetPosition.Position, position.Position);
+                TVector direction = VectorHelper<TVector>.SubtractVectors(targetPosition.Position, position.Position);
                 direction = VectorHelper<TVector>.NormalizeVector(direction);
 
                 flock.Direction = direction;

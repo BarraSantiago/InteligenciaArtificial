@@ -12,8 +12,8 @@ namespace NeuralNetworkDirectory.NeuralNet
         {
             weights = new float[weightsCount];
 
-            var random = new System.Random();
-            for (var i = 0; i < weights.Length; i++) weights[i] = (float)(random.NextDouble() * 2.0 - 1.0);
+            Random random = new System.Random();
+            for (int i = 0; i < weights.Length; i++) weights[i] = (float)(random.NextDouble() * 2.0 - 1.0);
             this.bias = bias;
             this.p = p;
         }
@@ -43,7 +43,7 @@ namespace NeuralNetworkDirectory.NeuralNet
 
         public int SetWeights(float[] newWeights, int fromId)
         {
-            for (var i = 0; i < weights.Length; i++) weights[i] = newWeights[i + fromId];
+            for (int i = 0; i < weights.Length; i++) weights[i] = newWeights[i + fromId];
 
             return fromId + weights.Length;
         }

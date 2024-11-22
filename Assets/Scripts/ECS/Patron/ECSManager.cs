@@ -28,13 +28,13 @@ namespace ECS.Patron
 
             systems.TryAdd(typeof(NeuralNetSystem), Activator.CreateInstance(typeof(NeuralNetSystem)) as ECSSystem);
             
-            foreach (var system in systems) system.Value.Initialize();
+            foreach (KeyValuePair<Type, ECSSystem> system in systems) system.Value.Initialize();
 
-            foreach (var classType in typeof(ECSComponent).Assembly.GetTypes())
+            foreach (Type classType in typeof(ECSComponent).Assembly.GetTypes())
                 if (typeof(ECSComponent).IsAssignableFrom(classType) && !classType.IsAbstract)
                     components.TryAdd(classType, new ConcurrentDictionary<uint, ECSComponent>());
 
-            foreach (var classType in typeof(ECSFlag).Assembly.GetTypes())
+            foreach (Type classType in typeof(ECSFlag).Assembly.GetTypes())
                 if (typeof(ECSFlag).IsAssignableFrom(classType) && !classType.IsAbstract)
                     flags.TryAdd(classType, new ConcurrentDictionary<uint, ECSFlag>());
         }
@@ -47,7 +47,7 @@ namespace ECS.Patron
         public static uint CreateEntity()
         {
             entities ??= new ConcurrentDictionary<uint, ECSEntity>();
-            var ecsEntity = new ECSEntity();
+            ECSEntity ecsEntity = new ECSEntity();
             entities.TryAdd(ecsEntity.GetID(), ecsEntity);
             return ecsEntity.GetID();
         }
@@ -61,7 +61,7 @@ namespace ECS.Patron
 
         public static void InitSystems()
         {
-            foreach (var system in systems) system.Value.Initialize();
+            foreach (KeyValuePair<Type, ECSSystem> system in systems) system.Value.Initialize();
         }
 
         public static void AddComponentList(Type component)
@@ -86,10 +86,10 @@ namespace ECS.Patron
 
         public static IEnumerable<uint> GetEntitiesWithComponentTypes(params Type[] componentTypes)
         {
-            var matchs = new ConcurrentBag<uint>();
+            ConcurrentBag<uint> matchs = new ConcurrentBag<uint>();
             Parallel.ForEach(entities, parallelOptions, entity =>
             {
-                for (var i = 0; i < componentTypes.Length; i++)
+                for (int i = 0; i < componentTypes.Length; i++)
                     if (!entity.Value.ContainsComponentType(componentTypes[i]))
                         return;
 
@@ -103,7 +103,7 @@ namespace ECS.Patron
         {
             if (!components.ContainsKey(typeof(TComponentType))) return null;
 
-            var comps = new ConcurrentDictionary<uint, TComponentType>();
+            ConcurrentDictionary<uint, TComponentType> comps = new ConcurrentDictionary<uint, TComponentType>();
 
             Parallel.ForEach(components[typeof(TComponentType)], parallelOptions,
                 component => { comps.TryAdd(component.Key, component.Value as TComponentType); });
@@ -123,10 +123,10 @@ namespace ECS.Patron
 
         public static IEnumerable<uint> GetEntitiesWhitFlagTypes(params Type[] flagTypes)
         {
-            var matchs = new ConcurrentBag<uint>();
+            ConcurrentBag<uint> matchs = new ConcurrentBag<uint>();
             Parallel.ForEach(entities, parallelOptions, entity =>
             {
-                for (var i = 0; i < flagTypes.Length; i++)
+                for (int i = 0; i < flagTypes.Length; i++)
                     if (!entity.Value.ContainsFlagType(flagTypes[i]))
                         return;
 
@@ -152,7 +152,7 @@ namespace ECS.Patron
         {
             if (!flags.ContainsKey(typeof(TFlagType))) return null;
 
-            var flgs = new ConcurrentDictionary<uint, TFlagType>();
+            ConcurrentDictionary<uint, TFlagType> flgs = new ConcurrentDictionary<uint, TFlagType>();
 
             Parallel.ForEach(flags[typeof(TFlagType)], parallelOptions,
                 flag => { flgs.TryAdd(flag.Key, flag.Value as TFlagType); });
@@ -173,9 +173,9 @@ namespace ECS.Patron
         public static void RemoveEntity(uint agentId)
         {
             entities.TryRemove(agentId, out _);
-            foreach (var component in components)
+            foreach (KeyValuePair<Type, ConcurrentDictionary<uint, ECSComponent>> component in components)
                 component.Value.TryRemove(agentId, out _);
-            foreach (var flag in flags)
+            foreach (KeyValuePair<Type, ConcurrentDictionary<uint, ECSFlag>> flag in flags)
                 flag.Value.TryRemove(agentId, out _);
         }
 

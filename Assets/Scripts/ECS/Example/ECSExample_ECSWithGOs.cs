@@ -15,9 +15,9 @@ public class ECSExample_ECSWithGOs : MonoBehaviour
     {
         ECSManager.Init();
         entities = new Dictionary<uint, GameObject>();
-        for (var i = 0; i < entityCount; i++)
+        for (int i = 0; i < entityCount; i++)
         {
-            var entityID = ECSManager.CreateEntity();
+            uint entityID = ECSManager.CreateEntity();
             ECSManager.AddComponent(entityID, new PositionComponent<Vector3>(new Vector3(0, -i, 0)));
             ECSManager.AddComponent(entityID, new VelocityComponent<Vector3>(velocity, Vector3.right));
             ECSManager.AddComponent(entityID, new RotationComponent(0, 0, 0));
@@ -33,12 +33,12 @@ public class ECSExample_ECSWithGOs : MonoBehaviour
 
     private void LateUpdate()
     {
-        foreach (var entity in entities)
+        foreach (KeyValuePair<uint, GameObject> entity in entities)
         {
-            var position = ECSManager.GetComponent<PositionComponent<Vector3>>(entity.Key);
+            PositionComponent<Vector3> position = ECSManager.GetComponent<PositionComponent<Vector3>>(entity.Key);
             entity.Value.transform.SetPositionAndRotation(
                 new Vector3(position.Position.x, position.Position.y, position.Position.z), Quaternion.identity);
-            var rotationComponent = ECSManager.GetComponent<RotationComponent>(entity.Key);
+            RotationComponent rotationComponent = ECSManager.GetComponent<RotationComponent>(entity.Key);
             entity.Value.transform.rotation =
                 Quaternion.Euler(rotationComponent.X, rotationComponent.Y, rotationComponent.Z);
         }

@@ -29,27 +29,27 @@ namespace Pathfinder.Voronoi
         {
             if (points == null) return false;
 
-            var inside = false;
+            bool inside = false;
 
             // Inicializo "point" con el ultimo punto (^1) de la matriz "points"
-            var point = new TCoordinate();
+            TCoordinate point = new TCoordinate();
             point.SetCoordinate(points[^1].GetCoordinate());
 
-            foreach (var coord in points)
+            foreach (TCoordinate coord in points)
             {
                 // Guardo el valor X e Y del punto anterior y el punto actual
-                var previousX = point.GetX();
-                var previousY = point.GetY();
+                float previousX = point.GetX();
+                float previousY = point.GetY();
                 point.SetCoordinate(coord.GetCoordinate());
 
                 // (El operador ^ alterna el valor del bool)
                 // Calculo si "position" cruza o no una línea formada por dos puntos consecutivos en el polígono:
                 // 1. Verifico si "position" esta por debajo de los puntos actual y anterior en el eje vertical (1 sola comparacion es V = V)
                 // 2. Verifico si "position" esta a la izquierda de la linea que conecta los puntos actual y anterior
-                var condition1 = (point.GetY() > position.GetY()) ^ (previousY > position.GetY());
-                var condition2 = position.GetX() - point.GetX() <
-                                 (position.GetY() - point.GetY()) * (previousX - point.GetX()) /
-                                 (previousY - point.GetY());
+                bool condition1 = (point.GetY() > position.GetY()) ^ (previousY > position.GetY());
+                bool condition2 = position.GetX() - point.GetX() <
+                                  (position.GetY() - point.GetY()) * (previousX - point.GetX()) /
+                                  (previousY - point.GetY());
 
                 // Si ambas condiciones son verdaderas, el punto está fuera del polígono
                 inside ^= condition1 && condition2;
@@ -60,9 +60,9 @@ namespace Pathfinder.Voronoi
 
         public List<RTSNode<TCoordinate>> GetNodesInSector(List<RTSNode<TCoordinate>> allNodes)
         {
-            var nodesInSector = new List<RTSNode<TCoordinate>>();
+            List<RTSNode<TCoordinate>> nodesInSector = new List<RTSNode<TCoordinate>>();
 
-            foreach (var node in allNodes)
+            foreach (RTSNode<TCoordinate> node in allNodes)
                 if (CheckPointInSector(node.GetCoordinate()))
                     nodesInSector.Add(node);
 
@@ -71,9 +71,9 @@ namespace Pathfinder.Voronoi
 
         public int CalculateTotalWeight(List<RTSNode<TCoordinate>> nodesInSector)
         {
-            var totalWeight = 0;
+            int totalWeight = 0;
 
-            foreach (var node in nodesInSector)
+            foreach (RTSNode<TCoordinate> node in nodesInSector)
                 // TODO totalWeight += node.GetPathNodeCost();
                 totalWeight += 1;
 
@@ -90,11 +90,11 @@ namespace Pathfinder.Voronoi
         public void AddSegmentLimits(List<Limit<TCoordinate, TCoordinateType>> limits)
         {
             // Calculo los segmentos con los limites del mapa
-            foreach (var limit in limits)
+            foreach (Limit<TCoordinate, TCoordinateType> limit in limits)
             {
-                var origin = new TCoordinate();
+                TCoordinate origin = new TCoordinate();
                 origin.SetCoordinate(Mine.GetCoordinate()); // Obtengo la posicion de la mina
-                var final = limit.GetMapLimitPosition(origin); // Obtengo la posicion final del segmento
+                TCoordinate final = limit.GetMapLimitPosition(origin); // Obtengo la posicion final del segmento
                 segments.Add(new Segment<TCoordinate, TCoordinateType>(origin, final));
             }
         }
@@ -113,13 +113,13 @@ namespace Pathfinder.Voronoi
             intersections.Clear();
 
             // Calculo las intersecciones entre cada segmento (menos entre si mismo)
-            for (var i = 0; i < segments.Count; i++)
-            for (var j = 0; j < segments.Count; j++)
+            for (int i = 0; i < segments.Count; i++)
+            for (int j = 0; j < segments.Count; j++)
             {
                 if (i == j) continue;
 
                 // Obtengo la interseccion
-                var intersectionPoint = GetIntersection(segments[i], segments[j]);
+                TCoordinate intersectionPoint = GetIntersection(segments[i], segments[j]);
 
                 if (intersectionPoint.Equals(_wrongPoint)) continue;
 
@@ -127,11 +127,11 @@ namespace Pathfinder.Voronoi
                 if (intersections.Contains(intersectionPoint)) continue;
 
                 // Calculo la distancia maxima entre la interseccion y el punto de oriden del segmento
-                var maxDistance = intersectionPoint.Distance(segments[i].Origin.GetCoordinate());
+                float maxDistance = intersectionPoint.Distance(segments[i].Origin.GetCoordinate());
 
                 // Determino si la interseccion es valida
-                var checkValidPoint = false;
-                for (var k = 0; k < segments.Count; k++)
+                bool checkValidPoint = false;
+                for (int k = 0; k < segments.Count; k++)
                 {
                     // Recorro todos los segmentos de nuevo para verificar si hay otro
                     // segmento más cercano a la intersección que el segmento actual
@@ -169,17 +169,17 @@ namespace Pathfinder.Voronoi
         private TCoordinate GetIntersection(Segment<TCoordinate, TCoordinateType> seg1,
             Segment<TCoordinate, TCoordinateType> seg2)
         {
-            var intersection = new TCoordinate();
+            TCoordinate intersection = new TCoordinate();
             intersection.Zero();
 
-            var p1 = seg1.Mediatrix;
-            var p2 = new TCoordinate();
+            TCoordinate p1 = seg1.Mediatrix;
+            TCoordinate p2 = new TCoordinate();
             p2.SetCoordinate(seg1.Mediatrix.GetCoordinate());
             p2.Add(seg1.Direction.Multiply(Graph<RTSNode<TCoordinateType>, TCoordinate, TCoordinateType>.MapDimensions
                 .GetMagnitude()));
 
-            var p3 = seg2.Mediatrix;
-            var p4 = new TCoordinate();
+            TCoordinate p3 = seg2.Mediatrix;
+            TCoordinate p4 = new TCoordinate();
             p4.SetCoordinate(seg2.Mediatrix.GetCoordinate());
             p4.Add(seg2.Direction.Multiply(Graph<RTSNode<TCoordinateType>, TCoordinate, TCoordinateType>.MapDimensions
                 .GetMagnitude()));
@@ -230,16 +230,16 @@ namespace Pathfinder.Voronoi
 
         private void SortIntersections()
         {
-            var intersectionPoints =
+            List<IntersectionPoint<TCoordinate>> intersectionPoints =
                 intersections.Select(coord => new IntersectionPoint<TCoordinate>(coord)).ToList();
 
             // Calculo los valores maximos y minimos de X e Y de las intersecciones para determinar el punto central (centroide)
-            var minX = intersectionPoints[0].Position.GetX();
-            var maxX = intersectionPoints[0].Position.GetX();
-            var minY = intersectionPoints[0].Position.GetY();
-            var maxY = intersectionPoints[0].Position.GetY();
+            float minX = intersectionPoints[0].Position.GetX();
+            float maxX = intersectionPoints[0].Position.GetX();
+            float minY = intersectionPoints[0].Position.GetY();
+            float maxY = intersectionPoints[0].Position.GetY();
 
-            for (var i = 0; i < intersections.Count; i++)
+            for (int i = 0; i < intersections.Count; i++)
             {
                 if (intersectionPoints[i].Position.GetX() < minX) minX = intersectionPoints[i].Position.GetX();
                 if (intersectionPoints[i].Position.GetX() > maxX) maxX = intersectionPoints[i].Position.GetX();
@@ -247,14 +247,14 @@ namespace Pathfinder.Voronoi
                 if (intersectionPoints[i].Position.GetY() > maxY) maxY = intersectionPoints[i].Position.GetY();
             }
 
-            var center = new TCoordinate();
+            TCoordinate center = new TCoordinate();
             center.SetCoordinate(minX + (maxX - minX) / 2, minY + (maxY - minY) / 2);
 
             // Calculo el angulo de cada interseccion con respecto al punto central:
             // calculo el angulo en radianes entre el punto de interseccion y un punto central con el eje horizontal
-            foreach (var coord in intersectionPoints)
+            foreach (IntersectionPoint<TCoordinate> coord in intersectionPoints)
             {
-                var pos = coord.Position;
+                TCoordinate pos = coord.Position;
                 coord.Angle = (float)Math.Acos((pos.GetX() - center.GetX()) /
                                                Math.Sqrt(Math.Pow(pos.GetX() - center.GetX(), 2f) +
                                                          Math.Pow(pos.GetY() - center.GetY(), 2f)));
@@ -269,13 +269,13 @@ namespace Pathfinder.Voronoi
             intersectionPoints = intersectionPoints.OrderBy(p => p.Angle).ToList();
             intersections.Clear();
 
-            foreach (var coord in intersectionPoints) intersections.Add(coord.Position);
+            foreach (IntersectionPoint<TCoordinate> coord in intersectionPoints) intersections.Add(coord.Position);
         }
 
         private void SetPointsInSector()
         {
             points = new List<TCoordinate>();
-            foreach (var coord in intersections)
+            foreach (TCoordinate coord in intersections)
                 // Asigno cada interseccion como un punto
                 points.Add(coord);
 

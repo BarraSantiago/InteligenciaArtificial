@@ -10,14 +10,14 @@ namespace States.Generic
 
         public override BehaviourActions GetTickBehaviour(params object[] parameters)
         {
-            var behaviours = new BehaviourActions();
+            BehaviourActions behaviours = new BehaviourActions();
 
-            var ownerTransform = parameters[0] as Transform;
-            var wayPoint1 = parameters[1] as Transform;
-            var wayPoint2 = parameters[2] as Transform;
-            var chaseTarget = parameters[3] as Transform;
-            var speed = Convert.ToSingle(parameters[4]);
-            var chaseDistance = Convert.ToSingle(parameters[5]);
+            Transform ownerTransform = parameters[0] as Transform;
+            Transform wayPoint1 = parameters[1] as Transform;
+            Transform wayPoint2 = parameters[2] as Transform;
+            Transform chaseTarget = parameters[3] as Transform;
+            float speed = Convert.ToSingle(parameters[4]);
+            float chaseDistance = Convert.ToSingle(parameters[5]);
 
             behaviours.AddMainThreadBehaviours(0, () =>
             {

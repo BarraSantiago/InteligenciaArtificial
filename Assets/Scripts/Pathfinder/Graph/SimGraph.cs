@@ -36,20 +36,20 @@ namespace Pathfinder.Graph
 
         private void AddNeighbors(float cellSize)
         {
-            var neighbors = new List<INode<TCoordinateType>>();
+            List<INode<TCoordinateType>> neighbors = new List<INode<TCoordinateType>>();
 
             Parallel.For(0, CoordNodes.GetLength(0), parallelOptions, i =>
             {
-                for (var j = 0; j < CoordNodes.GetLength(1); j++)
+                for (int j = 0; j < CoordNodes.GetLength(1); j++)
                 {
                     neighbors.Clear();
-                    for (var k = 0; k < CoordNodes.GetLength(0); k++)
+                    for (int k = 0; k < CoordNodes.GetLength(0); k++)
                     {
-                        for (var l = 0; l < CoordNodes.GetLength(1); l++)
+                        for (int l = 0; l < CoordNodes.GetLength(1); l++)
                         {
                             if (i == k && j == l) continue;
 
-                            var isNeighbor =
+                            bool isNeighbor =
                                 (Approximately(CoordNodes[i, j].GetX(), CoordNodes[k, l].GetX()) &&
                                  Approximately(Math.Abs(CoordNodes[i, j].GetY() - CoordNodes[k, l].GetY()),
                                      cellSize)) ||

@@ -30,13 +30,13 @@ namespace FlockingECS.System
         {
             Parallel.ForEach(queriedEntities, parallelOptions, entityId =>
             {
-                var position = positionComponents[entityId];
-                var flock = flockComponents[entityId];
-                var insideRadiusBoids = VectorHelper<TVector>.GetBoidsInsideRadius(position, positionComponents);
+                PositionComponent<TVector> position = positionComponents[entityId];
+                FlockComponent<TVector> flock = flockComponents[entityId];
+                List<PositionComponent<TVector>> insideRadiusBoids = VectorHelper<TVector>.GetBoidsInsideRadius(position, positionComponents);
                 if (insideRadiusBoids.Count == 0) return;
 
                 TVector avg = default;
-                foreach (var b in insideRadiusBoids) avg = VectorHelper<TVector>.AddVectors(avg, b.Position);
+                foreach (PositionComponent<TVector> b in insideRadiusBoids) avg = VectorHelper<TVector>.AddVectors(avg, b.Position);
 
                 avg = VectorHelper<TVector>.DivideVector(avg, insideRadiusBoids.Count);
                 flock.Cohesion = avg;
