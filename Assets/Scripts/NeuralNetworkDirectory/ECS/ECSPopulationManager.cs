@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Threading.Tasks;
-using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using ECS.Patron;
 using FlappyIa.GeneticAlg;
 using Flocking;
@@ -12,8 +11,8 @@ using NeuralNetworkDirectory.NeuralNet;
 using Pathfinder;
 using Pathfinder.Graph;
 using StateMachine.Agents.Simulation;
+using UnityEngine;
 using Utils;
-
 
 namespace NeuralNetworkDirectory.ECS
 {
@@ -218,7 +217,7 @@ namespace NeuralNetworkDirectory.ECS
 
         private void EntitiesTurn(float dt)
         {
-            KeyValuePair<uint,SimAgentType>[] agentsCopy = _agents.ToArray();
+            KeyValuePair<uint, SimAgentType>[] agentsCopy = _agents.ToArray();
 
             Parallel.ForEach(agentsCopy, parallelOptions, entity =>
             {
@@ -258,7 +257,7 @@ namespace NeuralNetworkDirectory.ECS
 
                 for (int j = 0; j < agentsCopy.Length; j += batchSize)
                 {
-                    KeyValuePair<uint,SimAgentType>[] batch = agentsCopy.Skip(j).Take(batchSize).ToArray();
+                    KeyValuePair<uint, SimAgentType>[] batch = agentsCopy.Skip(j).Take(batchSize).ToArray();
                     tasks.Add(Task.Run(() =>
                     {
                         foreach (KeyValuePair<uint, SimAgentType> entity in batch)
@@ -274,7 +273,7 @@ namespace NeuralNetworkDirectory.ECS
                 }
 
                 Task.WaitAll(tasks.ToArray());
-                
+
                 foreach (Task task in tasks)
                 {
                     task.Dispose();
@@ -381,7 +380,13 @@ namespace NeuralNetworkDirectory.ECS
 
         private SimAgentType CreateAgent(SimAgentTypes agentType)
         {
-            INode<IVector> randomNode = gridManager.GetRandomPosition();
+            INode<IVector> randomNode = agentType switch
+            {
+                SimAgentTypes.Carnivore => gridManager.GetRandomPositionInUpperQuarter(),
+                SimAgentTypes.Herbivore => gridManager.GetRandomPositionInLowerQuarter(),
+                SimAgentTypes.Scavenger => gridManager.GetRandomPosition(),
+                _ => throw new ArgumentOutOfRangeException(nameof(agentType), agentType, null)
+            };
 
             SimAgentType agent;
 
@@ -422,7 +427,8 @@ namespace NeuralNetworkDirectory.ECS
 
         private List<NeuralNetComponent> CreateBrain(SimAgentTypes agentType)
         {
-            List<NeuralNetComponent> brains = new List<NeuralNetComponent> { CreateSingleBrain(BrainType.Eat, agentType) };
+            List<NeuralNetComponent> brains = new List<NeuralNetComponent>
+                { CreateSingleBrain(BrainType.Eat, agentType) };
 
 
             switch (agentType)
@@ -685,14 +691,16 @@ namespace NeuralNetworkDirectory.ECS
 
         public void Load(string directoryPath)
         {
-            Dictionary<SimAgentTypes, Dictionary<BrainType, List<AgentNeuronData>>> loadedData = NeuronDataSystem.LoadLatestNeurons(directoryPath);
+            Dictionary<SimAgentTypes, Dictionary<BrainType, List<AgentNeuronData>>> loadedData =
+                NeuronDataSystem.LoadLatestNeurons(directoryPath);
 
             Parallel.ForEach(_agents, parallelOptions, entity =>
             {
                 NeuralNetComponent netComponent = ECSManager.GetComponent<NeuralNetComponent>(entity.Key);
                 SimAgentType agent = _agents[entity.Key];
 
-                if (!loadedData.TryGetValue(agent.agentType, out Dictionary<BrainType, List<AgentNeuronData>> brainData)) return;
+                if (!loadedData.TryGetValue(agent.agentType,
+                        out Dictionary<BrainType, List<AgentNeuronData>> brainData)) return;
 
                 Parallel.ForEach(agent.brainTypes, parallelOptions, brainType =>
                 {

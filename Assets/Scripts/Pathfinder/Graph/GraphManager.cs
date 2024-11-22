@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Numerics;
 using NeuralNetworkDirectory.ECS;
 using Utils;
-using Vector3 = UnityEngine.Vector3;
+using Random = System.Random;
 
 namespace Pathfinder.Graph
 {
@@ -21,18 +20,18 @@ namespace Pathfinder.Graph
             random = new Random();
         }
 
-        public Vector2 GetRandomPositionInLowerQuarter()
+        public INode<IVector> GetRandomPositionInLowerQuarter()
         {
             int x = random.Next(0, Width);
-            int y = random.Next(0, Height / 4);
-            return new Vector2(x, y);
+            int y = random.Next(1, Height / 4);
+            return EcsPopulationManager.graph.NodesType[x, y];
         }
 
-        public Vector2 GetRandomPositionInUpperQuarter()
+        public INode<IVector> GetRandomPositionInUpperQuarter()
         {
             int x = random.Next(0, Width);
-            int y = random.Next(3 * Height / 4, Height);
-            return new Vector2(x, y);
+            int y = random.Next(3 * Height / 4, Height-1);
+            return EcsPopulationManager.graph.NodesType[x, y];
         }
 
         public INode<IVector> GetRandomPosition()
@@ -40,13 +39,6 @@ namespace Pathfinder.Graph
             int x = random.Next(0, Width);
             int y = random.Next(0, Height);
             return EcsPopulationManager.graph.NodesType[x, y];
-        }
-
-        public SimCoordinate GetNode(Vector3 position)
-        {
-            int x = (int)position.x;
-            int y = (int)position.z;
-            return EcsPopulationManager.graph.CoordNodes[x, y];
         }
     }
 }
