@@ -40,14 +40,11 @@ namespace NeuralNetworkDirectory.ECS
             const int MaxBrains = 3;
             Parallel.ForEach(queriedEntities, parallelOptions, entityId =>
             {
-                NeuralNetComponent neuralNetwork = neuralNetworkComponents[entityId];
-                float[][] inputs = inputComponents[entityId].inputs;
-                float[] outputs = new float[3];
-
-                // TODO Parallel for rompe los outputs, cada tanto se saltea el for j o le da de output informacion de otra layer.
-                //Parallel.For(0, MaxBrains, i =>
-                for (int i = 0; i < MaxBrains; i++)
+                Parallel.For(0, MaxBrains, i =>
                 {
+                    NeuralNetComponent neuralNetwork = neuralNetworkComponents[entityId];
+                    float[][] inputs = inputComponents[entityId].inputs;
+                    float[] outputs = new float[3];
                     for (int j = 0; j < neuralNetwork.Layers[i].Count; j++)
                     {
                         outputs = neuralNetwork.Layers[i][j].Synapsis(inputs[i], i);
@@ -57,7 +54,7 @@ namespace NeuralNetworkDirectory.ECS
                     if (neuralNetwork.Layers[i][^1].OutputsCount != outputs.Length) return;
 
                     outputComponents[entityId].outputs[i] = outputs;
-                }
+                });
             });
         }
 
