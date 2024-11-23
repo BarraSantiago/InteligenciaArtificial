@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using StateMachine.Agents.Simulation;
+﻿using StateMachine.Agents.Simulation;
 
 namespace NeuralNetworkDirectory.NeuralNet
 {

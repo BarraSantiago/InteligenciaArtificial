@@ -76,12 +76,6 @@ namespace StateMachine.Agents.Simulation
         protected float dt;
         protected const int NoTarget = -1;
 
-        protected SimNode<TVector> TargetNode
-        {
-            get => targetNode;
-            set => targetNode = value;
-        }
-
         private SimNode<TVector> targetNode;
         Genome[] genomes;
         public float[][] output;

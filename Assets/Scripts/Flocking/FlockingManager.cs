@@ -10,53 +10,50 @@ namespace Flocking
     {
         public IVector Alignment(SimBoid boid)
         {
-            List<SimBoid> insideRadiusBoids = EcsPopulationManager.GetBoidsInsideRadius(boid);
-            if (insideRadiusBoids.Count == 0) return boid.transform.forward;
+            if (boid.NearBoids.Count == 0) return boid.transform.forward;
 
             IVector avg = MyVector.zero();
-            foreach (SimBoid b in insideRadiusBoids)
+            foreach (ITransform<IVector> b in boid.NearBoids)
             {
-                avg += (IVector)b.transform.forward;
+                avg += b.forward;
             }
 
-            avg /= insideRadiusBoids.Count;
+            avg /= boid.NearBoids.Count;
             return avg.Normalized();
         }
 
         public IVector Cohesion(SimBoid boid)
         {
-            List<SimBoid> insideRadiusBoids = EcsPopulationManager.GetBoidsInsideRadius(boid);
-            if (insideRadiusBoids.Count == 0) return MyVector.zero();
+            if (boid.NearBoids.Count == 0) return MyVector.zero();
 
             IVector avg = MyVector.zero();
-            foreach (SimBoid b in insideRadiusBoids)
+            foreach (ITransform<IVector> b in boid.NearBoids)
             {
-                avg += (IVector)b.transform.position;
+                avg += b.position;
             }
 
-            avg /= insideRadiusBoids.Count;
-            MyVector average = avg - (IVector)boid.transform.position;
+            avg /= boid.NearBoids.Count;
+            MyVector average = avg - boid.transform.position;
             return (average).Normalized();
         }
 
         public IVector Separation(SimBoid boid)
         {
-            List<SimBoid> insideRadiusBoids = EcsPopulationManager.GetBoidsInsideRadius(boid);
-            if (insideRadiusBoids.Count == 0) return MyVector.zero();
+            if (boid.NearBoids.Count == 0) return MyVector.zero();
 
             IVector avg = MyVector.zero();
-            foreach (SimBoid b in insideRadiusBoids)
+            foreach (ITransform<IVector> b in boid.NearBoids)
             {
-                avg += (boid.transform.position - b.transform.position);
+                avg += boid.transform.position - b.position;
             }
 
-            avg /= insideRadiusBoids.Count;
+            avg /= boid.NearBoids.Count;
             return avg.Normalized();
         }
 
         public IVector Direction(SimBoid boid)
         {
-            return (boid.target - boid.transform.position).Normalized();
+            return boid.transform.forward;
         }
     }
 }

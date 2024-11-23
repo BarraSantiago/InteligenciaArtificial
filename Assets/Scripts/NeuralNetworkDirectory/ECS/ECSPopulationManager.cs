@@ -916,9 +916,9 @@ namespace NeuralNetworkDirectory.ECS
             isRunning = !isRunning;
         }
 
-        public static List<SimBoid> GetBoidsInsideRadius(SimBoid boid)
+        public static List<ITransform<IVector>> GetBoidsInsideRadius(SimBoid boid)
         {
-            List<SimBoid> insideRadiusBoids = new List<SimBoid>();
+            List<ITransform<IVector>> insideRadiusBoids = new List<ITransform<IVector>>();
             float detectionRadiusSquared = boid.detectionRadious * boid.detectionRadious;
             IVector boidPosition = boid.transform.position;
 
@@ -934,7 +934,7 @@ namespace NeuralNetworkDirectory.ECS
 
                 if (distanceSquared <= detectionRadiusSquared)
                 {
-                    insideRadiusBoids.Add(scavenger.boid);
+                    insideRadiusBoids.Add(scavenger.boid.transform);
                 }
             });
 

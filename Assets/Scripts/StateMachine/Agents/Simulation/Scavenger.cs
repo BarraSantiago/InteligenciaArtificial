@@ -70,6 +70,11 @@ namespace StateMachine.Agents.Simulation
                 EcsPopulationManager.flockingManager.Separation, EcsPopulationManager.flockingManager.Direction);
         }
 
+        public override void UpdateInputs()
+        {
+            boid.NearBoids = EcsPopulationManager.GetBoidsInsideRadius(boid);
+            base.UpdateInputs();
+        }
 
         protected override void MovementInputs()
         {
@@ -182,39 +187,36 @@ namespace StateMachine.Agents.Simulation
 
         private IVector GetAverageNeighborPosition()
         {
-            List<Boid<IVector, ITransform<IVector>>> nearBoids = EcsPopulationManager.GetBoidsInsideRadius(boid);
 
-            if (nearBoids.Count == 0)
+            if (boid.NearBoids.Count == 0)
             {
                 return MyVector.zero();
             }
 
             MyVector avg = MyVector.zero();
-            foreach (Boid<IVector, ITransform<IVector>> boid in nearBoids)
+            foreach (ITransform<IVector> nearBoid in boid.NearBoids)
             {
-                avg += (MyVector)boid.transform.position;
+                avg += nearBoid.position;
             }
 
-            avg /= nearBoids.Count;
+            avg /= boid.NearBoids.Count;
             return avg;
         }
 
         private IVector GetAverageNeighborDirection()
-        {
-            List<Boid<IVector, ITransform<IVector>>> nearBoids = EcsPopulationManager.GetBoidsInsideRadius(boid);
-
-            if (nearBoids.Count == 0)
+        { 
+            if (boid.NearBoids.Count == 0)
             {
                 return MyVector.zero();
             }
 
             MyVector avg = MyVector.zero();
-            foreach (Boid<IVector, ITransform<IVector>> boid1 in nearBoids)
+            foreach (ITransform<IVector> boid1 in boid.NearBoids)
             {
-                avg += boid1.GetDirection().Normalized() - boid1.transform.position.Normalized();
+                avg += boid1.forward;
             }
 
-            avg /= nearBoids.Count;
+            avg /= boid.NearBoids.Count;
             return avg;
         }
 

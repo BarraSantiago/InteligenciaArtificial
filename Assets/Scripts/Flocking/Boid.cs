@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Utils;
 
 namespace Flocking
@@ -19,6 +20,7 @@ namespace Flocking
         private Func<Boid<TVector, TTransform>, TVector> cohesion;
         private Func<Boid<TVector, TTransform>, TVector> separation;
         private Func<Boid<TVector, TTransform>, TVector> direction;
+        public List<ITransform<IVector>> NearBoids { get; set; }
 
         public void Init(Func<Boid<TVector, TTransform>, TVector> Alignment,
             Func<Boid<TVector, TTransform>, TVector> Cohesion,

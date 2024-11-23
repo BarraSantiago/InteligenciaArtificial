@@ -232,7 +232,6 @@ namespace NeuralNetworkDirectory.AI
             const float safeDistance = 1f;
 
             Scavenger<TVector, TTransform> agent = (Scavenger<TVector, TTransform>)_agents[agentId];
-            List<Boid<IVector, ITransform<IVector>>> neighbors = EcsPopulationManager.GetBoidsInsideRadius(agent.boid);
             IVector targetPosition = agent.GetTarget(SimNodeType.Carrion).GetCoordinate();
 
             bool isMaintainingDistance = true;
@@ -242,11 +241,11 @@ namespace NeuralNetworkDirectory.AI
             IVector averageDirection = null;
             int neighborCount = 0;
 
-            foreach (Boid<IVector, ITransform<IVector>> neighbor in neighbors)
+            foreach (ITransform<IVector> neighbor in agent.boid.NearBoids)
             {
-                if (Equals(neighbor, agent.boid)) continue;
+                if (Approximatly(neighbor.position, agent.boid.transform.position)) continue;
 
-                IVector neighborPosition = neighbor.transform.position;
+                IVector neighborPosition = neighbor.position;
                 float distance = agent.Transform.position.Distance(neighborPosition);
 
                 if (distance < safeDistance)
@@ -255,7 +254,7 @@ namespace NeuralNetworkDirectory.AI
                     isMaintainingDistance = false;
                 }
 
-                averageDirection += neighbor.transform.forward;
+                averageDirection += neighbor.forward;
                 neighborCount++;
             }
 
@@ -281,7 +280,11 @@ namespace NeuralNetworkDirectory.AI
                 Punish(ECSManager.GetComponent<NeuralNetComponent>(agentId),punishment, BrainType.Flocking);
             }
         }
-
+        
+        private bool Approximatly(IVector a, IVector b, float tolerance = 0.01f)
+        {
+            return (a - b).Magnitude() < tolerance;
+        }
         private void ScavengerMovementFC(uint agentId)
         {
             const float reward = 10;
@@ -352,29 +355,29 @@ namespace NeuralNetworkDirectory.AI
 
             return dotProduct > 0.9f;
         }
-        
-        public void Reward(NeuralNetComponent neuralNetComponent, float reward, BrainType brainType)
+
+        private void Reward(NeuralNetComponent neuralNetComponent, float reward, BrainType brainType)
         {
             int id = EcsPopulationManager.GetBrainTypeKeyByValue(brainType, neuralNetComponent.Layers[0][0].AgentType);
             neuralNetComponent.FitnessMod[id] = IncreaseFitnessMod(neuralNetComponent.FitnessMod[id]);
             neuralNetComponent.Fitness[id] += reward * neuralNetComponent.FitnessMod[id];
         }
 
-        public void Punish(NeuralNetComponent neuralNetComponent, float punishment, BrainType brainType)
+        private void Punish(NeuralNetComponent neuralNetComponent, float punishment, BrainType brainType)
         {
-            const float MOD = 0.9f;
+            const float mod = 0.9f;
             int id = EcsPopulationManager.GetBrainTypeKeyByValue(brainType, neuralNetComponent.Layers[0][0].AgentType);
 
-            neuralNetComponent.FitnessMod[id] *= MOD;
+            neuralNetComponent.FitnessMod[id] *= mod;
             neuralNetComponent.Fitness[id] /= punishment + 0.05f * neuralNetComponent.FitnessMod[id];
         }
 
-        public float IncreaseFitnessMod(float fitnessMod)
+        private float IncreaseFitnessMod(float fitnessMod)
         {
-            const float MAX_FITNESS = 2;
-            const float MOD = 1.1f;
-            fitnessMod *= MOD;
-            if (fitnessMod > MAX_FITNESS) fitnessMod = MAX_FITNESS;
+            const float maxFitness = 2;
+            const float mod = 1.1f;
+            fitnessMod *= mod;
+            if (fitnessMod > maxFitness) fitnessMod = maxFitness;
             return fitnessMod;
         }
     }

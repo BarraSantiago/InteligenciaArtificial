@@ -163,5 +163,10 @@ namespace Utils
             if (ReferenceEquals(this, other)) return true;
             return X.Equals(other.X) && Y.Equals(other.Y);
         }
+
+        public float Magnitude()
+        {
+            return (float)Math.Sqrt(X * X + Y * Y);
+        }
     }
 }
