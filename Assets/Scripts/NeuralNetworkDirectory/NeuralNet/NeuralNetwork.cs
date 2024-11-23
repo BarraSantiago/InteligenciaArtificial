@@ -18,7 +18,7 @@ namespace NeuralNetworkDirectory.NeuralNet
                 return false;
             }
 
-            return AddNeuronLayer(layers[^1].OutputsCount, neuronsCount, bias, p);
+            return AddNeuronLayer((int)layers[^1].OutputsCount, neuronsCount, bias, p);
         }
 
         public bool AddFirstNeuronLayer(int inputsCount, float bias, float p)

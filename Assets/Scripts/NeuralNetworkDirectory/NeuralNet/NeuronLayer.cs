@@ -21,13 +21,11 @@ namespace NeuralNetworkDirectory.NeuralNet
         private readonly float p = 0.5f;
         public Neuron[] neurons;
         private float[] outputs;
-        private int totalWeights;
-        private ParallelOptions parallelOptions = new()
-        {
-            MaxDegreeOfParallelism = 32
-        };
+        public float InputsCount { get; }
+        public float NeuronsCount => neurons.Length;
+        public float OutputsCount => outputs.Length;
 
-        public NeuronLayer(int inputsCount, int neuronsCount, float bias, float p)
+        public NeuronLayer(float inputsCount, int neuronsCount, float bias, float p)
         {
             InputsCount = inputsCount;
             this.Bias = bias;
@@ -36,11 +34,6 @@ namespace NeuralNetworkDirectory.NeuralNet
             SetNeuronsCount(neuronsCount);
         }
 
-        public int NeuronsCount => neurons.Length;
-
-        public int InputsCount { get; }
-
-        public int OutputsCount => outputs.Length;
 
         private void SetNeuronsCount(int neuronsCount)
         {
@@ -48,8 +41,7 @@ namespace NeuralNetworkDirectory.NeuralNet
 
             for (int i = 0; i < neurons.Length; i++)
             {
-                neurons[i] = new Neuron(InputsCount, Bias, p);
-                totalWeights += InputsCount;
+                neurons[i] = new Neuron(InputsCount, Bias);
             }
 
             outputs = new float[neurons.Length];

@@ -1085,7 +1085,7 @@ namespace NeuralNetworkDirectory.ECS
 
         public static float[] GetWeights(NeuronLayer layer)
         {
-            int totalWeights = layer.NeuronsCount * layer.InputsCount;
+            int totalWeights = (int)(layer.NeuronsCount * layer.InputsCount);
             float[] weights = new float[totalWeights];
             int id = 0;
 

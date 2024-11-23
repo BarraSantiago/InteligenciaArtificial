@@ -87,12 +87,12 @@ namespace NeuralNetworkDirectory.AI
 
             if (!IsMovingTowardsTarget(agentId, targetPosition))
             {
-                ECSManager.GetComponent<NeuralNetComponent>(agentId).Reward(reward, BrainType.Escape);
+                Reward(ECSManager.GetComponent<NeuralNetComponent>(agentId), reward, BrainType.Escape);
             }
 
             if (agent?.Hp < 2)
             {
-                ECSManager.GetComponent<NeuralNetComponent>(agentId).Punish(punishment, BrainType.Escape);
+                Punish(ECSManager.GetComponent<NeuralNetComponent>(agentId), punishment, BrainType.Escape);
             }
         }
 
@@ -110,11 +110,11 @@ namespace NeuralNetworkDirectory.AI
 
             if (!IsMovingTowardsTarget(agentId, targetPosition))
             {
-                ECSManager.GetComponent<NeuralNetComponent>(agentId).Reward(reward, BrainType.Movement);
+                Reward(ECSManager.GetComponent<NeuralNetComponent>(agentId),reward, BrainType.Movement);
             }
             else
             {
-                ECSManager.GetComponent<NeuralNetComponent>(agentId).Punish(punishment, BrainType.Movement);
+                Punish(ECSManager.GetComponent<NeuralNetComponent>(agentId),punishment, BrainType.Movement);
             }
         }
 
@@ -162,11 +162,11 @@ namespace NeuralNetworkDirectory.AI
                 float damageRewardMod = (float)agent.DamageDealt * 2 / 5;
                 float rewardMod = killRewardMod * attackedRewardMod * damageRewardMod;
 
-                ECSManager.GetComponent<NeuralNetComponent>(agentId).Reward(reward * rewardMod, BrainType.Attack);
+                Reward(ECSManager.GetComponent<NeuralNetComponent>(agentId),reward * rewardMod, BrainType.Attack);
             }
             else
             {
-                ECSManager.GetComponent<NeuralNetComponent>(agentId).Punish(punishment, BrainType.Attack);
+                Punish(ECSManager.GetComponent<NeuralNetComponent>(agentId),punishment, BrainType.Attack);
             }
         }
 
@@ -192,11 +192,11 @@ namespace NeuralNetworkDirectory.AI
             {
                 float rewardMod = movingToHerb ? 1.15f : 0.9f;
                 
-                ECSManager.GetComponent<NeuralNetComponent>(agentId).Reward(reward * rewardMod, BrainType.Movement);
+                Reward(ECSManager.GetComponent<NeuralNetComponent>(agentId),reward * rewardMod, BrainType.Movement);
             }
             else
             {
-                ECSManager.GetComponent<NeuralNetComponent>(agentId).Punish(punishment, BrainType.Movement);
+                Punish(ECSManager.GetComponent<NeuralNetComponent>(agentId),punishment, BrainType.Movement);
             }
         }
 
@@ -273,12 +273,12 @@ namespace NeuralNetworkDirectory.AI
 
             if (isMaintainingDistance || isAligningWithFlock || IsMovingTowardsTarget(agentId, targetPosition))
             {
-                ECSManager.GetComponent<NeuralNetComponent>(agentId).Reward(reward, BrainType.Flocking);
+                Reward(ECSManager.GetComponent<NeuralNetComponent>(agentId),reward, BrainType.Flocking);
             }
             
             if (isColliding || !IsMovingTowardsTarget(agentId, targetPosition))
             {
-                ECSManager.GetComponent<NeuralNetComponent>(agentId).Punish(punishment, BrainType.Flocking);
+                Punish(ECSManager.GetComponent<NeuralNetComponent>(agentId),punishment, BrainType.Flocking);
             }
         }
 
@@ -314,16 +314,16 @@ namespace NeuralNetworkDirectory.AI
 
             if(neighbors > 0)
             {
-                ECSManager.GetComponent<NeuralNetComponent>(agentId).Reward(reward/5+neighbors, BrainType.ScavengerMovement);
+                Reward(ECSManager.GetComponent<NeuralNetComponent>(agentId),reward/5+neighbors, BrainType.ScavengerMovement);
             }
             
             if (IsMovingTowardsTarget(agentId, targetPosition))
             {
-                ECSManager.GetComponent<NeuralNetComponent>(agentId).Reward(reward, BrainType.ScavengerMovement);
+                Reward(ECSManager.GetComponent<NeuralNetComponent>(agentId),reward, BrainType.ScavengerMovement);
             }
             else
             {
-                ECSManager.GetComponent<NeuralNetComponent>(agentId).Punish(punishment, BrainType.ScavengerMovement);
+                Punish(ECSManager.GetComponent<NeuralNetComponent>(agentId),punishment, BrainType.ScavengerMovement);
             }
         }
 
@@ -337,7 +337,7 @@ namespace NeuralNetworkDirectory.AI
             if (agent.Food <= 0) return;
 
             float rewardMod = (float)agent.Food * 2 / agent.FoodLimit;
-            ECSManager.GetComponent<NeuralNetComponent>(agentId).Reward(reward * rewardMod, BrainType.Eat);
+            Reward(ECSManager.GetComponent<NeuralNetComponent>(agentId),reward * rewardMod, BrainType.Eat);
         }
 
         private bool IsMovingTowardsTarget(uint agentId, IVector targetPosition)
@@ -351,6 +351,31 @@ namespace NeuralNetworkDirectory.AI
             float dotProduct = IVector.Dot(directionToTarget, agentDirection);
 
             return dotProduct > 0.9f;
+        }
+        
+        public void Reward(NeuralNetComponent neuralNetComponent, float reward, BrainType brainType)
+        {
+            int id = EcsPopulationManager.GetBrainTypeKeyByValue(brainType, neuralNetComponent.Layers[0][0].AgentType);
+            neuralNetComponent.FitnessMod[id] = IncreaseFitnessMod(neuralNetComponent.FitnessMod[id]);
+            neuralNetComponent.Fitness[id] += reward * neuralNetComponent.FitnessMod[id];
+        }
+
+        public void Punish(NeuralNetComponent neuralNetComponent, float punishment, BrainType brainType)
+        {
+            const float MOD = 0.9f;
+            int id = EcsPopulationManager.GetBrainTypeKeyByValue(brainType, neuralNetComponent.Layers[0][0].AgentType);
+
+            neuralNetComponent.FitnessMod[id] *= MOD;
+            neuralNetComponent.Fitness[id] /= punishment + 0.05f * neuralNetComponent.FitnessMod[id];
+        }
+
+        public float IncreaseFitnessMod(float fitnessMod)
+        {
+            const float MAX_FITNESS = 2;
+            const float MOD = 1.1f;
+            fitnessMod *= MOD;
+            if (fitnessMod > MAX_FITNESS) fitnessMod = MAX_FITNESS;
+            return fitnessMod;
         }
     }
 }

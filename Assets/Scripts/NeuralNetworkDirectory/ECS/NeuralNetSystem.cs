@@ -52,7 +52,7 @@ namespace NeuralNetworkDirectory.ECS
                         inputs[i] = outputs;
                     }
 
-                    if (neuralNetwork.Layers[i][^1].OutputsCount != outputs.Length) return;
+                    if ((int)neuralNetwork.Layers[i][^1].OutputsCount != outputs.Length) return;
 
                     outputComponents[entityId].Outputs[i] = outputs;
                 });
@@ -65,8 +65,8 @@ namespace NeuralNetworkDirectory.ECS
 
         private float[] Synapsis(NeuronLayer layer, float[] inputs)
         {
-            float[] outputs = new float[layer.NeuronsCount];
-            Parallel.For(0, layer.NeuronsCount, parallelOptions, j =>
+            float[] outputs = new float[(int)layer.NeuronsCount];
+            Parallel.For(0, (int)layer.NeuronsCount, parallelOptions, j =>
             {
                 float a = 0;
                 for (int i = 0; i < inputs.Length; i++)

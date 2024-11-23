@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
-using Random = UnityEngine.Random;
 
-namespace FlappyIa.GeneticAlg
+namespace NeuralNetworkDirectory.GeneticAlg
 {
     public class Genome
     {
-        // TODO Actualizar este valor de fitness
+        private static readonly Random random = new Random();
+
         public float fitness;
         public float[] genome;
 
@@ -23,7 +22,7 @@ namespace FlappyIa.GeneticAlg
             genome = new float[genesCount];
 
             for (int j = 0; j < genesCount; j++)
-                genome[j] = Random.Range(-1.0f, 1.0f);
+                genome[j] = (float)(random.NextDouble() * 2.0 - 1.0);
 
             fitness = 0;
         }
@@ -34,8 +33,10 @@ namespace FlappyIa.GeneticAlg
         }
     }
 
+
     public class GeneticAlgorithm
     {
+        private static readonly Random random = new Random();
         private readonly List<Genome> newPopulation = new();
         private readonly List<Genome> population = new();
 
@@ -60,7 +61,6 @@ namespace FlappyIa.GeneticAlg
 
             return genomes;
         }
-
 
         public Genome[] Epoch(Genome[] oldGenomes)
         {
@@ -95,6 +95,8 @@ namespace FlappyIa.GeneticAlg
             Genome child1;
             Genome child2;
 
+            if (mom == null || dad == null) return;
+
             UniformCrossover(mom, dad, out child1, out child2);
 
             newPopulation.Add(child1);
@@ -109,19 +111,19 @@ namespace FlappyIa.GeneticAlg
             child1.genome = new float[mom.genome.Length];
             child2.genome = new float[mom.genome.Length];
 
-            int pivot = Random.Range(0, mom.genome.Length);
+            int pivot = random.Next(0, mom.genome.Length);
 
             for (int i = 0; i < pivot; i++)
             {
                 child1.genome[i] = mom.genome[i];
 
                 if (ShouldMutate())
-                    child1.genome[i] += Random.Range(-mutationRate, mutationRate);
+                    child1.genome[i] += (float)(random.NextDouble() * 2.0 - 1.0);
 
                 child2.genome[i] = dad.genome[i];
 
                 if (ShouldMutate())
-                    child2.genome[i] += Random.Range(-mutationRate, mutationRate);
+                    child2.genome[i] += (float)(random.NextDouble() * 2.0 - 1.0);
             }
 
             for (int i = pivot; i < mom.genome.Length; i++)
@@ -129,25 +131,24 @@ namespace FlappyIa.GeneticAlg
                 child2.genome[i] = mom.genome[i];
 
                 if (ShouldMutate())
-                    child2.genome[i] += Random.Range(-mutationRate, mutationRate);
+                    child2.genome[i] += (float)(random.NextDouble() * 2.0 - 1.0);
 
                 child1.genome[i] = dad.genome[i];
 
                 if (ShouldMutate())
-                    child1.genome[i] += Random.Range(-mutationRate, mutationRate);
+                    child1.genome[i] += (float)(random.NextDouble() * 2.0 - 1.0);
             }
         }
 
         public void DoublePivotCrossover(Genome parent1, Genome parent2, out Genome child1, out Genome child2)
         {
             List<float> parent1Chromosome = parent1.genome.ToList();
-
             List<float> parent2Chromosome = parent2.genome.ToList();
 
             int chromosomeLength = parent1Chromosome.Count - 1;
 
-            int locus = Random.Range(0, chromosomeLength);
-            int length = Random.Range(0, (int)Math.Ceiling(chromosomeLength / 2.0));
+            int locus = random.Next(0, chromosomeLength);
+            int length = random.Next(0, (int)Math.Ceiling(chromosomeLength / 2.0));
 
             List<float> child1Chromosome = new List<float>();
             List<float> child2Chromosome = new List<float>();
@@ -189,7 +190,7 @@ namespace FlappyIa.GeneticAlg
             float selectionChance = 0.5f;
 
             for (int i = 0; i < parent1.genome.Length; i++)
-                if (Random.value < selectionChance)
+                if (random.NextDouble() < selectionChance)
                 {
                     child1.genome[i] = parent1.genome[i];
                     child2.genome[i] = parent2.genome[i];
@@ -203,7 +204,7 @@ namespace FlappyIa.GeneticAlg
 
         private bool ShouldMutate()
         {
-            return Random.Range(0.0f, 1.0f) < mutationChance;
+            return random.NextDouble() < mutationChance;
         }
 
         private static int HandleComparison(Genome x, Genome y)
@@ -211,16 +212,15 @@ namespace FlappyIa.GeneticAlg
             return x.fitness > y.fitness ? 1 : x.fitness < y.fitness ? -1 : 0;
         }
 
-
         public Genome RouletteSelection()
         {
-            float rnd = Random.Range(0, Mathf.Max(totalFitness, 0));
+            float rnd = (float)(random.NextDouble() * Math.Max(totalFitness, 0));
 
             float fitness = 0;
 
             for (int i = 0; i < population.Count; i++)
             {
-                fitness += Mathf.Max(population[i].fitness, 0);
+                fitness += Math.Max(population[i].fitness, 0);
                 if (fitness >= rnd)
                     return population[i];
             }
