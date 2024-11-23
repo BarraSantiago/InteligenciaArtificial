@@ -412,16 +412,17 @@ namespace NeuralNetworkDirectory.ECS
                 };
 
                 OutputComponent outputComponent = new OutputComponent();
-                
+
                 ECSManager.AddComponent(entityID, outputComponent);
                 outputComponent.Outputs = new float[3][];
-                
+
                 foreach (BrainType brain in num.Values)
                 {
                     NeuronInputCount inputsCount = InputCountCache[(brain, agentType)];
-                    outputComponent.Outputs[GetBrainTypeKeyByValue(brain, agentType)] = new float[inputsCount.outputCount];
+                    outputComponent.Outputs[GetBrainTypeKeyByValue(brain, agentType)] =
+                        new float[inputsCount.outputCount];
                 }
-                
+
                 List<NeuralNetComponent> brains = CreateBrain(agentType);
                 Dictionary<BrainType, List<Genome>> genomes = new Dictionary<BrainType, List<Genome>>();
 
@@ -602,7 +603,7 @@ namespace NeuralNetworkDirectory.ECS
 
                 foreach (BrainType brain in agent.Value.brainTypes.Values)
                 {
-                    int brainId = agent.Value.GetBrainTypeKeyByValue(brain);
+                    agent.Value.GetBrainTypeKeyByValue(brain);
                     if (!indexes[agentType].ContainsKey(brain))
                     {
                         indexes[agentType][brain] = 0;
@@ -621,7 +622,17 @@ namespace NeuralNetworkDirectory.ECS
 
                     if (index >= genomes[agentType][brain].Length) continue;
 
-                    neuralNetComponent.SetWeights(brainId, genomes[agentType][brain][index].genome);
+                    int fromId = 0;
+
+                    if (index < neuralNetComponent.Layers.Count)
+                    {
+                        for (int i = 0; i < neuralNetComponent.Layers[index].Count; i++)
+                        {
+                            fromId = SetWeights(neuralNetComponent.Layers[index][i].GetWeights(), 
+                                genomes[agentType][brain][index].genome, fromId);
+                        }
+                    }
+
                     _population[agent.Key][brain].Add(genomes[agentType][brain][index]);
                     agent.Value.Transform = new ITransform<IVector>(new MyVector(
                         gridManager.GetRandomPosition().GetCoordinate().X,
@@ -634,6 +645,20 @@ namespace NeuralNetworkDirectory.ECS
                     }
                 }
             }
+        }
+
+        public static int SetWeights(float[] weights, float[] newWeights, int fromId)
+        {
+            if (newWeights == null || fromId < 0 || fromId + weights.Length > newWeights.Length)
+            {
+                return newWeights.Length;
+            }
+            for (int i = 0; i < weights.Length; i++)
+            {
+                weights[i] = newWeights[i + fromId];
+            }
+
+            return fromId + weights.Length;
         }
 
         private void FillPopulation()

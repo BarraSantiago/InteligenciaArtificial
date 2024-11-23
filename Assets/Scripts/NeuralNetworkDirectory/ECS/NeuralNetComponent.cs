@@ -11,13 +11,6 @@ namespace NeuralNetworkDirectory.ECS
         public float[] FitnessMod;
         public List<List<NeuronLayer>> Layers { get; set; } = new();
         
-        public void SetWeights(int index, float[] newWeights)
-        {
-            int fromId = 0;
-
-            for (int i = 0; i < Layers[index].Count; i++) fromId = Layers[index][i].SetWeights(newWeights, fromId);
-        }
-        
         public void Reward(float reward, BrainType brainType)
         {
             int id = EcsPopulationManager.GetBrainTypeKeyByValue(brainType, Layers[0][0].AgentType);
