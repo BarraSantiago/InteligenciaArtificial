@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using FlappyIa.GeneticAlg;
 using NeuralNetworkDirectory.ECS;
+using NeuralNetworkDirectory.GeneticAlg;
 using NeuralNetworkDirectory.NeuralNet;
 using Pathfinder;
 using StateMachine.States.SimStates;

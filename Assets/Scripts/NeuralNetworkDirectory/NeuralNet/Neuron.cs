@@ -40,13 +40,6 @@ namespace NeuralNetworkDirectory.NeuralNet
 
             return Tanh(a);
         }
-
-        public int SetWeights(float[] newWeights, int fromId)
-        {
-            for (int i = 0; i < weights.Length; i++) weights[i] = newWeights[i + fromId];
-
-            return fromId + weights.Length;
-        }
         
         private float Tanh(float a)
         {

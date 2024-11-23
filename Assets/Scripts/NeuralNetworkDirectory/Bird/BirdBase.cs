@@ -1,6 +1,6 @@
 ﻿using FlappyIa.Bird;
-using FlappyIa.GeneticAlg;
 using FlappyIa.Obstacles;
+using NeuralNetworkDirectory.GeneticAlg;
 using NeuralNetworkDirectory.NeuralNet;
 using UnityEngine;
 

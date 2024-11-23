@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using Agent;
-using FlappyIa.GeneticAlg;
+using NeuralNetworkDirectory.GeneticAlg;
 using NeuralNetworkDirectory.NeuralNet;
 using UnityEngine;
 

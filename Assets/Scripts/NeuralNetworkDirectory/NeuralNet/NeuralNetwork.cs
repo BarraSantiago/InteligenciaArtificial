@@ -60,7 +60,7 @@ namespace NeuralNetworkDirectory.NeuralNet
         {
             int fromId = 0;
 
-            for (int i = 0; i < layers.Count; i++) fromId = layers[i].SetWeights(newWeights, fromId);
+            //for (int i = 0; i < layers.Count; i++) fromId = layers[i].SetWeights(newWeights, fromId);
         }
 
         public float[] GetWeights()

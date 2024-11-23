@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using NeuralNetworkDirectory.ECS;
 using NeuralNetworkDirectory.NeuralNet;
@@ -7,7 +8,7 @@ namespace StateMachine.Agents.Simulation
 {
     public static class InputCountCache
     {
-        private static readonly Dictionary<(SimAgentTypes, BrainType), int> cache = new();
+        private static readonly ConcurrentDictionary<(SimAgentTypes, BrainType), int> cache = new();
 
         public static int GetInputCount(SimAgentTypes agentType, BrainType brainType)
         {

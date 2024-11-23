@@ -55,13 +55,6 @@ namespace NeuralNetworkDirectory.NeuralNet
             outputs = new float[neurons.Length];
         }
 
-        public int SetWeights(float[] weights, int fromId)
-        {
-            for (int i = 0; i < neurons.Length; i++) fromId = neurons[i].SetWeights(weights, fromId);
-
-            return fromId;
-        }
-
         public float[] GetWeights()
         {
             float[] weights = new float[totalWeights];
