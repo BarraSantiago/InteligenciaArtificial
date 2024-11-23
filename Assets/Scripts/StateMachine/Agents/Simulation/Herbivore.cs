@@ -108,10 +108,9 @@ namespace StateMachine.Agents.Simulation
             node.NodeType = SimNodeType.Corpse;
             node.Food = FoodDropped;
 
-            lock (this)
-            {
+            
                 EcsPopulationManager.RemoveEntity(this as SimAgent<IVector, ITransform<IVector>>);
-            }
+            
         }
 
         protected override void EatTransitions()

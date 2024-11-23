@@ -140,11 +140,10 @@ namespace StateMachine.Agents.Simulation
 
         private void Attack()
         {
-            if (target is not Herbivore<TVector, TTransform> herbivore ||
+            if (target is not Herbivore<IVector, ITransform<IVector>> herbivore ||
                 !Approximatly(herbivore.Transform.position, transform.position, 0.2f)) return;
 
-            lock (target)
-            {
+            
                 
                 herbivore.Hp--;
                 HasAttacked = true;
@@ -153,7 +152,7 @@ namespace StateMachine.Agents.Simulation
                 {
                     HasKilled = true;
                 }
-            }
+            
         }
 
         protected override void Eat()
