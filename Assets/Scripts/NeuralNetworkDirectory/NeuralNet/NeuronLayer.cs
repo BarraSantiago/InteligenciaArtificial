@@ -54,14 +54,5 @@ namespace NeuralNetworkDirectory.NeuralNet
 
             outputs = new float[neurons.Length];
         }
-        
-        public float[] Synapsis(float[] inputs)
-        {
-            Parallel.For(0, neurons.Length, parallelOptions, j =>
-            {
-                outputs[j] = neurons[j].Synapsis(inputs);
-            });
-            return outputs;
-        }
     }
 }
