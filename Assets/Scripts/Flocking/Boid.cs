@@ -7,7 +7,7 @@ namespace Flocking
         where TVector : IVector, IEquatable<TVector>
         where TTransform : ITransform<TVector>, new()
     {
-        public float detectionRadious = 3.0f;
+        public float detectionRadious = 6.0f;
         public float alignmentOffset;
         public float cohesionOffset;
         public float separationOffset;

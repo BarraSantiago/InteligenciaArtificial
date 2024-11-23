@@ -185,10 +185,14 @@ namespace NeuralNetworkDirectory.AI
             IVector herbPosition = nearestHerbivoreNode.CurrentNode.GetCoordinate();
             IVector corpsePosition = nearestCorpseNode?.GetCoordinate();
 
-            if (IsMovingTowardsTarget(agentId, herbPosition) ||
-                (corpsePosition != null && IsMovingTowardsTarget(agentId, corpsePosition)))
+            bool movingToHerb = IsMovingTowardsTarget(agentId, herbPosition);
+            bool movingToCorpse = corpsePosition != null && IsMovingTowardsTarget(agentId, corpsePosition);
+            
+            if (movingToHerb || movingToCorpse)
             {
-                ECSManager.GetComponent<NeuralNetComponent>(agentId).Reward(reward, BrainType.Movement);
+                float rewardMod = movingToHerb ? 1.15f : 0.9f;
+                
+                ECSManager.GetComponent<NeuralNetComponent>(agentId).Reward(reward * rewardMod, BrainType.Movement);
             }
             else
             {

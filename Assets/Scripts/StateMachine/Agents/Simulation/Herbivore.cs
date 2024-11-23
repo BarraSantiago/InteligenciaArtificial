@@ -30,12 +30,12 @@ namespace StateMachine.Agents.Simulation
         {
             base.Init();
             foodTarget = SimNodeType.Bush;
-            
+
             CalculateInputs();
 
             hp = InitialHp;
         }
-        
+
         public override void Reset()
         {
             base.Reset();
@@ -46,11 +46,12 @@ namespace StateMachine.Agents.Simulation
         {
             int brain = GetBrainTypeKeyByValue(BrainType.Escape);
             int inputCount = GetInputCount(BrainType.Escape);
-            
+
             input[brain] = new float[inputCount];
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
-            SimAgent<IVector, ITransform<IVector>> target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, Transform.position);
+            SimAgent<IVector, ITransform<IVector>> target =
+                EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, Transform.position);
             if (target == null)
             {
                 input[brain][2] = NoTarget;
@@ -67,12 +68,13 @@ namespace StateMachine.Agents.Simulation
         {
             int brain = GetBrainTypeKeyByValue(BrainType.Movement);
             int inputCount = GetInputCount(BrainType.Movement);
-            
+
             input[brain] = new float[inputCount];
             input[brain][0] = CurrentNode.GetCoordinate().X;
             input[brain][1] = CurrentNode.GetCoordinate().Y;
 
-            SimAgent<IVector, ITransform<IVector>> target = EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, Transform.position);
+            SimAgent<IVector, ITransform<IVector>> target =
+                EcsPopulationManager.GetNearestEntity(SimAgentTypes.Carnivore, Transform.position);
             if (target == null)
             {
                 input[brain][2] = NoTarget;
@@ -105,7 +107,11 @@ namespace StateMachine.Agents.Simulation
             INode<IVector> node = CurrentNode;
             node.NodeType = SimNodeType.Corpse;
             node.Food = FoodDropped;
-            EcsPopulationManager.RemoveEntity(this as SimAgent<IVector, ITransform<IVector>>);
+
+            lock (this)
+            {
+                EcsPopulationManager.RemoveEntity(this as SimAgent<IVector, ITransform<IVector>>);
+            }
         }
 
         protected override void EatTransitions()
@@ -113,17 +119,19 @@ namespace StateMachine.Agents.Simulation
             Fsm.SetTransition(Behaviours.Eat, Flags.OnEat, Behaviours.Eat);
             Fsm.SetTransition(Behaviours.Eat, Flags.OnSearchFood, Behaviours.Walk);
             Fsm.SetTransition(Behaviours.Eat, Flags.OnEscape, Behaviours.Walk);
+            Fsm.SetTransition(Behaviours.Eat, Flags.OnAttack, Behaviours.Walk);
         }
 
         protected override void WalkTransitions()
         {
             Fsm.SetTransition(Behaviours.Walk, Flags.OnEat, Behaviours.Eat);
             Fsm.SetTransition(Behaviours.Walk, Flags.OnEscape, Behaviours.Walk);
+            Fsm.SetTransition(Behaviours.Walk, Flags.OnAttack, Behaviours.Walk);
+            Fsm.SetTransition(Behaviours.Walk, Flags.OnSearchFood, Behaviours.Walk);
         }
 
         protected override void ExtraTransitions()
         {
-            
         }
 
         protected override void FsmBehaviours()

@@ -324,7 +324,7 @@ namespace NeuralNetworkDirectory.ECS
             PurgingSpecials();
             bool remainingPopulation = _agents.Count > 0;
             ECSManager.GetSystem<NeuralNetSystem>().Deinitialize();
-            if (Generation % 5 == 0) Save("NeuronData", Generation);
+            if (Generation % 100 == 0) Save("NeuronData", Generation);
 
             if (remainingPopulation)
             {
@@ -366,6 +366,8 @@ namespace NeuralNetworkDirectory.ECS
 
             genomes.Clear();
             indexes.Clear();
+
+            if (Generation % 25 != 0) return;
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
@@ -666,11 +668,14 @@ namespace NeuralNetworkDirectory.ECS
                 Dictionary<BrainType, List<Genome>> brainDict = agentEntry.Value;
 
                 if (_agents[agentId].agentType != agentType ||
-                    !brainDict.TryGetValue(brainType, out List<Genome> value)) continue;
+                    !brainDict.TryGetValue(brainType, out List<Genome> value) || value.Count == 0) continue;
 
                 genomes.AddRange(value);
-                genomes[^1].fitness = ECSManager.GetComponent<NeuralNetComponent>(agentId).Fitness[_agents[agentId]
-                    .GetBrainTypeKeyByValue(brainType)];
+                if (genomes.Count > 0)
+                {
+                    genomes[^1].fitness = ECSManager.GetComponent<NeuralNetComponent>(agentId).Fitness[_agents[agentId]
+                        .GetBrainTypeKeyByValue(brainType)];
+                }
             }
 
             return genomes;
@@ -864,19 +869,24 @@ namespace NeuralNetworkDirectory.ECS
         public static List<SimBoid> GetBoidsInsideRadius(SimBoid boid)
         {
             List<SimBoid> insideRadiusBoids = new List<SimBoid>();
+            float detectionRadiusSquared = boid.detectionRadious * boid.detectionRadious;
+            IVector boidPosition = boid.transform.position;
 
-            foreach (Scavenger<IVector, ITransform<IVector>> scavenger in _scavengers.Values)
+            Parallel.ForEach(_scavengers.Values, scavenger =>
             {
-                if (scavenger?.Transform.position == null)
+                if (scavenger?.Transform.position == null || boid == scavenger.boid)
                 {
-                    continue;
+                    return;
                 }
 
-                if (IVector.Distance(boid.transform.position, scavenger.Transform.position) >
-                    boid.detectionRadious) continue;
-                if (boid == scavenger.boid) continue;
-                insideRadiusBoids.Add(scavenger.boid);
-            }
+                IVector scavengerPosition = scavenger.Transform.position;
+                float distanceSquared = IVector.DistanceSquared(boidPosition, scavengerPosition);
+
+                if (distanceSquared <= detectionRadiusSquared)
+                {
+                    insideRadiusBoids.Add(scavenger.boid);
+                }
+            });
 
             return insideRadiusBoids;
         }
@@ -979,7 +989,7 @@ namespace NeuralNetworkDirectory.ECS
                     }
                 }
 
-                if (agent.CanReproduce)
+                if (!agent.CanReproduce)
                 {
                     agentsToRemove.Add(agentEntry.Key);
                 }

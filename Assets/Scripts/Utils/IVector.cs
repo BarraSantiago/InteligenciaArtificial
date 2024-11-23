@@ -60,6 +60,13 @@ namespace Utils
         {
             return (float)Math.Sqrt(X * X + Y * Y);
         }
+
+        static float DistanceSquared(IVector a, IVector b)
+        {
+            float deltaX = a.X - b.X;
+            float deltaY = a.Y - b.Y;
+            return deltaX * deltaX + deltaY * deltaY;
+        }
     }
 
     public class MyVector : IVector, IEquatable<MyVector>
