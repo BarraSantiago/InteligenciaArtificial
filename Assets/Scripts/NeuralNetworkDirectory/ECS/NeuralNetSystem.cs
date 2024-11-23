@@ -47,7 +47,7 @@ namespace NeuralNetworkDirectory.ECS
                     float[] outputs = new float[3];
                     for (int j = 0; j < neuralNetwork.Layers[i].Count; j++)
                     {
-                        outputs = neuralNetwork.Layers[i][j].Synapsis(inputs[i], i);
+                        outputs = neuralNetwork.Layers[i][j].Synapsis(inputs[i]);
                         inputs[i] = outputs;
                     }
 

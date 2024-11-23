@@ -63,25 +63,6 @@ namespace NeuralNetworkDirectory.NeuralNet
             //for (int i = 0; i < layers.Count; i++) fromId = layers[i].SetWeights(newWeights, fromId);
         }
 
-        public float[] GetWeights()
-        {
-            float[] weights = new float[totalWeightsCount];
-            int id = 0;
-
-            for (int i = 0; i < layers.Count; i++)
-            {
-                float[] ws = layers[i].GetWeights();
-
-                for (int j = 0; j < ws.Length; j++)
-                {
-                    weights[id] = ws[j];
-                    id++;
-                }
-            }
-
-            return weights;
-        }
-
         public float[] Synapsis(float[] inputs)
         {
             float[] outputs = null;

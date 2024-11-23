@@ -19,7 +19,7 @@ namespace NeuralNetworkDirectory.NeuralNet
         public SimAgentTypes AgentType;
         public float Bias {  get; set; }= 1;
         private readonly float p = 0.5f;
-        private Neuron[] neurons;
+        public Neuron[] neurons;
         private float[] outputs;
         private int totalWeights;
         private ParallelOptions parallelOptions = new()
@@ -54,31 +54,12 @@ namespace NeuralNetworkDirectory.NeuralNet
 
             outputs = new float[neurons.Length];
         }
-
-        public float[] GetWeights()
-        {
-            float[] weights = new float[totalWeights];
-            int id = 0;
-
-            for (int i = 0; i < neurons.Length; i++)
-            {
-                float[] ws = neurons[i].GetWeights();
-
-                for (int j = 0; j < ws.Length; j++)
-                {
-                    weights[id] = ws[j];
-                    id++;
-                }
-            }
-
-            return weights;
-        }
-
-        public float[] Synapsis(float[] inputs, int i)
+        
+        public float[] Synapsis(float[] inputs)
         {
             Parallel.For(0, neurons.Length, parallelOptions, j =>
             {
-                outputs[j] = neurons[j].Synapsis(inputs, i);
+                outputs[j] = neurons[j].Synapsis(inputs);
             });
             return outputs;
         }

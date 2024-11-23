@@ -431,13 +431,14 @@ namespace NeuralNetworkDirectory.ECS
                     int fromId = 0;
                     BrainType brainType = BrainType.Movement;
                     Genome genome =
-                        new Genome(brain.Layers.Sum(layerList => layerList.Sum(layer => layer.GetWeights().Length)));
+                        new Genome(brain.Layers.Sum(layerList =>
+                            layerList.Sum(layer => GetWeights(layer).Length)));
                     foreach (List<NeuronLayer> layerList in brain.Layers)
                     {
                         foreach (NeuronLayer layer in layerList)
                         {
                             brainType = layer.BrainType;
-                            SetWeights(layer.GetWeights(), genome.genome, fromId);
+                            SetWeights(GetWeights(layer), genome.genome, fromId);
                         }
                     }
 
@@ -638,7 +639,7 @@ namespace NeuralNetworkDirectory.ECS
                     {
                         for (int i = 0; i < neuralNetComponent.Layers[index].Count; i++)
                         {
-                            fromId = SetWeights(neuralNetComponent.Layers[index][i].GetWeights(),
+                            fromId = SetWeights(GetWeights(neuralNetComponent.Layers[index][i]),
                                 genomes[agentType][brain][index].genome, fromId);
                         }
                     }
@@ -810,7 +811,7 @@ namespace NeuralNetworkDirectory.ECS
                                     layer.Bias = neuronData.Bias;
 
 
-                                    fromId = SetWeights(layer.GetWeights(), neuronData.NeuronWeights, fromId);
+                                    fromId = SetWeights(GetWeights(layer), neuronData.NeuronWeights, fromId);
                                 }
                             }
                         }
@@ -1080,6 +1081,26 @@ namespace NeuralNetworkDirectory.ECS
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        public static float[] GetWeights(NeuronLayer layer)
+        {
+            int totalWeights = layer.NeuronsCount * layer.InputsCount;
+            float[] weights = new float[totalWeights];
+            int id = 0;
+
+            for (int i = 0; i < layer.NeuronsCount; i++)
+            {
+                float[] ws = layer.neurons[i].weights;
+
+                for (int j = 0; j < ws.Length; j++)
+                {
+                    weights[id] = ws[j];
+                    id++;
+                }
+            }
+
+            return weights;
         }
     }
 }
