@@ -268,7 +268,7 @@ namespace NeuralNetworkDirectory.ECS
                 OutputComponent outputComponent = ECSManager.GetComponent<OutputComponent>(entity.Key);
                 if (outputComponent == null || !_agents.TryGetValue(entity.Key, out SimAgentType agent)) return;
 
-                agent.output = outputComponent.outputs;
+                agent.output = outputComponent.Outputs;
 
                 if (agent.agentType != SimAgentTypes.Scavenger) return;
 
@@ -276,7 +276,7 @@ namespace NeuralNetworkDirectory.ECS
 
                 if (boid != null)
                 {
-                    UpdateBoidOffsets(boid, outputComponent.outputs
+                    UpdateBoidOffsets(boid, outputComponent.Outputs
                         [GetBrainTypeKeyByValue(BrainType.Flocking, SimAgentTypes.Scavenger)]);
                 }
             });
@@ -411,8 +411,17 @@ namespace NeuralNetworkDirectory.ECS
                     _ => throw new ArgumentException("Invalid agent type")
                 };
 
-                ECSManager.AddComponent(entityID, new OutputComponent(agentType, num));
-
+                OutputComponent outputComponent = new OutputComponent();
+                
+                ECSManager.AddComponent(entityID, outputComponent);
+                outputComponent.Outputs = new float[3][];
+                
+                foreach (BrainType brain in num.Values)
+                {
+                    NeuronInputCount inputsCount = InputCountCache[(brain, agentType)];
+                    outputComponent.Outputs[GetBrainTypeKeyByValue(brain, agentType)] = new float[inputsCount.outputCount];
+                }
+                
                 List<NeuralNetComponent> brains = CreateBrain(agentType);
                 Dictionary<BrainType, List<Genome>> genomes = new Dictionary<BrainType, List<Genome>>();
 

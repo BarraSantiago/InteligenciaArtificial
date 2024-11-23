@@ -53,7 +53,7 @@ namespace NeuralNetworkDirectory.ECS
 
                     if (neuralNetwork.Layers[i][^1].OutputsCount != outputs.Length) return;
 
-                    outputComponents[entityId].outputs[i] = outputs;
+                    outputComponents[entityId].Outputs[i] = outputs;
                 });
             });
         }
