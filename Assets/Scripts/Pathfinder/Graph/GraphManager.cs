@@ -1,6 +1,6 @@
 ﻿using System;
 using NeuralNetworkDirectory.ECS;
-using Utils;
+using NeuralNetworkLib.Utils;
 using Random = System.Random;
 
 namespace Pathfinder.Graph
