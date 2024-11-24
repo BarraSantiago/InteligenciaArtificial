@@ -187,24 +187,27 @@ namespace StateMachine.Agents.Simulation
 
         private IVector GetAverageNeighborPosition()
         {
+            IVector averagePosition = new MyVector(0, 0);
+            int neighborCount = 0;
 
-            if (boid.NearBoids.Count == 0)
+            foreach (var neighbor in boid.NearBoids)
             {
-                return MyVector.zero();
+                if (neighbor?.position == null) continue;
+                
+                averagePosition += neighbor.position;
+                neighborCount++;
             }
 
-            MyVector avg = MyVector.zero();
-            foreach (ITransform<IVector> nearBoid in boid.NearBoids)
+            if (neighborCount > 0)
             {
-                avg += nearBoid.position;
+                averagePosition /= neighborCount;
             }
 
-            avg /= boid.NearBoids.Count;
-            return avg;
+            return averagePosition;
         }
 
         private IVector GetAverageNeighborDirection()
-        { 
+        {
             if (boid.NearBoids.Count == 0)
             {
                 return MyVector.zero();
