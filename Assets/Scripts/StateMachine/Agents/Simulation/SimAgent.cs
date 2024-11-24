@@ -93,6 +93,7 @@ namespace StateMachine.Agents.Simulation
 
         public virtual void Init()
         {
+            Food = 0;
             Fsm = new FSM<Behaviours, Flags>();
             output = new float[brainTypes.Count][];
             foreach (BrainType brain in brainTypes.Values)
@@ -223,14 +224,7 @@ namespace StateMachine.Agents.Simulation
             };
             return objects;
         }
-
-        protected virtual object[] WalkEnterParameters()
-        {
-            object[] objects = { };
-            return objects;
-        }
-
-
+        
         protected virtual object[] EatTickParameters()
         {
             int extraBrain = agentType == SimAgentTypes.Carnivore

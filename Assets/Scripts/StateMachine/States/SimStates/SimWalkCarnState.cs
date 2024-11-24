@@ -14,30 +14,27 @@ namespace StateMachine.States.SimStates
             BehaviourActions behaviours = new BehaviourActions();
 
             SimNode<IVector> currentNode = parameters[0] as SimNode<IVector>;
-            SimNodeType foodTarget = (SimNodeType)parameters[1];
-            Action onMove = parameters[2] as Action;
-            float[] outputBrain1 = (float[])parameters[3];
-            float[] outputBrain2 = (float[])parameters[4];
+            IVector target = (IVector)parameters[1];
+            SimNodeType foodTarget = (SimNodeType)parameters[2];
+            Action onMove = parameters[3] as Action;
+            float[] outputBrain1 = parameters[4] as float[];
+            float[] outputBrain2 = parameters[5] as float[];
 
             behaviours.AddMultiThreadableBehaviours(0, () =>
             {
                 onMove?.Invoke();
             });
 
-            
-            //behaviours.AddMainThreadBehaviours(1, () =>
-            //{
-            //    if (currentNode == null) return;
-
-            //    position.position = new Vector3(currentNode.GetCoordinate().x, currentNode.GetCoordinate().y);
-            //});
-
             behaviours.SetTransitionBehaviour(() =>
             {
                 if (outputBrain1[0] > 0.5f && currentNode != null && currentNode.NodeType == foodTarget) OnFlag?.Invoke(Flags.OnEat);
-                if (outputBrain2[0] > 0.5f) OnFlag?.Invoke(Flags.OnAttack);
+                if (outputBrain2[0] > 0.5f && Approximatly(target, currentNode?.GetCoordinate(), 0.2f)) OnFlag?.Invoke(Flags.OnAttack);
             });
             return behaviours;
+        }
+        private bool Approximatly(IVector coord1, IVector coord2, float tolerance)
+        {
+            return Math.Abs(coord1.X - coord2.X) <= tolerance && Math.Abs(coord1.Y - coord2.Y) <= tolerance;
         }
         public override BehaviourActions GetOnEnterBehaviour(params object[] parameters)
         {

@@ -224,7 +224,7 @@ namespace NeuralNetworkDirectory.AI
             WorstFitness = GetWorstFitness();
 
             // Evolve each genome and create a new array of genomes
-            Genome[] newGenomes = genAlg.Epoch(population.ToArray());
+            List<Genome> newGenomes = genAlg.Epoch(population.ToArray(), PopulationCount);
 
             // Clear current population
             population.Clear();

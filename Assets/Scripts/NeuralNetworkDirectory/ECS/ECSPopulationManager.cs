@@ -14,6 +14,7 @@ using Pathfinder.Graph;
 using StateMachine.Agents.Simulation;
 using UnityEngine;
 using Utils;
+using Random = UnityEngine.Random;
 
 namespace NeuralNetworkDirectory.ECS
 {
@@ -53,13 +54,15 @@ namespace NeuralNetworkDirectory.ECS
 
         public int gridWidth = 10;
         public int gridHeight = 10;
-        public int generationTurns = 100;
         public float speed = 1.0f;
         public static Sim2Graph graph;
         public static NeuronInputCount[] inputCounts;
         public static Dictionary<(BrainType, SimAgentTypes), NeuronInputCount> InputCountCache;
         public static FlockingManager flockingManager = new();
 
+        private int missingCarnivores;
+        private int missingHerbivores;
+        private int missingScavengers;
         private const float Bias = 0.0f;
         private const float SigmoidP = .5f;
         private bool isRunning = true;
@@ -319,7 +322,19 @@ namespace NeuralNetworkDirectory.ECS
             Generation++;
 
             PurgingSpecials();
+
+            missingCarnivores =
+                carnivoreCount - _agents.Count(agent => agent.Value.agentType == SimAgentTypes.Carnivore);
+            missingHerbivores =
+                herbivoreCount - _agents.Count(agent => agent.Value.agentType == SimAgentTypes.Herbivore);
+            missingScavengers =
+                scavengerCount - _agents.Count(agent => agent.Value.agentType == SimAgentTypes.Scavenger);
             bool remainingPopulation = _agents.Count > 0;
+
+            bool remainingCarn = carnivoreCount - missingCarnivores > 1;
+            bool remainingHerb = herbivoreCount - missingHerbivores > 1;
+            bool remainingScav = scavengerCount - missingScavengers > 1;
+
             ECSManager.GetSystem<NeuralNetSystem>().Deinitialize();
             if (Generation % 100 == 0) Save("NeuronData", Generation);
 
@@ -333,20 +348,20 @@ namespace NeuralNetworkDirectory.ECS
 
             CleanMap();
             InitializePlants();
-            
+
             if (!remainingPopulation)
             {
                 FillPopulation();
                 _population.Clear();
-                
+
                 return;
             }
 
-            Dictionary<SimAgentTypes, Dictionary<BrainType, Genome[]>> genomes = new()
+            Dictionary<SimAgentTypes, Dictionary<BrainType, List<Genome>>> genomes = new()
             {
-                [SimAgentTypes.Scavenger] = new Dictionary<BrainType, Genome[]>(),
-                [SimAgentTypes.Herbivore] = new Dictionary<BrainType, Genome[]>(),
-                [SimAgentTypes.Carnivore] = new Dictionary<BrainType, Genome[]>()
+                [SimAgentTypes.Scavenger] = new Dictionary<BrainType, List<Genome>>(),
+                [SimAgentTypes.Herbivore] = new Dictionary<BrainType, List<Genome>>(),
+                [SimAgentTypes.Carnivore] = new Dictionary<BrainType, List<Genome>>()
             };
             Dictionary<SimAgentTypes, Dictionary<BrainType, int>> indexes = new()
             {
@@ -356,9 +371,28 @@ namespace NeuralNetworkDirectory.ECS
             };
 
 
-            CreateNewGenomes(genomes);
+            foreach (SimAgentType agent in _agents.Values)
+            {
+                agent.Reset();
+            }
+
+            if (remainingCarn)
+            {
+                CreateNewGenomes(genomes, carnBrainTypes, SimAgentTypes.Carnivore, carnivoreCount);
+            }
+
+            if (remainingScav)
+            {
+                CreateNewGenomes(genomes, scavBrainTypes, SimAgentTypes.Scavenger, scavengerCount);
+            }
+
+            if (remainingHerb)
+            {
+                CreateNewGenomes(genomes, herbBrainTypes, SimAgentTypes.Herbivore, herbivoreCount);
+            }
+
             FillPopulation();
-            BrainsHandler(indexes, genomes);
+            BrainsHandler(indexes, genomes, remainingCarn, remainingScav, remainingHerb);
 
             genomes.Clear();
             indexes.Clear();
@@ -601,11 +635,28 @@ namespace NeuralNetworkDirectory.ECS
 
 
         private void BrainsHandler(Dictionary<SimAgentTypes, Dictionary<BrainType, int>> indexes,
-            Dictionary<SimAgentTypes, Dictionary<BrainType, Genome[]>> genomes)
+            Dictionary<SimAgentTypes, Dictionary<BrainType, List<Genome>>> genomes,
+            bool remainingCarn, bool remainingScav, bool remainingHerb)
         {
             foreach (KeyValuePair<uint, SimAgentType> agent in _agents)
             {
                 SimAgentTypes agentType = agent.Value.agentType;
+                
+                switch (agentType)
+                {
+                    case SimAgentTypes.Carnivore:
+                        if (!remainingCarn) continue;
+                        break;
+                    case SimAgentTypes.Herbivore:
+                        if (!remainingHerb) continue;
+                        break;
+                    case SimAgentTypes.Scavenger:
+                        if (!remainingScav) continue;
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
                 NeuralNetComponent neuralNetComponent = ECSManager.GetComponent<NeuralNetComponent>(agent.Key);
 
                 foreach (BrainType brain in agent.Value.brainTypes.Values)
@@ -616,7 +667,7 @@ namespace NeuralNetworkDirectory.ECS
                         indexes[agentType][brain] = 0;
                     }
 
-                    int index = indexes[agentType][brain]++;
+                    int index = Random.Range(0, genomes[agentType][brain].Count);
                     if (!_population.ContainsKey(agent.Key))
                     {
                         _population[agent.Key] = new Dictionary<BrainType, List<Genome>>();
@@ -627,7 +678,7 @@ namespace NeuralNetworkDirectory.ECS
                         _population[agent.Key][brain] = new List<Genome>();
                     }
 
-                    if (index >= genomes[agentType][brain].Length) continue;
+                    if (index >= genomes[agentType][brain].Count) continue;
 
                     int fromId = 0;
 
@@ -641,15 +692,12 @@ namespace NeuralNetworkDirectory.ECS
                     }
 
                     _population[agent.Key][brain].Add(genomes[agentType][brain][index]);
+                    genomes[agentType][brain].Remove(genomes[agentType][brain][index]);
+
                     agent.Value.Transform = new ITransform<IVector>(new MyVector(
                         gridManager.GetRandomPosition().GetCoordinate().X,
                         gridManager.GetRandomPosition().GetCoordinate().Y));
                     agent.Value.Reset();
-
-                    if (!_agents.ContainsKey(agent.Key))
-                    {
-                        CreateAgent(agentType);
-                    }
                 }
             }
         }
@@ -672,32 +720,18 @@ namespace NeuralNetworkDirectory.ECS
 
         private void FillPopulation()
         {
-            int missingCarnivores = carnivoreCount - _agents.Count(agent => agent.Value.agentType == SimAgentTypes.Carnivore);
-            int missingHerbivores = herbivoreCount - _agents.Count(agent => agent.Value.agentType == SimAgentTypes.Herbivore);
-            int missingScavengers = scavengerCount - _agents.Count(agent => agent.Value.agentType == SimAgentTypes.Scavenger);
             CreateAgents(missingHerbivores, SimAgentTypes.Herbivore);
             CreateAgents(missingCarnivores, SimAgentTypes.Carnivore);
             CreateAgents(missingScavengers, SimAgentTypes.Scavenger);
         }
 
-        private void CreateNewGenomes(Dictionary<SimAgentTypes, Dictionary<BrainType, Genome[]>> genomes)
+        private void CreateNewGenomes(Dictionary<SimAgentTypes, Dictionary<BrainType, List<Genome>>> genomes,
+            Dictionary<int, BrainType> brainTypes, SimAgentTypes agentType, int count)
         {
-            foreach (BrainType brain in scavBrainTypes.Values)
+            foreach (BrainType brain in brainTypes.Values)
             {
-                genomes[SimAgentTypes.Scavenger][brain] =
-                    genAlg.Epoch(GetGenomesByBrainAndAgentType(SimAgentTypes.Scavenger, brain).ToArray());
-            }
-
-            foreach (BrainType brain in herbBrainTypes.Values)
-            {
-                genomes[SimAgentTypes.Herbivore][brain] =
-                    genAlg.Epoch(GetGenomesByBrainAndAgentType(SimAgentTypes.Herbivore, brain).ToArray());
-            }
-
-            foreach (BrainType brain in carnBrainTypes.Values)
-            {
-                genomes[SimAgentTypes.Carnivore][brain] =
-                    genAlg.Epoch(GetGenomesByBrainAndAgentType(SimAgentTypes.Carnivore, brain).ToArray());
+                genomes[agentType][brain] =
+                    genAlg.Epoch(GetGenomesByBrainAndAgentType(agentType, brain).ToArray(), count);
             }
         }
 
@@ -947,15 +981,17 @@ namespace NeuralNetworkDirectory.ECS
                 SimAgentTypes.Scavenger => scavBrainTypes,
                 _ => throw new ArgumentException("Invalid agent type")
             };
-            foreach (KeyValuePair<int, BrainType> kvp in brainTypes)
+
+            foreach (var kvp in brainTypes)
             {
-                if (EqualityComparer<BrainType>.Default.Equals(kvp.Value, value))
+                if (kvp.Value == value)
                 {
                     return kvp.Key;
                 }
             }
 
-            throw new KeyNotFoundException("The value is not present in the brainTypes dictionary.");
+            throw new KeyNotFoundException(
+                $"The value '{value}' is not present in the brainTypes dictionary for agent type '{agentType}'.");
         }
 
         private void OnDrawGizmos()

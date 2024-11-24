@@ -62,7 +62,7 @@ namespace NeuralNetworkDirectory.GeneticAlg
             return genomes;
         }
 
-        public Genome[] Epoch(Genome[] oldGenomes)
+        public List<Genome> Epoch(Genome[] oldGenomes, int totalCount)
         {
             totalFitness = 0;
 
@@ -76,9 +76,9 @@ namespace NeuralNetworkDirectory.GeneticAlg
 
             SelectElite();
 
-            while (newPopulation.Count < population.Count) Crossover();
+            while (newPopulation.Count < (population.Count > 0 ? totalCount : 0)) Crossover();
 
-            return newPopulation.ToArray();
+            return newPopulation;
         }
 
         private void SelectElite()
@@ -198,6 +198,7 @@ namespace NeuralNetworkDirectory.GeneticAlg
             float selectionChance = 0.5f;
 
             for (int i = 0; i < parent1.genome.Length; i++)
+            {
                 if (random.NextDouble() < selectionChance)
                 {
                     child1.genome[i] = parent1.genome[i];
@@ -208,6 +209,7 @@ namespace NeuralNetworkDirectory.GeneticAlg
                     child1.genome[i] = parent2.genome[i];
                     child2.genome[i] = parent1.genome[i];
                 }
+            }
         }
 
         private bool ShouldMutate()

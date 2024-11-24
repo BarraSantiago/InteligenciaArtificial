@@ -26,6 +26,8 @@ namespace StateMachine.Agents.Simulation
             foodTarget = SimNodeType.Corpse;
             FoodLimit = 1;
             movement = 2;
+            HasAttacked = false;
+            HasKilled = false;
 
             CalculateInputs();
             OnAttack += Attack;
@@ -116,11 +118,16 @@ namespace StateMachine.Agents.Simulation
 
             Fsm.AddBehaviour<SimWalkCarnState>(Behaviours.Walk, WalkTickParameters);
 
-            Fsm.AddBehaviour<SimAttackState>(Behaviours.Attack, AttackEnterParameters);
+            Fsm.AddBehaviour<SimAttackState>(Behaviours.Attack, AttackTickParameters);
         }
 
-        private object[] AttackEnterParameters()
+        private object[] AttackTickParameters()
         {
+            if (output.Length < 3 || output[GetBrainTypeKeyByValue(BrainType.Movement)].Length < 2)
+            {
+                return Array.Empty<object>();
+            }
+
             int extraBrain = GetBrainTypeKeyByValue(BrainType.Attack);
             object[] objects =
             {
@@ -137,12 +144,22 @@ namespace StateMachine.Agents.Simulation
             return objects;
         }
 
+        protected override object[] WalkTickParameters()
+        {
+            object[] objects =
+            {
+                CurrentNode, target?.CurrentNode.GetCoordinate(), foodTarget, OnMove,
+                output[GetBrainTypeKeyByValue(BrainType.Eat)], output[GetBrainTypeKeyByValue(BrainType.Attack)]
+            };
+            return objects;
+        }
+
 
         private void Attack()
         {
             if (target is not Herbivore<IVector, ITransform<IVector>> herbivore ||
                 !Approximatly(herbivore.Transform.position, transform.position, 0.2f)) return;
-            
+
             herbivore.Hp--;
             HasAttacked = true;
             DamageDealt++;
