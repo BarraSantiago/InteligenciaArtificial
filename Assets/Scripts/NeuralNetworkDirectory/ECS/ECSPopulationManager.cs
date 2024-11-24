@@ -63,9 +63,6 @@ namespace NeuralNetworkDirectory.ECS
         private const float Bias = 0.0f;
         private const float SigmoidP = .5f;
         private bool isRunning = true;
-        private static int missingHerbivores;
-        private static int missingCarnivores;
-        private static int missingScavengers;
         private int plantCount;
         private int currentTurn;
         private int behaviourCount;
@@ -336,13 +333,12 @@ namespace NeuralNetworkDirectory.ECS
 
             CleanMap();
             InitializePlants();
-
-
+            
             if (!remainingPopulation)
             {
                 FillPopulation();
-
                 _population.Clear();
+                
                 return;
             }
 
@@ -367,7 +363,7 @@ namespace NeuralNetworkDirectory.ECS
             genomes.Clear();
             indexes.Clear();
 
-            if (Generation % 25 != 0) return;
+            if (Generation % 100 != 0) return;
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
@@ -676,12 +672,12 @@ namespace NeuralNetworkDirectory.ECS
 
         private void FillPopulation()
         {
+            int missingCarnivores = carnivoreCount - _agents.Count(agent => agent.Value.agentType == SimAgentTypes.Carnivore);
+            int missingHerbivores = herbivoreCount - _agents.Count(agent => agent.Value.agentType == SimAgentTypes.Herbivore);
+            int missingScavengers = scavengerCount - _agents.Count(agent => agent.Value.agentType == SimAgentTypes.Scavenger);
             CreateAgents(missingHerbivores, SimAgentTypes.Herbivore);
             CreateAgents(missingCarnivores, SimAgentTypes.Carnivore);
             CreateAgents(missingScavengers, SimAgentTypes.Scavenger);
-            missingCarnivores = 0;
-            missingHerbivores = 0;
-            missingScavengers = 0;
         }
 
         private void CreateNewGenomes(Dictionary<SimAgentTypes, Dictionary<BrainType, Genome[]>> genomes)
@@ -845,46 +841,6 @@ namespace NeuralNetworkDirectory.ECS
             return nearestAgent;
         }
 
-        public static SimAgentType GetEntity(SimAgentTypes entityType, INode<IVector> position)
-        {
-            if (position == null) return null;
-            SimAgentType result = null;
-            SimAgentType[] agentsCopy = _agents.Values.ToArray();
-
-            foreach (SimAgentType agent in agentsCopy)
-            {
-                if (agent.agentType != entityType || agent.Transform?.position == null ||
-                    !agent.Transform.position.Equals(position.GetCoordinate())) continue;
-                result = agent;
-                break;
-            }
-
-            return result;
-        }
-
-        public static SimAgentType GetEntity(SimAgentTypes entityType, ICoordinate<IVector> position)
-        {
-            SimAgentType target = null;
-
-            foreach (SimAgentType agent in _agents.Values)
-            {
-                if (agent.agentType != entityType) continue;
-
-                if (!position.GetCoordinate().Equals(agent.CurrentNode.GetCoordinate())) continue;
-
-                target = agent;
-                break;
-            }
-
-            return target;
-        }
-
-        public static INode<IVector> CoordinateToNode(ICoordinate<IVector> coordinate)
-        {
-            return graph.NodesType.Cast<INode<IVector>>()
-                .FirstOrDefault(node => node.GetCoordinate().Equals(coordinate.GetCoordinate()));
-        }
-
         public static INode<IVector> CoordinateToNode(IVector coordinate)
         {
             if (coordinate.X < 0 || coordinate.Y < 0 || coordinate.X >= graph.MaxX || coordinate.Y >= graph.MaxY)
@@ -932,7 +888,8 @@ namespace NeuralNetworkDirectory.ECS
                 IVector scavengerPosition = scavenger.Transform.position;
                 float distanceSquared = IVector.DistanceSquared(boidPosition, scavengerPosition);
 
-                if (distanceSquared <= detectionRadiusSquared)
+                if (distanceSquared > detectionRadiusSquared) return;
+                lock (insideRadiusBoids)
                 {
                     insideRadiusBoids.Add(scavenger.boid.transform);
                 }
@@ -1057,30 +1014,11 @@ namespace NeuralNetworkDirectory.ECS
         public static void RemoveEntity(SimAgentType simAgent)
         {
             simAgent.Uninit();
-            CountMissing(simAgent.agentType);
             uint agentId = _agents.FirstOrDefault(agent => agent.Value == simAgent).Key;
             _agents.Remove(agentId);
             _population.Remove(agentId);
             _scavengers.Remove(agentId);
             ECSManager.RemoveEntity(agentId);
-        }
-
-        private static void CountMissing(SimAgentTypes agentType)
-        {
-            switch (agentType)
-            {
-                case SimAgentTypes.Carnivore:
-                    missingCarnivores++;
-                    break;
-                case SimAgentTypes.Herbivore:
-                    missingHerbivores++;
-                    break;
-                case SimAgentTypes.Scavenger:
-                    missingScavengers++;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
         }
 
         public static float[] GetWeights(NeuronLayer layer)
