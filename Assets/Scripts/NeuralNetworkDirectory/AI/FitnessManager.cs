@@ -229,7 +229,7 @@ namespace NeuralNetworkDirectory.AI
         {
             const float reward = 10;
             const float punishment = 0.90f;
-            const float safeDistance = 1f;
+            const float safeDistance = 0.7f;
 
             Scavenger<TVector, TTransform> agent = (Scavenger<TVector, TTransform>)_agents[agentId];
             IVector targetPosition = agent.GetTarget(SimNodeType.Carrion).GetCoordinate();
@@ -243,8 +243,6 @@ namespace NeuralNetworkDirectory.AI
 
             foreach (ITransform<IVector> neighbor in agent.boid.NearBoids)
             {
-                if (Approximatly(neighbor.position, agent.boid.transform.position)) continue;
-
                 IVector neighborPosition = neighbor.position;
                 float distance = agent.Transform.position.Distance(neighborPosition);
 
@@ -280,11 +278,7 @@ namespace NeuralNetworkDirectory.AI
                 Punish(ECSManager.GetComponent<NeuralNetComponent>(agentId),punishment, BrainType.Flocking);
             }
         }
-        
-        private bool Approximatly(IVector a, IVector b, float tolerance = 0.01f)
-        {
-            return (a - b).Magnitude() < tolerance;
-        }
+
         private void ScavengerMovementFC(uint agentId)
         {
             const float reward = 10;
