@@ -89,15 +89,23 @@ namespace NeuralNetworkDirectory.GeneticAlg
 
         private void Crossover()
         {
+            const int maxRetries = 10;
+
             Genome mom = RouletteSelection();
             Genome dad = RouletteSelection();
 
-            Genome child1;
-            Genome child2;
+            for (int i = 0; i < maxRetries; i++)
+            {
+                mom ??= RouletteSelection();
+                dad ??= RouletteSelection();
+
+                if (mom != null && dad != null)
+                    break;
+            }
 
             if (mom == null || dad == null) return;
 
-            UniformCrossover(mom, dad, out child1, out child2);
+            UniformCrossover(mom, dad, out Genome child1, out Genome child2);
 
             newPopulation.Add(child1);
             newPopulation.Add(child2);
