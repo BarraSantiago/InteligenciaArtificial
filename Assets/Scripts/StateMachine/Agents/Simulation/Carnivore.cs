@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using NeuralNetworkDirectory.ECS;
 using NeuralNetworkDirectory.NeuralNet;
 using Pathfinder;

@@ -2,7 +2,6 @@
 using Pathfinder;
 using StateMachine.Agents.Simulation;
 using States;
-using UnityEngine;
 using Utils;
 
 namespace StateMachine.States.SimStates

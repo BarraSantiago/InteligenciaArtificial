@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using UnityEngine;
 using Utils;
 
 namespace Pathfinder.Graph
