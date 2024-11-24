@@ -641,7 +641,7 @@ namespace NeuralNetworkDirectory.ECS
             foreach (KeyValuePair<uint, SimAgentType> agent in _agents)
             {
                 SimAgentTypes agentType = agent.Value.agentType;
-                
+
                 switch (agentType)
                 {
                     case SimAgentTypes.Carnivore:
@@ -739,20 +739,32 @@ namespace NeuralNetworkDirectory.ECS
         {
             List<Genome> genomes = new List<Genome>();
 
-            foreach (KeyValuePair<uint, Dictionary<BrainType, List<Genome>>> agentEntry in _population)
+            foreach (KeyValuePair<uint, SimAgentType> agentEntry in _agents)
             {
                 uint agentId = agentEntry.Key;
-                Dictionary<BrainType, List<Genome>> brainDict = agentEntry.Value;
+                SimAgentType agent = agentEntry.Value;
 
-                if (_agents[agentId].agentType != agentType ||
-                    !brainDict.TryGetValue(brainType, out List<Genome> value) || value.Count == 0) continue;
-
-                genomes.AddRange(value);
-                if (genomes.Count > 0)
+                if (agent.agentType != agentType)
                 {
-                    genomes[^1].fitness = ECSManager.GetComponent<NeuralNetComponent>(agentId).Fitness[_agents[agentId]
-                        .GetBrainTypeKeyByValue(brainType)];
+                    continue;
                 }
+
+                NeuralNetComponent neuralNetComponent = ECSManager.GetComponent<NeuralNetComponent>(agentId);
+
+                List<float> weights = new List<float>();
+                foreach (List<NeuronLayer> layerList in neuralNetComponent.Layers)
+                {
+                    foreach (NeuronLayer layer in layerList)
+                    {
+                        if (layer.BrainType != brainType) continue;
+
+
+                        weights.AddRange(GetWeights(layer));
+                    }
+                }
+
+                Genome genome = new Genome(weights.ToArray());
+                genomes.Add(genome);
             }
 
             return genomes;
