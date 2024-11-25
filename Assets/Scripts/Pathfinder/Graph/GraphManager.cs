@@ -1,5 +1,5 @@
 ﻿using System;
-using NeuralNetworkDirectory.ECS;
+using NeuralNetworkDirectory;
 using NeuralNetworkLib.Utils;
 using Random = System.Random;
 

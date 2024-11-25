@@ -15,7 +15,7 @@ using Pathfinder.Graph;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace NeuralNetworkDirectory.ECS
+namespace NeuralNetworkDirectory
 {
     using SimAgentType = SimAgent<IVector, ITransform<IVector>>;
     using SimBoid = Boid<IVector, ITransform<IVector>>;
@@ -223,7 +223,7 @@ namespace NeuralNetworkDirectory.ECS
 
             float dt = Time.fixedDeltaTime;
 
-            float clampSpeed = Mathf.Clamp(speed / 100.0f * 50, 1, 50);
+            float clampSpeed = Mathf.Clamp(speed, 1, 100);
             for (int i = 0; i < clampSpeed; i++)
             {
                 EntitiesTurn(dt);
@@ -781,7 +781,6 @@ namespace NeuralNetworkDirectory.ECS
 
         private void Save(string directoryPath, int generation)
         {
-            /*
             var agentsData = new List<AgentNeuronData>();
 
             var entitiesCopy = DataContainer.Agents.ToList();
@@ -789,38 +788,36 @@ namespace NeuralNetworkDirectory.ECS
             Parallel.ForEach(entitiesCopy, parallelOptions, entity =>
             {
                 var netComponent = ECSManager.GetComponent<NeuralNetComponent>(entity.Key);
-                for (int i = 0; i < netComponent.Layers.Count; i++)
+                foreach (var neuronLayers in netComponent.Layers)
                 {
-                    for (int j = 0; j < netComponent.Layers[i].Count; j++)
+                    foreach (var layer in neuronLayers)
                     {
-                        var layer = netComponent.Layers[i][j];
                         var neuronData = new AgentNeuronData
                         {
                             AgentType = layer.AgentType,
                             BrainType = layer.BrainType,
-                            TotalWeights = layer.GetWeights().Length,
-                            Bias = layer.Bias,
-                            NeuronWeights = layer.GetWeights(),
-                            Fitness = netComponent.Fitness[i]
+                            NeuronWeights = GetWeights(layer),
                         };
                         agentsData.Add(neuronData);
                     }
                 }
+            });
 
-                NeuronDataSystem.SaveNeurons(agentsData, directoryPath, generation);
-            });*/
+            NeuronDataSystem.SaveNeurons(agentsData, directoryPath, generation);
         }
 
         public void Load(string directoryPath)
         {
-            /*
             Dictionary<SimAgentTypes, Dictionary<BrainType, List<AgentNeuronData>>> loadedData =
                 NeuronDataSystem.LoadLatestNeurons(directoryPath);
 
             Parallel.ForEach(DataContainer.Agents, parallelOptions, entity =>
             {
                 NeuralNetComponent netComponent = ECSManager.GetComponent<NeuralNetComponent>(entity.Key);
-                SimAgentType agent = DataContainer.Agents[entity.Key];
+                if (netComponent == null || !DataContainer.Agents.TryGetValue(entity.Key, out SimAgentType agent))
+                {
+                    return;
+                }
 
                 if (!loadedData.TryGetValue(agent.agentType,
                         out Dictionary<BrainType, List<AgentNeuronData>> brainData)) return;
@@ -841,21 +838,13 @@ namespace NeuralNetworkDirectory.ECS
                                 {
                                     layer.AgentType = neuronData.AgentType;
                                     layer.BrainType = neuronData.BrainType;
-                                    layer.Bias = neuronData.Bias;
-
-
                                     fromId = SetWeights(GetWeights(layer), neuronData.NeuronWeights, fromId);
                                 }
                             }
                         }
-
-                        lock (netComponent.Fitness)
-                        {
-                            netComponent.Fitness[i] = neuronData.Fitness;
-                        }
                     }
                 });
-            });*/
+            });
         }
 
         public static SimAgentType GetNearestEntity(SimAgentTypes entityType, IVector position)
