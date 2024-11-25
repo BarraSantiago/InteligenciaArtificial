@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Flocking;
 using NeuralNetworkLib.Agents.Flocking;
 using NeuralNetworkLib.Agents.SimAgents;
 using NeuralNetworkLib.DataManagement;
@@ -94,7 +93,10 @@ namespace NeuralNetworkDirectory.ECS
             carnBrainTypes[1] = BrainType.Movement;
             carnBrainTypes[2] = BrainType.Attack;
 
-
+            DataContainer.carnBrainTypes = carnBrainTypes;
+            DataContainer.herbBrainTypes = herbBrainTypes;
+            DataContainer.scavBrainTypes = scavBrainTypes;
+            
             inputCounts = new[]
             {
                 new NeuronInputCount
@@ -777,7 +779,7 @@ namespace NeuralNetworkDirectory.ECS
 
         private void CleanMap()
         {
-            foreach (SimNode<IVector> node in graph.NodesType)
+            foreach (SimNode<IVector> node in DataContainer.graph.NodesType)
             {
                 node.Food = 0;
                 node.NodeType = SimNodeType.Empty;
@@ -885,12 +887,12 @@ namespace NeuralNetworkDirectory.ECS
 
         public static INode<IVector> CoordinateToNode(IVector coordinate)
         {
-            if (coordinate.X < 0 || coordinate.Y < 0 || coordinate.X >= graph.MaxX || coordinate.Y >= graph.MaxY)
+            if (coordinate.X < 0 || coordinate.Y < 0 || coordinate.X >= DataContainer.graph.MaxX || coordinate.Y >= DataContainer.graph.MaxY)
             {
                 return null;
             }
 
-            return graph.NodesType[(int)coordinate.X, (int)coordinate.Y];
+            return DataContainer.graph.NodesType[(int)coordinate.X, (int)coordinate.Y];
         }
 
         private void StartSimulation()
@@ -945,7 +947,7 @@ namespace NeuralNetworkDirectory.ECS
             INode<IVector> nearestNode = null;
             float minDistance = float.MaxValue;
 
-            foreach (SimNode<IVector> node in graph.NodesType)
+            foreach (SimNode<IVector> node in DataContainer.graph.NodesType)
             {
                 if (node.NodeType != nodeType) continue;
 
@@ -1008,7 +1010,7 @@ namespace NeuralNetworkDirectory.ECS
                 return;
 
 
-            foreach (SimNode<IVector> node in graph.NodesType)
+            foreach (SimNode<IVector> node in DataContainer.graph.NodesType)
             {
                 Gizmos.color = node.NodeType switch
                 {
