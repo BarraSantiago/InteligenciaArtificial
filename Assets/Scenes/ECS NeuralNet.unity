@@ -256,7 +256,8 @@ MonoBehaviour:
   herbivoreCount: 15
   scavengerCount: 10
   eliteCount: 2
-  generationDuration: 120
+  generationsPerSave: 25
+  generationDuration: 25
   mutationChance: 0.1
   mutationRate: 0.07
   Generation: 0
