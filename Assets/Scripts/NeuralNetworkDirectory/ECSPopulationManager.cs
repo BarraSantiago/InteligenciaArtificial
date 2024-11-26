@@ -24,6 +24,7 @@ namespace NeuralNetworkDirectory
     {
         #region Variables
 
+        [Header("Population Setup")]
         [SerializeField] private Mesh carnivoreMesh;
         [SerializeField] private Material carnivoreMat;
         [SerializeField] private Mesh herbivoreMesh;
@@ -31,16 +32,20 @@ namespace NeuralNetworkDirectory
         [SerializeField] private Mesh scavengerMesh;
         [SerializeField] private Material scavengerMat;
 
+        [Header("Population Settings")]
         [SerializeField] private int carnivoreCount = 10;
         [SerializeField] private int herbivoreCount = 20;
         [SerializeField] private int scavengerCount = 10;
-        [SerializeField] private int eliteCount = 4;
-        [SerializeField] private int generationsPerSave = 25;
-        [SerializeField] private float Bias = 0.0f;
-        [SerializeField] private float generationDuration = 20.0f;
-        [SerializeField] private float mutationChance = 0.10f;
         [SerializeField] private float mutationRate = 0.01f;
+        [SerializeField] private float mutationChance = 0.10f;
+        [SerializeField] private int eliteCount = 4;
+        
+        [Header("Modifiable Settings")]
         [SerializeField] public int Generation;
+        [SerializeField] private float Bias = 0.0f;
+        [SerializeField] private int generationsPerSave = 25;
+        [SerializeField] private float generationDuration = 20.0f;
+        [SerializeField] private int generationToLoad = 0;
 
         public int gridWidth = 10;
         public int gridHeight = 10;
@@ -222,7 +227,7 @@ namespace NeuralNetworkDirectory
 
             float dt = Time.fixedDeltaTime;
 
-            float clampSpeed = Mathf.Clamp(speed, 1, 100);
+            float clampSpeed = Mathf.Clamp(speed, 1, 1500);
             for (int i = 0; i < clampSpeed; i++)
             {
                 EntitiesTurn(dt);
@@ -292,6 +297,7 @@ namespace NeuralNetworkDirectory
                     entity.Value.Fsm.MainThreadTick(i);
                 }
 
+                
                 Task.WaitAll(tasks.ToArray());
 
                 foreach (Task task in tasks)
@@ -846,7 +852,8 @@ namespace NeuralNetworkDirectory
 
         public void Load(string directoryPath)
         {
-            Dictionary<SimAgentTypes, Dictionary<BrainType, List<AgentNeuronData>>> loadedData =
+            Dictionary<SimAgentTypes, Dictionary<BrainType, List<AgentNeuronData>>> loadedData = generationToLoad > 0 ?
+                NeuronDataSystem.LoadSpecificNeurons(directoryPath, generationToLoad) :
                 NeuronDataSystem.LoadLatestNeurons(directoryPath);
 
             if (loadedData.Count == 0) return;
