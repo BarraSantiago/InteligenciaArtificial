@@ -257,7 +257,7 @@ MonoBehaviour:
   scavengerCount: 10
   eliteCount: 2
   generationsPerSave: 100
-  Bias: 1
+  Bias: 0.5
   generationDuration: 80
   mutationChance: 0.1
   mutationRate: 0.07
