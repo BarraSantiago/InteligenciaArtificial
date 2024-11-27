@@ -258,11 +258,11 @@ MonoBehaviour:
   mutationRate: 0.07
   mutationChance: 0.1
   eliteCount: 2
-  Generation: 90
+  Generation: 511
   Bias: 0.5
-  generationsPerSave: 255
-  generationDuration: 20
-  generationToLoad: 0
+  generationsPerSave: 120
+  generationDuration: 30
+  generationToLoad: 1
   gridWidth: 50
   gridHeight: 50
   speed: 150

@@ -13,6 +13,7 @@ using NeuralNetworkLib.NeuralNetDirectory.NeuralNet;
 using NeuralNetworkLib.Utils;
 using Pathfinder.Graph;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 namespace NeuralNetworkDirectory
@@ -24,27 +25,32 @@ namespace NeuralNetworkDirectory
     {
         #region Variables
 
-        [Header("Population Setup")]
-        [SerializeField] private Mesh carnivoreMesh;
+        [Header("Population Setup")] [SerializeField]
+        private Mesh carnivoreMesh;
+
         [SerializeField] private Material carnivoreMat;
         [SerializeField] private Mesh herbivoreMesh;
         [SerializeField] private Material herbivoreMat;
         [SerializeField] private Mesh scavengerMesh;
         [SerializeField] private Material scavengerMat;
 
-        [Header("Population Settings")]
-        [SerializeField] private int carnivoreCount = 10;
+        [Header("Population Settings")] [SerializeField]
+        private int carnivoreCount = 10;
+
         [SerializeField] private int herbivoreCount = 20;
         [SerializeField] private int scavengerCount = 10;
         [SerializeField] private float mutationRate = 0.01f;
         [SerializeField] private float mutationChance = 0.10f;
         [SerializeField] private int eliteCount = 4;
-        
-        [Header("Modifiable Settings")]
-        [SerializeField] public int Generation;
+
+        [Header("Modifiable Settings")] [SerializeField]
+        public int Generation;
+
         [SerializeField] private float Bias = 0.0f;
         [SerializeField] private int generationsPerSave = 25;
         [SerializeField] private float generationDuration = 20.0f;
+        [SerializeField] private bool activateSave;
+        [SerializeField] private bool activateLoad;
         [SerializeField] private int generationToLoad = 0;
 
         public int gridWidth = 10;
@@ -77,6 +83,7 @@ namespace NeuralNetworkDirectory
 
         private void Awake()
         {
+            NeuronDataSystem.OnSpecificLoaded += SpecificLoaded;
             Herbivore<IVector, ITransform<IVector>>.OnDeath += RemoveEntity;
             DataContainer.herbBrainTypes = new Dictionary<int, BrainType>();
             DataContainer.scavBrainTypes = new Dictionary<int, BrainType>();
@@ -156,6 +163,7 @@ namespace NeuralNetworkDirectory
             fitnessManager = new FitnessManager<IVector, ITransform<IVector>>(DataContainer.Agents);
             behaviourCount = GetHighestBehaviourCount();
         }
+
 
         private void Update()
         {
@@ -296,7 +304,7 @@ namespace NeuralNetworkDirectory
                     entity.Value.Fsm.MainThreadTick(i);
                 }
 
-                
+
                 Task.WaitAll(tasks.ToArray());
 
                 foreach (Task task in tasks)
@@ -780,6 +788,8 @@ namespace NeuralNetworkDirectory
 
         private void Save(string directoryPath, int generation)
         {
+            if (!activateSave) return;
+
             List<AgentNeuronData> agentsData = new List<AgentNeuronData>();
 
             if (DataContainer.Agents.Count == 0) return;
@@ -812,8 +822,11 @@ namespace NeuralNetworkDirectory
 
             NeuronDataSystem.SaveNeurons(agentsData, directoryPath, generation);
         }
+
         public void Load(SimAgentTypes agentType)
         {
+            if (!activateLoad) return;
+
             Dictionary<SimAgentTypes, Dictionary<BrainType, List<AgentNeuronData>>> loadedData =
                 NeuronDataSystem.LoadLatestNeurons(DirectoryPath);
 
@@ -855,9 +868,11 @@ namespace NeuralNetworkDirectory
 
         public void Load(string directoryPath)
         {
-            Dictionary<SimAgentTypes, Dictionary<BrainType, List<AgentNeuronData>>> loadedData = generationToLoad > 0 ?
-                NeuronDataSystem.LoadSpecificNeurons(directoryPath, generationToLoad) :
-                NeuronDataSystem.LoadLatestNeurons(directoryPath);
+            if (!activateLoad) return;
+            Dictionary<SimAgentTypes, Dictionary<BrainType, List<AgentNeuronData>>> loadedData =
+                generationToLoad > 0
+                    ? NeuronDataSystem.LoadSpecificNeurons(directoryPath, generationToLoad)
+                    : NeuronDataSystem.LoadLatestNeurons(directoryPath);
 
             if (loadedData.Count == 0) return;
             System.Random random = new System.Random();
@@ -991,7 +1006,7 @@ namespace NeuralNetworkDirectory
 
             foreach (KeyValuePair<uint, SimAgentType> agentEntry in DataContainer.Agents)
             {
-                if(agentEntry.Value.agentType != SimAgentTypes.Herbivore) continue;
+                if (agentEntry.Value.agentType != SimAgentTypes.Herbivore) continue;
                 SimAgentType agent = agentEntry.Value;
                 if (agent.agentType == SimAgentTypes.Herbivore)
                 {
@@ -1072,6 +1087,18 @@ namespace NeuralNetworkDirectory
             }
 
             return weights;
+        }
+
+        private void SpecificLoaded(bool obj)
+        {
+            if (obj)
+            {
+                Debug.Log("Specific generation loaded correctly.");
+            }
+            else
+            {
+                Debug.LogWarning("Specific generation couldn't be loaded.");
+            }
         }
     }
 }
