@@ -786,6 +786,8 @@ namespace NeuralNetworkDirectory
 
             List<KeyValuePair<uint, SimAgentType>> entitiesCopy = DataContainer.Agents.ToList();
 
+            agentsData.Capacity = entitiesCopy.Count * DataContainer.InputCountCache.Count;
+
             Parallel.ForEach(entitiesCopy, parallelOptions, entity =>
             {
                 NeuralNetComponent netComponent = ECSManager.GetComponent<NeuralNetComponent>(entity.Key);
@@ -801,13 +803,15 @@ namespace NeuralNetworkDirectory
                     }
 
                     neuronData.NeuronWeights = weights.ToArray();
-                    agentsData.Add(neuronData);
+                    lock (agentsData)
+                    {
+                        agentsData.Add(neuronData);
+                    }
                 }
             });
 
             NeuronDataSystem.SaveNeurons(agentsData, directoryPath, generation);
         }
-
         public void Load(SimAgentTypes agentType)
         {
             Dictionary<SimAgentTypes, Dictionary<BrainType, List<AgentNeuronData>>> loadedData =
@@ -987,6 +991,7 @@ namespace NeuralNetworkDirectory
 
             foreach (KeyValuePair<uint, SimAgentType> agentEntry in DataContainer.Agents)
             {
+                if(agentEntry.Value.agentType != SimAgentTypes.Herbivore) continue;
                 SimAgentType agent = agentEntry.Value;
                 if (agent.agentType == SimAgentTypes.Herbivore)
                 {
