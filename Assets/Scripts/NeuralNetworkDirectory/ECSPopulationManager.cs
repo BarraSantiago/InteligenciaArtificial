@@ -24,27 +24,24 @@ namespace NeuralNetworkDirectory
     {
         #region Variables
 
-        [Header("Population Setup")] [SerializeField]
-        private Mesh carnivoreMesh;
-
+        [Header("Population Setup")] 
+        [SerializeField] private Mesh carnivoreMesh;
         [SerializeField] private Material carnivoreMat;
         [SerializeField] private Mesh herbivoreMesh;
         [SerializeField] private Material herbivoreMat;
         [SerializeField] private Mesh scavengerMesh;
         [SerializeField] private Material scavengerMat;
 
-        [Header("Population Settings")] [SerializeField]
-        private int carnivoreCount = 10;
-
+        [Header("Population Settings")] 
+        [SerializeField] private int carnivoreCount = 10;
         [SerializeField] private int herbivoreCount = 20;
         [SerializeField] private int scavengerCount = 10;
         [SerializeField] private float mutationRate = 0.01f;
         [SerializeField] private float mutationChance = 0.10f;
         [SerializeField] private int eliteCount = 4;
 
-        [Header("Modifiable Settings")] [SerializeField]
-        public int Generation;
-
+        [Header("Modifiable Settings")]
+        [SerializeField] public int Generation;
         [SerializeField] private float Bias = 0.0f;
         [SerializeField] private int generationsPerSave = 25;
         [SerializeField] private float generationDuration = 20.0f;
@@ -68,7 +65,6 @@ namespace NeuralNetworkDirectory
         private GeneticAlgorithm genAlg;
         private GraphManager<IVector, ITransform<IVector>> gridManager;
         private FitnessManager<IVector, ITransform<IVector>> fitnessManager;
-        private static Dictionary<uint, Dictionary<BrainType, List<Genome>>> _population = new();
         private static readonly int BrainsAmount = Enum.GetValues(typeof(BrainType)).Length;
 
         private ParallelOptions parallelOptions = new()
@@ -287,7 +283,6 @@ namespace NeuralNetworkDirectory
             if (!remainingPopulation)
             {
                 FillPopulation();
-                _population.Clear();
                 return;
             }
 
@@ -337,8 +332,6 @@ namespace NeuralNetworkDirectory
 
         private void GenerateInitialPopulation()
         {
-            DestroyAgents();
-
             CreateAgents(herbivoreCount, SimAgentTypes.Herbivore);
             CreateAgents(carnivoreCount, SimAgentTypes.Carnivore);
             CreateAgents(scavengerCount, SimAgentTypes.Scavenger);
@@ -422,19 +415,6 @@ namespace NeuralNetworkDirectory
                     lock (DataContainer.Scavengers)
                     {
                         DataContainer.Scavengers[entityID] = (Scavenger<IVector, ITransform<IVector>>)agent;
-                    }
-                }
-
-                foreach (BrainType brain in agent.brainTypes.Values)
-                {
-                    lock (_population)
-                    {
-                        if (!_population.ContainsKey(entityID))
-                        {
-                            _population[entityID] = new Dictionary<BrainType, List<Genome>>();
-                        }
-
-                        _population[entityID][brain] = genomes[brain];
                     }
                 }
             });
@@ -547,13 +527,6 @@ namespace NeuralNetworkDirectory
 
             return layers;
         }
-
-        private void DestroyAgents()
-        {
-            _population.Clear();
-        }
-
-
         private void BrainsHandler(Dictionary<SimAgentTypes, Dictionary<BrainType, int>> indexes,
             Dictionary<SimAgentTypes, Dictionary<BrainType, List<Genome>>> genomes,
             bool remainingCarn, bool remainingScav, bool remainingHerb)
@@ -588,15 +561,6 @@ namespace NeuralNetworkDirectory
                     }
 
                     int index = Random.Range(0, genomes[agentType][brain].Count);
-                    if (!_population.ContainsKey(agent.Key))
-                    {
-                        _population[agent.Key] = new Dictionary<BrainType, List<Genome>>();
-                    }
-
-                    if (!_population[agent.Key].ContainsKey(brain))
-                    {
-                        _population[agent.Key][brain] = new List<Genome>();
-                    }
 
                     if (index >= genomes[agentType][brain].Count) continue;
 
@@ -604,8 +568,6 @@ namespace NeuralNetworkDirectory
                     SetWeights(neuralNetComponent.Layers[GetBrainTypeKeyByValue(brain, agent.Value.agentType)],
                         genomes[agentType][brain][index].genome);
 
-
-                    _population[agent.Key][brain].Add(genomes[agentType][brain][index]);
                     genomes[agentType][brain].Remove(genomes[agentType][brain][index]);
 
                     agent.Value.Transform = new ITransform<IVector>(new MyVector(
@@ -820,7 +782,6 @@ namespace NeuralNetworkDirectory
         private void StartSimulation()
         {
             DataContainer.Agents = new Dictionary<uint, SimAgentType>();
-            _population = new Dictionary<uint, Dictionary<BrainType, List<Genome>>>();
             genAlg = new GeneticAlgorithm(eliteCount, mutationChance, mutationRate);
             GenerateInitialPopulation();
             Load(DirectoryPath);
@@ -831,7 +792,6 @@ namespace NeuralNetworkDirectory
         {
             isRunning = false;
             Generation = 0;
-            DestroyAgents();
         }
 
         public void PauseSimulation()
@@ -909,7 +869,6 @@ namespace NeuralNetworkDirectory
 
             foreach (KeyValuePair<uint, SimAgentType> agentEntry in DataContainer.Agents)
             {
-                if (agentEntry.Value.agentType != SimAgentTypes.Herbivore) continue;
                 SimAgentType agent = agentEntry.Value;
                 if (agent.agentType == SimAgentTypes.Herbivore)
                 {
@@ -941,7 +900,6 @@ namespace NeuralNetworkDirectory
             simAgent.Uninit();
             uint agentId = DataContainer.Agents.FirstOrDefault(agent => agent.Value == simAgent).Key;
             DataContainer.Agents.Remove(agentId);
-            _population.Remove(agentId);
             DataContainer.Scavengers.Remove(agentId);
             ECSManager.RemoveEntity(agentId);
         }
