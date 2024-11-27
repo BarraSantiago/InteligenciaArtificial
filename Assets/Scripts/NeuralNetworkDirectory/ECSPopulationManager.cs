@@ -231,8 +231,7 @@ namespace NeuralNetworkDirectory
             for (int i = 0; i < clampSpeed; i++)
             {
                 EntitiesTurn(dt);
-
-                accumTime += dt * clampSpeed;
+                accumTime += dt;
                 if (!(accumTime >= generationDuration)) return;
                 accumTime -= generationDuration;
                 Epoch();

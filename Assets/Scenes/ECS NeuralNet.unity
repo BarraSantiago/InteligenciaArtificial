@@ -255,16 +255,17 @@ MonoBehaviour:
   carnivoreCount: 10
   herbivoreCount: 15
   scavengerCount: 10
-  eliteCount: 2
-  generationsPerSave: 100
-  Bias: 0.5
-  generationDuration: 80
-  mutationChance: 0.1
   mutationRate: 0.07
+  mutationChance: 0.1
+  eliteCount: 2
   Generation: 0
+  Bias: 0.5
+  generationsPerSave: 1000000000
+  generationDuration: 20
+  generationToLoad: 0
   gridWidth: 50
   gridHeight: 50
-  speed: 100
+  speed: 150
 --- !u!4 &1659154293
 Transform:
   m_ObjectHideFlags: 0
