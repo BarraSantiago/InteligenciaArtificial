@@ -692,6 +692,7 @@ namespace NeuralNetworkDirectory
         {
             if (!activateLoad) return;
 
+            //  TODO BIT MATRIX
             Dictionary<SimAgentTypes, Dictionary<BrainType, List<AgentNeuronData>>> loadedData =
                 NeuronDataSystem.LoadLatestNeurons(DirectoryPath);
 
