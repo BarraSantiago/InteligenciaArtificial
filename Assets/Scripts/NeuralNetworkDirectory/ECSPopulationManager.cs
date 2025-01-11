@@ -79,7 +79,8 @@ namespace NeuralNetworkDirectory
             NeuronDataSystem.OnSpecificLoaded += SpecificLoaded;
             Herbivore<IVector, ITransform<IVector>>.OnDeath += RemoveEntity;
             ECSManager.Init();
-            DataContainer.graph.SaveGraph("GraphData.json");
+            
+            DataContainer.graph.LoadGraph("GraphData.json");
             StartSimulation();
             plantCount = DataContainer.Animals.Values.Count(agent => agent.agentType == AnimalAgentTypes.Herbivore) * 2;
             fitnessManager = new FitnessManager<IVector, ITransform<IVector>>(DataContainer.Animals);
