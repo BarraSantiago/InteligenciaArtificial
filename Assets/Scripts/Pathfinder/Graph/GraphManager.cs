@@ -25,21 +25,21 @@ namespace Pathfinder.Graph
         {
             int x = random.Next(0, Width);
             int y = random.Next(1, Height / 4);
-            return DataContainer.graph.NodesType[x, y];
+            return DataContainer.Graph.NodesType[x, y];
         }
 
         public INode<IVector> GetRandomPositionInUpperQuarter()
         {
             int x = random.Next(0, Width);
             int y = random.Next(3 * Height / 4, Height-1);
-            return DataContainer.graph.NodesType[x, y];
+            return DataContainer.Graph.NodesType[x, y];
         }
 
         public INode<IVector> GetRandomPosition()
         {
             int x = random.Next(0, Width);
             int y = random.Next(0, Height);
-            return DataContainer.graph.NodesType[x, y];
+            return DataContainer.Graph.NodesType[x, y];
         }
     }
 }
