@@ -12,6 +12,7 @@ using NeuralNetworkLib.NeuralNetDirectory;
 using NeuralNetworkLib.NeuralNetDirectory.NeuralNet;
 using NeuralNetworkLib.Utils;
 using Pathfinder.Graph;
+using UnityEditor;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -38,6 +39,7 @@ namespace NeuralNetworkDirectory
         [SerializeField] private int eliteCount = 4;
 
         [Header("Modifiable Settings")]
+        [SerializeField] [Range(0, 5)] private int VoronoiToDraw = 0;
         [SerializeField] public int Generation;
         [SerializeField] private float Bias = 0.0f;
         [SerializeField] private int generationsPerSave = 25;
@@ -798,6 +800,9 @@ namespace NeuralNetworkDirectory
             throw new KeyNotFoundException(
                 $"The value '{value}' is not present in the brainTypes dictionary for agent type '{agentType}'.");
         }
+        
+        private Color color = new Color(0.5f, 0.5f, 0.5f, 0.2f);
+
 
         private void OnDrawGizmos()
         {
@@ -817,11 +822,6 @@ namespace NeuralNetworkDirectory
                     _ => Color.white
                 };
 
-                Gizmos.DrawSphere(new Vector3(node.GetCoordinate().X, node.GetCoordinate().Y), (float)CellSize / 5);
-            }
-
-            foreach (SimNode<IVector> node in DataContainer.Graph.NodesType)
-            {
                 Gizmos.color = node.NodeTerrain switch
                 {
                     NodeTerrain.Tree => Color.green,
@@ -834,6 +834,20 @@ namespace NeuralNetworkDirectory
                 };
 
                 Gizmos.DrawCube(new Vector3(node.GetCoordinate().X, node.GetCoordinate().Y), Vector3.one / 7);
+                
+                Gizmos.DrawSphere(new Vector3(node.GetCoordinate().X, node.GetCoordinate().Y), (float)CellSize / 5);
+            }
+            
+            foreach (var sector in DataContainer.Voronois[VoronoiToDraw].SectorsToDraw())
+            {
+                Handles.color = color;
+                List<Vector3> list = new List<Vector3>();
+                foreach (var nodeVoronoi in sector.PointsToDraw())
+                    list.Add(new Vector3(nodeVoronoi.GetX(), nodeVoronoi.GetY()));
+                Handles.DrawAAConvexPolygon(list.ToArray());
+
+                Handles.color = Color.black;
+                Handles.DrawPolyLine(list.ToArray());
             }
         }
 

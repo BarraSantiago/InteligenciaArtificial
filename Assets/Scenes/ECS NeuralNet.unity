@@ -254,6 +254,7 @@ MonoBehaviour:
   mutationRate: 0.07
   mutationChance: 0.1
   eliteCount: 2
+  VoronoiToDraw: 1
   Generation: 3000
   Bias: 0.5
   generationsPerSave: 50
