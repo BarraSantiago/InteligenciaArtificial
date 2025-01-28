@@ -169,7 +169,7 @@ namespace NeuralNetworkDirectory
             ECSManager.Tick(dt);
 
             // TODO flocking
-            /*
+            
             Parallel.ForEach(agentsCopy, parallelOptions, entity =>
             {
                 OutputComponent outputComponent = ECSManager.GetComponent<OutputComponent>(entity.Key);
@@ -178,7 +178,7 @@ namespace NeuralNetworkDirectory
 
                 agent.output = outputComponent.Outputs;
 
-                if (agent.agentType != AgentTypes.Scavenger) return;
+                /*if (agent.agentType != AgentTypes.Scavenger) return;
 
                 SimBoid boid = DataContainer.Scavengers[entity.Key]?.boid;
 
@@ -186,8 +186,8 @@ namespace NeuralNetworkDirectory
                 {
                     UpdateBoidOffsets(boid, outputComponent.Outputs
                         [GetBrainTypeKeyByValue(BrainType.Flocking, AgentTypes.Scavenger)]);
-                }
-            });*/
+                }*/
+            });
 
             int batchSize = 10;
             for (int i = 0; i < behaviourCount; i++)
