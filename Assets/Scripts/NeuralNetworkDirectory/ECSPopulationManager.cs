@@ -85,7 +85,7 @@ namespace NeuralNetworkDirectory
             Herbivore<IVector, ITransform<IVector>>.OnDeath += RemoveEntity;
             ECSManager.Init();
 
-            //DataContainer.Graph.LoadGraph("GraphData.json");
+            DataContainer.Graph.LoadGraph("GraphData.json");
             StartSimulation();
             plantCount = DataContainer.Animals.Values.Count(agent => agent.agentType == AgentTypes.Herbivore) * 2;
             fitnessManager = new FitnessManager<IVector, ITransform<IVector>>(DataContainer.Animals);
@@ -103,6 +103,9 @@ namespace NeuralNetworkDirectory
 
             int carnivoreIndex = 0;
             int herbivoreIndex = 0;
+            int carIndex = 0;
+            int buiIndex = 0;
+            int gatIndex = 0;
 
             Parallel.ForEach(DataContainer.Animals.Keys, id =>
             {
@@ -132,42 +135,42 @@ namespace NeuralNetworkDirectory
                         throw new ArgumentOutOfRangeException();
                 }
             });
-            
+
             Parallel.ForEach(DataContainer.TcAgents.Keys, id =>
             {
                 IVector pos = DataContainer.TcAgents[id].Transform.position;
                 Vector3 position = new Vector3(pos.X, pos.Y);
                 Matrix4x4 matrix = Matrix4x4.Translate(position);
 
-                switch (DataContainer.Animals[id].agentType)
+                switch (DataContainer.TcAgents[id].AgentType)
                 {
                     case AgentTypes.Builder:
-                        int builderIndex = Interlocked.Increment(ref carnivoreIndex) - 1;
+                        int builderIndex = Interlocked.Increment(ref buiIndex) - 1;
                         if (builderIndex < carnivoreMatrices.Length)
                         {
                             builderMatrices[builderIndex] = matrix;
                         }
 
                         break;
-                    
+
                     case AgentTypes.Cart:
-                        int cartIndex = Interlocked.Increment(ref herbivoreIndex) - 1;
+                        int cartIndex = Interlocked.Increment(ref carIndex) - 1;
                         if (cartIndex < herbivoreMatrices.Length)
                         {
                             carnivoreMatrices[cartIndex] = matrix;
                         }
-                        
+
                         break;
-                    
+
                     case AgentTypes.Gatherer:
-                        int gathererIndex = Interlocked.Increment(ref herbivoreIndex) - 1;
+                        int gathererIndex = Interlocked.Increment(ref gatIndex) - 1;
                         if (gathererIndex < herbivoreMatrices.Length)
                         {
                             gathererMatrices[gathererIndex] = matrix;
                         }
-                        
+
                         break;
-                    
+
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -182,17 +185,20 @@ namespace NeuralNetworkDirectory
             {
                 Graphics.DrawMeshInstanced(herbivoreMesh, 0, herbivoreMat, herbivoreMatrices);
             }
+
             if (builderMatrices.Length > 0)
             {
-                Graphics.DrawMeshInstanced(herbivoreMesh, 0, herbivoreMat, herbivoreMatrices);
+                Graphics.DrawMeshInstanced(herbivoreMesh, 0, herbivoreMat, builderMatrices);
             }
+
             if (gathererMatrices.Length > 0)
             {
-                Graphics.DrawMeshInstanced(herbivoreMesh, 0, herbivoreMat, herbivoreMatrices);
+                Graphics.DrawMeshInstanced(herbivoreMesh, 0, herbivoreMat, gathererMatrices);
             }
+
             if (cartMatrices.Length > 0)
             {
-                Graphics.DrawMeshInstanced(herbivoreMesh, 0, herbivoreMat, herbivoreMatrices);
+                Graphics.DrawMeshInstanced(herbivoreMesh, 0, herbivoreMat, cartMatrices);
             }
         }
 
@@ -227,11 +233,13 @@ namespace NeuralNetworkDirectory
                     inputComponent.inputs = agent.input;
                 }
             });
-            
-            Parallel.ForEach(tcAgentsCopy, parallelOptions, entity =>
-            {
-                ECSManager.GetComponent<TransformComponent>(entity.Key).Transform = DataContainer.TcAgents[entity.Key].Transform;
-            });
+
+            Parallel.ForEach(tcAgentsCopy, parallelOptions,
+                entity =>
+                {
+                    ECSManager.GetComponent<TransformComponent>(entity.Key).Transform =
+                        DataContainer.TcAgents[entity.Key].Transform;
+                });
 
             ECSManager.Tick(dt);
 
@@ -274,8 +282,24 @@ namespace NeuralNetworkDirectory
                         }
                     }));
                 }
+                
+                for (int j = 0; j < tcAgentsCopy.Length; j += batchSize)
+                {
+                    KeyValuePair<uint, TCAgentType>[] batch = tcAgentsCopy.Skip(j).Take(batchSize).ToArray();
+                    tasks.Add(Task.Run(() =>
+                    {
+                        foreach (KeyValuePair<uint, TCAgentType> entity in batch)
+                        {
+                            entity.Value.Fsm.MultiThreadTick(i1);
+                        }
+                    }));
+                }
 
                 foreach (KeyValuePair<uint, AnimalAgentType> entity in agentsCopy)
+                {
+                    entity.Value.Fsm.MainThreadTick(i);
+                }
+                foreach (KeyValuePair<uint, TCAgentType> entity in tcAgentsCopy)
                 {
                     entity.Value.Fsm.MainThreadTick(i);
                 }
