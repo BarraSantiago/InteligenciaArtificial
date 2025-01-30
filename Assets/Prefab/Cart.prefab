@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 607602474975637604}
   - component: {fileID: 6699663846932747268}
   m_Layer: 0
-  m_Name: Scavenger
+  m_Name: Cart
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -53,7 +53,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 270848fc9f2ee884fa2b6bfccb1525b0, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
