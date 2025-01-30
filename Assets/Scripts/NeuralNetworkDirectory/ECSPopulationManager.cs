@@ -34,6 +34,12 @@ namespace NeuralNetworkDirectory
         [SerializeField] private Material carnivoreMat;
         [SerializeField] private Mesh herbivoreMesh;
         [SerializeField] private Material herbivoreMat;
+        [SerializeField] private Mesh cartMesh;
+        [SerializeField] private Material cartMat;
+        [SerializeField] private Mesh builderMesh;
+        [SerializeField] private Material builderMat;
+        [SerializeField] private Mesh gathererMesh;
+        [SerializeField] private Material gathererMat;
 
         [Header("Population Settings")] 
         [SerializeField] private int carnivoreCount = 10;
@@ -146,7 +152,7 @@ namespace NeuralNetworkDirectory
                 {
                     case AgentTypes.Builder:
                         int builderIndex = Interlocked.Increment(ref buiIndex) - 1;
-                        if (builderIndex < carnivoreMatrices.Length)
+                        if (builderIndex < builderMatrices.Length)
                         {
                             builderMatrices[builderIndex] = matrix;
                         }
@@ -155,16 +161,16 @@ namespace NeuralNetworkDirectory
 
                     case AgentTypes.Cart:
                         int cartIndex = Interlocked.Increment(ref carIndex) - 1;
-                        if (cartIndex < herbivoreMatrices.Length)
+                        if (cartIndex < cartMatrices.Length)
                         {
-                            carnivoreMatrices[cartIndex] = matrix;
+                            cartMatrices[cartIndex] = matrix;
                         }
 
                         break;
 
                     case AgentTypes.Gatherer:
                         int gathererIndex = Interlocked.Increment(ref gatIndex) - 1;
-                        if (gathererIndex < herbivoreMatrices.Length)
+                        if (gathererIndex < gathererMatrices.Length)
                         {
                             gathererMatrices[gathererIndex] = matrix;
                         }
@@ -188,17 +194,17 @@ namespace NeuralNetworkDirectory
 
             if (builderMatrices.Length > 0)
             {
-                Graphics.DrawMeshInstanced(herbivoreMesh, 0, herbivoreMat, builderMatrices);
+                Graphics.DrawMeshInstanced(builderMesh, 0, builderMat, builderMatrices);
             }
 
             if (gathererMatrices.Length > 0)
             {
-                Graphics.DrawMeshInstanced(herbivoreMesh, 0, herbivoreMat, gathererMatrices);
+                Graphics.DrawMeshInstanced(gathererMesh, 0, gathererMat, gathererMatrices);
             }
 
             if (cartMatrices.Length > 0)
             {
-                Graphics.DrawMeshInstanced(herbivoreMesh, 0, herbivoreMat, cartMatrices);
+                Graphics.DrawMeshInstanced(carnivoreMesh, 0, cartMat, cartMatrices);
             }
         }
 
