@@ -61,7 +61,7 @@ namespace NeuralNetworkDirectory
 
         public int gridWidth = 10;
         public int gridHeight = 10;
-        private bool isRunning = true;
+        private bool isRunning = false;
         private int missingCarnivores;
         private int missingHerbivores;
         private int plantCount;
@@ -82,7 +82,9 @@ namespace NeuralNetworkDirectory
 
         #endregion
 
-        private void Awake()
+        
+        private bool startSimulation = false;
+        public void Awake()
         {
             gridManager = new GraphManager<IVector, ITransform<IVector>>(gridWidth, gridHeight);
             DataContainer.Graph = new Sim2Graph(gridWidth, gridHeight, CellSize);
@@ -96,11 +98,13 @@ namespace NeuralNetworkDirectory
             plantCount = DataContainer.Animals.Values.Count(agent => agent.agentType == AgentTypes.Herbivore) * 2;
             fitnessManager = new FitnessManager<IVector, ITransform<IVector>>(DataContainer.Animals);
             behaviourCount = GetHighestBehaviourCount();
+            startSimulation = true;
+            isRunning = true;
         }
-
 
         private void Update()
         {
+            if(!startSimulation) return;
             Matrix4x4[] carnivoreMatrices = new Matrix4x4[carnivoreCount];
             Matrix4x4[] herbivoreMatrices = new Matrix4x4[herbivoreCount];
             Matrix4x4[] builderMatrices = new Matrix4x4[herbivoreCount];
@@ -223,6 +227,8 @@ namespace NeuralNetworkDirectory
                 accumTime -= generationDuration;
                 Epoch();
             }
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
         }
 
         private void EntitiesTurn(float dt)
