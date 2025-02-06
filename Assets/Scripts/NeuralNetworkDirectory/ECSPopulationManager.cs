@@ -15,7 +15,6 @@ using NeuralNetworkLib.NeuralNetDirectory;
 using NeuralNetworkLib.NeuralNetDirectory.NeuralNet;
 using NeuralNetworkLib.Utils;
 using Pathfinder.Graph;
-using UnityEditor;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -49,7 +48,7 @@ namespace NeuralNetworkDirectory
         [SerializeField] private int eliteCount = 4;
 
         [Header("Modifiable Settings")]
-        [SerializeField] [Range(0, 5)] private int VoronoiToDraw = 0;
+        [SerializeField] [Range(1, 5)] private int VoronoiToDraw = 0;
         [SerializeField] public int Generation;
         [SerializeField] private float Bias = 0.0f;
         [SerializeField] private int generationsPerSave = 25;
@@ -82,8 +81,9 @@ namespace NeuralNetworkDirectory
 
         #endregion
 
-        
+
         private bool startSimulation = false;
+
         public void Awake()
         {
             gridManager = new GraphManager<IVector, ITransform<IVector>>(gridWidth, gridHeight);
@@ -93,7 +93,7 @@ namespace NeuralNetworkDirectory
             Herbivore<IVector, ITransform<IVector>>.OnDeath += RemoveEntity;
             ECSManager.Init();
 
-            DataContainer.Graph.LoadGraph("GraphData.json");
+            //DataContainer.Graph.LoadGraph("GraphData.json");
             StartSimulation();
             plantCount = DataContainer.Animals.Values.Count(agent => agent.agentType == AgentTypes.Herbivore) * 2;
             fitnessManager = new FitnessManager<IVector, ITransform<IVector>>(DataContainer.Animals);
@@ -102,9 +102,24 @@ namespace NeuralNetworkDirectory
             isRunning = true;
         }
 
+        public NodeTerrain terrain = NodeTerrain.Mine;
+        private void CountAndPrintNodes(NodeTerrain terrain)
+        {
+            int count = 0;
+            foreach (SimNode<IVector> node in DataContainer.Graph.NodesType)
+            {
+                if (node.NodeTerrain == terrain)
+                {
+                    count++;
+                    Debug.Log($"{terrain} Coordinate: X = {node.GetCoordinate().X}, Y = {node.GetCoordinate().Y}");
+                }
+            }
+            Debug.Log($"Total Nodes of Terrain {terrain}: {count}");
+        }
         private void Update()
         {
-            if(!startSimulation) return;
+            if (!startSimulation) return;
+            CountAndPrintNodes(terrain);
             Matrix4x4[] carnivoreMatrices = new Matrix4x4[carnivoreCount];
             Matrix4x4[] herbivoreMatrices = new Matrix4x4[herbivoreCount];
             Matrix4x4[] builderMatrices = new Matrix4x4[herbivoreCount];
@@ -227,6 +242,7 @@ namespace NeuralNetworkDirectory
                 accumTime -= generationDuration;
                 Epoch();
             }
+
             GC.Collect();
             GC.WaitForPendingFinalizers();
         }
@@ -294,7 +310,7 @@ namespace NeuralNetworkDirectory
                         }
                     }));
                 }
-                
+
                 for (int j = 0; j < tcAgentsCopy.Length; j += batchSize)
                 {
                     KeyValuePair<uint, TCAgentType>[] batch = tcAgentsCopy.Skip(j).Take(batchSize).ToArray();
@@ -311,6 +327,7 @@ namespace NeuralNetworkDirectory
                 {
                     entity.Value.Fsm.MainThreadTick(i);
                 }
+
                 foreach (KeyValuePair<uint, TCAgentType> entity in tcAgentsCopy)
                 {
                     entity.Value.Fsm.MainThreadTick(i);
@@ -992,16 +1009,33 @@ namespace NeuralNetworkDirectory
                 Gizmos.DrawSphere(new Vector3(node.GetCoordinate().X, node.GetCoordinate().Y), (float)CellSize / 5);
             }
 
-            foreach (var sector in DataContainer.Voronois[VoronoiToDraw].SectorsToDraw())
-            {
-                Handles.color = color;
-                List<Vector3> list = new List<Vector3>();
-                foreach (var nodeVoronoi in sector.PointsToDraw())
-                    list.Add(new Vector3(nodeVoronoi.GetX(), nodeVoronoi.GetY()));
-                Handles.DrawAAConvexPolygon(list.ToArray());
 
-                Handles.color = Color.black;
-                Handles.DrawPolyLine(list.ToArray());
+            if (DataContainer.Voronois == null || DataContainer.Voronois[VoronoiToDraw] == null) return;
+            
+            foreach (var site in DataContainer.Voronois[VoronoiToDraw].Sites)
+            {
+                // Draw the site as a sphere.
+                Gizmos.color = Color.cyan;
+                Vector3 sitePos = new Vector3((float)site.Position.X, (float)site.Position.Y, 0f);
+                Gizmos.DrawSphere(sitePos, 2);
+
+                // Draw the Voronoi cell (if computed) as a closed polygon.
+                if (site.CellPolygon is { Count: > 1 })
+                {
+                    Gizmos.color = Color.magenta;
+                    // Convert the cell polygon points to Vector3.
+                    List<Vector3> polyPoints = site.CellPolygon
+                        .Select(p => new Vector3((float)p.X, (float)p.Y, 0f))
+                        .ToList();
+
+                    // Ensure the polygon is closed by drawing from the last to the first point.
+                    for (int i = 0; i < polyPoints.Count; i++)
+                    {
+                        Vector3 from = polyPoints[i];
+                        Vector3 to = polyPoints[(i + 1) % polyPoints.Count];
+                        Gizmos.DrawLine(from, to);
+                    }
+                }
             }
         }
 
