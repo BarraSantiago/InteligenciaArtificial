@@ -87,7 +87,7 @@ namespace NeuralNetworkDirectory
         public void Awake()
         {
             gridManager = new GraphManager<IVector, ITransform<IVector>>(gridWidth, gridHeight);
-            DataContainer.Graph = new Sim2Graph(gridWidth, gridHeight, CellSize);
+            DataContainer.Graph = new Sim2DGraph(gridWidth, gridHeight, CellSize);
             DataContainer.Init();
             NeuronDataSystem.OnSpecificLoaded += SpecificLoaded;
             Herbivore<IVector, ITransform<IVector>>.OnDeath += RemoveEntity;
@@ -102,24 +102,9 @@ namespace NeuralNetworkDirectory
             isRunning = true;
         }
 
-        public NodeTerrain terrain = NodeTerrain.Mine;
-        private void CountAndPrintNodes(NodeTerrain terrain)
-        {
-            int count = 0;
-            foreach (SimNode<IVector> node in DataContainer.Graph.NodesType)
-            {
-                if (node.NodeTerrain == terrain)
-                {
-                    count++;
-                    Debug.Log($"{terrain} Coordinate: X = {node.GetCoordinate().X}, Y = {node.GetCoordinate().Y}");
-                }
-            }
-            Debug.Log($"Total Nodes of Terrain {terrain}: {count}");
-        }
         private void Update()
         {
             if (!startSimulation) return;
-            CountAndPrintNodes(terrain);
             Matrix4x4[] carnivoreMatrices = new Matrix4x4[carnivoreCount];
             Matrix4x4[] herbivoreMatrices = new Matrix4x4[herbivoreCount];
             Matrix4x4[] builderMatrices = new Matrix4x4[herbivoreCount];
@@ -912,6 +897,7 @@ namespace NeuralNetworkDirectory
             townCenters[0] = new TownCenter(gridManager.GetRandomPositionInUpperQuarter());
             townCenters[1] = new TownCenter(gridManager.GetRandomPosition());
             townCenters[2] = new TownCenter(gridManager.GetRandomPositionInLowerQuarter());
+            
             foreach (TownCenter townCenter in townCenters)
             {
                 CreateTCAgents(townCenter.InitialGatherer, townCenter, AgentTypes.Gatherer);
@@ -919,6 +905,7 @@ namespace NeuralNetworkDirectory
                 CreateTCAgents(townCenter.InitialCarts, townCenter, AgentTypes.Cart);
                 townCenter.OnSpawnUnit += CreateTCAgents;
             }
+            DataContainer.UpdateVoronoi2(NodeTerrain.TownCenter);
         }
 
         public void StopSimulation()
@@ -992,12 +979,14 @@ namespace NeuralNetworkDirectory
                     NodeType.Sand => Color.yellow,
                     _ => Color.white
                 };
+                Gizmos.DrawSphere(new Vector3(node.GetCoordinate().X, node.GetCoordinate().Y), (float)CellSize / 5);
 
                 Gizmos.color = node.NodeTerrain switch
                 {
                     NodeTerrain.Tree => Color.green,
                     NodeTerrain.Stump => new Color(165 / 255, 42 / 255, 42 / 255, 1),
-                    NodeTerrain.TownCenter => Color.blue,
+                    NodeTerrain.Lake => Color.blue,
+                    NodeTerrain.TownCenter => Color.magenta,
                     NodeTerrain.WatchTower => Color.cyan,
                     NodeTerrain.Construction => Color.gray,
                     NodeTerrain.Mine => Color.yellow,
@@ -1006,7 +995,6 @@ namespace NeuralNetworkDirectory
 
                 Gizmos.DrawCube(new Vector3(node.GetCoordinate().X, node.GetCoordinate().Y), Vector3.one / 7);
 
-                Gizmos.DrawSphere(new Vector3(node.GetCoordinate().X, node.GetCoordinate().Y), (float)CellSize / 5);
             }
 
 
