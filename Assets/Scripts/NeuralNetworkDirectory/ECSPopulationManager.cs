@@ -11,11 +11,14 @@ using NeuralNetworkLib.ECS.FlockingECS;
 using NeuralNetworkLib.ECS.NeuralNetECS;
 using NeuralNetworkLib.ECS.Patron;
 using NeuralNetworkLib.Entities;
+using NeuralNetworkLib.GraphDirectory.Voronoi;
 using NeuralNetworkLib.NeuralNetDirectory;
 using NeuralNetworkLib.NeuralNetDirectory.NeuralNet;
 using NeuralNetworkLib.Utils;
 using Pathfinder.Graph;
+using UI;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 namespace NeuralNetworkDirectory
@@ -47,8 +50,9 @@ namespace NeuralNetworkDirectory
         [SerializeField] private float mutationChance = 0.10f;
         [SerializeField] private int eliteCount = 4;
 
+        [FormerlySerializedAs("VoronoiToDraw")]
         [Header("Modifiable Settings")]
-        [SerializeField] [Range(1, 5)] private int VoronoiToDraw = 0;
+        [SerializeField] [Range(1, 5)] private int voronoiToDraw = 0;
         [SerializeField] public int Generation;
         [SerializeField] private float Bias = 0.0f;
         [SerializeField] private int generationsPerSave = 25;
@@ -60,6 +64,7 @@ namespace NeuralNetworkDirectory
 
         public int gridWidth = 10;
         public int gridHeight = 10;
+        private UiManager uiManager;
         private bool isRunning = false;
         private int missingCarnivores;
         private int missingHerbivores;
@@ -86,6 +91,8 @@ namespace NeuralNetworkDirectory
 
         public void Awake()
         {
+            uiManager = FindObjectOfType<UiManager>();
+            UiManagerInit();
             gridManager = new GraphManager<IVector, ITransform<IVector>>(gridWidth, gridHeight);
             DataContainer.Graph = new Sim2DGraph(gridWidth, gridHeight, CellSize);
             DataContainer.Init();
@@ -101,6 +108,7 @@ namespace NeuralNetworkDirectory
             startSimulation = true;
             isRunning = true;
         }
+
 
         private void Update()
         {
@@ -223,6 +231,7 @@ namespace NeuralNetworkDirectory
             {
                 EntitiesTurn(dt);
                 accumTime += dt;
+                uiManager.OnGenTimeUpdate?.Invoke(accumTime);
                 if (!(accumTime >= generationDuration)) return;
                 accumTime -= generationDuration;
                 Epoch();
@@ -335,6 +344,7 @@ namespace NeuralNetworkDirectory
         private void Epoch()
         {
             Generation++;
+            uiManager.OnGenUpdate(Generation);
             PurgingSpecials();
 
             missingCarnivores = carnivoreCount -
@@ -348,6 +358,7 @@ namespace NeuralNetworkDirectory
 
             bool remainingCarn = carnivoreCount - missingCarnivores > 1;
             bool remainingHerb = herbivoreCount - missingHerbivores > 1;
+            uiManager.OnSurvivorsPerSpeciesUpdate?.Invoke(new []{ carnivoreCount - missingCarnivores, herbivoreCount - missingHerbivores});
 
             ECSManager.GetSystem<NeuralNetSystem>().Deinitialize();
             if (Generation % generationsPerSave == 0)
@@ -374,12 +385,12 @@ namespace NeuralNetworkDirectory
                 return;
             }
 
-            var genomes = new Dictionary<AgentTypes, Dictionary<BrainType, List<Genome>>>
+            Dictionary<AgentTypes, Dictionary<BrainType, List<Genome>>> genomes = new Dictionary<AgentTypes, Dictionary<BrainType, List<Genome>>>
             {
                 [AgentTypes.Herbivore] = new(),
                 [AgentTypes.Carnivore] = new()
             };
-            var indexes = new Dictionary<AgentTypes, Dictionary<BrainType, int>>
+            Dictionary<AgentTypes, Dictionary<BrainType, int>> indexes = new Dictionary<AgentTypes, Dictionary<BrainType, int>>
             {
                 [AgentTypes.Herbivore] = new(),
                 [AgentTypes.Carnivore] = new()
@@ -897,7 +908,7 @@ namespace NeuralNetworkDirectory
             townCenters[0] = new TownCenter(gridManager.GetRandomPositionInUpperQuarter());
             townCenters[1] = new TownCenter(gridManager.GetRandomPosition());
             townCenters[2] = new TownCenter(gridManager.GetRandomPositionInLowerQuarter());
-            
+
             foreach (TownCenter townCenter in townCenters)
             {
                 CreateTCAgents(townCenter.InitialGatherer, townCenter, AgentTypes.Gatherer);
@@ -905,6 +916,7 @@ namespace NeuralNetworkDirectory
                 CreateTCAgents(townCenter.InitialCarts, townCenter, AgentTypes.Cart);
                 townCenter.OnSpawnUnit += CreateTCAgents;
             }
+
             DataContainer.UpdateVoronoi2(NodeTerrain.TownCenter);
         }
 
@@ -994,13 +1006,12 @@ namespace NeuralNetworkDirectory
                 };
 
                 Gizmos.DrawCube(new Vector3(node.GetCoordinate().X, node.GetCoordinate().Y), Vector3.one / 7);
-
             }
 
 
-            if (DataContainer.Voronois == null || DataContainer.Voronois[VoronoiToDraw] == null) return;
-            
-            foreach (var site in DataContainer.Voronois[VoronoiToDraw].Sites)
+            if (DataContainer.Voronois == null || DataContainer.Voronois[voronoiToDraw] == null) return;
+
+            foreach (Site<Point2D> site in DataContainer.Voronois[voronoiToDraw].Sites)
             {
                 // Draw the site as a sphere.
                 Gizmos.color = Color.cyan;
@@ -1112,6 +1123,80 @@ namespace NeuralNetworkDirectory
 
             return weights;
         }
+
+        #region UiConfig
+
+        private void UiManagerInit()
+        {
+            
+            uiManager.Init(Generation, generationDuration, new []{0,0}, new []{1f});
+            
+            uiManager.onBiasUpdate += UpdateBias;
+            uiManager.onMutChanceUpdate += UpdateMutChance;
+            uiManager.onMutationRateUpdate += UpdateMutationRate;
+            uiManager.onElitesUpdate += UpdateElites;
+            uiManager.onSpeciesCountUpdate += UpdateSpeciesCount;
+            uiManager.onGensPerSaveUpdate += UpdateGensPerSave;
+            uiManager.onGenDurationUpdate += UpdateGenDuration;
+            uiManager.onWhichGenToLoadUpdate += UpdateWhichGenToLoad;
+            uiManager.onActivateSaveLoadUpdate += UpdateActivateSaveLoad;
+            uiManager.onVoronoiUpdate += VoronoiToDraw;
+            uiManager.LoadConfig();
+        }
+        
+        private void VoronoiToDraw(int obj)
+        {
+            voronoiToDraw = obj;
+        }
+
+        private void UpdateActivateSaveLoad(bool save, bool load)
+        {
+            activateSave = save;
+            activateLoad = load;
+        }
+
+        private void UpdateWhichGenToLoad(int obj)
+        {
+            generationToLoad = obj;
+        }
+
+        private void UpdateGensPerSave(int obj)
+        {
+            generationsPerSave = obj;
+        }
+
+        private void UpdateGenDuration(int obj)
+        {
+            generationDuration = obj;
+        }
+
+        private void UpdateSpeciesCount(int obj)
+        {
+            herbivoreCount = obj;
+            carnivoreCount = obj / 2;
+        }
+
+        private void UpdateElites(int obj)
+        {
+            eliteCount = obj;
+        }
+
+        private void UpdateMutationRate(float obj)
+        {
+            mutationRate = obj;
+        }
+
+        private void UpdateMutChance(float obj)
+        {
+            mutationChance = obj;
+        }
+
+        private void UpdateBias(float obj)
+        {
+            Bias = obj;
+        }
+
+        #endregion
 
         private void SpecificLoaded(bool obj)
         {
