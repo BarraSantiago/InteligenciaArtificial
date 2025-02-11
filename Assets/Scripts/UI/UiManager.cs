@@ -41,6 +41,7 @@ namespace UI
             mut chance
             elites
          */
+        [SerializeField] TMP_Text fpsCounter;
         [SerializeField] TMP_Text generationNum;
         [SerializeField] TMP_Text genTime;
         [SerializeField] TMP_Text survivorsPerSpecies;
@@ -72,6 +73,7 @@ namespace UI
         public Action<int> onWhichGenToLoadUpdate;
         public Action<bool, bool> onActivateSaveLoadUpdate;
 
+        private float deltaTime;
         private void Awake()
         {
             voronoiToDraw.onValueChanged.AddListener(value => onVoronoiUpdate?.Invoke((int)value));
@@ -88,6 +90,18 @@ namespace UI
             gensPerSave.onEndEdit.AddListener(value => onGensPerSaveUpdate?.Invoke(int.Parse(value)));
             genDuration.onEndEdit.AddListener(value => onGenDurationUpdate?.Invoke(int.Parse(value)));
             whichGenToLoad.onEndEdit.AddListener(value => onWhichGenToLoadUpdate?.Invoke(int.Parse(value)));
+        }
+
+        private void Update()
+        {
+            UpdateFPSCounter();
+        }
+
+        private void UpdateFPSCounter()
+        {
+            deltaTime += (Time.unscaledDeltaTime - deltaTime) * 0.1f;
+            float fps = 1.0f / deltaTime;
+            fpsCounter.text = $"FPS: " + fps.ToString("0.00");
         }
 
         public void Init(int genNum, float genTime, int[] survivorsPerSpecies, float[] fitnessAvg)
@@ -169,7 +183,7 @@ namespace UI
 
         public void UpdateGenerationNum(int num)
         {
-            generationNum.text = num.ToString();
+            generationNum.text = "Gen: " + num.ToString();
         }
 
         public void UpdateGenTime(float time)

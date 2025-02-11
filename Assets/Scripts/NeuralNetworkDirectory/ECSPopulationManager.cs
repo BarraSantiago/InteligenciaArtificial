@@ -232,6 +232,10 @@ namespace NeuralNetworkDirectory
                 EntitiesTurn(dt);
                 accumTime += dt;
                 uiManager.OnGenTimeUpdate?.Invoke(accumTime);
+                foreach (TownCenter townCenter in townCenters)
+                {
+                    townCenter.ManageSpawning();
+                }
                 if (!(accumTime >= generationDuration)) return;
                 accumTime -= generationDuration;
                 Epoch();
@@ -278,6 +282,14 @@ namespace NeuralNetworkDirectory
                 if (agent.agentType is AgentTypes.Carnivore or AgentTypes.Herbivore) return;
 
                 DataContainer.TcAgents[entity.Key].AcsVector = ECSManager.GetComponent<ACSComponent>(entity.Key).ACS;
+
+            });
+            
+            Parallel.ForEach(tcAgentsCopy, parallelOptions, entity =>
+            {
+                ACSComponent component = ECSManager.GetComponent<ACSComponent>(entity.Key);
+                if(component == null) return;
+                DataContainer.TcAgents[entity.Key].AcsVector = component.ACS;
 
                 /*if (boid != null)
                 {
