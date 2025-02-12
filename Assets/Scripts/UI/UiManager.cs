@@ -114,7 +114,7 @@ namespace UI
 
         public void SaveConfig()
         {
-            var config = new UIConfig
+            UIConfig config = new UIConfig
             {
                 Bias = float.Parse(bias.text),
                 MutChance = float.Parse(mutChance.text),
