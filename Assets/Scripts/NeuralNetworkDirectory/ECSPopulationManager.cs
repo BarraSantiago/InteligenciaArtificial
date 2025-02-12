@@ -231,7 +231,6 @@ namespace NeuralNetworkDirectory
             {
                 EntitiesTurn(dt);
                 accumTime += dt;
-                uiManager.OnGenTimeUpdate?.Invoke(accumTime);
                 foreach (TownCenter townCenter in townCenters)
                 {
                     townCenter.ManageSpawning();
@@ -241,8 +240,7 @@ namespace NeuralNetworkDirectory
                 Epoch();
             }
 
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
+            uiManager.OnGenTimeUpdate?.Invoke(accumTime);
         }
 
         private void EntitiesTurn(float dt)
