@@ -18,7 +18,6 @@ using NeuralNetworkLib.Utils;
 using Pathfinder.Graph;
 using UI;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 namespace NeuralNetworkDirectory
@@ -31,9 +30,8 @@ namespace NeuralNetworkDirectory
     {
         #region Variables
 
-        [Header("Population Setup")] [SerializeField]
-        private Mesh carnivoreMesh;
-
+        [Header("Population Setup")] 
+        [SerializeField] private Mesh carnivoreMesh;
         [SerializeField] private Material carnivoreMat;
         [SerializeField] private Mesh herbivoreMesh;
         [SerializeField] private Material herbivoreMat;
@@ -44,17 +42,15 @@ namespace NeuralNetworkDirectory
         [SerializeField] private Mesh gathererMesh;
         [SerializeField] private Material gathererMat;
 
-        [Header("Population Settings")] [SerializeField]
-        private int carnivoreCount = 10;
-
+        [Header("Population Settings")] 
+        [SerializeField] private int carnivoreCount = 10;
         [SerializeField] private int herbivoreCount = 20;
         [SerializeField] private float mutationRate = 0.01f;
         [SerializeField] private float mutationChance = 0.10f;
         [SerializeField] private int eliteCount = 4;
 
-        [FormerlySerializedAs("VoronoiToDraw")] [Header("Modifiable Settings")] [SerializeField] [Range(1, 5)]
-        private int voronoiToDraw = 0;
-
+        [Header("Modifiable Settings")] 
+        [SerializeField] [Range(1, 5)] private int voronoiToDraw = 0;
         [SerializeField] public int Generation;
         [SerializeField] private float Bias = 0.0f;
         [SerializeField] private int generationsPerSave = 25;
@@ -70,7 +66,6 @@ namespace NeuralNetworkDirectory
         private bool isRunning = false;
         private int missingCarnivores;
         private int missingHerbivores;
-        private int plantCount;
         private int behaviourCount;
         private const int CellSize = 1;
         private const float SigmoidP = .5f;
@@ -80,19 +75,33 @@ namespace NeuralNetworkDirectory
         private GraphManager<IVector, ITransform<IVector>> gridManager;
         private FitnessManager<IVector, ITransform<IVector>> fitnessManager;
         private TownCenter[] townCenters = new TownCenter[3];
-
-        private ParallelOptions parallelOptions = new()
-        {
-            MaxDegreeOfParallelism = 32
-        };
+        private KeyValuePair<uint, AnimalAgentType>[] agentsCopy = new KeyValuePair<uint, AnimalAgentType>[DataContainer.Animals.Count];
+        private KeyValuePair<uint, TCAgentType>[] tcAgentsCopy = new KeyValuePair<uint, TCAgentType>[72];
+        
+        private ParallelOptions parallelOptions;
 
         #endregion
 
-
+        private Matrix4x4[] carnivoreMatrices;
+        private Matrix4x4[] herbivoreMatrices;
+        private Matrix4x4[] builderMatrices;
+        private Matrix4x4[] cartMatrices;
+        private Matrix4x4[] gathererMatrices;
+        private bool _requiresRedraw;
+        private readonly object _renderLock = new object();
+        private const int maxBuildersCarts = 18;
+        private const int maxGatherers = 18;
         private bool startSimulation = false;
 
         public void Awake()
         {
+            parallelOptions = new ParallelOptions {MaxDegreeOfParallelism = 32};
+            carnivoreMatrices = new Matrix4x4[carnivoreCount] ;
+            herbivoreMatrices = new Matrix4x4[herbivoreCount];
+            builderMatrices = new Matrix4x4[maxBuildersCarts];
+            cartMatrices = new Matrix4x4[maxBuildersCarts];
+            gathererMatrices = new Matrix4x4[maxGatherers];
+
             uiManager = FindObjectOfType<UiManager>();
             UiManagerInit();
             gridManager = new GraphManager<IVector, ITransform<IVector>>(gridWidth, gridHeight);
@@ -104,22 +113,18 @@ namespace NeuralNetworkDirectory
 
             //DataContainer.Graph.LoadGraph("GraphData.json");
             StartSimulation();
-            plantCount = DataContainer.Animals.Values.Count(agent => agent.agentType == AgentTypes.Herbivore) * 2;
             fitnessManager = new FitnessManager<IVector, ITransform<IVector>>(DataContainer.Animals);
             behaviourCount = GetHighestBehaviourCount();
             startSimulation = true;
             isRunning = true;
-        }
+            
+            UpdateAgentsCopy();
 
+        }
 
         private void Update()
         {
-            if (!startSimulation) return;
-            Matrix4x4[] carnivoreMatrices = new Matrix4x4[carnivoreCount];
-            Matrix4x4[] herbivoreMatrices = new Matrix4x4[herbivoreCount];
-            Matrix4x4[] builderMatrices = new Matrix4x4[herbivoreCount];
-            Matrix4x4[] cartMatrices = new Matrix4x4[herbivoreCount];
-            Matrix4x4[] gathererMatrices = new Matrix4x4[herbivoreCount];
+            if (!_requiresRedraw) return;
 
             int carnivoreIndex = 0;
             int herbivoreIndex = 0;
@@ -195,31 +200,26 @@ namespace NeuralNetworkDirectory
                         throw new ArgumentOutOfRangeException();
                 }
             });
-
-            if (carnivoreMatrices.Length > 0)
+            
+            lock (_renderLock)
             {
-                Graphics.DrawMeshInstanced(carnivoreMesh, 0, carnivoreMat, carnivoreMatrices);
+                if (carnivoreMatrices.Length > 0)
+                    Graphics.DrawMeshInstanced(carnivoreMesh, 0, carnivoreMat, carnivoreMatrices);
+
+                if (herbivoreMatrices.Length > 0)
+                    Graphics.DrawMeshInstanced(herbivoreMesh, 0, herbivoreMat, herbivoreMatrices.ToArray());
+
+                if (builderMatrices.Length > 0)
+                    Graphics.DrawMeshInstanced(builderMesh, 0, builderMat, builderMatrices.ToArray());
+
+                if (gathererMatrices.Length > 0)
+                    Graphics.DrawMeshInstanced(gathererMesh, 0, gathererMat, gathererMatrices.ToArray());
+
+                if (cartMatrices.Length > 0)
+                    Graphics.DrawMeshInstanced(cartMesh, 0, cartMat, cartMatrices.ToArray());
             }
 
-            if (herbivoreMatrices.Length > 0)
-            {
-                Graphics.DrawMeshInstanced(herbivoreMesh, 0, herbivoreMat, herbivoreMatrices);
-            }
-
-            if (builderMatrices.Length > 0)
-            {
-                Graphics.DrawMeshInstanced(builderMesh, 0, builderMat, builderMatrices);
-            }
-
-            if (gathererMatrices.Length > 0)
-            {
-                Graphics.DrawMeshInstanced(gathererMesh, 0, gathererMat, gathererMatrices);
-            }
-
-            if (cartMatrices.Length > 0)
-            {
-                Graphics.DrawMeshInstanced(carnivoreMesh, 0, cartMat, cartMatrices);
-            }
+            _requiresRedraw = false;
         }
 
         private void FixedUpdate()
@@ -233,94 +233,96 @@ namespace NeuralNetworkDirectory
             {
                 EntitiesTurn(dt);
                 accumTime += dt;
-                foreach (TownCenter townCenter in townCenters)
-                {
-                    townCenter.ManageSpawning();
-                }
+                
 
-                if (!(accumTime >= generationDuration)) return;
-                accumTime -= generationDuration;
-                Epoch();
+                if (accumTime > generationDuration)
+                {
+                    accumTime -= generationDuration;
+                    Epoch();
+
+                    UpdateAgentsCopy();
+                }
+            }
+            
+            for (int j = 0; j < townCenters.Length; j++)
+            {
+                townCenters[j].ManageSpawning();
+            }
+            
+            _requiresRedraw = true;
+            uiManager.OnGenTimeUpdate?.Invoke(accumTime);
+           
+        }
+        
+        private void UpdateAgentsCopy()
+        {
+            int index = 0;
+            foreach (var kvp in DataContainer.Animals)
+            {
+                if (index >= agentsCopy.Length) break;
+                agentsCopy[index++] = kvp;
             }
 
-            uiManager.OnGenTimeUpdate?.Invoke(accumTime);
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
         }
-
         private void EntitiesTurn(float dt)
         {
-            // Take snapshots of the dictionaries to avoid concurrent modification issues.
-            KeyValuePair<uint, AnimalAgentType>[] agentsCopy = DataContainer.Animals.ToArray();
-            KeyValuePair<uint, TCAgentType>[] tcAgentsCopy = DataContainer.TcAgents.ToArray();
-
-            // 1. Update inputs for animal agents.
-            Parallel.ForEach(agentsCopy, parallelOptions, entity =>
+            int index = 0;
+            
+            TCAgentType.Time = dt;
+            AnimalAgentType.Time = dt;
+            foreach (var kvp in DataContainer.TcAgents)
             {
-                AnimalAgentType agent = entity.Value;
+                if (index < tcAgentsCopy.Length)
+                {
+                    tcAgentsCopy[index++] = kvp;
+                }
+            }
+
+            for (int i = 0; i < agentsCopy.Length; i++)
+            {
+                AnimalAgentType agent = agentsCopy[i].Value;
                 agent.UpdateInputs();
-                InputComponent inputComponent = ECSManager.GetComponent<InputComponent>(entity.Key);
-                if (inputComponent != null)
-                {
-                    inputComponent.inputs = agent.input;
-                }
-            });
-
-            // 2. Update Transform for TC agents.
-            Parallel.ForEach(tcAgentsCopy, parallelOptions, entity =>
+                ECSManager.GetComponent<InputComponent>(agentsCopy[i].Key).inputs = agent.input;
+            }
+            
+            for (int i = 0; i < tcAgentsCopy.Length; i++)
             {
-                TransformComponent transformComponent = ECSManager.GetComponent<TransformComponent>(entity.Key);
-                if (transformComponent != null)
-                {
-                    transformComponent.Transform = DataContainer.TcAgents[entity.Key].Transform;
-                }
-            });
+                uint agent = tcAgentsCopy[i].Key;
+                ECSManager.GetComponent<TransformComponent>(agent).Transform = DataContainer.TcAgents[agent].Transform;
+            }
 
-            // 3. Tick the ECS manager.
             ECSManager.Tick(dt);
 
-            // 4. Update outputs for animal agents.
-            Parallel.ForEach(agentsCopy, parallelOptions, entity =>
+            for (int i = 0; i < agentsCopy.Length; i++)
             {
-                OutputComponent outputComponent = ECSManager.GetComponent<OutputComponent>(entity.Key);
-                if (outputComponent == null)
-                    return;
-                // Update the agent’s outputs from its ECS output component.
-                entity.Value.output = outputComponent.Outputs;
+                KeyValuePair<uint, AnimalAgentType> agent = agentsCopy[i];
+ 
+                agent.Value.output = ECSManager.GetComponent<OutputComponent>(agent.Key).Outputs;
+            }
 
-                // If the agent is not a Carnivore or Herbivore, update its ACS vector.
-                if (!(entity.Value.agentType is AgentTypes.Carnivore or AgentTypes.Herbivore))
-                {
-                    ACSComponent acs = ECSManager.GetComponent<ACSComponent>(entity.Key);
-                    if (acs != null)
-                    {
-                        DataContainer.TcAgents[entity.Key].AcsVector = acs.ACS;
-                    }
-                }
-            });
-
-            // 5. Update ACS for TC agents.
-            Parallel.ForEach(tcAgentsCopy, parallelOptions, entity =>
+            for (int i = 0; i < tcAgentsCopy.Length; i++)
             {
-                ACSComponent acs = ECSManager.GetComponent<ACSComponent>(entity.Key);
-                if (acs != null)
-                {
-                    DataContainer.TcAgents[entity.Key].AcsVector = acs.ACS;
-                }
-            });
+                uint agent = tcAgentsCopy[i].Key;
+                
+                DataContainer.TcAgents[agent].AcsVector = ECSManager.GetComponent<ACSComponent>(agent).ACS;
+            }
 
-            // 6. For each behavior tick index, process MultiThreadTick then MainThreadTick.
-            //    Using Parallel.For over the arrays eliminates extra Task.Run batching.
+           
             for (int i = 0; i < behaviourCount; i++)
             {
-                int tickIndex = i; // local copy for the lambda
+                int tickIndex = i;
 
-                // Process multi-threadable ticks for all animal agents.
-                Parallel.For(0, agentsCopy.Length, j => { agentsCopy[j].Value.Fsm.MultiThreadTick(tickIndex); });
-                // Process multi-threadable ticks for all TC agents.
-                Parallel.For(0, tcAgentsCopy.Length, j => { tcAgentsCopy[j].Value.Fsm.MultiThreadTick(tickIndex); });
+                Parallel.For(0, agentsCopy.Length, j =>
+                {
+                    agentsCopy[j].Value.Fsm.MultiThreadTick(tickIndex);
+                });
+                Parallel.For(0, tcAgentsCopy.Length, j =>
+                {
+                    if (tcAgentsCopy[j].Value == null) return;
+                    
+                    tcAgentsCopy[j].Value.Fsm.MultiThreadTick(tickIndex);
+                });
 
-                // Process main thread ticks (assumed to be low-overhead) in simple loops.
                 for (int j = 0; j < agentsCopy.Length; j++)
                 {
                     agentsCopy[j].Value.Fsm.MainThreadTick(tickIndex);
@@ -328,11 +330,12 @@ namespace NeuralNetworkDirectory
 
                 for (int j = 0; j < tcAgentsCopy.Length; j++)
                 {
+                    if (tcAgentsCopy[j].Value == null) continue;
+
                     tcAgentsCopy[j].Value.Fsm.MainThreadTick(tickIndex);
                 }
             }
 
-            // 7. Finally, update fitness.
             fitnessManager.Tick();
         }
 
@@ -342,12 +345,10 @@ namespace NeuralNetworkDirectory
             uiManager.OnGenUpdate(Generation);
             PurgingSpecials();
 
-            missingCarnivores = carnivoreCount -
-                                DataContainer.Animals.Count(
-                                    agent => agent.Value.agentType == AgentTypes.Carnivore);
-            missingHerbivores = herbivoreCount -
-                                DataContainer.Animals.Count(
-                                    agent => agent.Value.agentType == AgentTypes.Herbivore);
+            missingCarnivores = carnivoreCount - DataContainer.Animals.Count(agent => 
+                                                    agent.Value.agentType == AgentTypes.Carnivore);
+            missingHerbivores = herbivoreCount - DataContainer.Animals.Count(agent => 
+                                                    agent.Value.agentType == AgentTypes.Herbivore);
 
             bool remainingPopulation = DataContainer.Animals.Count > 0;
 
@@ -501,7 +502,7 @@ namespace NeuralNetworkDirectory
                 }
 
                 inputComponent.inputs = new float[brains.Count][];
-                neuralNetComponent.Layers = brains.SelectMany(brain => brain.Layers).ToList().ToArray();
+                neuralNetComponent.Layers = brains.SelectMany(brain => brain.Layers).ToArray();
                 int brainAmount = agentType switch
                 {
                     AgentTypes.Carnivore => DataContainer.CarnBrainTypes.Count,
@@ -627,7 +628,8 @@ namespace NeuralNetworkDirectory
         private NeuralNetComponent CreateSingleBrain(BrainType brainType, AgentTypes agentType)
         {
             NeuralNetComponent neuralNetComponent = new NeuralNetComponent();
-            List<NeuronLayer[]> layersList = new List<NeuronLayer[]> { CreateNeuronLayerList(brainType, agentType).ToArray() };
+            List<NeuronLayer[]> layersList = new List<NeuronLayer[]>
+                { CreateNeuronLayerList(brainType, agentType).ToArray() };
             neuralNetComponent.Layers = layersList.ToArray();
             return neuralNetComponent;
         }
@@ -774,7 +776,6 @@ namespace NeuralNetworkDirectory
 
             agentsData.Capacity = entitiesCopy.Count * DataContainer.InputCountCache.Count;
 
-            //Parallel.ForEach(entitiesCopy, parallelOptions, entity =>
             foreach (KeyValuePair<uint, AnimalAgentType> entity in entitiesCopy)
             {
                 NeuralNetComponent netComponent = ECSManager.GetComponent<NeuralNetComponent>(entity.Key);
