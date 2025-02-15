@@ -267,7 +267,7 @@ namespace NeuralNetworkDirectory
         private void UpdateTcAgentsCopy()
         {
             int index = 0;
-            foreach (var kvp in DataContainer.TcAgents)
+            foreach (KeyValuePair<uint, TCAgentType> kvp in DataContainer.TcAgents)
             {
                 if (index < tcAgentsCopy.Length)
                 {
@@ -1012,6 +1012,7 @@ namespace NeuralNetworkDirectory
 
         private void OnDrawGizmos()
         {
+            /*
             if (!Application.isPlaying)
                 return;
 
@@ -1042,7 +1043,7 @@ namespace NeuralNetworkDirectory
                 };
 
                 Gizmos.DrawCube(new Vector3(node.GetCoordinate().X, node.GetCoordinate().Y), Vector3.one / 7);
-            }
+            }*/
 
 
             if (DataContainer.Voronois == null || DataContainer.Voronois[voronoiToDraw] == null) return;
