@@ -75,9 +75,12 @@ namespace NeuralNetworkDirectory
         private GraphManager<IVector, ITransform<IVector>> gridManager;
         private FitnessManager<IVector, ITransform<IVector>> fitnessManager;
         private TownCenter[] townCenters = new TownCenter[3];
-        private KeyValuePair<uint, AnimalAgentType>[] agentsCopy = new KeyValuePair<uint, AnimalAgentType>[DataContainer.Animals.Count];
+
+        private KeyValuePair<uint, AnimalAgentType>[] agentsCopy =
+            new KeyValuePair<uint, AnimalAgentType>[DataContainer.Animals.Count];
+
         private KeyValuePair<uint, TCAgentType>[] tcAgentsCopy = new KeyValuePair<uint, TCAgentType>[72];
-        
+
         private ParallelOptions parallelOptions;
 
         #endregion
@@ -95,8 +98,8 @@ namespace NeuralNetworkDirectory
 
         public void Awake()
         {
-            parallelOptions = new ParallelOptions {MaxDegreeOfParallelism = 32};
-            carnivoreMatrices = new Matrix4x4[carnivoreCount] ;
+            parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 32 };
+            carnivoreMatrices = new Matrix4x4[carnivoreCount];
             herbivoreMatrices = new Matrix4x4[herbivoreCount];
             builderMatrices = new Matrix4x4[maxBuildersCarts];
             cartMatrices = new Matrix4x4[maxBuildersCarts];
@@ -117,9 +120,9 @@ namespace NeuralNetworkDirectory
             behaviourCount = GetHighestBehaviourCount();
             startSimulation = true;
             isRunning = true;
-            
-            UpdateAgentsCopy();
 
+            UpdateAgentsCopy();
+            UpdateTcAgentsCopy();
         }
 
         private void Update()
@@ -200,7 +203,7 @@ namespace NeuralNetworkDirectory
                         throw new ArgumentOutOfRangeException();
                 }
             });
-            
+
             lock (_renderLock)
             {
                 if (carnivoreMatrices.Length > 0)
@@ -233,7 +236,7 @@ namespace NeuralNetworkDirectory
             {
                 EntitiesTurn(dt);
                 accumTime += dt;
-                
+
 
                 if (accumTime > generationDuration)
                 {
@@ -243,33 +246,27 @@ namespace NeuralNetworkDirectory
                     UpdateAgentsCopy();
                 }
             }
-            
+
+            bool unitSpawned = false;
             for (int j = 0; j < townCenters.Length; j++)
             {
-                townCenters[j].ManageSpawning();
+                if(townCenters[j].ManageSpawning()) unitSpawned = true;
             }
+
+            if (unitSpawned) UpdateTcAgentsCopy();
             
             _requiresRedraw = true;
             uiManager.OnGenTimeUpdate?.Invoke(accumTime);
-           
         }
-        
+
         private void UpdateAgentsCopy()
         {
-            int index = 0;
-            foreach (var kvp in DataContainer.Animals)
-            {
-                if (index >= agentsCopy.Length) break;
-                agentsCopy[index++] = kvp;
-            }
-
+            agentsCopy = DataContainer.Animals.ToArray();
         }
-        private void EntitiesTurn(float dt)
+        
+        private void UpdateTcAgentsCopy()
         {
             int index = 0;
-            
-            TCAgentType.Time = dt;
-            AnimalAgentType.Time = dt;
             foreach (var kvp in DataContainer.TcAgents)
             {
                 if (index < tcAgentsCopy.Length)
@@ -277,6 +274,15 @@ namespace NeuralNetworkDirectory
                     tcAgentsCopy[index++] = kvp;
                 }
             }
+        }
+
+        private void EntitiesTurn(float dt)
+        {
+            int index = 0;
+
+            TCAgentType.Time = dt;
+            AnimalAgentType.Time = dt;
+            
 
             for (int i = 0; i < agentsCopy.Length; i++)
             {
@@ -284,7 +290,7 @@ namespace NeuralNetworkDirectory
                 agent.UpdateInputs();
                 ECSManager.GetComponent<InputComponent>(agentsCopy[i].Key).inputs = agent.input;
             }
-            
+
             for (int i = 0; i < tcAgentsCopy.Length; i++)
             {
                 uint agent = tcAgentsCopy[i].Key;
@@ -296,30 +302,27 @@ namespace NeuralNetworkDirectory
             for (int i = 0; i < agentsCopy.Length; i++)
             {
                 KeyValuePair<uint, AnimalAgentType> agent = agentsCopy[i];
- 
+
                 agent.Value.output = ECSManager.GetComponent<OutputComponent>(agent.Key).Outputs;
             }
 
             for (int i = 0; i < tcAgentsCopy.Length; i++)
             {
                 uint agent = tcAgentsCopy[i].Key;
-                
+
                 DataContainer.TcAgents[agent].AcsVector = ECSManager.GetComponent<ACSComponent>(agent).ACS;
             }
 
-           
+
             for (int i = 0; i < behaviourCount; i++)
             {
                 int tickIndex = i;
 
-                Parallel.For(0, agentsCopy.Length, j =>
-                {
-                    agentsCopy[j].Value.Fsm.MultiThreadTick(tickIndex);
-                });
+                Parallel.For(0, agentsCopy.Length, j => { agentsCopy[j].Value.Fsm.MultiThreadTick(tickIndex); });
                 Parallel.For(0, tcAgentsCopy.Length, j =>
                 {
                     if (tcAgentsCopy[j].Value == null) return;
-                    
+
                     tcAgentsCopy[j].Value.Fsm.MultiThreadTick(tickIndex);
                 });
 
@@ -345,11 +348,14 @@ namespace NeuralNetworkDirectory
             uiManager.OnGenUpdate(Generation);
             PurgingSpecials();
 
-            missingCarnivores = carnivoreCount - DataContainer.Animals.Count(agent => 
-                                                    agent.Value.agentType == AgentTypes.Carnivore);
-            missingHerbivores = herbivoreCount - DataContainer.Animals.Count(agent => 
-                                                    agent.Value.agentType == AgentTypes.Herbivore);
+            missingCarnivores = carnivoreCount - DataContainer.Animals.Count(agent =>
+                agent.Value.agentType == AgentTypes.Carnivore);
+            missingHerbivores = herbivoreCount - DataContainer.Animals.Count(agent =>
+                agent.Value.agentType == AgentTypes.Herbivore);
 
+            AddFitnessData();
+            DataContainer.FitnessStagnationManager.AnalyzeData();
+            
             bool remainingPopulation = DataContainer.Animals.Count > 0;
 
             bool remainingCarn = carnivoreCount - missingCarnivores > 1;
@@ -415,6 +421,35 @@ namespace NeuralNetworkDirectory
             }
         }
 
+        private static void AddFitnessData()
+        {
+            GetAvgFitness(AgentTypes.Carnivore, DataContainer.CarnBrainTypes.Values.ToArray());
+            GetAvgFitness(AgentTypes.Herbivore, DataContainer.HerbBrainTypes.Values.ToArray());
+        }
+
+        private static void GetAvgFitness(AgentTypes agentType, params BrainType[] brainTypes)
+        {
+            float[] fitness = new float[brainTypes.Length];
+
+            int agentCount = 0;
+            
+            foreach (KeyValuePair<uint, AnimalAgentType> variable in DataContainer.Animals)
+            {
+                if (variable.Value.agentType != agentType) continue;
+                for (int i = 0; i < fitness.Length; i++)
+                {
+                    fitness[i] += ECSManager.GetComponent<NeuralNetComponent>(variable.Key).Fitness[i];
+                }
+
+                agentCount++;
+            }
+
+            for (int i = 0; i < fitness.Length; i++)
+            {
+                DataContainer.FitnessStagnationManager.AddFitnessData(agentType, brainTypes[i], fitness[i] / agentCount);
+            }
+        }
+
         private void UpdateBoidOffsets(SimBoid boid, float[] outputs)
         {
             boid.cohesionOffset = outputs[0];
@@ -468,7 +503,7 @@ namespace NeuralNetworkDirectory
 
                 foreach (BrainType brain in num.Values)
                 {
-                    NeuronInputCount inputsCount = DataContainer.InputCountCache[(brain, agentType)];
+                    BrainConfiguration inputsCount = DataContainer.InputCountCache[(brain, agentType)];
                     outputComponent.Outputs[GetBrainTypeKeyByValue(brain, agentType)] =
                         new float[inputsCount.OutputCount];
                 }
@@ -589,14 +624,7 @@ namespace NeuralNetworkDirectory
 
             agent.SetPosition(randomNode.GetCoordinate());
             agent.Init();
-            // TODO flocking
-            /*
-             if (agentType == AgentTypes.Scavenger)
-            {
-                Scavenger<IVector, ITransform<IVector>> sca = (Scavenger<IVector, ITransform<IVector>>)agent;
-                sca.boid.Init(DataContainer.flockingManager.Alignment, DataContainer.flockingManager.Cohesion,
-                    DataContainer.flockingManager.Separation, DataContainer.flockingManager.Direction);
-            }*/
+
             return agent;
         }
 
@@ -636,7 +664,7 @@ namespace NeuralNetworkDirectory
 
         private List<NeuronLayer> CreateNeuronLayerList(BrainType brainType, AgentTypes agentType)
         {
-            if (!DataContainer.InputCountCache.TryGetValue((brainType, agentType), out NeuronInputCount InputCount))
+            if (!DataContainer.InputCountCache.TryGetValue((brainType, agentType), out BrainConfiguration InputCount))
             {
                 throw new ArgumentException("Invalid brainType or agentType");
             }
@@ -647,7 +675,7 @@ namespace NeuralNetworkDirectory
                     { BrainType = brainType, AgentType = agentType }
             };
 
-            foreach (int hiddenLayerInput in InputCount.HiddenLayersInputs)
+            foreach (int hiddenLayerInput in InputCount.HiddenLayers)
             {
                 layers.Add(new NeuronLayer(layers[^1].OutputsCount, hiddenLayerInput, Bias, SigmoidP)
                     { BrainType = brainType, AgentType = agentType });
@@ -1148,6 +1176,7 @@ namespace NeuralNetworkDirectory
             uiManager.onWhichGenToLoadUpdate += UpdateWhichGenToLoad;
             uiManager.onActivateSaveLoadUpdate += UpdateActivateSaveLoad;
             uiManager.onVoronoiUpdate += VoronoiToDraw;
+            uiManager.onSpeedUpdate += i => speed = i;
             uiManager.LoadConfig();
         }
 

@@ -22,31 +22,13 @@ namespace UI
 
     public class UiManager : MonoBehaviour
     {
-        /*
-         - UI
-            generacion num
-            gen time
-            sobrevivientes por especie
-            fitness avg de cada cerebro
-            que voronoi dubujar
-
-        - Config
-            bias
-            gens per save
-            gen duration
-            activate save/load
-            which gen to load
-            species count
-            mutation rate
-            mut chance
-            elites
-         */
         [SerializeField] TMP_Text fpsCounter;
         [SerializeField] TMP_Text generationNum;
         [SerializeField] TMP_Text genTime;
         [SerializeField] TMP_Text survivorsPerSpecies;
         [SerializeField] TMP_Text fitnessAvg;
         [SerializeField] Slider voronoiToDraw;
+        [SerializeField] Slider speed;
         [SerializeField] TMP_InputField bias;
         [SerializeField] TMP_InputField mutChance;
         [SerializeField] TMP_InputField mutationRate;
@@ -63,6 +45,7 @@ namespace UI
         public Action<int[]> OnSurvivorsPerSpeciesUpdate => UpdateSurvivorsPerSpecies;
         public Action<float[]> OnFitnessAvgUpdate => UpdateFitnessAvg;
         public Action<int> onVoronoiUpdate;
+        public Action<int> onSpeedUpdate;
         public Action<float> onBiasUpdate;
         public Action<float> onMutChanceUpdate;
         public Action<float> onMutationRateUpdate;
@@ -76,8 +59,11 @@ namespace UI
         private float deltaTime;
         private void Awake()
         {
+            speed.minValue = 1;
+            speed.maxValue = 500;
             voronoiToDraw.onValueChanged.AddListener(value => onVoronoiUpdate?.Invoke((int)value));
-
+            speed.onValueChanged.AddListener(value => onSpeedUpdate?.Invoke((int)value));
+            
             activateLoad.onValueChanged.AddListener(activate =>
                 onActivateSaveLoadUpdate?.Invoke(activateSave.isOn, activate));
             activateSave.onValueChanged.AddListener(activate =>
@@ -188,7 +174,7 @@ namespace UI
 
         public void UpdateGenTime(float time)
         {
-            genTime.text = time.ToString();
+            genTime.text = time.ToString("0.0");
         }
 
         public void UpdateSurvivorsPerSpecies(int[] survivors)
