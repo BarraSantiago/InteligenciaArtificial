@@ -22,29 +22,31 @@ namespace UI
 
     public class UiManager : MonoBehaviour
     {
-        [SerializeField] TMP_Text fpsCounter;
-        [SerializeField] TMP_Text generationNum;
-        [SerializeField] TMP_Text genTime;
-        [SerializeField] TMP_Text survivorsPerSpecies;
-        [SerializeField] TMP_Text fitnessAvg;
-        [SerializeField] Slider voronoiToDraw;
-        [SerializeField] Slider speed;
-        [SerializeField] TMP_InputField bias;
-        [SerializeField] TMP_InputField mutChance;
-        [SerializeField] TMP_InputField mutationRate;
-        [SerializeField] TMP_InputField elites;
-        [SerializeField] TMP_InputField speciesCount;
-        [SerializeField] TMP_InputField gensPerSave;
-        [SerializeField] TMP_InputField genDuration;
-        [SerializeField] TMP_InputField whichGenToLoad;
-        [SerializeField] Toggle activateSave;
-        [SerializeField] Toggle activateLoad;
+        [SerializeField] private TMP_Text fpsCounter;
+        [SerializeField] private TMP_Text generationNum;
+        [SerializeField] private TMP_Text genTime;
+        [SerializeField] private TMP_Text survivorsPerSpecies;
+        [SerializeField] private TMP_Text fitnessAvg;
+        [SerializeField] private Slider voronoiToDraw;
+        [SerializeField] private Slider speed;
+        [SerializeField] private TMP_InputField bias;
+        [SerializeField] private TMP_InputField mutChance;
+        [SerializeField] private TMP_InputField mutationRate;
+        [SerializeField] private TMP_InputField elites;
+        [SerializeField] private TMP_InputField speciesCount;
+        [SerializeField] private TMP_InputField gensPerSave;
+        [SerializeField] private TMP_InputField genDuration;
+        [SerializeField] private TMP_InputField whichGenToLoad;
+        [SerializeField] private Toggle activateSave;
+        [SerializeField] private Toggle activateLoad;
+        [SerializeField] private Toggle activateVoronoi;
 
         public Action<int> OnGenUpdate => UpdateGenerationNum;
         public Action<float> OnGenTimeUpdate => UpdateGenTime;
         public Action<int[]> OnSurvivorsPerSpeciesUpdate => UpdateSurvivorsPerSpecies;
         public Action<float[]> OnFitnessAvgUpdate => UpdateFitnessAvg;
         public Action<int> onVoronoiUpdate;
+        public Action onDrawVoronoi;
         public Action<int> onSpeedUpdate;
         public Action<float> onBiasUpdate;
         public Action<float> onMutChanceUpdate;
@@ -76,6 +78,7 @@ namespace UI
             gensPerSave.onEndEdit.AddListener(value => onGensPerSaveUpdate?.Invoke(int.Parse(value)));
             genDuration.onEndEdit.AddListener(value => onGenDurationUpdate?.Invoke(int.Parse(value)));
             whichGenToLoad.onEndEdit.AddListener(value => onWhichGenToLoadUpdate?.Invoke(int.Parse(value)));
+            activateVoronoi.onValueChanged.AddListener(value => onDrawVoronoi?.Invoke());
         }
 
         private void Update()

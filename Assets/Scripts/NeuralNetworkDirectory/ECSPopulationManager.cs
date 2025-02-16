@@ -10,7 +10,6 @@ using NeuralNetworkLib.DataManagement;
 using NeuralNetworkLib.ECS.FlockingECS;
 using NeuralNetworkLib.ECS.NeuralNetECS;
 using NeuralNetworkLib.ECS.Patron;
-using NeuralNetworkLib.Entities;
 using NeuralNetworkLib.GraphDirectory.Voronoi;
 using NeuralNetworkLib.NeuralNetDirectory;
 using NeuralNetworkLib.NeuralNetDirectory.NeuralNet;
@@ -1013,39 +1012,6 @@ namespace NeuralNetworkDirectory
         private void OnDrawGizmos()
         {
             /*
-            if (!Application.isPlaying)
-                return;
-
-
-            foreach (SimNode<IVector> node in DataContainer.Graph.NodesType)
-            {
-                Gizmos.color = node.NodeType switch
-                {
-                    NodeType.Empty => Color.white,
-                    NodeType.Lake => Color.blue,
-                    NodeType.Mountain => Color.gray,
-                    NodeType.Plains => Color.green,
-                    NodeType.Sand => Color.yellow,
-                    _ => Color.white
-                };
-                Gizmos.DrawSphere(new Vector3(node.GetCoordinate().X, node.GetCoordinate().Y), (float)CellSize / 5);
-
-                Gizmos.color = node.NodeTerrain switch
-                {
-                    NodeTerrain.Tree => Color.green,
-                    NodeTerrain.Stump => new Color(165 / 255, 42 / 255, 42 / 255, 1),
-                    NodeTerrain.Lake => Color.blue,
-                    NodeTerrain.TownCenter => Color.magenta,
-                    NodeTerrain.WatchTower => Color.cyan,
-                    NodeTerrain.Construction => Color.gray,
-                    NodeTerrain.Mine => Color.yellow,
-                    _ => Color.white
-                };
-
-                Gizmos.DrawCube(new Vector3(node.GetCoordinate().X, node.GetCoordinate().Y), Vector3.one / 7);
-            }*/
-
-
             if (DataContainer.Voronois == null || DataContainer.Voronois[voronoiToDraw] == null) return;
 
             foreach (Site<Point2D> site in DataContainer.Voronois[voronoiToDraw].Sites)
@@ -1072,7 +1038,7 @@ namespace NeuralNetworkDirectory
                         Gizmos.DrawLine(from, to);
                     }
                 }
-            }
+            }*/
         }
 
         private void PurgingSpecials()
