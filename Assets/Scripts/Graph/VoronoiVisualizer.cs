@@ -5,22 +5,22 @@ using NeuralNetworkLib.GraphDirectory.Voronoi;
 using UI;
 using UnityEngine;
 
-// Ensure this gives access to Site<Point2D> and Point2D
 
 namespace Graph
 {
     public class VoronoiRenderer : MonoBehaviour
     {
-        [Header("Voronoi Settings")] 
-        [SerializeField] private UiManager uiManager;
-        [SerializeField] private int voronoiToDraw = 1;
+        [Header("Voronoi Settings")] [SerializeField]
+        private int voronoiToDraw = 0;
+
         [SerializeField] private Color siteColor = Color.cyan;
         [SerializeField] private Color cellColor = Color.magenta;
         [SerializeField] private float siteMarkerSize = 2f;
 
-        [Header("Material Settings")] 
-        [SerializeField] private Material lineMaterial;
+        [Header("Material Settings")] [SerializeField]
+        private Material lineMaterial;
 
+        [SerializeField] private UiManager uiManager;
         private bool drawVoronoi = true;
 
         private void Start()
@@ -30,25 +30,39 @@ namespace Graph
         }
 
 
-        private void OnRenderObject()
+        private void OnPostRender()
         {
             if (!drawVoronoi) return;
-            
             if (lineMaterial == null)
             {
-                Debug.LogWarning("Line material not set on VoronoiRenderer.");
+                Debug.LogError("VoronoiRenderer: Line material is not assigned.");
                 return;
             }
 
-            // Set the material pass (typically pass 0 for an unlit shader)
+            // Use the line material.
             lineMaterial.SetPass(0);
 
-            // Push current matrix, so that any changes here don't affect other rendering.
+            // Save the current GL state.
             GL.PushMatrix();
-            // Use the object's transform matrix so that lines are drawn in world space.
-            GL.MultMatrix(transform.localToWorldMatrix);
 
-            // Validate that the Voronoi data exists.
+            // Use the current camera's projection and view matrices.
+            Camera cam = Camera.current;
+            if (cam == null)
+            {
+                cam = Camera.main;
+            }
+
+            if (cam != null)
+            {
+                GL.LoadProjectionMatrix(cam.projectionMatrix);
+                GL.modelview = cam.worldToCameraMatrix;
+            }
+            else
+            {
+                Debug.LogError("VoronoiRenderer: No active camera found.");
+            }
+
+            // Validate the Voronoi data.
             if (DataContainer.Voronois == null ||
                 voronoiToDraw < 0 ||
                 voronoiToDraw >= DataContainer.Voronois.Length ||
@@ -58,32 +72,28 @@ namespace Graph
                 return;
             }
 
-            // Draw each site.
+            // Begin drawing lines.
+            GL.Begin(GL.LINES);
+
             foreach (Site<Point2D> site in DataContainer.Voronois[voronoiToDraw].Sites)
             {
+                // Convert site position to Vector3.
                 Vector3 sitePos = new Vector3((float)site.Position.X, (float)site.Position.Y, 0f);
 
-                // Draw the site as a cross.
-                GL.Begin(GL.LINES);
+                // Draw a cross at the site.
                 GL.Color(siteColor);
-                // Horizontal line.
                 GL.Vertex(sitePos + Vector3.left * siteMarkerSize);
                 GL.Vertex(sitePos + Vector3.right * siteMarkerSize);
-                // Vertical line.
                 GL.Vertex(sitePos + Vector3.up * siteMarkerSize);
                 GL.Vertex(sitePos + Vector3.down * siteMarkerSize);
-                GL.End();
 
-                // Draw the Voronoi cell if available.
+                // Draw the Voronoi cell if it exists.
                 if (site.CellPolygon != null && site.CellPolygon.Count > 1)
                 {
-                    // Convert the polygon points to Vector3.
+                    GL.Color(cellColor);
                     List<Vector3> polyPoints = site.CellPolygon
                         .Select(p => new Vector3((float)p.X, (float)p.Y, 0f))
                         .ToList();
-
-                    GL.Begin(GL.LINES);
-                    GL.Color(cellColor);
                     for (int i = 0; i < polyPoints.Count; i++)
                     {
                         Vector3 from = polyPoints[i];
@@ -91,12 +101,10 @@ namespace Graph
                         GL.Vertex(from);
                         GL.Vertex(to);
                     }
-
-                    GL.End();
                 }
             }
 
-            // Pop the matrix to restore state.
+            GL.End();
             GL.PopMatrix();
         }
     }
