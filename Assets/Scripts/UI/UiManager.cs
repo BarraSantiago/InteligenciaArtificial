@@ -1,4 +1,6 @@
 using System;
+using NeuralNetworkLib.DataManagement;
+using NeuralNetworkLib.GraphDirectory.Voronoi;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -40,7 +42,8 @@ namespace UI
         [SerializeField] private Toggle activateSave;
         [SerializeField] private Toggle activateLoad;
         [SerializeField] private Toggle activateVoronoi;
-
+        [SerializeField] private Button balanceVoronoiButton;
+        [SerializeField] private double correctionFactor;
         public Action<int> OnGenUpdate => UpdateGenerationNum;
         public Action<float> OnGenTimeUpdate => UpdateGenTime;
         public Action<int[]> OnSurvivorsPerSpeciesUpdate => UpdateSurvivorsPerSpecies;
@@ -59,13 +62,14 @@ namespace UI
         public Action<bool, bool> onActivateSaveLoadUpdate;
 
         private float deltaTime;
+
         private void Awake()
         {
             speed.minValue = 1;
-            speed.maxValue = 500;
+            speed.maxValue = 50;
             voronoiToDraw.onValueChanged.AddListener(value => onVoronoiUpdate?.Invoke((int)value));
             speed.onValueChanged.AddListener(value => onSpeedUpdate?.Invoke((int)value));
-            
+
             activateLoad.onValueChanged.AddListener(activate =>
                 onActivateSaveLoadUpdate?.Invoke(activateSave.isOn, activate));
             activateSave.onValueChanged.AddListener(activate =>
@@ -79,6 +83,13 @@ namespace UI
             genDuration.onEndEdit.AddListener(value => onGenDurationUpdate?.Invoke(int.Parse(value)));
             whichGenToLoad.onEndEdit.AddListener(value => onWhichGenToLoadUpdate?.Invoke(int.Parse(value)));
             activateVoronoi.onValueChanged.AddListener(value => onDrawVoronoi?.Invoke());
+            balanceVoronoiButton.onClick.AddListener(BalanceVoronoi);
+            
+        }
+
+        private void BalanceVoronoi()
+        {
+            DataContainer.Voronois[(int)voronoiToDraw.value].BalanceCells(correctionFactor, 7);
         }
 
         private void Update()

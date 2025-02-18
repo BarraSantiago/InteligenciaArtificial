@@ -109,6 +109,11 @@ namespace NeuralNetworkDirectory
             gridManager = new GraphManager<IVector, ITransform<IVector>>(gridWidth, gridHeight);
             DataContainer.Graph = new Sim2DGraph(gridWidth, gridHeight, CellSize);
             DataContainer.Init();
+            foreach (VoronoiDiagram<Point2D> variable in DataContainer.Voronois)
+            {
+                if(variable == null) continue;
+                variable.ComputeCellsStandard();
+            }
             NeuronDataSystem.OnSpecificLoaded += SpecificLoaded;
             Herbivore<IVector, ITransform<IVector>>.OnDeath += RemoveEntity;
             ECSManager.Init();
