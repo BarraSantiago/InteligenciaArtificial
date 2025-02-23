@@ -111,9 +111,10 @@ namespace NeuralNetworkDirectory
             DataContainer.Init();
             foreach (VoronoiDiagram<Point2D> variable in DataContainer.Voronois)
             {
-                if(variable == null) continue;
+                if (variable == null) continue;
                 variable.ComputeCellsStandard();
             }
+
             NeuronDataSystem.OnSpecificLoaded += SpecificLoaded;
             Herbivore<IVector, ITransform<IVector>>.OnDeath += RemoveEntity;
             ECSManager.Init();
@@ -254,11 +255,11 @@ namespace NeuralNetworkDirectory
             bool unitSpawned = false;
             for (int j = 0; j < townCenters.Length; j++)
             {
-                if(townCenters[j].ManageSpawning()) unitSpawned = true;
+                if (townCenters[j].ManageSpawning()) unitSpawned = true;
             }
 
             if (unitSpawned) UpdateTcAgentsCopy();
-            
+
             _requiresRedraw = true;
             uiManager.OnGenTimeUpdate?.Invoke(accumTime);
         }
@@ -267,7 +268,7 @@ namespace NeuralNetworkDirectory
         {
             agentsCopy = DataContainer.Animals.ToArray();
         }
-        
+
         private void UpdateTcAgentsCopy()
         {
             int index = 0;
@@ -286,7 +287,8 @@ namespace NeuralNetworkDirectory
 
             TCAgentType.Time = dt;
             AnimalAgentType.Time = dt;
-            
+
+            ECSManager.RunFlocking(dt);
 
             for (int i = 0; i < agentsCopy.Length; i++)
             {
@@ -297,11 +299,30 @@ namespace NeuralNetworkDirectory
 
             for (int i = 0; i < tcAgentsCopy.Length; i++)
             {
-                uint agent = tcAgentsCopy[i].Key;
-                ECSManager.GetComponent<TransformComponent>(agent).Transform = DataContainer.TcAgents[agent].Transform;
+                KeyValuePair<uint, TCAgentType> agent = tcAgentsCopy[i];
+                ECSManager.GetComponent<TransformComponent>(agent.Key).Transform = agent.Value.Transform;
+                ECSManager.GetComponent<InputComponent>(agentsCopy[i].Key).inputs = agent.Value.input;
             }
 
-            ECSManager.Tick(dt);
+            ECSManager.RunSystem(dt, typeof(NeuralNetSystem));
+
+            int flockingBrainNum = tcAgentsCopy[0].Value.GetBrainTypeKeyByValue(BrainType.Flocking);
+            for (int i = 0; i < tcAgentsCopy.Length; i++)
+            {
+                KeyValuePair<uint, TCAgentType> agent = tcAgentsCopy[i];
+
+                ECSManager.GetComponent<BoidConfigComponent>(agent.Key).cohesionOffset =
+                    agent.Value.output[flockingBrainNum][0];
+                ECSManager.GetComponent<BoidConfigComponent>(agent.Key).alignmentOffset =
+                    agent.Value.output[flockingBrainNum][1];
+                ECSManager.GetComponent<BoidConfigComponent>(agent.Key).directionOffset =
+                    agent.Value.output[flockingBrainNum][2];
+                ECSManager.GetComponent<BoidConfigComponent>(agent.Key).separationOffset =
+                    agent.Value.output[flockingBrainNum][3];
+            }
+
+            ECSManager.RunSystem(dt, typeof(ACSSystem));
+
 
             for (int i = 0; i < agentsCopy.Length; i++)
             {
@@ -314,6 +335,7 @@ namespace NeuralNetworkDirectory
             {
                 uint agent = tcAgentsCopy[i].Key;
 
+                tcAgentsCopy[i].Value.output = ECSManager.GetComponent<OutputComponent>(agent).Outputs;
                 DataContainer.TcAgents[agent].AcsVector = ECSManager.GetComponent<ACSComponent>(agent).ACS;
             }
 
@@ -359,7 +381,7 @@ namespace NeuralNetworkDirectory
 
             AddFitnessData();
             DataContainer.FitnessStagnationManager.AnalyzeData();
-            
+
             bool remainingPopulation = DataContainer.Animals.Count > 0;
 
             bool remainingCarn = carnivoreCount - missingCarnivores > 1;
@@ -436,7 +458,7 @@ namespace NeuralNetworkDirectory
             float[] fitness = new float[brainTypes.Length];
 
             int agentCount = 0;
-            
+
             foreach (KeyValuePair<uint, AnimalAgentType> variable in DataContainer.Animals)
             {
                 if (variable.Value.agentType != agentType) continue;
@@ -450,16 +472,9 @@ namespace NeuralNetworkDirectory
 
             for (int i = 0; i < fitness.Length; i++)
             {
-                DataContainer.FitnessStagnationManager.AddFitnessData(agentType, brainTypes[i], fitness[i] / agentCount);
+                DataContainer.FitnessStagnationManager.AddFitnessData(agentType, brainTypes[i],
+                    fitness[i] / agentCount);
             }
-        }
-
-        private void UpdateBoidOffsets(SimBoid boid, float[] outputs)
-        {
-            boid.cohesionOffset = outputs[0];
-            boid.separationOffset = outputs[1];
-            boid.directionOffset = outputs[2];
-            boid.alignmentOffset = outputs[3];
         }
 
 
@@ -574,7 +589,7 @@ namespace NeuralNetworkDirectory
                 BoidConfigComponent boidConfig = new BoidConfigComponent(6, 1, 1, 1, 1);
                 ACSComponent acsComponent = new ACSComponent();
                 TransformComponent transformComponent = new TransformComponent();
-
+                InputComponent inputComponent = new InputComponent();
 
                 TCAgentType agent = agentType switch
                 {
@@ -591,6 +606,7 @@ namespace NeuralNetworkDirectory
                 ECSManager.AddComponent(entityID, acsComponent);
                 ECSManager.AddComponent(entityID, boidConfig);
                 ECSManager.AddComponent(entityID, transformComponent);
+                ECSManager.AddComponent(entityID, inputComponent);
 
                 lock (DataContainer.TcAgents)
                 {
@@ -1011,40 +1027,6 @@ namespace NeuralNetworkDirectory
                 $"The value '{value}' is not present in the brainTypes dictionary for agent type '{agentType}'.");
         }
 
-        private Color color = new Color(0.5f, 0.5f, 0.5f, 0.2f);
-
-
-        private void OnDrawGizmos()
-        {
-            /*
-            if (DataContainer.Voronois == null || DataContainer.Voronois[voronoiToDraw] == null) return;
-
-            foreach (Site<Point2D> site in DataContainer.Voronois[voronoiToDraw].Sites)
-            {
-                // Draw the site as a sphere.
-                Gizmos.color = Color.cyan;
-                Vector3 sitePos = new Vector3((float)site.Position.X, (float)site.Position.Y, 0f);
-                Gizmos.DrawSphere(sitePos, 2);
-
-                // Draw the Voronoi cell (if computed) as a closed polygon.
-                if (site.CellPolygon is { Count: > 1 })
-                {
-                    Gizmos.color = Color.magenta;
-                    // Convert the cell polygon points to Vector3.
-                    List<Vector3> polyPoints = site.CellPolygon
-                        .Select(p => new Vector3((float)p.X, (float)p.Y, 0f))
-                        .ToList();
-
-                    // Ensure the polygon is closed by drawing from the last to the first point.
-                    for (int i = 0; i < polyPoints.Count; i++)
-                    {
-                        Vector3 from = polyPoints[i];
-                        Vector3 to = polyPoints[(i + 1) % polyPoints.Count];
-                        Gizmos.DrawLine(from, to);
-                    }
-                }
-            }*/
-        }
 
         private void PurgingSpecials()
         {

@@ -44,6 +44,8 @@ namespace UI
         [SerializeField] private Toggle activateVoronoi;
         [SerializeField] private Button balanceVoronoiButton;
         [SerializeField] private double correctionFactor;
+        [SerializeField] private double snapDistance;
+        [SerializeField] private int iterations =3;
         public Action<int> OnGenUpdate => UpdateGenerationNum;
         public Action<float> OnGenTimeUpdate => UpdateGenTime;
         public Action<int[]> OnSurvivorsPerSpeciesUpdate => UpdateSurvivorsPerSpecies;
@@ -89,7 +91,7 @@ namespace UI
 
         private void BalanceVoronoi()
         {
-            DataContainer.Voronois[(int)voronoiToDraw.value].BalanceCells(correctionFactor, 7);
+            DataContainer.Voronois[(int)voronoiToDraw.value].BalanceCells(correctionFactor, iterations);
         }
 
         private void Update()
