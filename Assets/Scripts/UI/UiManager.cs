@@ -168,8 +168,6 @@ namespace UI
             gensPerSave.text = config.GensPerSave.ToString();
             genDuration.text = config.GenDuration.ToString();
             whichGenToLoad.text = config.WhichGenToLoad.ToString();
-            activateSave.isOn = config.ActivateSave;
-            activateLoad.isOn = config.ActivateLoad;
 
             onVoronoiUpdate?.Invoke(1);
             onBiasUpdate?.Invoke(config.Bias);
