@@ -23,7 +23,6 @@ namespace NeuralNetworkDirectory
 {
     using AnimalAgentType = AnimalAgent<IVector, ITransform<IVector>>;
     using TCAgentType = TcAgent<IVector, ITransform<IVector>>;
-    using SimBoid = Boid<IVector, ITransform<IVector>>;
 
     public class EcsPopulationManager : MonoBehaviour
     {
@@ -444,14 +443,6 @@ namespace NeuralNetworkDirectory
             {
                 DataContainer.FitnessStagnationManager.AddFitnessData(agentType, brainTypes[i], fitness[i] / agentCount);
             }
-        }
-
-        private void UpdateBoidOffsets(SimBoid boid, float[] outputs)
-        {
-            boid.cohesionOffset = outputs[0];
-            boid.separationOffset = outputs[1];
-            boid.directionOffset = outputs[2];
-            boid.alignmentOffset = outputs[3];
         }
 
 
@@ -949,7 +940,7 @@ namespace NeuralNetworkDirectory
                 townCenter.OnSpawnUnit += CreateTCAgents;
             }
 
-            DataContainer.UpdateVoronoi2(NodeTerrain.TownCenter);
+            DataContainer.UpdateVoronoi(NodeTerrain.TownCenter);
         }
 
         public void StopSimulation()

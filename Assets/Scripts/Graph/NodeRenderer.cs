@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using NeuralNetworkLib.DataManagement;
 using NeuralNetworkLib.Utils;
+using UI;
 using UnityEngine;
 
 namespace Graph
@@ -16,6 +17,7 @@ namespace Graph
         public Material treeMaterial;
         public Material townCenterMaterial;
         public Material constructionMaterial;
+        public Material mountainMaterial;
 
         public float cellSize = 1f;
 
@@ -35,7 +37,8 @@ namespace Graph
                 { NodeTerrain.WatchTower, watchTowerMaterial },
                 { NodeTerrain.Tree, treeMaterial },
                 { NodeTerrain.TownCenter, townCenterMaterial },
-                { NodeTerrain.Construction, constructionMaterial }
+                { NodeTerrain.Construction, constructionMaterial },
+                { NodeTerrain.Mountain, mountainMaterial }
             };
 
             foreach (NodeTerrain terrain in terrainMaterials.Keys)
@@ -56,8 +59,20 @@ namespace Graph
 
                 terrainTransforms[terrain].Add(matrix);
             }
+            UiManager.OnNodeUpdate += UpdateNode;
         }
 
+        public void UpdateNode(IVector coord, NodeTerrain oldTerrain, NodeTerrain newTerrain)
+        {
+            if(oldTerrain == newTerrain) return;
+            Vector3 pos = new Vector3(coord.X, coord.Y, 0f);
+            float scale = cellSize / 5f;
+            Matrix4x4 matrix = Matrix4x4.TRS(pos, Quaternion.identity, Vector3.one * scale);
+            
+            terrainTransforms[oldTerrain].Remove(matrix);
+            terrainTransforms[newTerrain].Add(matrix);
+        }
+        
         void Update()
         {
             foreach (KeyValuePair<NodeTerrain, List<Matrix4x4>> kvp in terrainTransforms)
