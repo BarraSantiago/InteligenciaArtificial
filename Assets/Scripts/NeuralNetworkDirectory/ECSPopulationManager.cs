@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -119,8 +120,8 @@ namespace NeuralNetworkDirectory
 
             //DataContainer.Graph.LoadGraph("GraphData.json");
             StartSimulation();
-            fitnessManager = new FitnessManager<IVector, ITransform<IVector>>(DataContainer.Animals, 
-                                                                              DataContainer.TcAgents);
+            fitnessManager = new FitnessManager<IVector, ITransform<IVector>>(DataContainer.Animals,
+                DataContainer.TcAgents);
             behaviourCount = GetHighestBehaviourCount();
             startSimulation = true;
             isRunning = true;
@@ -299,7 +300,7 @@ namespace NeuralNetworkDirectory
             for (int i = 0; i < tcAgentsCopy.Length; i++)
             {
                 KeyValuePair<uint, TCAgentType> agent = tcAgentsCopy[i];
-                if(agent.Value == null) break;
+                if (agent.Value == null) break;
                 ECSManager.GetComponent<TransformComponent>(agent.Key).Transform = agent.Value.Transform;
                 ECSManager.GetComponent<InputComponent>(agent.Key).inputs = agent.Value.input;
             }
@@ -310,7 +311,7 @@ namespace NeuralNetworkDirectory
             for (int i = 0; i < tcAgentsCopy.Length; i++)
             {
                 KeyValuePair<uint, TCAgentType> agent = tcAgentsCopy[i];
-                if(agent.Value == null) break;
+                if (agent.Value == null) break;
 
                 ECSManager.GetComponent<BoidConfigComponent>(agent.Key).cohesionOffset =
                     agent.Value.output[flockingBrainNum][0];
@@ -334,7 +335,7 @@ namespace NeuralNetworkDirectory
 
             for (int i = 0; i < tcAgentsCopy.Length; i++)
             {
-                if(tcAgentsCopy[i].Value == null) break;
+                if (tcAgentsCopy[i].Value == null) break;
                 uint agent = tcAgentsCopy[i].Key;
 
                 tcAgentsCopy[i].Value.output = ECSManager.GetComponent<OutputComponent>(agent).Outputs;
@@ -346,7 +347,8 @@ namespace NeuralNetworkDirectory
             {
                 int tickIndex = i;
 
-                Parallel.For(0, animalAgentsCopy.Length, j => { animalAgentsCopy[j].Value.Fsm.MultiThreadTick(tickIndex); });
+                Parallel.For(0, animalAgentsCopy.Length,
+                    j => { animalAgentsCopy[j].Value.Fsm.MultiThreadTick(tickIndex); });
                 Parallel.For(0, tcAgentsCopy.Length, j =>
                 {
                     if (tcAgentsCopy[j].Value == null) return;
@@ -426,13 +428,16 @@ namespace NeuralNetworkDirectory
             CreateNewGenomes(genomes, DataContainer.BuilBrainTypes, AgentTypes.Builder, maxBuildersCarts);
             CreateNewGenomes(genomes, DataContainer.GathBrainTypes, AgentTypes.Gatherer, maxGatherers);
             TcBrainsHandler(indexes, genomes);
-            
+
+            ResetFitness();
+            HandleBrainReset();
+
             if (!remainingPopulation)
             {
                 FillPopulation();
                 return;
             }
-            
+
             foreach (AnimalAgentType agent in DataContainer.Animals.Values) agent.Reset();
 
             if (remainingCarn)
@@ -449,6 +454,102 @@ namespace NeuralNetworkDirectory
             {
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
+            }
+        }
+
+        private void ResetFitness()
+        {
+            ICollection<NeuralNetComponent> brains = ECSManager.GetComponents<NeuralNetComponent>().Values;
+            foreach (NeuralNetComponent neuralNetComponent in brains)
+            {
+                for (int i = 0; i < neuralNetComponent.Fitness.Length; i++)
+                {
+                    neuralNetComponent.Fitness[i] = 0;
+                }
+
+                for (int i = 0; i < neuralNetComponent.FitnessMod.Length; i++)
+                {
+                    neuralNetComponent.Fitness[i] = 1;
+                }
+            }
+        }
+
+        private void HandleBrainReset()
+        {
+            foreach (BrainType brain in DataContainer.BuilBrainTypes.Values)
+            {
+                CheckAndResetStagnantBrain(AgentTypes.Builder, brain);
+            }
+
+            foreach (BrainType brain in DataContainer.GathBrainTypes.Values)
+            {
+                CheckAndResetStagnantBrain(AgentTypes.Gatherer, brain);
+            }
+
+            foreach (BrainType brain in DataContainer.CartBrainTypes.Values)
+            {
+                CheckAndResetStagnantBrain(AgentTypes.Cart, brain);
+            }
+        }
+
+        public void CheckAndResetStagnantBrain(AgentTypes agentType, BrainType brainType)
+        {
+            List<uint> agentIds = new List<uint>();
+            switch (agentType)
+            {
+                case AgentTypes.Carnivore:
+                case AgentTypes.Herbivore:
+                    
+                    foreach (KeyValuePair<uint, AnimalAgentType> kv in DataContainer.Animals)
+                    {
+                        if (kv.Value.agentType == agentType)
+                        {
+                            agentIds.Add(kv.Key);
+                        }
+                    }
+                    break;
+                case AgentTypes.Gatherer:
+                case AgentTypes.Cart:
+                case AgentTypes.Builder:
+                    
+                    foreach (KeyValuePair<uint, TCAgentType> kv in DataContainer.TcAgents)
+                    {
+                        if (kv.Value.AgentType == agentType)
+                        {
+                            agentIds.Add(kv.Key);
+                        }
+                    }
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(agentType), agentType, null);
+            }
+
+            if (agentIds.Count == 0)
+            {
+                return; 
+            }
+
+            bool allZero = true;
+            int brainIndex = GetBrainTypeKeyByValue(brainType, agentType);
+            foreach (uint id in agentIds)
+            {
+                NeuralNetComponent nnComponent = ECSManager.GetComponent<NeuralNetComponent>(id);
+                if (nnComponent.Fitness[brainIndex] != 0)
+                {
+                    allZero = false;
+                    break;
+                }
+            }
+
+            if (!allZero)
+            {
+                return;
+            }
+            
+            foreach (uint id in agentIds)
+            {
+                NeuralNetComponent nnComponent = ECSManager.GetComponent<NeuralNetComponent>(id);
+                nnComponent.Layers[brainIndex] = CreateNeuronLayerList(brainType, agentType).ToArray();
             }
         }
 
@@ -481,7 +582,7 @@ namespace NeuralNetworkDirectory
             for (int i = 0; i < fitness.Length; i++)
             {
                 DataContainer.FitnessStagnationManager.AddFitnessData(agentType, brainTypes[i],
-                    fitness[i] / agentCount);
+                    fitness[i] < 0.01 ? 0 : fitness[i] / agentCount);
             }
         }
 
@@ -656,7 +757,7 @@ namespace NeuralNetworkDirectory
                 {
                     BrainType brainType = BrainType.Movement;
                     Genome genome = new Genome(brain.Layers.Sum(layerList =>
-                            layerList.Sum(layer => GetWeights(layer).Length)));
+                        layerList.Sum(layer => GetWeights(layer).Length)));
                     int j = 0;
                     foreach (NeuronLayer[] layerList in brain.Layers)
                     {
@@ -715,7 +816,7 @@ namespace NeuralNetworkDirectory
 
             return agent;
         }
-        
+
         private TCAgentType CreateTcAgent(AgentTypes agentType, TownCenter townCenter)
         {
             TCAgentType agent;
@@ -740,6 +841,7 @@ namespace NeuralNetworkDirectory
                 default:
                     throw new ArgumentException("Invalid agent type");
             }
+
             agent.TownCenter = townCenter;
             agent.CurrentNode = townCenter.Position;
             agent.Init();
@@ -785,7 +887,8 @@ namespace NeuralNetworkDirectory
                     brains.Add(CreateSingleBrain(BrainType.Gather, AgentTypes.Gatherer));
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(agentType), agentType, "Not prepared for this agent type");
+                    throw new ArgumentOutOfRangeException(nameof(agentType), agentType,
+                        "Not prepared for this agent type");
             }
 
             return brains;
@@ -900,9 +1003,8 @@ namespace NeuralNetworkDirectory
                         genomes[agentType][brain][index].genome);
 
                     genomes[agentType][brain].Remove(genomes[agentType][brain][index]);
-                    
                 }
-                
+
                 agent.Value.Reset();
             }
         }
@@ -1039,7 +1141,7 @@ namespace NeuralNetworkDirectory
 
             NeuronDataSystem.SaveNeurons(agentsData, directoryPath, generation);
         }
-        
+
         private void SaveTcAgents(string directoryPath, int generation)
         {
             if (!activateSave) return;
@@ -1182,7 +1284,7 @@ namespace NeuralNetworkDirectory
             DataContainer.Animals = new Dictionary<uint, AnimalAgentType>();
             genAlg = new GeneticAlgorithm(eliteCount, mutationChance, mutationRate);
             GenerateInitialPopulation();
-            if(activateLoad) Load(DirectoryPath);
+            if (activateLoad) Load(DirectoryPath);
             isRunning = true;
         }
 
