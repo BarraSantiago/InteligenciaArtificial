@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Linq;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using NeuralNetworkLib.Agents.AnimalAgents;
+using NeuralNetworkLib.Agents.Flocking;
 using NeuralNetworkLib.Agents.TCAgent;
 using NeuralNetworkLib.DataManagement;
 using NeuralNetworkLib.ECS.FlockingECS;
@@ -23,6 +23,7 @@ namespace NeuralNetworkDirectory
 {
     using AnimalAgentType = AnimalAgent<IVector, ITransform<IVector>>;
     using TCAgentType = TcAgent<IVector, ITransform<IVector>>;
+    using SimBoid = Boid<IVector, ITransform<IVector>>;
 
     public class EcsPopulationManager : MonoBehaviour
     {
@@ -74,7 +75,7 @@ namespace NeuralNetworkDirectory
         private FitnessManager<IVector, ITransform<IVector>> fitnessManager;
         private TownCenter[] townCenters = new TownCenter[3];
 
-        private KeyValuePair<uint, AnimalAgentType>[] animalAgentsCopy =
+        private KeyValuePair<uint, AnimalAgentType>[] agentsCopy =
             new KeyValuePair<uint, AnimalAgentType>[DataContainer.Animals.Count];
 
         private KeyValuePair<uint, TCAgentType>[] tcAgentsCopy = new KeyValuePair<uint, TCAgentType>[72];
@@ -110,18 +111,16 @@ namespace NeuralNetworkDirectory
             DataContainer.Init();
             foreach (VoronoiDiagram<Point2D> variable in DataContainer.Voronois)
             {
-                if (variable == null) continue;
+                if(variable == null) continue;
                 variable.ComputeCellsStandard();
             }
-
             NeuronDataSystem.OnSpecificLoaded += SpecificLoaded;
             Herbivore<IVector, ITransform<IVector>>.OnDeath += RemoveEntity;
             ECSManager.Init();
 
             //DataContainer.Graph.LoadGraph("GraphData.json");
             StartSimulation();
-            fitnessManager = new FitnessManager<IVector, ITransform<IVector>>(DataContainer.Animals,
-                DataContainer.TcAgents);
+            fitnessManager = new FitnessManager<IVector, ITransform<IVector>>(DataContainer.Animals);
             behaviourCount = GetHighestBehaviourCount();
             startSimulation = true;
             isRunning = true;
@@ -255,20 +254,20 @@ namespace NeuralNetworkDirectory
             bool unitSpawned = false;
             for (int j = 0; j < townCenters.Length; j++)
             {
-                if (townCenters[j].ManageSpawning()) unitSpawned = true;
+                if(townCenters[j].ManageSpawning()) unitSpawned = true;
             }
 
             if (unitSpawned) UpdateTcAgentsCopy();
-
+            
             _requiresRedraw = true;
             uiManager.OnGenTimeUpdate?.Invoke(accumTime);
         }
 
         private void UpdateAgentsCopy()
         {
-            animalAgentsCopy = DataContainer.Animals.ToArray();
+            agentsCopy = DataContainer.Animals.ToArray();
         }
-
+        
         private void UpdateTcAgentsCopy()
         {
             int index = 0;
@@ -287,58 +286,34 @@ namespace NeuralNetworkDirectory
 
             TCAgentType.Time = dt;
             AnimalAgentType.Time = dt;
+            
 
-            ECSManager.RunFlocking(dt);
-
-            for (int i = 0; i < animalAgentsCopy.Length; i++)
+            for (int i = 0; i < agentsCopy.Length; i++)
             {
-                AnimalAgentType agent = animalAgentsCopy[i].Value;
+                AnimalAgentType agent = agentsCopy[i].Value;
                 agent.UpdateInputs();
-                ECSManager.GetComponent<InputComponent>(animalAgentsCopy[i].Key).inputs = agent.input;
+                ECSManager.GetComponent<InputComponent>(agentsCopy[i].Key).inputs = agent.input;
             }
 
             for (int i = 0; i < tcAgentsCopy.Length; i++)
             {
-                KeyValuePair<uint, TCAgentType> agent = tcAgentsCopy[i];
-                if (agent.Value == null) break;
-                ECSManager.GetComponent<TransformComponent>(agent.Key).Transform = agent.Value.Transform;
-                ECSManager.GetComponent<InputComponent>(agent.Key).inputs = agent.Value.input;
+                uint agent = tcAgentsCopy[i].Key;
+                ECSManager.GetComponent<TransformComponent>(agent).Transform = DataContainer.TcAgents[agent].Transform;
             }
 
-            ECSManager.RunSystem(dt, typeof(NeuralNetSystem));
+            ECSManager.Tick(dt);
 
-            int flockingBrainNum = tcAgentsCopy[0].Value.GetBrainTypeKeyByValue(BrainType.Flocking);
-            for (int i = 0; i < tcAgentsCopy.Length; i++)
+            for (int i = 0; i < agentsCopy.Length; i++)
             {
-                KeyValuePair<uint, TCAgentType> agent = tcAgentsCopy[i];
-                if (agent.Value == null) break;
-
-                ECSManager.GetComponent<BoidConfigComponent>(agent.Key).cohesionOffset =
-                    agent.Value.output[flockingBrainNum][0];
-                ECSManager.GetComponent<BoidConfigComponent>(agent.Key).alignmentOffset =
-                    agent.Value.output[flockingBrainNum][1];
-                ECSManager.GetComponent<BoidConfigComponent>(agent.Key).directionOffset =
-                    agent.Value.output[flockingBrainNum][2];
-                ECSManager.GetComponent<BoidConfigComponent>(agent.Key).separationOffset =
-                    agent.Value.output[flockingBrainNum][3];
-            }
-
-            ECSManager.RunSystem(dt, typeof(ACSSystem));
-
-
-            for (int i = 0; i < animalAgentsCopy.Length; i++)
-            {
-                KeyValuePair<uint, AnimalAgentType> agent = animalAgentsCopy[i];
+                KeyValuePair<uint, AnimalAgentType> agent = agentsCopy[i];
 
                 agent.Value.output = ECSManager.GetComponent<OutputComponent>(agent.Key).Outputs;
             }
 
             for (int i = 0; i < tcAgentsCopy.Length; i++)
             {
-                if (tcAgentsCopy[i].Value == null) break;
                 uint agent = tcAgentsCopy[i].Key;
 
-                tcAgentsCopy[i].Value.output = ECSManager.GetComponent<OutputComponent>(agent).Outputs;
                 DataContainer.TcAgents[agent].AcsVector = ECSManager.GetComponent<ACSComponent>(agent).ACS;
             }
 
@@ -347,8 +322,7 @@ namespace NeuralNetworkDirectory
             {
                 int tickIndex = i;
 
-                Parallel.For(0, animalAgentsCopy.Length,
-                    j => { animalAgentsCopy[j].Value.Fsm.MultiThreadTick(tickIndex); });
+                Parallel.For(0, agentsCopy.Length, j => { agentsCopy[j].Value.Fsm.MultiThreadTick(tickIndex); });
                 Parallel.For(0, tcAgentsCopy.Length, j =>
                 {
                     if (tcAgentsCopy[j].Value == null) return;
@@ -356,14 +330,14 @@ namespace NeuralNetworkDirectory
                     tcAgentsCopy[j].Value.Fsm.MultiThreadTick(tickIndex);
                 });
 
-                for (int j = 0; j < animalAgentsCopy.Length; j++)
+                for (int j = 0; j < agentsCopy.Length; j++)
                 {
-                    animalAgentsCopy[j].Value.Fsm.MainThreadTick(tickIndex);
+                    agentsCopy[j].Value.Fsm.MainThreadTick(tickIndex);
                 }
 
                 for (int j = 0; j < tcAgentsCopy.Length; j++)
                 {
-                    if (tcAgentsCopy[j].Value == null) break;
+                    if (tcAgentsCopy[j].Value == null) continue;
 
                     tcAgentsCopy[j].Value.Fsm.MainThreadTick(tickIndex);
                 }
@@ -385,7 +359,7 @@ namespace NeuralNetworkDirectory
 
             AddFitnessData();
             DataContainer.FitnessStagnationManager.AnalyzeData();
-
+            
             bool remainingPopulation = DataContainer.Animals.Count > 0;
 
             bool remainingCarn = carnivoreCount - missingCarnivores > 1;
@@ -394,11 +368,9 @@ namespace NeuralNetworkDirectory
                 { carnivoreCount - missingCarnivores, herbivoreCount - missingHerbivores });
 
             ECSManager.GetSystem<NeuralNetSystem>().Deinitialize();
-
             if (Generation % generationsPerSave == 0)
             {
                 Save(DirectoryPath, Generation);
-                SaveTcAgents(DirectoryPath, Generation);
             }
 
             CleanMap();
@@ -406,37 +378,24 @@ namespace NeuralNetworkDirectory
             if (missingCarnivores == carnivoreCount) Load(AgentTypes.Carnivore);
             if (missingHerbivores == herbivoreCount) Load(AgentTypes.Herbivore);
 
-            Dictionary<AgentTypes, Dictionary<BrainType, List<Genome>>> genomes =
-                new Dictionary<AgentTypes, Dictionary<BrainType, List<Genome>>>
-                {
-                    [AgentTypes.Herbivore] = new(),
-                    [AgentTypes.Carnivore] = new(),
-                    [AgentTypes.Cart] = new(),
-                    [AgentTypes.Builder] = new(),
-                    [AgentTypes.Gatherer] = new()
-                };
-            Dictionary<AgentTypes, Dictionary<BrainType, int>> indexes =
-                new Dictionary<AgentTypes, Dictionary<BrainType, int>>
-                {
-                    [AgentTypes.Herbivore] = new(),
-                    [AgentTypes.Carnivore] = new(),
-                    [AgentTypes.Cart] = new(),
-                    [AgentTypes.Builder] = new(),
-                    [AgentTypes.Gatherer] = new()
-                };
-            CreateNewGenomes(genomes, DataContainer.CartBrainTypes, AgentTypes.Cart, maxBuildersCarts);
-            CreateNewGenomes(genomes, DataContainer.BuilBrainTypes, AgentTypes.Builder, maxBuildersCarts);
-            CreateNewGenomes(genomes, DataContainer.GathBrainTypes, AgentTypes.Gatherer, maxGatherers);
-            TcBrainsHandler(indexes, genomes);
-
-            ResetFitness();
-            HandleBrainReset();
-
             if (!remainingPopulation)
             {
                 FillPopulation();
                 return;
             }
+
+            Dictionary<AgentTypes, Dictionary<BrainType, List<Genome>>> genomes =
+                new Dictionary<AgentTypes, Dictionary<BrainType, List<Genome>>>
+                {
+                    [AgentTypes.Herbivore] = new(),
+                    [AgentTypes.Carnivore] = new()
+                };
+            Dictionary<AgentTypes, Dictionary<BrainType, int>> indexes =
+                new Dictionary<AgentTypes, Dictionary<BrainType, int>>
+                {
+                    [AgentTypes.Herbivore] = new(),
+                    [AgentTypes.Carnivore] = new()
+                };
 
             foreach (AnimalAgentType agent in DataContainer.Animals.Values) agent.Reset();
 
@@ -447,6 +406,7 @@ namespace NeuralNetworkDirectory
 
             FillPopulation();
             BrainsHandler(indexes, genomes, remainingCarn, remainingHerb);
+
             genomes.Clear();
             indexes.Clear();
 
@@ -457,109 +417,10 @@ namespace NeuralNetworkDirectory
             }
         }
 
-        private void ResetFitness()
-        {
-            ICollection<NeuralNetComponent> brains = ECSManager.GetComponents<NeuralNetComponent>().Values;
-            foreach (NeuralNetComponent neuralNetComponent in brains)
-            {
-                for (int i = 0; i < neuralNetComponent.Fitness.Length; i++)
-                {
-                    neuralNetComponent.Fitness[i] = 0;
-                }
-
-                for (int i = 0; i < neuralNetComponent.FitnessMod.Length; i++)
-                {
-                    neuralNetComponent.Fitness[i] = 1;
-                }
-            }
-        }
-
-        private void HandleBrainReset()
-        {
-            foreach (BrainType brain in DataContainer.BuilBrainTypes.Values)
-            {
-                CheckAndResetStagnantBrain(AgentTypes.Builder, brain);
-            }
-
-            foreach (BrainType brain in DataContainer.GathBrainTypes.Values)
-            {
-                CheckAndResetStagnantBrain(AgentTypes.Gatherer, brain);
-            }
-
-            foreach (BrainType brain in DataContainer.CartBrainTypes.Values)
-            {
-                CheckAndResetStagnantBrain(AgentTypes.Cart, brain);
-            }
-        }
-
-        public void CheckAndResetStagnantBrain(AgentTypes agentType, BrainType brainType)
-        {
-            List<uint> agentIds = new List<uint>();
-            switch (agentType)
-            {
-                case AgentTypes.Carnivore:
-                case AgentTypes.Herbivore:
-                    
-                    foreach (KeyValuePair<uint, AnimalAgentType> kv in DataContainer.Animals)
-                    {
-                        if (kv.Value.agentType == agentType)
-                        {
-                            agentIds.Add(kv.Key);
-                        }
-                    }
-                    break;
-                case AgentTypes.Gatherer:
-                case AgentTypes.Cart:
-                case AgentTypes.Builder:
-                    
-                    foreach (KeyValuePair<uint, TCAgentType> kv in DataContainer.TcAgents)
-                    {
-                        if (kv.Value.AgentType == agentType)
-                        {
-                            agentIds.Add(kv.Key);
-                        }
-                    }
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(agentType), agentType, null);
-            }
-
-            if (agentIds.Count == 0)
-            {
-                return; 
-            }
-
-            bool allZero = true;
-            int brainIndex = GetBrainTypeKeyByValue(brainType, agentType);
-            foreach (uint id in agentIds)
-            {
-                NeuralNetComponent nnComponent = ECSManager.GetComponent<NeuralNetComponent>(id);
-                if (nnComponent.Fitness[brainIndex] != 0)
-                {
-                    allZero = false;
-                    break;
-                }
-            }
-
-            if (!allZero)
-            {
-                return;
-            }
-            
-            foreach (uint id in agentIds)
-            {
-                NeuralNetComponent nnComponent = ECSManager.GetComponent<NeuralNetComponent>(id);
-                nnComponent.Layers[brainIndex] = CreateNeuronLayerList(brainType, agentType).ToArray();
-            }
-        }
-
         private static void AddFitnessData()
         {
             GetAvgFitness(AgentTypes.Carnivore, DataContainer.CarnBrainTypes.Values.ToArray());
             GetAvgFitness(AgentTypes.Herbivore, DataContainer.HerbBrainTypes.Values.ToArray());
-            GetAvgFitness(AgentTypes.Cart, DataContainer.CartBrainTypes.Values.ToArray());
-            GetAvgFitness(AgentTypes.Builder, DataContainer.BuilBrainTypes.Values.ToArray());
-            GetAvgFitness(AgentTypes.Gatherer, DataContainer.GathBrainTypes.Values.ToArray());
         }
 
         private static void GetAvgFitness(AgentTypes agentType, params BrainType[] brainTypes)
@@ -567,7 +428,7 @@ namespace NeuralNetworkDirectory
             float[] fitness = new float[brainTypes.Length];
 
             int agentCount = 0;
-
+            
             foreach (KeyValuePair<uint, AnimalAgentType> variable in DataContainer.Animals)
             {
                 if (variable.Value.agentType != agentType) continue;
@@ -581,9 +442,16 @@ namespace NeuralNetworkDirectory
 
             for (int i = 0; i < fitness.Length; i++)
             {
-                DataContainer.FitnessStagnationManager.AddFitnessData(agentType, brainTypes[i],
-                    fitness[i] < 0.01 ? 0 : fitness[i] / agentCount);
+                DataContainer.FitnessStagnationManager.AddFitnessData(agentType, brainTypes[i], fitness[i] / agentCount);
             }
+        }
+
+        private void UpdateBoidOffsets(SimBoid boid, float[] outputs)
+        {
+            boid.cohesionOffset = outputs[0];
+            boid.separationOffset = outputs[1];
+            boid.directionOffset = outputs[2];
+            boid.alignmentOffset = outputs[3];
         }
 
 
@@ -627,7 +495,7 @@ namespace NeuralNetworkDirectory
                 OutputComponent outputComponent = new OutputComponent();
 
                 ECSManager.AddComponent(entityID, outputComponent);
-                outputComponent.Outputs = new float[brainAmountComponent.BrainAmount][];
+                outputComponent.Outputs = new float[3][];
 
                 foreach (BrainType brain in num.Values)
                 {
@@ -698,84 +566,23 @@ namespace NeuralNetworkDirectory
                 BoidConfigComponent boidConfig = new BoidConfigComponent(6, 1, 1, 1, 1);
                 ACSComponent acsComponent = new ACSComponent();
                 TransformComponent transformComponent = new TransformComponent();
-                InputComponent inputComponent = new InputComponent();
-                OutputComponent outputComponent = new OutputComponent();
-                NeuralNetComponent neuralNetComponent = new NeuralNetComponent();
-                int brainAmount = agentType switch
-                {
-                    AgentTypes.Cart => DataContainer.CartBrainTypes.Count,
-                    AgentTypes.Gatherer => DataContainer.GathBrainTypes.Count,
-                    AgentTypes.Builder => DataContainer.BuilBrainTypes.Count,
-                    _ => throw new ArgumentException("Invalid agent type")
-                };
-                BrainAmountComponent brainAmountComponent = new BrainAmountComponent
-                {
-                    BrainAmount = brainAmount
-                };
-                outputComponent.Outputs = new float[brainAmountComponent.BrainAmount][];
 
-                Dictionary<int, BrainType> num = agentType switch
+
+                TCAgentType agent = agentType switch
                 {
-                    AgentTypes.Cart => DataContainer.CartBrainTypes,
-                    AgentTypes.Gatherer => DataContainer.GathBrainTypes,
-                    AgentTypes.Builder => DataContainer.BuilBrainTypes,
+                    AgentTypes.Gatherer => new Gatherer(),
+                    AgentTypes.Cart => new Cart(),
+                    AgentTypes.Builder => new Builder(),
                     _ => throw new ArgumentException("Invalid agent type")
                 };
 
-                foreach (BrainType brain in num.Values)
-                {
-                    BrainConfiguration inputsCount = DataContainer.InputCountCache[(brain, agentType)];
-                    outputComponent.Outputs[GetBrainTypeKeyByValue(brain, agentType)] =
-                        new float[inputsCount.OutputCount];
-                }
-
-                TCAgentType agent = CreateTcAgent(agentType, townCenter);
-
+                agent.TownCenter = townCenter;
+                agent.CurrentNode = townCenter.Position;
+                agent.Init();
                 transformComponent.Transform = agent.Transform;
                 ECSManager.AddComponent(entityID, acsComponent);
                 ECSManager.AddComponent(entityID, boidConfig);
                 ECSManager.AddComponent(entityID, transformComponent);
-                ECSManager.AddComponent(entityID, inputComponent);
-                ECSManager.AddComponent(entityID, neuralNetComponent);
-                ECSManager.AddComponent(entityID, brainAmountComponent);
-                ECSManager.AddComponent(entityID, outputComponent);
-
-                List<NeuralNetComponent> brains = CreateBrain(agentType);
-                Dictionary<BrainType, List<Genome>> genomes = new Dictionary<BrainType, List<Genome>>();
-
-                inputComponent.inputs = new float[brains.Count][];
-                neuralNetComponent.Layers = brains.SelectMany(brain => brain.Layers).ToArray();
-                neuralNetComponent.Fitness = new float[brainAmount];
-                neuralNetComponent.FitnessMod = new float[brainAmount];
-
-                for (int j = 0; j < neuralNetComponent.FitnessMod.Length; j++)
-                {
-                    neuralNetComponent.FitnessMod[j] = 1.0f;
-                }
-
-                foreach (NeuralNetComponent brain in brains)
-                {
-                    BrainType brainType = BrainType.Movement;
-                    Genome genome = new Genome(brain.Layers.Sum(layerList =>
-                        layerList.Sum(layer => GetWeights(layer).Length)));
-                    int j = 0;
-                    foreach (NeuronLayer[] layerList in brain.Layers)
-                    {
-                        brainType = layerList[j++].BrainType;
-                        SetWeights(layerList, genome.genome);
-                        foreach (NeuronLayer neuronLayer in layerList)
-                        {
-                            neuronLayer.AgentType = agentType;
-                        }
-                    }
-
-                    if (!genomes.ContainsKey(brainType))
-                    {
-                        genomes[brainType] = new List<Genome>();
-                    }
-
-                    genomes[brainType].Add(genome);
-                }
 
                 lock (DataContainer.TcAgents)
                 {
@@ -817,38 +624,6 @@ namespace NeuralNetworkDirectory
             return agent;
         }
 
-        private TCAgentType CreateTcAgent(AgentTypes agentType, TownCenter townCenter)
-        {
-            TCAgentType agent;
-
-            switch (agentType)
-            {
-                case AgentTypes.Cart:
-                    agent = new Cart();
-                    agent.brainTypes = DataContainer.CartBrainTypes;
-                    agent.AgentType = AgentTypes.Cart;
-                    break;
-                case AgentTypes.Gatherer:
-                    agent = new Gatherer();
-                    agent.brainTypes = DataContainer.GathBrainTypes;
-                    agent.AgentType = AgentTypes.Gatherer;
-                    break;
-                case AgentTypes.Builder:
-                    agent = new Builder();
-                    agent.brainTypes = DataContainer.BuilBrainTypes;
-                    agent.AgentType = AgentTypes.Builder;
-                    break;
-                default:
-                    throw new ArgumentException("Invalid agent type");
-            }
-
-            agent.TownCenter = townCenter;
-            agent.CurrentNode = townCenter.Position;
-            agent.Init();
-
-            return agent;
-        }
-
 
         private List<NeuralNetComponent> CreateBrain(AgentTypes agentType)
         {
@@ -865,26 +640,6 @@ namespace NeuralNetworkDirectory
                 case AgentTypes.Carnivore:
                     brains.Add(CreateSingleBrain(BrainType.Movement, AgentTypes.Carnivore));
                     brains.Add(CreateSingleBrain(BrainType.Attack, AgentTypes.Carnivore));
-                    break;
-                case AgentTypes.Cart:
-                    brains.Add(CreateSingleBrain(BrainType.Flocking, AgentTypes.Cart));
-                    brains.Add(CreateSingleBrain(BrainType.Movement, AgentTypes.Cart));
-                    brains.Add(CreateSingleBrain(BrainType.Wait, AgentTypes.Cart));
-                    brains.Add(CreateSingleBrain(BrainType.GetResources, AgentTypes.Cart));
-                    brains.Add(CreateSingleBrain(BrainType.Deliver, AgentTypes.Cart));
-                    brains.Add(CreateSingleBrain(BrainType.ReturnResources, AgentTypes.Cart));
-                    break;
-                case AgentTypes.Builder:
-                    brains.Add(CreateSingleBrain(BrainType.Flocking, AgentTypes.Builder));
-                    brains.Add(CreateSingleBrain(BrainType.Movement, AgentTypes.Builder));
-                    brains.Add(CreateSingleBrain(BrainType.Wait, AgentTypes.Builder));
-                    brains.Add(CreateSingleBrain(BrainType.Build, AgentTypes.Builder));
-                    break;
-                case AgentTypes.Gatherer:
-                    brains.Add(CreateSingleBrain(BrainType.Flocking, AgentTypes.Gatherer));
-                    brains.Add(CreateSingleBrain(BrainType.Movement, AgentTypes.Gatherer));
-                    brains.Add(CreateSingleBrain(BrainType.Wait, AgentTypes.Gatherer));
-                    brains.Add(CreateSingleBrain(BrainType.Gather, AgentTypes.Gatherer));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(agentType), agentType,
@@ -929,7 +684,8 @@ namespace NeuralNetworkDirectory
         }
 
         private void BrainsHandler(Dictionary<AgentTypes, Dictionary<BrainType, int>> indexes,
-            Dictionary<AgentTypes, Dictionary<BrainType, List<Genome>>> genomes, bool remainingCarn, bool remainingHerb)
+            Dictionary<AgentTypes, Dictionary<BrainType, List<Genome>>> genomes,
+            bool remainingCarn, bool remainingHerb)
         {
             foreach (KeyValuePair<uint, AnimalAgentType> agent in DataContainer.Animals)
             {
@@ -975,40 +731,6 @@ namespace NeuralNetworkDirectory
             }
         }
 
-        private void TcBrainsHandler(Dictionary<AgentTypes, Dictionary<BrainType, int>> indexes,
-            Dictionary<AgentTypes, Dictionary<BrainType, List<Genome>>> genomes)
-        {
-            foreach (KeyValuePair<uint, TCAgentType> agent in DataContainer.TcAgents)
-            {
-                AgentTypes agentType = agent.Value.AgentType;
-
-                if (agentType is AgentTypes.Carnivore or AgentTypes.Herbivore) continue;
-
-                NeuralNetComponent neuralNetComponent = ECSManager.GetComponent<NeuralNetComponent>(agent.Key);
-
-                foreach (BrainType brain in agent.Value.brainTypes.Values)
-                {
-                    agent.Value.GetBrainTypeKeyByValue(brain);
-                    if (!indexes[agentType].ContainsKey(brain))
-                    {
-                        indexes[agentType][brain] = 0;
-                    }
-
-                    int index = Random.Range(0, genomes[agentType][brain].Count);
-
-                    if (index >= genomes[agentType][brain].Count) continue;
-
-
-                    SetWeights(neuralNetComponent.Layers[GetBrainTypeKeyByValue(brain, agent.Value.AgentType)],
-                        genomes[agentType][brain][index].genome);
-
-                    genomes[agentType][brain].Remove(genomes[agentType][brain][index]);
-                }
-
-                agent.Value.Reset();
-            }
-        }
-
 
         private void FillPopulation()
         {
@@ -1021,11 +743,8 @@ namespace NeuralNetworkDirectory
         {
             foreach (BrainType brain in brainTypes.Values)
             {
-                List<Genome> genome = agentType is AgentTypes.Carnivore or AgentTypes.Herbivore
-                    ? GetGenomesByBrainAndAgentType(agentType, brain)
-                    : GetTcGenomesByBrainAndAgentType(agentType, brain);
-
-                genomes[agentType][brain] = genAlg.Epoch(genome.ToArray(), count);
+                genomes[agentType][brain] =
+                    genAlg.Epoch(GetGenomesByBrainAndAgentType(agentType, brain).ToArray(), count);
             }
         }
 
@@ -1063,42 +782,6 @@ namespace NeuralNetworkDirectory
 
             return genomes;
         }
-
-        private List<Genome> GetTcGenomesByBrainAndAgentType(AgentTypes agentType, BrainType brainType)
-        {
-            List<Genome> genomes = new List<Genome>();
-
-            foreach (KeyValuePair<uint, TCAgentType> agentEntry in DataContainer.TcAgents)
-            {
-                uint agentId = agentEntry.Key;
-                TCAgentType agent = agentEntry.Value;
-
-                if (agent.AgentType != agentType)
-                {
-                    continue;
-                }
-
-                NeuralNetComponent neuralNetComponent = ECSManager.GetComponent<NeuralNetComponent>(agentId);
-
-                List<float> weights = new List<float>();
-                foreach (NeuronLayer[] layerList in neuralNetComponent.Layers)
-                {
-                    foreach (NeuronLayer layer in layerList)
-                    {
-                        if (layer.BrainType != brainType) continue;
-
-
-                        weights.AddRange(GetWeights(layer));
-                    }
-                }
-
-                Genome genome = new Genome(weights.ToArray());
-                genomes.Add(genome);
-            }
-
-            return genomes;
-        }
-
 
         private void CleanMap()
         {
@@ -1141,44 +824,6 @@ namespace NeuralNetworkDirectory
 
             NeuronDataSystem.SaveNeurons(agentsData, directoryPath, generation);
         }
-
-        private void SaveTcAgents(string directoryPath, int generation)
-        {
-            if (!activateSave) return;
-
-            List<AgentNeuronData> agentsData = new List<AgentNeuronData>();
-
-            if (DataContainer.TcAgents.Count == 0) return;
-
-            List<KeyValuePair<uint, TCAgentType>> entitiesCopy = DataContainer.TcAgents.ToList();
-
-            agentsData.Capacity = entitiesCopy.Count * DataContainer.InputCountCache.Count;
-
-            foreach (KeyValuePair<uint, TCAgentType> entity in entitiesCopy)
-            {
-                NeuralNetComponent netComponent = ECSManager.GetComponent<NeuralNetComponent>(entity.Key);
-                foreach (NeuronLayer[] neuronLayers in netComponent.Layers)
-                {
-                    List<float> weights = new List<float>();
-                    AgentNeuronData neuronData = new AgentNeuronData();
-                    foreach (NeuronLayer layer in neuronLayers)
-                    {
-                        neuronData.AgentType = layer.AgentType;
-                        neuronData.BrainType = layer.BrainType;
-                        weights.AddRange(GetWeights(layer));
-                    }
-
-                    neuronData.NeuronWeights = weights.ToArray();
-                    lock (agentsData)
-                    {
-                        agentsData.Add(neuronData);
-                    }
-                }
-            }
-
-            NeuronDataSystem.SaveNeurons(agentsData, directoryPath, generation);
-        }
-
 
         public void Load(AgentTypes agentType)
         {
@@ -1343,9 +988,6 @@ namespace NeuralNetworkDirectory
             {
                 AgentTypes.Carnivore => DataContainer.CarnBrainTypes,
                 AgentTypes.Herbivore => DataContainer.HerbBrainTypes,
-                AgentTypes.Cart => DataContainer.CartBrainTypes,
-                AgentTypes.Gatherer => DataContainer.GathBrainTypes,
-                AgentTypes.Builder => DataContainer.BuilBrainTypes,
                 _ => throw new ArgumentException("Invalid agent type")
             };
 
