@@ -9,6 +9,7 @@ using NeuralNetworkLib.Agents.TCAgent;
 using NeuralNetworkLib.DataManagement;
 using NeuralNetworkLib.ECS.FlockingECS;
 using NeuralNetworkLib.ECS.NeuralNetECS;
+using NeuralNetworkLib.ECS.PathfinderECS;
 using NeuralNetworkLib.ECS.Patron;
 using NeuralNetworkLib.GraphDirectory.Voronoi;
 using NeuralNetworkLib.NeuralNetDirectory;
@@ -74,7 +75,7 @@ namespace NeuralNetworkDirectory
         private FitnessManager<IVector, ITransform<IVector>> fitnessManager;
         private TownCenter[] townCenters = new TownCenter[3];
 
-        private KeyValuePair<uint, AnimalAgentType>[] agentsCopy =
+        private KeyValuePair<uint, AnimalAgentType>[] animalAgentsCopy =
             new KeyValuePair<uint, AnimalAgentType>[DataContainer.Animals.Count];
 
         private KeyValuePair<uint, TCAgentType>[] tcAgentsCopy = new KeyValuePair<uint, TCAgentType>[72];
@@ -107,6 +108,7 @@ namespace NeuralNetworkDirectory
             UiManagerInit();
             gridManager = new GraphManager<IVector, ITransform<IVector>>(gridWidth, gridHeight);
             DataContainer.Graph = new Sim2DGraph(gridWidth, gridHeight, CellSize);
+            ECSManager.Init();
             DataContainer.Init();
             foreach (VoronoiDiagram<Point2D> variable in DataContainer.Voronois)
             {
@@ -115,7 +117,6 @@ namespace NeuralNetworkDirectory
             }
             NeuronDataSystem.OnSpecificLoaded += SpecificLoaded;
             Herbivore<IVector, ITransform<IVector>>.OnDeath += RemoveEntity;
-            ECSManager.Init();
 
             //DataContainer.Graph.LoadGraph("GraphData.json");
             StartSimulation();
@@ -264,7 +265,7 @@ namespace NeuralNetworkDirectory
 
         private void UpdateAgentsCopy()
         {
-            agentsCopy = DataContainer.Animals.ToArray();
+            animalAgentsCopy = DataContainer.Animals.ToArray();
         }
         
         private void UpdateTcAgentsCopy()
@@ -287,32 +288,39 @@ namespace NeuralNetworkDirectory
             AnimalAgentType.Time = dt;
             
 
-            for (int i = 0; i < agentsCopy.Length; i++)
+            for (int i = 0; i < animalAgentsCopy.Length; i++)
             {
-                AnimalAgentType agent = agentsCopy[i].Value;
+                AnimalAgentType agent = animalAgentsCopy[i].Value;
                 agent.UpdateInputs();
-                ECSManager.GetComponent<InputComponent>(agentsCopy[i].Key).inputs = agent.input;
+                ECSManager.GetComponent<InputComponent>(animalAgentsCopy[i].Key).inputs = agent.input;
             }
 
             for (int i = 0; i < tcAgentsCopy.Length; i++)
             {
+                if(tcAgentsCopy[i].Value == null) continue;
                 uint agent = tcAgentsCopy[i].Key;
                 ECSManager.GetComponent<TransformComponent>(agent).Transform = DataContainer.TcAgents[agent].Transform;
             }
 
             ECSManager.Tick(dt);
+            
 
-            for (int i = 0; i < agentsCopy.Length; i++)
+            for (int i = 0; i < animalAgentsCopy.Length; i++)
             {
-                KeyValuePair<uint, AnimalAgentType> agent = agentsCopy[i];
+                KeyValuePair<uint, AnimalAgentType> agent = animalAgentsCopy[i];
 
                 agent.Value.output = ECSManager.GetComponent<OutputComponent>(agent.Key).Outputs;
             }
 
             for (int i = 0; i < tcAgentsCopy.Length; i++)
             {
+                if(tcAgentsCopy[i].Value == null) continue;
                 uint agent = tcAgentsCopy[i].Key;
-
+                var pathResult = ECSManager.GetComponent<PathResultComponent<SimNode<IVector>>>(agent);
+                if (pathResult.PathFound)
+                {
+                    DataContainer.TcAgents[agent].Path = pathResult.Path;
+                }
                 DataContainer.TcAgents[agent].AcsVector = ECSManager.GetComponent<ACSComponent>(agent).ACS;
             }
 
@@ -321,7 +329,7 @@ namespace NeuralNetworkDirectory
             {
                 int tickIndex = i;
 
-                Parallel.For(0, agentsCopy.Length, j => { agentsCopy[j].Value.Fsm.MultiThreadTick(tickIndex); });
+                Parallel.For(0, animalAgentsCopy.Length, j => { animalAgentsCopy[j].Value.Fsm.MultiThreadTick(tickIndex); });
                 Parallel.For(0, tcAgentsCopy.Length, j =>
                 {
                     if (tcAgentsCopy[j].Value == null) return;
@@ -329,9 +337,9 @@ namespace NeuralNetworkDirectory
                     tcAgentsCopy[j].Value.Fsm.MultiThreadTick(tickIndex);
                 });
 
-                for (int j = 0; j < agentsCopy.Length; j++)
+                for (int j = 0; j < animalAgentsCopy.Length; j++)
                 {
-                    agentsCopy[j].Value.Fsm.MainThreadTick(tickIndex);
+                    animalAgentsCopy[j].Value.Fsm.MainThreadTick(tickIndex);
                 }
 
                 for (int j = 0; j < tcAgentsCopy.Length; j++)
@@ -557,15 +565,25 @@ namespace NeuralNetworkDirectory
                 BoidConfigComponent boidConfig = new BoidConfigComponent(6, 1, 1, 1, 1);
                 ACSComponent acsComponent = new ACSComponent();
                 TransformComponent transformComponent = new TransformComponent();
-
-
-                TCAgentType agent = agentType switch
+                PathResultComponent<SimNode<IVector>> pathComponent = new PathResultComponent<SimNode<IVector>>();
+                TCAgentType agent;
+                ECSFlag flag = new ECSFlag(FlagType.None);
+                switch (agentType)
                 {
-                    AgentTypes.Gatherer => new Gatherer(),
-                    AgentTypes.Cart => new Cart(),
-                    AgentTypes.Builder => new Builder(),
-                    _ => throw new ArgumentException("Invalid agent type")
-                };
+                    default:
+                    case AgentTypes.Gatherer:
+                        agent = new Gatherer(entityID);
+                        flag.Flag = FlagType.Gatherer;
+                        break;
+                    case AgentTypes.Cart:
+                        agent = new Cart(entityID);
+                        flag.Flag = FlagType.Cart;
+                        break;
+                    case AgentTypes.Builder:
+                        agent = new Builder(entityID);
+                        flag.Flag = FlagType.Builder;
+                        break;
+                }
 
                 agent.TownCenter = townCenter;
                 agent.CurrentNode = townCenter.Position;
@@ -574,6 +592,8 @@ namespace NeuralNetworkDirectory
                 ECSManager.AddComponent(entityID, acsComponent);
                 ECSManager.AddComponent(entityID, boidConfig);
                 ECSManager.AddComponent(entityID, transformComponent);
+                ECSManager.AddComponent(entityID, pathComponent);
+                ECSManager.AddFlag(entityID, flag);
 
                 lock (DataContainer.TcAgents)
                 {
