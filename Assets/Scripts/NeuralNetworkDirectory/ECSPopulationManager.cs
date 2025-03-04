@@ -597,17 +597,17 @@ namespace NeuralNetworkDirectory
                         break;
                 }
 
-                agent.TownCenter = townCenter;
-                agent.CurrentNode = townCenter.Position;
-                agent.Init();
-                transformComponent.Transform = agent.Transform;
+               
                 ECSManager.AddComponent(entityID, acsComponent);
                 ECSManager.AddComponent(entityID, boidConfig);
                 ECSManager.AddComponent(entityID, transformComponent);
                 ECSManager.AddComponent(entityID, pathComponent);
                 ECSManager.AddComponent(entityID, pathRequestComponent);
                 ECSManager.AddFlag(entityID, flag);
-
+                agent.TownCenter = townCenter;
+                agent.CurrentNode = townCenter.Position;
+                agent.Init();
+                transformComponent.Transform = agent.Transform;
                 lock (DataContainer.TcAgents)
                 {
                     DataContainer.TcAgents[entityID] = agent;

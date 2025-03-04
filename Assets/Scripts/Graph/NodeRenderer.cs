@@ -59,6 +59,18 @@ namespace Graph
 
                 terrainTransforms[terrain].Add(matrix);
             }
+            UiManager.OnNodeUpdate += UpdateNode;
+        }
+
+        public void UpdateNode(IVector coord, NodeTerrain oldTerrain, NodeTerrain newTerrain)
+        {
+            if(oldTerrain == newTerrain) return;
+            Vector3 pos = new Vector3(coord.X, coord.Y, 0f);
+            float scale = cellSize / 5f;
+            Matrix4x4 matrix = Matrix4x4.TRS(pos, Quaternion.identity, Vector3.one * scale);
+            
+            terrainTransforms[oldTerrain].Remove(matrix);
+            terrainTransforms[newTerrain].Add(matrix);
         }
 
         void Update()
