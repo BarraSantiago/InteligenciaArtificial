@@ -571,6 +571,13 @@ namespace NeuralNetworkDirectory
                 ACSComponent acsComponent = new ACSComponent();
                 TransformComponent transformComponent = new TransformComponent();
                 PathResultComponent<SimNode<IVector>> pathComponent = new PathResultComponent<SimNode<IVector>>();
+                PathRequestComponent<SimNode<IVector>> pathRequestComponent =
+                    new PathRequestComponent<SimNode<IVector>>()
+                    {
+                        StartNode = townCenter.Position,
+                        DestinationNode = townCenter.Position,
+                        IsProcessed = true
+                    };
                 TCAgentType agent;
                 ECSFlag flag = new ECSFlag(FlagType.None);
                 switch (agentType)
@@ -598,6 +605,7 @@ namespace NeuralNetworkDirectory
                 ECSManager.AddComponent(entityID, boidConfig);
                 ECSManager.AddComponent(entityID, transformComponent);
                 ECSManager.AddComponent(entityID, pathComponent);
+                ECSManager.AddComponent(entityID, pathRequestComponent);
                 ECSManager.AddFlag(entityID, flag);
 
                 lock (DataContainer.TcAgents)
