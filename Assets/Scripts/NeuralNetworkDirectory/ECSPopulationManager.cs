@@ -128,6 +128,7 @@ namespace NeuralNetworkDirectory
 
             UpdateAgentsCopy();
             UpdateTcAgentsCopy();
+            DataContainer.IncreaseTerrain += RecreateTerrain;
         }
 
         private void Update()
@@ -384,7 +385,6 @@ namespace NeuralNetworkDirectory
             }
 
             CleanMap();
-            CheckAndRecreateTerrain();
             
             if (missingCarnivores == carnivoreCount) Load(AgentTypes.Carnivore);
             if (missingHerbivores == herbivoreCount) Load(AgentTypes.Herbivore);
@@ -567,7 +567,7 @@ namespace NeuralNetworkDirectory
             {
                 uint entityID = ECSManager.CreateEntity();
 
-                BoidConfigComponent boidConfig = new BoidConfigComponent(6, 0.7f, 1, 1, 1);
+                BoidConfigComponent boidConfig = new BoidConfigComponent(6, 0.6f, 0.9f, 1.2f, 1.1f);
                 ACSComponent acsComponent = new ACSComponent();
                 TransformComponent transformComponent = new TransformComponent();
                 PathResultComponent<SimNode<IVector>> pathComponent = new PathResultComponent<SimNode<IVector>>();
@@ -850,37 +850,9 @@ namespace NeuralNetworkDirectory
             }
         }
 
-        public void CheckAndRecreateTerrain()
+        public void RecreateTerrain(NodeTerrain terrain)
         {
-            SimNode<IVector>[,] allNodes = DataContainer.Graph.NodesType;
-            
-            bool reminingMines = false;
-            bool reminingTrees = false;
-            bool reminingLakes = false;
-            // Check and recreate mines
-            foreach (SimNode<IVector> node in allNodes)
-            {
-                if(node.NodeTerrain==NodeTerrain.Mine) reminingMines = true;
-                if(node.NodeTerrain==NodeTerrain.Tree) reminingTrees = true;
-                if(node.NodeTerrain==NodeTerrain.Lake) reminingLakes = true;
-            }
-                
-            if (!reminingMines)
-            {
-                RegenerateTerrain(NodeTerrain.Mine, 15);
-            }
-            
-            // Check and recreate trees
-            if (!reminingTrees)
-            {
-                RegenerateTerrain(NodeTerrain.Tree, 30);
-            }
-            
-            // Check and recreate lakes
-            if (!reminingLakes)
-            {
-                RegenerateTerrain(NodeTerrain.Lake, 12);
-            }
+            RegenerateTerrain(terrain, 15);
         }
         
         private void RegenerateTerrain(NodeTerrain terrainType, int count)
@@ -983,6 +955,7 @@ namespace NeuralNetworkDirectory
                     AgentNeuronData neuronData = neuronDataList[index];
                     foreach (NeuronLayer[] neuronLayer in netComponent.Layers)
                     {
+                        if(neuronLayer[0].BrainType != brainType.Value) continue;
                         lock (neuronLayer)
                         {
                             SetWeights(neuronLayer, neuronData.NeuronWeights);
@@ -1006,9 +979,8 @@ namespace NeuralNetworkDirectory
         {
             if (!activateLoad) return;
             Dictionary<AgentTypes, Dictionary<BrainType, List<AgentNeuronData>>> loadedData =
-                generationToLoad > 0
-                    ? NeuronDataSystem.LoadSpecificNeurons(directoryPath, generationToLoad)
-                    : NeuronDataSystem.LoadLatestNeurons(directoryPath);
+                generationToLoad > 0 ? NeuronDataSystem.LoadSpecificNeurons(directoryPath, generationToLoad)
+                                    : NeuronDataSystem.LoadLatestNeurons(directoryPath);
 
             if (loadedData.Count == 0) return;
             System.Random random = new System.Random();
@@ -1021,8 +993,7 @@ namespace NeuralNetworkDirectory
                     return;
                 }
 
-                if (!loadedData.TryGetValue(agent.agentType,
-                        out Dictionary<BrainType, List<AgentNeuronData>> brainData)) return;
+                if (!loadedData.TryGetValue(agent.agentType, out Dictionary<BrainType, List<AgentNeuronData>> brainData)) return;
 
                 foreach (KeyValuePair<int, BrainType> brainType in agent.brainTypes)
                 {
@@ -1031,8 +1002,10 @@ namespace NeuralNetworkDirectory
 
                     int index = random.Next(0, neuronDataList.Count);
                     AgentNeuronData neuronData = neuronDataList[index];
+                    
                     foreach (NeuronLayer[] neuronLayer in netComponent.Layers)
                     {
+                        if(neuronLayer[0].BrainType != brainType.Value) continue;
                         lock (neuronLayer)
                         {
                             SetWeights(neuronLayer, neuronData.NeuronWeights);
