@@ -112,9 +112,10 @@ namespace NeuralNetworkDirectory
             DataContainer.Init();
             foreach (VoronoiDiagram<Point2D> variable in DataContainer.Voronois)
             {
-                if(variable == null) continue;
+                if (variable == null) continue;
                 variable.ComputeCellsStandard();
             }
+
             NeuronDataSystem.OnSpecificLoaded += SpecificLoaded;
             Herbivore<IVector, ITransform<IVector>>.OnDeath += RemoveEntity;
 
@@ -254,11 +255,11 @@ namespace NeuralNetworkDirectory
             bool unitSpawned = false;
             for (int j = 0; j < townCenters.Length; j++)
             {
-                if(townCenters[j].ManageSpawning()) unitSpawned = true;
+                if (townCenters[j].ManageSpawning()) unitSpawned = true;
             }
 
             if (unitSpawned) UpdateTcAgentsCopy();
-            
+
             _requiresRedraw = true;
             uiManager.OnGenTimeUpdate?.Invoke(accumTime);
         }
@@ -267,7 +268,7 @@ namespace NeuralNetworkDirectory
         {
             animalAgentsCopy = DataContainer.Animals.ToArray();
         }
-        
+
         private void UpdateTcAgentsCopy()
         {
             int index = 0;
@@ -286,7 +287,7 @@ namespace NeuralNetworkDirectory
 
             TCAgentType.Time = dt;
             AnimalAgentType.Time = dt;
-            
+
 
             for (int i = 0; i < animalAgentsCopy.Length; i++)
             {
@@ -297,13 +298,13 @@ namespace NeuralNetworkDirectory
 
             for (int i = 0; i < tcAgentsCopy.Length; i++)
             {
-                if(tcAgentsCopy[i].Value == null) continue;
+                if (tcAgentsCopy[i].Value == null) continue;
                 uint agent = tcAgentsCopy[i].Key;
                 ECSManager.GetComponent<TransformComponent>(agent).Transform = DataContainer.TcAgents[agent].Transform;
             }
 
             ECSManager.Tick(dt);
-            
+
 
             for (int i = 0; i < animalAgentsCopy.Length; i++)
             {
@@ -314,13 +315,14 @@ namespace NeuralNetworkDirectory
 
             for (int i = 0; i < tcAgentsCopy.Length; i++)
             {
-                if(tcAgentsCopy[i].Value == null) continue;
+                if (tcAgentsCopy[i].Value == null) continue;
                 uint agent = tcAgentsCopy[i].Key;
-                var pathResult = ECSManager.GetComponent<PathResultComponent<SimNode<IVector>>>(agent);
+                PathResultComponent<SimNode<IVector>> pathResult = ECSManager.GetComponent<PathResultComponent<SimNode<IVector>>>(agent);
                 if (pathResult.PathFound)
                 {
                     DataContainer.TcAgents[agent].Path = pathResult.Path;
                 }
+
                 DataContainer.TcAgents[agent].AcsVector = ECSManager.GetComponent<ACSComponent>(agent).ACS;
             }
 
@@ -329,7 +331,8 @@ namespace NeuralNetworkDirectory
             {
                 int tickIndex = i;
 
-                Parallel.For(0, animalAgentsCopy.Length, j => { animalAgentsCopy[j].Value.Fsm.MultiThreadTick(tickIndex); });
+                Parallel.For(0, animalAgentsCopy.Length,
+                    j => { animalAgentsCopy[j].Value.Fsm.MultiThreadTick(tickIndex); });
                 Parallel.For(0, tcAgentsCopy.Length, j =>
                 {
                     if (tcAgentsCopy[j].Value == null) return;
@@ -364,9 +367,9 @@ namespace NeuralNetworkDirectory
             missingHerbivores = herbivoreCount - DataContainer.Animals.Count(agent =>
                 agent.Value.agentType == AgentTypes.Herbivore);
 
-            AddFitnessData();
+            //AddFitnessData();
             DataContainer.FitnessStagnationManager.AnalyzeData();
-            
+
             bool remainingPopulation = DataContainer.Animals.Count > 0;
 
             bool remainingCarn = carnivoreCount - missingCarnivores > 1;
@@ -381,7 +384,8 @@ namespace NeuralNetworkDirectory
             }
 
             CleanMap();
-
+            CheckAndRecreateTerrain();
+            
             if (missingCarnivores == carnivoreCount) Load(AgentTypes.Carnivore);
             if (missingHerbivores == herbivoreCount) Load(AgentTypes.Herbivore);
 
@@ -435,7 +439,7 @@ namespace NeuralNetworkDirectory
             float[] fitness = new float[brainTypes.Length];
 
             int agentCount = 0;
-            
+
             foreach (KeyValuePair<uint, AnimalAgentType> variable in DataContainer.Animals)
             {
                 if (variable.Value.agentType != agentType) continue;
@@ -449,7 +453,8 @@ namespace NeuralNetworkDirectory
 
             for (int i = 0; i < fitness.Length; i++)
             {
-                DataContainer.FitnessStagnationManager.AddFitnessData(agentType, brainTypes[i], fitness[i] / agentCount);
+                DataContainer.FitnessStagnationManager.AddFitnessData(agentType, brainTypes[i],
+                    fitness[i] / agentCount);
             }
         }
 
@@ -562,7 +567,7 @@ namespace NeuralNetworkDirectory
             {
                 uint entityID = ECSManager.CreateEntity();
 
-                BoidConfigComponent boidConfig = new BoidConfigComponent(6, 1, 1, 1, 1);
+                BoidConfigComponent boidConfig = new BoidConfigComponent(6, 0.7f, 1, 1, 1);
                 ACSComponent acsComponent = new ACSComponent();
                 TransformComponent transformComponent = new TransformComponent();
                 PathResultComponent<SimNode<IVector>> pathComponent = new PathResultComponent<SimNode<IVector>>();
@@ -796,9 +801,115 @@ namespace NeuralNetworkDirectory
 
         private void CleanMap()
         {
-            // TODO  clean map
+            // Get all nodes from the graph
+            SimNode<IVector>[,] allNodes = DataContainer.Graph.NodesType;
+            List<SimNode<IVector>> stumpNodes = new List<SimNode<IVector>>();
+
+            // Find all stump nodes and change them to empty
+            foreach (SimNode<IVector> node in allNodes)
+            {
+                if (node.NodeTerrain == NodeTerrain.Stump)
+                {
+                    node.NodeTerrain = NodeTerrain.Empty;
+                    stumpNodes.Add(node);
+                }
+            }
+
+            List<SimNode<IVector>> emptyNodes = new List<SimNode<IVector>>();
+            // Get all empty nodes
+
+             
+            
+            // Randomly select 20 empty nodes and make them stumps
+            if (emptyNodes.Count >= 20)
+            {
+                System.Random random = new System.Random();
+                // Shuffle using Fisher-Yates algorithm
+                for (int i = emptyNodes.Count - 1; i > 0; i--)
+                {
+                    int j = random.Next(i + 1);
+                    (emptyNodes[i], emptyNodes[j]) = (emptyNodes[j], emptyNodes[i]);
+                }
+
+                // Take first 20 nodes and convert to stumps
+                for (int i = 0; i < 20; i++)
+                {
+                    emptyNodes[i].NodeTerrain = NodeTerrain.Stump;
+                }
+
+                // Update relevant visual data if needed
+                DataContainer.UpdateVoronoi(NodeTerrain.Stump);
+            }
         }
 
+        public void CheckAndRecreateTerrain()
+        {
+            SimNode<IVector>[,] allNodes = DataContainer.Graph.NodesType;
+            
+            bool reminingMines = false;
+            bool reminingTrees = false;
+            bool reminingLakes = false;
+            // Check and recreate mines
+            foreach (SimNode<IVector> node in allNodes)
+            {
+                if(node.NodeTerrain==NodeTerrain.Mine) reminingMines = true;
+                if(node.NodeTerrain==NodeTerrain.Tree) reminingTrees = true;
+                if(node.NodeTerrain==NodeTerrain.Lake) reminingLakes = true;
+            }
+                
+            if (!reminingMines)
+            {
+                RegenerateTerrain(NodeTerrain.Mine, 15);
+            }
+            
+            // Check and recreate trees
+            if (!reminingTrees)
+            {
+                RegenerateTerrain(NodeTerrain.Tree, 30);
+            }
+            
+            // Check and recreate lakes
+            if (!reminingLakes)
+            {
+                RegenerateTerrain(NodeTerrain.Lake, 12);
+            }
+        }
+        
+        private void RegenerateTerrain(NodeTerrain terrainType, int count)
+        {
+            SimNode<IVector>[,] allNodes = DataContainer.Graph.NodesType;
+            List<SimNode<IVector>> emptyNodes = new List<SimNode<IVector>>();
+            
+            foreach (SimNode<IVector> node in allNodes)
+            {
+                if(node.NodeTerrain == NodeTerrain.Empty) emptyNodes.Add(node);
+            }
+            
+            if (emptyNodes.Count >= count)
+            {
+                System.Random random = new System.Random();
+                // Shuffle using Fisher-Yates algorithm
+                for (int i = emptyNodes.Count - 1; i > 0; i--)
+                {
+                    int j = random.Next(i + 1);
+                    (emptyNodes[i], emptyNodes[j]) = (emptyNodes[j], emptyNodes[i]);
+                }
+                
+                // Take first count nodes and convert to specified terrain
+                for (int i = 0; i < count; i++)
+                {
+                    emptyNodes[i].NodeTerrain = terrainType;
+                }
+                
+                // Update relevant visual data
+                DataContainer.UpdateVoronoi(terrainType);
+                Debug.Log($"Regenerated {count} {terrainType} nodes as they were missing from the map");
+            }
+            else
+            {
+                Debug.LogWarning($"Not enough empty nodes to create {count} {terrainType} nodes");
+            }
+        }
         private void Save(string directoryPath, int generation)
         {
             if (!activateSave) return;
