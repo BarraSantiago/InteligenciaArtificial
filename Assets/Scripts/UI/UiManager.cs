@@ -81,7 +81,7 @@ namespace UI
         private void Awake()
         {
             speed.minValue = 1;
-            speed.maxValue = 50;
+            speed.maxValue = 10;
             voronoiToDraw.onValueChanged.AddListener(value => onVoronoiUpdate?.Invoke((int)value));
             speed.onValueChanged.AddListener(value => onSpeedUpdate?.Invoke((int)value));
 

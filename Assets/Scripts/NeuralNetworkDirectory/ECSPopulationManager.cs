@@ -103,7 +103,7 @@ namespace NeuralNetworkDirectory
             DirectoryPath = Application.persistentDataPath + "/" + DirectoryPath;
             parallelOptions = new ParallelOptions
             {
-                MaxDegreeOfParallelism = (int)(Environment.ProcessorCount * 0.8) 
+                MaxDegreeOfParallelism = (int)(Environment.ProcessorCount * 0.8)
             };
             carnivoreMatrices = new Matrix4x4[carnivoreCount];
             herbivoreMatrices = new Matrix4x4[herbivoreCount];
@@ -259,8 +259,7 @@ namespace NeuralNetworkDirectory
             }
 
             if (unitSpawned) UpdateTcAgentsCopy();
-            
-            
+
 
             _requiresRedraw = true;
             uiManager.OnGenTimeUpdate?.Invoke(accumTime);
@@ -367,6 +366,7 @@ namespace NeuralNetworkDirectory
                 _cancellationTokenSource.Cancel();
                 _cancellationTokenSource.Dispose();
             }
+
             _cancellationTokenSource = new CancellationTokenSource();
             parallelOptions.CancellationToken = _cancellationTokenSource.Token;
             Generation++;
@@ -1036,10 +1036,10 @@ namespace NeuralNetworkDirectory
         {
             if (!activateLoad) return;
 
-            //  TODO BIT MATRIX
-            Dictionary<AgentTypes, Dictionary<BrainType, List<AgentNeuronData>>> loadedData =
+            (Dictionary<AgentTypes, Dictionary<BrainType, List<AgentNeuronData>>>, int) data =
                 NeuronDataSystem.LoadLatestNeurons(DirectoryPath);
-
+            Dictionary<AgentTypes, Dictionary<BrainType, List<AgentNeuronData>>> loadedData = data.Item1;
+            
             if (loadedData.Count == 0 || !loadedData.ContainsKey(agentType)) return;
             System.Random random = new System.Random();
 
@@ -1083,10 +1083,14 @@ namespace NeuralNetworkDirectory
         public void Load(string directoryPath)
         {
             if (!activateLoad) return;
-            Dictionary<AgentTypes, Dictionary<BrainType, List<AgentNeuronData>>> loadedData =
-                generationToLoad > 0
-                    ? NeuronDataSystem.LoadSpecificNeurons(directoryPath, generationToLoad)
-                    : NeuronDataSystem.LoadLatestNeurons(directoryPath);
+            (Dictionary<AgentTypes, Dictionary<BrainType, List<AgentNeuronData>>>, int) data = generationToLoad > 0
+                ? NeuronDataSystem.LoadSpecificNeurons(directoryPath, generationToLoad)
+                : NeuronDataSystem.LoadLatestNeurons(directoryPath);
+
+            Generation = data.Item2;
+            uiManager.OnGenUpdate.Invoke(Generation);
+            Dictionary<AgentTypes, Dictionary<BrainType, List<AgentNeuronData>>> loadedData = data.Item1;
+
 
             if (loadedData.Count == 0) return;
             System.Random random = new System.Random();
