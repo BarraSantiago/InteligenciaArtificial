@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using NeuralNetworkDirectory;
 using NeuralNetworkLib.DataManagement;
 using NeuralNetworkLib.GraphDirectory.Voronoi;
 using NeuralNetworkLib.Utils;
@@ -44,6 +46,8 @@ namespace UI
         [SerializeField] private TMP_InputField nodeY;
         [SerializeField] private TMP_Dropdown nodeTerrain;
         [SerializeField] private TMP_Dropdown nodeType;
+        [SerializeField] private TMP_Dropdown fitnessAgentType;
+        [SerializeField] private TMP_Dropdown fitnessBrain;
         
         [SerializeField] private Toggle activateSave;
         [SerializeField] private Toggle activateLoad;
@@ -56,7 +60,7 @@ namespace UI
         public Action<int> OnGenUpdate => UpdateGenerationNum;
         public Action<float> OnGenTimeUpdate => UpdateGenTime;
         public Action<int[]> OnSurvivorsPerSpeciesUpdate => UpdateSurvivorsPerSpecies;
-        public Action<float[]> OnFitnessAvgUpdate => UpdateFitnessAvg;
+        public Action<int> OnFitnessAvgUpdate => UpdateFitnessAvg;
         public Action<int> onVoronoiUpdate;
         public Action onDrawVoronoi;
         public Action<int> onSpeedUpdate;
@@ -97,6 +101,26 @@ namespace UI
             nodeX.onValueChanged.AddListener(value => CheckValue(value, nodeY.text));
             nodeY.onValueChanged.AddListener(value => CheckValue(nodeX.text, value));
             updateNodeButton.onClick.AddListener(UpdateNode);
+            fitnessAgentType.onValueChanged.AddListener(UpdateFitnessBrain);
+            fitnessBrain.onValueChanged.AddListener(UpdateFitnessAvg);
+        }
+
+        private void UpdateFitnessBrain(int arg0)
+        {
+            switch (arg0)
+            {
+                default:
+                case 0:
+                    fitnessBrain.ClearOptions();
+                    
+                    fitnessBrain.AddOptions(new List<string>{"Move", "Attack"});
+                    break;
+                case 1:
+                    fitnessBrain.ClearOptions();
+                    fitnessBrain.AddOptions(new List<string>{"Move", "Escape", "Eat"});
+                    break;
+            }
+            fitnessBrain.value = 0;
         }
 
         public static Action<IVector, NodeTerrain, NodeTerrain> OnNodeUpdate;
@@ -170,12 +194,11 @@ namespace UI
             fpsCounter.text = $"FPS: " + fps.ToString("0.00");
         }
 
-        public void Init(int genNum, float genTime, int[] survivorsPerSpecies, float[] fitnessAvg)
+        public void Init(int genNum, float genTime, int[] survivorsPerSpecies)
         {
             UpdateGenerationNum(genNum);
             UpdateGenTime(genTime);
             UpdateSurvivorsPerSpecies(survivorsPerSpecies);
-            UpdateFitnessAvg(fitnessAvg);
         }
 
         public void SaveConfig()
@@ -211,7 +234,7 @@ namespace UI
             {
                 config = new UIConfig
                 {
-                    Bias = 1f,
+                    Bias = .4f,
                     MutChance = 0.07f,
                     MutationRate = 0.1f,
                     Elites = 4,
@@ -266,14 +289,32 @@ namespace UI
             survivorsPerSpecies.text = text;
         }
 
-        public void UpdateFitnessAvg(float[] fitness)
+        public void UpdateFitnessAvg(int fitness)
         {
             string text = "";
-            for (int i = 0; i < fitness.Length; i++)
+            AgentTypes agentType = fitnessAgentType.value == 0 ? AgentTypes.Carnivore : AgentTypes.Herbivore;
+            BrainType brainType = BrainType.Movement;
+            switch (fitnessBrain.options[fitnessBrain.value].text.ToString())
             {
-                text += $"Especie {i}: {fitness[i]}\n";
+                case "Move":
+                    brainType = BrainType.Movement;
+                    break;
+                case "Attack":
+                    brainType = BrainType.Attack;
+                    break;
+                case "Escape":
+                    brainType = BrainType.Escape;
+                    break;
+                case "Eat":
+                    brainType = BrainType.Eat;
+                    break;
+                default:
+                    brainType = BrainType.Movement;
+                    break;
             }
-
+            
+            float totalFitness = EcsPopulationManager.GetFitness(agentType, (BrainType)brainType);
+            text = totalFitness.ToString("0.0");
             fitnessAvg.text = text;
         }
     }

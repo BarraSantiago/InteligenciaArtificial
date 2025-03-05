@@ -1,0 +1,52 @@
+[
+  {
+    "AgentType": 0,
+    "BrainType": 0,
+    "InputCount": 5,
+    "OutputCount": 3,
+    "HiddenLayers": [
+      8,
+      6
+    ]
+  },
+  {
+    "AgentType": 0,
+    "BrainType": 2,
+    "InputCount": 4,
+    "OutputCount": 1,
+    "HiddenLayers": [
+      4,
+      4
+    ]
+  },
+  {
+    "AgentType": 1,
+    "BrainType": 1,
+    "InputCount": 4,
+    "OutputCount": 1,
+    "HiddenLayers": [
+      4,
+      4
+    ]
+  },
+  {
+    "AgentType": 1,
+    "BrainType": 0,
+    "InputCount": 8,
+    "OutputCount": 2,
+    "HiddenLayers": [
+      12,
+      8
+    ]
+  },
+  {
+    "AgentType": 1,
+    "BrainType": 3,
+    "InputCount": 4,
+    "OutputCount": 1,
+    "HiddenLayers": [
+      4,
+      4
+    ]
+  }
+]

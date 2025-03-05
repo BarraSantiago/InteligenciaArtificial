@@ -264,9 +264,12 @@ namespace NeuralNetworkDirectory
             }
 
             if (unitSpawned) UpdateTcAgentsCopy();
+            
+            
 
             _requiresRedraw = true;
             uiManager.OnGenTimeUpdate?.Invoke(accumTime);
+            uiManager.UpdateFitnessAvg(0);
         }
 
         private void UpdateAgentsCopy()
@@ -375,9 +378,9 @@ namespace NeuralNetworkDirectory
 
             AddFitnessData();
             DataContainer.FitnessStagnationManager.AnalyzeData();
-            
-            ResetLowPerformingBrains();
-                
+
+            //ResetLowPerformingBrains();
+
             bool remainingPopulation = DataContainer.Animals.Count > 0;
 
             bool remainingCarn = carnivoreCount - missingCarnivores > 1;
@@ -440,6 +443,17 @@ namespace NeuralNetworkDirectory
                 }
             }
 
+            foreach (KeyValuePair<uint, AnimalAgentType> animalAgent in DataContainer.Animals)
+            {
+                INode<IVector> randomNode = animalAgent.Value.agentType switch
+                {
+                    AgentTypes.Carnivore => gridManager.GetRandomPositionInUpperQuarter(),
+                    AgentTypes.Herbivore => gridManager.GetRandomPositionInLowerQuarter(),
+                    _ => gridManager.GetRandomPosition()
+                };
+                animalAgent.Value.SetPosition(randomNode.GetCoordinate());
+            }
+
             if (Generation % 100 == 0)
             {
                 GC.Collect();
@@ -455,28 +469,29 @@ namespace NeuralNetworkDirectory
             GetAvgFitness(AgentTypes.Herbivore, DataContainer.HerbBrainTypes.Values.ToArray());
         }
 
-        private static void GetAvgFitness(AgentTypes agentType, params BrainType[] brainTypes)
+        public static void GetAvgFitness(AgentTypes agentType, params BrainType[] brainTypes)
         {
-            float[] fitness = new float[brainTypes.Length];
+            foreach (var brain in brainTypes)
+            {
+                DataContainer.FitnessStagnationManager.AddFitnessData(agentType, brain, GetFitness(agentType, brain));
+            }
+        }
 
+        public static float GetFitness(AgentTypes agentType, BrainType brainType)
+        {
+            float fitness = 0;
             int agentCount = 0;
-
+            int key = GetBrainTypeKeyByValue(brainType, agentType);
             foreach (KeyValuePair<uint, AnimalAgentType> variable in DataContainer.Animals)
             {
                 if (variable.Value.agentType != agentType) continue;
-                for (int i = 0; i < fitness.Length; i++)
-                {
-                    fitness[i] += ECSManager.GetComponent<NeuralNetComponent>(variable.Key).Fitness[i];
-                }
+
+                fitness += ECSManager.GetComponent<NeuralNetComponent>(variable.Key).Fitness[key];
 
                 agentCount++;
             }
 
-            for (int i = 0; i < fitness.Length; i++)
-            {
-                DataContainer.FitnessStagnationManager.AddFitnessData(agentType, brainTypes[i],
-                    fitness[i] / agentCount);
-            }
+            return fitness / agentCount;
         }
 
 
@@ -577,6 +592,12 @@ namespace NeuralNetworkDirectory
                     AgentTypes.Herbivore => DataContainer.HerbBrainTypes,
                     _ => throw new ArgumentException("Invalid agent type")
                 };
+
+                ECSManager.AddFlag(entityID, new ECSFlag(agentType switch
+                {
+                    AgentTypes.Carnivore => FlagType.Carnivore,
+                    AgentTypes.Herbivore => FlagType.Herbivore,
+                }));
 
                 OutputComponent outputComponent = new OutputComponent();
 
@@ -893,7 +914,6 @@ namespace NeuralNetworkDirectory
         {
             // Get all nodes from the graph
             SimNode<IVector>[,] allNodes = DataContainer.Graph.NodesType;
-            List<SimNode<IVector>> stumpNodes = new List<SimNode<IVector>>();
 
             // Find all stump nodes and change them to empty
             foreach (SimNode<IVector> node in allNodes)
@@ -901,11 +921,18 @@ namespace NeuralNetworkDirectory
                 if (node.NodeTerrain == NodeTerrain.Stump)
                 {
                     node.NodeTerrain = NodeTerrain.Empty;
-                    stumpNodes.Add(node);
                 }
             }
 
             List<SimNode<IVector>> emptyNodes = new List<SimNode<IVector>>();
+
+            foreach (SimNode<IVector> node in allNodes)
+            {
+                if (node.NodeTerrain == NodeTerrain.Empty)
+                {
+                    emptyNodes.Add(node);
+                }
+            }
 
             if (emptyNodes.Count >= 20)
             {
@@ -1275,7 +1302,7 @@ namespace NeuralNetworkDirectory
 
         private void UiManagerInit()
         {
-            uiManager.Init(Generation, generationDuration, new[] { 0, 0 }, new[] { 1f });
+            uiManager.Init(Generation, generationDuration, new[] { 0, 0 });
 
             uiManager.onBiasUpdate += UpdateBias;
             uiManager.onMutChanceUpdate += UpdateMutChance;
