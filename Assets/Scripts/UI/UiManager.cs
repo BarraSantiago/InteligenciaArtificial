@@ -48,11 +48,12 @@ namespace UI
         [SerializeField] private TMP_Dropdown nodeType;
         [SerializeField] private TMP_Dropdown fitnessAgentType;
         [SerializeField] private TMP_Dropdown fitnessBrain;
-        
+
         [SerializeField] private Toggle activateSave;
         [SerializeField] private Toggle activateLoad;
         [SerializeField] private Toggle activateVoronoi;
         [SerializeField] private Button balanceVoronoiButton;
+        [SerializeField] private Button startSimulationButton;
         [SerializeField] private Button updateNodeButton;
         [SerializeField] private double correctionFactor;
         [SerializeField] private double snapDistance;
@@ -73,6 +74,7 @@ namespace UI
         public Action<int> onGenDurationUpdate;
         public Action<int> onWhichGenToLoadUpdate;
         public Action<bool, bool> onActivateSaveLoadUpdate;
+        public static Action OnSimulationStart;
 
         private float deltaTime;
 
@@ -97,93 +99,19 @@ namespace UI
             whichGenToLoad.onEndEdit.AddListener(value => onWhichGenToLoadUpdate?.Invoke(int.Parse(value)));
             activateVoronoi.onValueChanged.AddListener(value => onDrawVoronoi?.Invoke());
             balanceVoronoiButton.onClick.AddListener(BalanceVoronoi);
-        nodeType.onValueChanged.AddListener(UpdateNodeType);
+            nodeType.onValueChanged.AddListener(UpdateNodeType);
             nodeX.onValueChanged.AddListener(value => CheckValue(value, nodeY.text));
             nodeY.onValueChanged.AddListener(value => CheckValue(nodeX.text, value));
             updateNodeButton.onClick.AddListener(UpdateNode);
             fitnessAgentType.onValueChanged.AddListener(UpdateFitnessBrain);
             fitnessBrain.onValueChanged.AddListener(UpdateFitnessAvg);
-        }
-
-        private void UpdateFitnessBrain(int arg0)
-        {
-            switch (arg0)
-            {
-                default:
-                case 0:
-                    fitnessBrain.ClearOptions();
-                    
-                    fitnessBrain.AddOptions(new List<string>{"Move", "Attack"});
-                    break;
-                case 1:
-                    fitnessBrain.ClearOptions();
-                    fitnessBrain.AddOptions(new List<string>{"Move", "Escape", "Eat"});
-                    break;
-            }
-            fitnessBrain.value = 0;
-        }
-
-        public static Action<IVector, NodeTerrain, NodeTerrain> OnNodeUpdate;
-
-        private void UpdateNode()
-        {
-            if (nodeX.text == "" || nodeY.text == "") return;
-            int x = int.Parse(nodeX.text);
-            int y = int.Parse(nodeY.text);
-            NodeType type = (NodeType)nodeType.value;
-            NodeTerrain terrain = type switch
-            {
-                NodeType.Lake => NodeTerrain.Lake,
-                NodeType.Mountain => NodeTerrain.Mountain,
-                _ => nodeTerrain.value switch
-                {
-                    0 => NodeTerrain.Empty,
-                    1 => NodeTerrain.Mine,
-                    2 => NodeTerrain.Tree,
-                    3 => NodeTerrain.Stump,
-                    4 => NodeTerrain.WatchTower,
-                    _ => NodeTerrain.Empty
-                }
-            };
-
-            IVector coord = new MyVector(x, y);
-            NodeTerrain oldTerrain = DataContainer.GetNode(coord).NodeTerrain;
-            DataContainer.NodeUpdater.UpdateNode(coord, terrain, type);
-
-            OnNodeUpdate?.Invoke(coord, oldTerrain, terrain);
-        }
-
-        private void CheckValue(string x, string y)
-        {
-            if (nodeY.text != "")
-            {
-                int newY = int.Parse(y);
-                if (newY < 0) newY = 0;
-                if (newY >= DataContainer.Graph.MaxY) newY = DataContainer.Graph.MaxY - 1;
-                nodeY.text = newY.ToString();
-            }
-
-            if (nodeX.text == "") return;
-            int newX = int.Parse(x);
-
-            if (newX < 0) newX = 0;
-            if (newX >= DataContainer.Graph.MaxX) newX = DataContainer.Graph.MaxX - 1;
-
-            nodeX.text = newX.ToString();
-        }
-
-        private void UpdateNodeType(int value)
-        {
-            nodeTerrain.interactable = (NodeType)value != NodeType.Lake && (NodeType)value != NodeType.Mountain;
-        }
-        
-        private void BalanceVoronoi()
-        {
-            DataContainer.Voronois[(int)voronoiToDraw.value].BalanceCells(correctionFactor, 2000, iterations);
+            startSimulationButton.onClick.AddListener(SimulationStart);
         }
 
         private void Update()
         {
+            if(!EcsPopulationManager.isRunning) return;
+            
             UpdateFPSCounter();
         }
 
@@ -199,6 +127,13 @@ namespace UI
             UpdateGenerationNum(genNum);
             UpdateGenTime(genTime);
             UpdateSurvivorsPerSpecies(survivorsPerSpecies);
+        }
+        
+        private void SimulationStart()
+        {
+            OnSimulationStart?.Invoke();
+            startSimulationButton.interactable = false;
+            startSimulationButton.gameObject.SetActive(false);
         }
 
         public void SaveConfig()
@@ -312,10 +247,88 @@ namespace UI
                     brainType = BrainType.Movement;
                     break;
             }
-            
+
             float totalFitness = EcsPopulationManager.GetFitness(agentType, (BrainType)brainType);
             text = totalFitness.ToString("0.0");
             fitnessAvg.text = text;
+        }
+
+        private void UpdateFitnessBrain(int arg0)
+        {
+            switch (arg0)
+            {
+                default:
+                case 0:
+                    fitnessBrain.ClearOptions();
+
+                    fitnessBrain.AddOptions(new List<string> { "Move", "Attack" });
+                    break;
+                case 1:
+                    fitnessBrain.ClearOptions();
+                    fitnessBrain.AddOptions(new List<string> { "Move", "Escape", "Eat" });
+                    break;
+            }
+
+            fitnessBrain.value = 0;
+        }
+
+        public static Action<IVector, NodeTerrain, NodeTerrain> OnNodeUpdate;
+
+        private void UpdateNode()
+        {
+            if (nodeX.text == "" || nodeY.text == "") return;
+            int x = int.Parse(nodeX.text);
+            int y = int.Parse(nodeY.text);
+            NodeType type = (NodeType)nodeType.value;
+            NodeTerrain terrain = type switch
+            {
+                NodeType.Lake => NodeTerrain.Lake,
+                NodeType.Mountain => NodeTerrain.Mountain,
+                _ => nodeTerrain.value switch
+                {
+                    0 => NodeTerrain.Empty,
+                    1 => NodeTerrain.Mine,
+                    2 => NodeTerrain.Tree,
+                    3 => NodeTerrain.Stump,
+                    4 => NodeTerrain.WatchTower,
+                    _ => NodeTerrain.Empty
+                }
+            };
+
+            IVector coord = new MyVector(x, y);
+            NodeTerrain oldTerrain = DataContainer.GetNode(coord).NodeTerrain;
+            DataContainer.NodeUpdater.UpdateNode(coord, terrain, type);
+
+            OnNodeUpdate?.Invoke(coord, oldTerrain, terrain);
+        }
+
+        private void CheckValue(string x, string y)
+        {
+            if (nodeY.text != "")
+            {
+                int newY = int.Parse(y);
+                if (newY < 0) newY = 0;
+                if (newY >= DataContainer.Graph.MaxY) newY = DataContainer.Graph.MaxY - 1;
+                nodeY.text = newY.ToString();
+            }
+
+            if (nodeX.text == "") return;
+            int newX = int.Parse(x);
+
+            if (newX < 0) newX = 0;
+            if (newX >= DataContainer.Graph.MaxX) newX = DataContainer.Graph.MaxX - 1;
+
+            nodeX.text = newX.ToString();
+        }
+
+        private void UpdateNodeType(int value)
+        {
+            nodeTerrain.interactable = (NodeType)value != NodeType.Lake && (NodeType)value != NodeType.Mountain;
+        }
+
+        private void BalanceVoronoi()
+        {
+            DataContainer.Voronois[(int)voronoiToDraw.value].BalanceCells(correctionFactor, 2000, iterations);
         }
     }
 }

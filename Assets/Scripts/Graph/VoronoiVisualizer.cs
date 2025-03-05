@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using NeuralNetworkDirectory;
 using NeuralNetworkLib.DataManagement;
 using NeuralNetworkLib.GraphDirectory.Voronoi;
 using UI;
@@ -32,6 +33,7 @@ namespace Graph
 
         private void OnPostRender()
         {
+            if (!EcsPopulationManager.isRunning) return;
             if (!drawVoronoi) return;
             if (lineMaterial == null)
             {
@@ -63,9 +65,7 @@ namespace Graph
             }
 
             // Validate the Voronoi data.
-            if (DataContainer.Voronois == null ||
-                voronoiToDraw < 0 ||
-                voronoiToDraw >= DataContainer.Voronois.Length ||
+            if (DataContainer.Voronois == null || voronoiToDraw < 0 || voronoiToDraw >= DataContainer.Voronois.Length ||
                 DataContainer.Voronois[voronoiToDraw] == null)
             {
                 GL.PopMatrix();

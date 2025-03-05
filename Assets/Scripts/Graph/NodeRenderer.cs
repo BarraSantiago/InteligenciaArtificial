@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using NeuralNetworkDirectory;
 using NeuralNetworkLib.DataManagement;
 using NeuralNetworkLib.Utils;
 using UI;
@@ -75,6 +76,8 @@ namespace Graph
 
         void Update()
         {
+            if (!EcsPopulationManager.isRunning) return;
+
             foreach (KeyValuePair<NodeTerrain, List<Matrix4x4>> kvp in terrainTransforms)
             {
                 List<Matrix4x4> matrices = kvp.Value;

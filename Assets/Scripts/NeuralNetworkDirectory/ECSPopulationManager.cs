@@ -65,7 +65,7 @@ namespace NeuralNetworkDirectory
         public int gridWidth = 10;
         public int gridHeight = 10;
         private UiManager uiManager;
-        private bool isRunning = false;
+        public static bool isRunning = false;
         private int missingCarnivores;
         private int missingHerbivores;
         private int behaviourCount;
@@ -96,7 +96,6 @@ namespace NeuralNetworkDirectory
         private readonly object _renderLock = new object();
         private const int maxBuildersCarts = 18;
         private const int maxGatherers = 18;
-        private bool startSimulation = false;
         private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         public void Awake()
@@ -111,11 +110,11 @@ namespace NeuralNetworkDirectory
             builderMatrices = new Matrix4x4[maxBuildersCarts];
             cartMatrices = new Matrix4x4[maxBuildersCarts];
             gathererMatrices = new Matrix4x4[maxGatherers];
-
             uiManager = FindObjectOfType<UiManager>();
             UiManagerInit();
             gridManager = new GraphManager<IVector, ITransform<IVector>>(gridWidth, gridHeight);
             DataContainer.Graph = new Sim2DGraph(gridWidth, gridHeight, CellSize);
+
             ECSManager.Init();
             DataContainer.Init();
             foreach (VoronoiDiagram<Point2D> variable in DataContainer.Voronois)
@@ -128,20 +127,13 @@ namespace NeuralNetworkDirectory
             Herbivore<IVector, ITransform<IVector>>.OnDeath += RemoveEntity;
 
             //DataContainer.Graph.LoadGraph("GraphData.json");
-            StartSimulation();
-            fitnessManager = new FitnessManager<IVector, ITransform<IVector>>(DataContainer.Animals);
-            behaviourCount = GetHighestBehaviourCount();
-            startSimulation = true;
-            isRunning = true;
-
-            UpdateAgentsCopy();
-            UpdateTcAgentsCopy();
             DataContainer.IncreaseTerrain += RecreateTerrain;
+            UiManager.OnSimulationStart += StartSimulation;
         }
 
         private void Update()
         {
-            if (!_requiresRedraw) return;
+            if (!_requiresRedraw || !isRunning) return;
 
             int carnivoreIndex = 0;
             int herbivoreIndex = 0;
@@ -1149,6 +1141,11 @@ namespace NeuralNetworkDirectory
             GenerateInitialPopulation();
             if (activateLoad) Load(DirectoryPath);
             isRunning = true;
+            fitnessManager = new FitnessManager<IVector, ITransform<IVector>>(DataContainer.Animals);
+            behaviourCount = GetHighestBehaviourCount();
+
+            UpdateAgentsCopy();
+            UpdateTcAgentsCopy();
         }
 
         private void StartTownCenters()
