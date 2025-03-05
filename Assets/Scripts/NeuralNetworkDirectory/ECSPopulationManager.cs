@@ -29,8 +29,9 @@ namespace NeuralNetworkDirectory
     {
         #region Variables
 
-        [Header("Population Setup")] 
-        [SerializeField] private Mesh carnivoreMesh;
+        [Header("Population Setup")] [SerializeField]
+        private Mesh carnivoreMesh;
+
         [SerializeField] private Material carnivoreMat;
         [SerializeField] private Mesh herbivoreMesh;
         [SerializeField] private Material herbivoreMat;
@@ -41,15 +42,17 @@ namespace NeuralNetworkDirectory
         [SerializeField] private Mesh gathererMesh;
         [SerializeField] private Material gathererMat;
 
-        [Header("Population Settings")] 
-        [SerializeField] private int carnivoreCount = 10;
+        [Header("Population Settings")] [SerializeField]
+        private int carnivoreCount = 10;
+
         [SerializeField] private int herbivoreCount = 20;
         [SerializeField] private float mutationRate = 0.01f;
         [SerializeField] private float mutationChance = 0.10f;
         [SerializeField] private int eliteCount = 4;
 
-        [Header("Modifiable Settings")] 
-        [SerializeField] [Range(1, 5)] private int voronoiToDraw = 0;
+        [Header("Modifiable Settings")] [SerializeField] [Range(1, 5)]
+        private int voronoiToDraw = 0;
+
         [SerializeField] public int Generation;
         [SerializeField] private float Bias = 0.0f;
         [SerializeField] private int generationsPerSave = 25;
@@ -69,7 +72,7 @@ namespace NeuralNetworkDirectory
         private const int CellSize = 1;
         private const float SigmoidP = .5f;
         private float accumTime;
-        private const string DirectoryPath = "NeuronData";
+        private string DirectoryPath = "NeuronData";
         private GeneticAlgorithm genAlg;
         private GraphManager<IVector, ITransform<IVector>> gridManager;
         private FitnessManager<IVector, ITransform<IVector>> fitnessManager;
@@ -97,6 +100,7 @@ namespace NeuralNetworkDirectory
 
         public void Awake()
         {
+            DirectoryPath = Application.persistentDataPath + "/" + DirectoryPath;
             parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 32 };
             carnivoreMatrices = new Matrix4x4[carnivoreCount];
             herbivoreMatrices = new Matrix4x4[herbivoreCount];
@@ -318,7 +322,8 @@ namespace NeuralNetworkDirectory
             {
                 if (tcAgentsCopy[i].Value == null) continue;
                 uint agent = tcAgentsCopy[i].Key;
-                PathResultComponent<SimNode<IVector>> pathResult = ECSManager.GetComponent<PathResultComponent<SimNode<IVector>>>(agent);
+                PathResultComponent<SimNode<IVector>> pathResult =
+                    ECSManager.GetComponent<PathResultComponent<SimNode<IVector>>>(agent);
                 if (pathResult.PathFound)
                 {
                     DataContainer.TcAgents[agent].Path = pathResult.Path;
@@ -368,9 +373,11 @@ namespace NeuralNetworkDirectory
             missingHerbivores = herbivoreCount - DataContainer.Animals.Count(agent =>
                 agent.Value.agentType == AgentTypes.Herbivore);
 
-            //AddFitnessData();
+            AddFitnessData();
             DataContainer.FitnessStagnationManager.AnalyzeData();
-
+            
+            ResetLowPerformingBrains();
+                
             bool remainingPopulation = DataContainer.Animals.Count > 0;
 
             bool remainingCarn = carnivoreCount - missingCarnivores > 1;
@@ -385,7 +392,7 @@ namespace NeuralNetworkDirectory
             }
 
             CleanMap();
-            
+
             if (missingCarnivores == carnivoreCount) Load(AgentTypes.Carnivore);
             if (missingHerbivores == herbivoreCount) Load(AgentTypes.Herbivore);
 
@@ -421,11 +428,25 @@ namespace NeuralNetworkDirectory
             genomes.Clear();
             indexes.Clear();
 
+            NeuralNetComponent[] comps = ECSManager.GetComponentsDirect<NeuralNetComponent>().components;
+            foreach (NeuralNetComponent comp in comps)
+            {
+                comp.Fitness = new float[3];
+                comp.FitnessMod = new float[3];
+
+                for (int j = 0; j < comp.FitnessMod.Length; j++)
+                {
+                    comp.FitnessMod[j] = 1.0f;
+                }
+            }
+
             if (Generation % 100 == 0)
             {
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
             }
+
+            fitnessManager.Agents = DataContainer.Animals;
         }
 
         private static void AddFitnessData()
@@ -458,6 +479,67 @@ namespace NeuralNetworkDirectory
             }
         }
 
+
+        /// <summary>
+        /// Checks all agents and resets brains with fitness below threshold
+        /// </summary>
+        /// <param name="fitnessThreshold">Minimum fitness value before resetting</param>
+        private void ResetLowPerformingBrains(float fitnessThreshold = 0.001f)
+        {
+            int resetCount = 0;
+            foreach (KeyValuePair<uint, AnimalAgentType> agent in DataContainer.Animals)
+            {
+                uint entityId = agent.Key;
+                AgentTypes agentType = agent.Value.agentType;
+                NeuralNetComponent neuralNetComponent = ECSManager.GetComponent<NeuralNetComponent>(entityId);
+
+                if (neuralNetComponent == null) continue;
+
+                Dictionary<int, BrainType> brainTypes = agentType switch
+                {
+                    AgentTypes.Carnivore => DataContainer.CarnBrainTypes,
+                    AgentTypes.Herbivore => DataContainer.HerbBrainTypes,
+                    _ => throw new ArgumentException("Invalid agent type")
+                };
+
+                foreach (KeyValuePair<int, BrainType> brainEntry in brainTypes)
+                {
+                    int brainIndex = brainEntry.Key;
+                    BrainType brainType = brainEntry.Value;
+
+                    // Check if fitness is below threshold
+                    if (brainIndex < neuralNetComponent.Fitness.Length &&
+                        neuralNetComponent.Fitness[brainIndex] <= fitnessThreshold)
+                    {
+                        // Create a new brain of this type
+                        NeuralNetComponent newBrain = CreateSingleBrain(brainType, agentType);
+
+                        // Find the layer in the neural network that corresponds to this brain type
+                        for (int layerIndex = 0; layerIndex < neuralNetComponent.Layers.Length; layerIndex++)
+                        {
+                            NeuronLayer[] layers = neuralNetComponent.Layers[layerIndex];
+                            if (layers.Length > 0 && layers[0].BrainType == brainType)
+                            {
+                                // Replace with new layers
+                                neuralNetComponent.Layers[layerIndex] = newBrain.Layers[0];
+
+                                // Reset fitness for this brain
+                                neuralNetComponent.Fitness[brainIndex] = 0;
+                                neuralNetComponent.FitnessMod[brainIndex] = 1.0f;
+
+                                resetCount++;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (resetCount > 0)
+            {
+                Debug.Log($"Reset {resetCount} low-performing brains (fitness < {fitnessThreshold})");
+            }
+        }
 
         private void GenerateInitialPopulation()
         {
@@ -567,7 +649,7 @@ namespace NeuralNetworkDirectory
             {
                 uint entityID = ECSManager.CreateEntity();
 
-                BoidConfigComponent boidConfig = new BoidConfigComponent(6, 0.6f, 0.9f, 1.2f, 1.1f);
+                BoidConfigComponent boidConfig = new BoidConfigComponent(6, 0.5f, 0.8f, 1.3f, 1.3f);
                 ACSComponent acsComponent = new ACSComponent();
                 TransformComponent transformComponent = new TransformComponent();
                 PathResultComponent<SimNode<IVector>> pathComponent = new PathResultComponent<SimNode<IVector>>();
@@ -597,7 +679,7 @@ namespace NeuralNetworkDirectory
                         break;
                 }
 
-               
+
                 ECSManager.AddComponent(entityID, acsComponent);
                 ECSManager.AddComponent(entityID, boidConfig);
                 ECSManager.AddComponent(entityID, transformComponent);
@@ -824,28 +906,21 @@ namespace NeuralNetworkDirectory
             }
 
             List<SimNode<IVector>> emptyNodes = new List<SimNode<IVector>>();
-            // Get all empty nodes
 
-             
-            
-            // Randomly select 20 empty nodes and make them stumps
             if (emptyNodes.Count >= 20)
             {
                 System.Random random = new System.Random();
-                // Shuffle using Fisher-Yates algorithm
                 for (int i = emptyNodes.Count - 1; i > 0; i--)
                 {
                     int j = random.Next(i + 1);
                     (emptyNodes[i], emptyNodes[j]) = (emptyNodes[j], emptyNodes[i]);
                 }
 
-                // Take first 20 nodes and convert to stumps
                 for (int i = 0; i < 20; i++)
                 {
                     emptyNodes[i].NodeTerrain = NodeTerrain.Stump;
                 }
 
-                // Update relevant visual data if needed
                 DataContainer.UpdateVoronoi(NodeTerrain.Stump);
             }
         }
@@ -854,17 +929,17 @@ namespace NeuralNetworkDirectory
         {
             RegenerateTerrain(terrain, 15);
         }
-        
+
         private void RegenerateTerrain(NodeTerrain terrainType, int count)
         {
             SimNode<IVector>[,] allNodes = DataContainer.Graph.NodesType;
             List<SimNode<IVector>> emptyNodes = new List<SimNode<IVector>>();
-            
+
             foreach (SimNode<IVector> node in allNodes)
             {
-                if(node.NodeTerrain == NodeTerrain.Empty) emptyNodes.Add(node);
+                if (node.NodeTerrain == NodeTerrain.Empty) emptyNodes.Add(node);
             }
-            
+
             if (emptyNodes.Count >= count)
             {
                 System.Random random = new System.Random();
@@ -874,13 +949,13 @@ namespace NeuralNetworkDirectory
                     int j = random.Next(i + 1);
                     (emptyNodes[i], emptyNodes[j]) = (emptyNodes[j], emptyNodes[i]);
                 }
-                
+
                 // Take first count nodes and convert to specified terrain
                 for (int i = 0; i < count; i++)
                 {
                     emptyNodes[i].NodeTerrain = terrainType;
                 }
-                
+
                 // Update relevant visual data
                 DataContainer.UpdateVoronoi(terrainType);
                 Debug.Log($"Regenerated {count} {terrainType} nodes as they were missing from the map");
@@ -890,6 +965,7 @@ namespace NeuralNetworkDirectory
                 Debug.LogWarning($"Not enough empty nodes to create {count} {terrainType} nodes");
             }
         }
+
         private void Save(string directoryPath, int generation)
         {
             if (!activateSave) return;
@@ -955,7 +1031,7 @@ namespace NeuralNetworkDirectory
                     AgentNeuronData neuronData = neuronDataList[index];
                     foreach (NeuronLayer[] neuronLayer in netComponent.Layers)
                     {
-                        if(neuronLayer[0].BrainType != brainType.Value) continue;
+                        if (neuronLayer[0].BrainType != brainType.Value) continue;
                         lock (neuronLayer)
                         {
                             SetWeights(neuronLayer, neuronData.NeuronWeights);
@@ -979,8 +1055,9 @@ namespace NeuralNetworkDirectory
         {
             if (!activateLoad) return;
             Dictionary<AgentTypes, Dictionary<BrainType, List<AgentNeuronData>>> loadedData =
-                generationToLoad > 0 ? NeuronDataSystem.LoadSpecificNeurons(directoryPath, generationToLoad)
-                                    : NeuronDataSystem.LoadLatestNeurons(directoryPath);
+                generationToLoad > 0
+                    ? NeuronDataSystem.LoadSpecificNeurons(directoryPath, generationToLoad)
+                    : NeuronDataSystem.LoadLatestNeurons(directoryPath);
 
             if (loadedData.Count == 0) return;
             System.Random random = new System.Random();
@@ -993,7 +1070,8 @@ namespace NeuralNetworkDirectory
                     return;
                 }
 
-                if (!loadedData.TryGetValue(agent.agentType, out Dictionary<BrainType, List<AgentNeuronData>> brainData)) return;
+                if (!loadedData.TryGetValue(agent.agentType,
+                        out Dictionary<BrainType, List<AgentNeuronData>> brainData)) return;
 
                 foreach (KeyValuePair<int, BrainType> brainType in agent.brainTypes)
                 {
@@ -1002,10 +1080,10 @@ namespace NeuralNetworkDirectory
 
                     int index = random.Next(0, neuronDataList.Count);
                     AgentNeuronData neuronData = neuronDataList[index];
-                    
+
                     foreach (NeuronLayer[] neuronLayer in netComponent.Layers)
                     {
-                        if(neuronLayer[0].BrainType != brainType.Value) continue;
+                        if (neuronLayer[0].BrainType != brainType.Value) continue;
                         lock (neuronLayer)
                         {
                             SetWeights(neuronLayer, neuronData.NeuronWeights);

@@ -211,7 +211,7 @@ namespace UI
             {
                 config = new UIConfig
                 {
-                    Bias = 0.5f,
+                    Bias = 1f,
                     MutChance = 0.07f,
                     MutationRate = 0.1f,
                     Elites = 4,
