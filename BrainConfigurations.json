@@ -16,7 +16,8 @@
     "OutputCount": 1,
     "HiddenLayers": [
       4,
-      4
+      4,
+      1
     ]
   },
   {
@@ -26,7 +27,8 @@
     "OutputCount": 1,
     "HiddenLayers": [
       4,
-      4
+      4,
+      1
     ]
   },
   {
@@ -46,7 +48,8 @@
     "OutputCount": 1,
     "HiddenLayers": [
       4,
-      4
+      4,
+      1
     ]
   }
 ]

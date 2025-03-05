@@ -97,11 +97,15 @@ namespace NeuralNetworkDirectory
         private const int maxBuildersCarts = 18;
         private const int maxGatherers = 18;
         private bool startSimulation = false;
+        private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         public void Awake()
         {
             DirectoryPath = Application.persistentDataPath + "/" + DirectoryPath;
-            parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 32 };
+            parallelOptions = new ParallelOptions
+            {
+                MaxDegreeOfParallelism = (int)(Environment.ProcessorCount * 0.8) 
+            };
             carnivoreMatrices = new Matrix4x4[carnivoreCount];
             herbivoreMatrices = new Matrix4x4[herbivoreCount];
             builderMatrices = new Matrix4x4[maxBuildersCarts];
@@ -149,7 +153,7 @@ namespace NeuralNetworkDirectory
             {
                 IVector pos = DataContainer.Animals[id].Transform.position;
                 Vector3 position = new Vector3(pos.X, pos.Y);
-                Matrix4x4 matrix = Matrix4x4.Translate(position);
+                Matrix4x4.Translate(position);
 
                 switch (DataContainer.Animals[id].agentType)
                 {
@@ -157,7 +161,7 @@ namespace NeuralNetworkDirectory
                         int carnIndex = Interlocked.Increment(ref carnivoreIndex) - 1;
                         if (carnIndex < carnivoreMatrices.Length)
                         {
-                            carnivoreMatrices[carnIndex] = matrix;
+                            carnivoreMatrices[carnIndex].SetTRS(position, Quaternion.identity, Vector3.one);
                         }
 
                         break;
@@ -165,7 +169,7 @@ namespace NeuralNetworkDirectory
                         int herbIndex = Interlocked.Increment(ref herbivoreIndex) - 1;
                         if (herbIndex < herbivoreMatrices.Length)
                         {
-                            herbivoreMatrices[herbIndex] = matrix;
+                            herbivoreMatrices[herbIndex].SetTRS(position, Quaternion.identity, Vector3.one);
                         }
 
                         break;
@@ -246,7 +250,6 @@ namespace NeuralNetworkDirectory
             {
                 EntitiesTurn(dt);
                 accumTime += dt;
-
 
                 if (accumTime > generationDuration)
                 {
@@ -367,6 +370,13 @@ namespace NeuralNetworkDirectory
 
         private void Epoch()
         {
+            if (_cancellationTokenSource != null)
+            {
+                _cancellationTokenSource.Cancel();
+                _cancellationTokenSource.Dispose();
+            }
+            _cancellationTokenSource = new CancellationTokenSource();
+            parallelOptions.CancellationToken = _cancellationTokenSource.Token;
             Generation++;
             uiManager.OnGenUpdate(Generation);
             PurgingSpecials();
