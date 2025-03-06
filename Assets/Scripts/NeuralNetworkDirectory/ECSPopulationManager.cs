@@ -379,9 +379,7 @@ namespace NeuralNetworkDirectory
 
             AddFitnessData();
             DataContainer.FitnessStagnationManager.AnalyzeData();
-
-            //ResetLowPerformingBrains();
-
+            
             bool remainingPopulation = DataContainer.Animals.Count > 0;
 
             bool remainingCarn = carnivoreCount - missingCarnivores > 1;
@@ -549,11 +547,6 @@ namespace NeuralNetworkDirectory
                         }
                     }
                 }
-            }
-
-            if (resetCount > 0)
-            {
-                Debug.Log($"Reset {resetCount} low-performing brains (fitness < {fitnessThreshold})");
             }
         }
 
@@ -837,7 +830,6 @@ namespace NeuralNetworkDirectory
 
                 foreach (BrainType brain in agent.Value.brainTypes.Values)
                 {
-                    agent.Value.GetBrainTypeKeyByValue(brain);
                     if (!indexes[agentType].ContainsKey(brain))
                     {
                         indexes[agentType][brain] = 0;
@@ -908,6 +900,7 @@ namespace NeuralNetworkDirectory
 
                 Genome genome = new Genome(weights.ToArray());
                 genomes.Add(genome);
+                genome.fitness = neuralNetComponent.Fitness[GetBrainTypeKeyByValue(brainType, agentType)];
             }
 
             return genomes;
