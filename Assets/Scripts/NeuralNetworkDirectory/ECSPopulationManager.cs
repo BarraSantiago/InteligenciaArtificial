@@ -99,7 +99,8 @@ namespace NeuralNetworkDirectory
 
         public void Awake()
         {
-            DirectoryPath = Application.persistentDataPath + "/" + DirectoryPath;
+            DirectoryPath = Application.dataPath + "/../" + DirectoryPath;
+            DataContainer.FilePath = DirectoryPath;
             parallelOptions = new ParallelOptions
             {
                 MaxDegreeOfParallelism = (int)(Environment.ProcessorCount * 0.8)
@@ -216,16 +217,16 @@ namespace NeuralNetworkDirectory
                     Graphics.DrawMeshInstanced(carnivoreMesh, 0, carnivoreMat, carnivoreMatrices);
 
                 if (herbivoreMatrices.Length > 0)
-                    Graphics.DrawMeshInstanced(herbivoreMesh, 0, herbivoreMat, herbivoreMatrices.ToArray());
+                    Graphics.DrawMeshInstanced(herbivoreMesh, 0, herbivoreMat, herbivoreMatrices);
 
                 if (builderMatrices.Length > 0)
-                    Graphics.DrawMeshInstanced(builderMesh, 0, builderMat, builderMatrices.ToArray());
+                    Graphics.DrawMeshInstanced(builderMesh, 0, builderMat, builderMatrices);
 
                 if (gathererMatrices.Length > 0)
-                    Graphics.DrawMeshInstanced(gathererMesh, 0, gathererMat, gathererMatrices.ToArray());
+                    Graphics.DrawMeshInstanced(gathererMesh, 0, gathererMat, gathererMatrices);
 
                 if (cartMatrices.Length > 0)
-                    Graphics.DrawMeshInstanced(cartMesh, 0, cartMat, cartMatrices.ToArray());
+                    Graphics.DrawMeshInstanced(cartMesh, 0, cartMat, cartMatrices);
             }
 
             _requiresRedraw = false;
@@ -285,8 +286,6 @@ namespace NeuralNetworkDirectory
 
         private void EntitiesTurn(float dt)
         {
-            int index = 0;
-
             TCAgentType.Time = dt;
             AnimalAgentType.Time = dt;
 
