@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -103,7 +104,7 @@ namespace NeuralNetworkDirectory
             DataContainer.FilePath = DirectoryPath;
             parallelOptions = new ParallelOptions
             {
-                MaxDegreeOfParallelism = (int)(Environment.ProcessorCount * 0.8)
+                MaxDegreeOfParallelism = (int)(Environment.ProcessorCount)
             };
             carnivoreMatrices = new Matrix4x4[carnivoreCount];
             herbivoreMatrices = new Matrix4x4[herbivoreCount];
@@ -130,6 +131,10 @@ namespace NeuralNetworkDirectory
             DataContainer.IncreaseTerrain += RecreateTerrain;
             UiManager.OnSimulationStart += StartSimulation;
             UiManager.OnAlarmCall += CallAlarm;
+
+            // Set reasonable thread pool limits
+            ThreadPool.SetMinThreads(Environment.ProcessorCount, Environment.ProcessorCount);
+            ThreadPool.SetMaxThreads(Environment.ProcessorCount * 2, Environment.ProcessorCount * 2);
         }
 
         private void Update()
@@ -379,7 +384,7 @@ namespace NeuralNetworkDirectory
 
             AddFitnessData();
             DataContainer.FitnessStagnationManager.AnalyzeData();
-            
+
             bool remainingPopulation = DataContainer.Animals.Count > 0;
 
             bool remainingCarn = carnivoreCount - missingCarnivores > 1;
@@ -459,7 +464,8 @@ namespace NeuralNetworkDirectory
                 GC.WaitForPendingFinalizers();
             }
 
-            fitnessManager.Agents = DataContainer.Animals;
+            fitnessManager = new FitnessManager<IVector, ITransform<IVector>>(
+                new Dictionary<uint, AnimalAgentType>(DataContainer.Animals));
         }
 
         private static void AddFitnessData()
@@ -705,10 +711,8 @@ namespace NeuralNetworkDirectory
                 agent.CurrentNode = townCenter.Position;
                 agent.Init();
                 transformComponent.Transform = agent.Transform;
-                lock (DataContainer.TcAgents)
-                {
-                    DataContainer.TcAgents[entityID] = agent;
-                }
+
+                DataContainer.TcAgents.TryAdd(entityID, agent);
 
                 townCenter.Agents.Add(agent);
             });
@@ -1134,12 +1138,13 @@ namespace NeuralNetworkDirectory
         private void StartSimulation()
         {
             StartTownCenters();
-            DataContainer.Animals = new Dictionary<uint, AnimalAgentType>();
+            DataContainer.Animals = new ConcurrentDictionary<uint, AnimalAgentType>();
             genAlg = new GeneticAlgorithm(eliteCount, mutationChance, mutationRate);
             GenerateInitialPopulation();
             if (activateLoad) Load(DirectoryPath);
             isRunning = true;
-            fitnessManager = new FitnessManager<IVector, ITransform<IVector>>(DataContainer.Animals);
+            fitnessManager = new FitnessManager<IVector, ITransform<IVector>>(
+                new Dictionary<uint, AnimalAgentType>(DataContainer.Animals));
             behaviourCount = GetHighestBehaviourCount();
 
             UpdateAgentsCopy();
@@ -1148,7 +1153,7 @@ namespace NeuralNetworkDirectory
 
         private void StartTownCenters()
         {
-            DataContainer.TcAgents = new Dictionary<uint, TCAgentType>();
+            DataContainer.TcAgents = new ConcurrentDictionary<uint, TCAgentType>();
 
             townCenters[0] = new TownCenter(gridManager.GetRandomPositionInUpperQuarter());
             townCenters[1] = new TownCenter(gridManager.GetRandomPosition());
@@ -1252,9 +1257,24 @@ namespace NeuralNetworkDirectory
         public static void RemoveEntity(AnimalAgentType simAgent)
         {
             simAgent.Uninit();
-            uint agentId = DataContainer.Animals.FirstOrDefault(agent => agent.Value == simAgent).Key;
-            DataContainer.Animals.Remove(agentId);
-            ECSManager.RemoveEntity(agentId);
+            uint agentId = 0;
+
+            // Find the key without locking
+            foreach (var pair in DataContainer.Animals)
+            {
+                if (pair.Value == simAgent)
+                {
+                    agentId = pair.Key;
+                    break;
+                }
+            }
+
+            if (agentId != 0)
+            {
+                // Thread-safe removal
+                DataContainer.Animals.TryRemove(agentId, out _);
+                ECSManager.RemoveEntity(agentId);
+            }
         }
 
         public static void SetWeights(NeuronLayer[] layers, float[] newWeights)
@@ -1388,8 +1408,8 @@ namespace NeuralNetworkDirectory
                 Debug.LogWarning("Specific generation couldn't be loaded.");
             }
         }
-        
-        
+
+
         private void CallAlarm()
         {
             foreach (TownCenter townCenter in townCenters)
