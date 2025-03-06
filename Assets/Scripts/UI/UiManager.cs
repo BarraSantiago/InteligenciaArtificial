@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using NeuralNetworkDirectory;
 using NeuralNetworkLib.DataManagement;
-using NeuralNetworkLib.GraphDirectory.Voronoi;
 using NeuralNetworkLib.Utils;
 using TMPro;
 using UnityEngine;
@@ -55,13 +54,12 @@ namespace UI
         [SerializeField] private Button balanceVoronoiButton;
         [SerializeField] private Button startSimulationButton;
         [SerializeField] private Button updateNodeButton;
+        [SerializeField] private Button SoundAlarmButton;
         [SerializeField] private double correctionFactor;
-        [SerializeField] private double snapDistance;
         [SerializeField] private int iterations = 3;
         public Action<int> OnGenUpdate => UpdateGenerationNum;
         public Action<float> OnGenTimeUpdate => UpdateGenTime;
         public Action<int[]> OnSurvivorsPerSpeciesUpdate => UpdateSurvivorsPerSpecies;
-        public Action<int> OnFitnessAvgUpdate => UpdateFitnessAvg;
         public Action<int> onVoronoiUpdate;
         public Action onDrawVoronoi;
         public Action<int> onSpeedUpdate;
@@ -106,6 +104,13 @@ namespace UI
             fitnessAgentType.onValueChanged.AddListener(UpdateFitnessBrain);
             fitnessBrain.onValueChanged.AddListener(UpdateFitnessAvg);
             startSimulationButton.onClick.AddListener(SimulationStart);
+            SoundAlarmButton.onClick.AddListener(CallAlarm);
+        }
+
+        public static Action OnAlarmCall;
+        private void CallAlarm()
+        {
+            OnAlarmCall?.Invoke();
         }
 
         private void Update()

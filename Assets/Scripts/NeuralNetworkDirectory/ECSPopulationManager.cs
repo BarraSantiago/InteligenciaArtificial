@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using NeuralNetworkLib.Agents.AnimalAgents;
-using NeuralNetworkLib.Agents.Flocking;
 using NeuralNetworkLib.Agents.TCAgent;
 using NeuralNetworkLib.DataManagement;
 using NeuralNetworkLib.ECS.FlockingECS;
@@ -129,6 +128,7 @@ namespace NeuralNetworkDirectory
             //DataContainer.Graph.LoadGraph("GraphData.json");
             DataContainer.IncreaseTerrain += RecreateTerrain;
             UiManager.OnSimulationStart += StartSimulation;
+            UiManager.OnAlarmCall += CallAlarm;
         }
 
         private void Update()
@@ -717,6 +717,8 @@ namespace NeuralNetworkDirectory
                 {
                     DataContainer.TcAgents[entityID] = agent;
                 }
+
+                townCenter.Agents.Add(agent);
             });
         }
 
@@ -1039,7 +1041,7 @@ namespace NeuralNetworkDirectory
             (Dictionary<AgentTypes, Dictionary<BrainType, List<AgentNeuronData>>>, int) data =
                 NeuronDataSystem.LoadLatestNeurons(DirectoryPath);
             Dictionary<AgentTypes, Dictionary<BrainType, List<AgentNeuronData>>> loadedData = data.Item1;
-            
+
             if (loadedData.Count == 0 || !loadedData.ContainsKey(agentType)) return;
             System.Random random = new System.Random();
 
@@ -1392,6 +1394,15 @@ namespace NeuralNetworkDirectory
             else
             {
                 Debug.LogWarning("Specific generation couldn't be loaded.");
+            }
+        }
+        
+        
+        private void CallAlarm()
+        {
+            foreach (TownCenter townCenter in townCenters)
+            {
+                townCenter.SoundAlarm();
             }
         }
     }
