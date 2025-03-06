@@ -255,6 +255,7 @@ namespace NeuralNetworkDirectory
                     Epoch();
 
                     UpdateAgentsCopy();
+                    
                 }
             }
 
@@ -275,6 +276,8 @@ namespace NeuralNetworkDirectory
         private void UpdateAgentsCopy()
         {
             animalAgentsCopy = DataContainer.Animals.ToArray();
+            fitnessManager = new FitnessManager<IVector, ITransform<IVector>>(
+                new Dictionary<uint, AnimalAgentType>(DataContainer.Animals));
         }
 
         private void UpdateTcAgentsCopy()
@@ -464,8 +467,7 @@ namespace NeuralNetworkDirectory
                 GC.WaitForPendingFinalizers();
             }
 
-            fitnessManager = new FitnessManager<IVector, ITransform<IVector>>(
-                new Dictionary<uint, AnimalAgentType>(DataContainer.Animals));
+           
         }
 
         private static void AddFitnessData()
