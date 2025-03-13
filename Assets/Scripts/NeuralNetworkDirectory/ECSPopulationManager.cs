@@ -104,7 +104,7 @@ namespace NeuralNetworkDirectory
             DataContainer.FilePath = DirectoryPath;
             parallelOptions = new ParallelOptions
             {
-                MaxDegreeOfParallelism = (int)(Environment.ProcessorCount)
+                MaxDegreeOfParallelism = Environment.ProcessorCount
             };
             carnivoreMatrices = new Matrix4x4[carnivoreCount];
             herbivoreMatrices = new Matrix4x4[herbivoreCount];
@@ -147,7 +147,7 @@ namespace NeuralNetworkDirectory
             int buiIndex = 0;
             int gatIndex = 0;
 
-            Parallel.ForEach(DataContainer.Animals.Keys, id =>
+            Parallel.ForEach(DataContainer.Animals.Keys, parallelOptions, id =>
             {
                 IVector pos = DataContainer.Animals[id].Transform.position;
                 Vector3 position = new Vector3(pos.X, pos.Y);
@@ -176,7 +176,7 @@ namespace NeuralNetworkDirectory
                 }
             });
 
-            Parallel.ForEach(DataContainer.TcAgents.Keys, id =>
+            Parallel.ForEach(DataContainer.TcAgents.Keys, parallelOptions, id =>
             {
                 IVector pos = DataContainer.TcAgents[id].Transform.position;
                 Vector3 position = new Vector3(pos.X, pos.Y);
@@ -341,9 +341,8 @@ namespace NeuralNetworkDirectory
             {
                 int tickIndex = i;
 
-                Parallel.For(0, animalAgentsCopy.Length,
-                    j => { animalAgentsCopy[j].Value.Fsm.MultiThreadTick(tickIndex); });
-                Parallel.For(0, tcAgentsCopy.Length, j =>
+                Parallel.For(0, animalAgentsCopy.Length, parallelOptions, j => { animalAgentsCopy[j].Value.Fsm.MultiThreadTick(tickIndex); });
+                Parallel.For(0, tcAgentsCopy.Length, parallelOptions, j =>
                 {
                     if (tcAgentsCopy[j].Value == null) return;
 
@@ -568,7 +567,7 @@ namespace NeuralNetworkDirectory
 
         private void CreateAgents(int count, AgentTypes agentType)
         {
-            Parallel.For((long)0, count, i =>
+            Parallel.For((long)0, count, parallelOptions, i =>
             {
                 uint entityID = ECSManager.CreateEntity();
 
@@ -668,7 +667,7 @@ namespace NeuralNetworkDirectory
 
         private void CreateTCAgents(int count, TownCenter townCenter, AgentTypes agentType)
         {
-            Parallel.For((long)0, count, i =>
+            Parallel.For((long)0, count, parallelOptions, i =>
             {
                 uint entityID = ECSManager.CreateEntity();
 
