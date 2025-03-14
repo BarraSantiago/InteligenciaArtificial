@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Graph;
 using NeuralNetworkLib.Agents.AnimalAgents;
 using NeuralNetworkLib.Agents.TCAgent;
 using NeuralNetworkLib.DataManagement;
@@ -29,18 +30,7 @@ namespace NeuralNetworkDirectory
     {
         #region Variables
 
-        [Header("Population Setup")] [SerializeField]
-        private Mesh carnivoreMesh;
-
-        [SerializeField] private Material carnivoreMat;
-        [SerializeField] private Mesh herbivoreMesh;
-        [SerializeField] private Material herbivoreMat;
-        [SerializeField] private Mesh cartMesh;
-        [SerializeField] private Material cartMat;
-        [SerializeField] private Mesh builderMesh;
-        [SerializeField] private Material builderMat;
-        [SerializeField] private Mesh gathererMesh;
-        [SerializeField] private Material gathererMat;
+       
 
         [Header("Population Settings")] [SerializeField]
         private int carnivoreCount = 10;
@@ -77,7 +67,7 @@ namespace NeuralNetworkDirectory
         private GraphManager<IVector, ITransform<IVector>> gridManager;
         private FitnessManager<IVector, ITransform<IVector>> fitnessManager;
         private TownCenter[] townCenters = new TownCenter[3];
-
+        AgentsRenderer agentsRenderer;
         private KeyValuePair<uint, AnimalAgentType>[] animalAgentsCopy =
             new KeyValuePair<uint, AnimalAgentType>[DataContainer.Animals.Count];
 
@@ -87,30 +77,20 @@ namespace NeuralNetworkDirectory
 
         #endregion
 
-        private Matrix4x4[] carnivoreMatrices;
-        private Matrix4x4[] herbivoreMatrices;
-        private Matrix4x4[] builderMatrices;
-        private Matrix4x4[] cartMatrices;
-        private Matrix4x4[] gathererMatrices;
-        private bool _requiresRedraw;
-        private readonly object _renderLock = new object();
-        private const int maxBuildersCarts = 18;
-        private const int maxGatherers = 18;
+        
+        
         private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         public void Awake()
         {
+            agentsRenderer = FindObjectOfType<AgentsRenderer>();
             DirectoryPath = Application.dataPath + "/../" + DirectoryPath;
             DataContainer.FilePath = DirectoryPath;
             parallelOptions = new ParallelOptions
             {
                 MaxDegreeOfParallelism = Environment.ProcessorCount
             };
-            carnivoreMatrices = new Matrix4x4[carnivoreCount];
-            herbivoreMatrices = new Matrix4x4[herbivoreCount];
-            builderMatrices = new Matrix4x4[maxBuildersCarts];
-            cartMatrices = new Matrix4x4[maxBuildersCarts];
-            gathererMatrices = new Matrix4x4[maxGatherers];
+            
             uiManager = FindObjectOfType<UiManager>();
             UiManagerInit();
             gridManager = new GraphManager<IVector, ITransform<IVector>>(gridWidth, gridHeight);
@@ -127,115 +107,14 @@ namespace NeuralNetworkDirectory
             NeuronDataSystem.OnSpecificLoaded += SpecificLoaded;
             Herbivore<IVector, ITransform<IVector>>.OnDeath += RemoveEntity;
 
-            //DataContainer.Graph.LoadGraph("GraphData.json");
             DataContainer.IncreaseTerrain += RecreateTerrain;
             UiManager.OnSimulationStart += StartSimulation;
             UiManager.OnAlarmCall += CallAlarm;
 
-            // Set reasonable thread pool limits
             ThreadPool.SetMinThreads(Environment.ProcessorCount, Environment.ProcessorCount);
             ThreadPool.SetMaxThreads(Environment.ProcessorCount * 2, Environment.ProcessorCount * 2);
         }
 
-        private void Update()
-        {
-            if (!_requiresRedraw || !isRunning) return;
-
-            int carnivoreIndex = 0;
-            int herbivoreIndex = 0;
-            int carIndex = 0;
-            int buiIndex = 0;
-            int gatIndex = 0;
-
-            Parallel.ForEach(DataContainer.Animals.Keys, parallelOptions, id =>
-            {
-                IVector pos = DataContainer.Animals[id].Transform.position;
-                Vector3 position = new Vector3(pos.X, pos.Y);
-                Matrix4x4.Translate(position);
-
-                switch (DataContainer.Animals[id].agentType)
-                {
-                    case AgentTypes.Carnivore:
-                        int carnIndex = Interlocked.Increment(ref carnivoreIndex) - 1;
-                        if (carnIndex < carnivoreMatrices.Length)
-                        {
-                            carnivoreMatrices[carnIndex].SetTRS(position, Quaternion.identity, Vector3.one);
-                        }
-
-                        break;
-                    case AgentTypes.Herbivore:
-                        int herbIndex = Interlocked.Increment(ref herbivoreIndex) - 1;
-                        if (herbIndex < herbivoreMatrices.Length)
-                        {
-                            herbivoreMatrices[herbIndex].SetTRS(position, Quaternion.identity, Vector3.one);
-                        }
-
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            });
-
-            Parallel.ForEach(DataContainer.TcAgents.Keys, parallelOptions, id =>
-            {
-                IVector pos = DataContainer.TcAgents[id].Transform.position;
-                Vector3 position = new Vector3(pos.X, pos.Y);
-                Matrix4x4 matrix = Matrix4x4.Translate(position);
-
-                switch (DataContainer.TcAgents[id].AgentType)
-                {
-                    case AgentTypes.Builder:
-                        int builderIndex = Interlocked.Increment(ref buiIndex) - 1;
-                        if (builderIndex < builderMatrices.Length)
-                        {
-                            builderMatrices[builderIndex] = matrix;
-                        }
-
-                        break;
-
-                    case AgentTypes.Cart:
-                        int cartIndex = Interlocked.Increment(ref carIndex) - 1;
-                        if (cartIndex < cartMatrices.Length)
-                        {
-                            cartMatrices[cartIndex] = matrix;
-                        }
-
-                        break;
-
-                    case AgentTypes.Gatherer:
-                        int gathererIndex = Interlocked.Increment(ref gatIndex) - 1;
-                        if (gathererIndex < gathererMatrices.Length)
-                        {
-                            gathererMatrices[gathererIndex] = matrix;
-                        }
-
-                        break;
-
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            });
-
-            lock (_renderLock)
-            {
-                if (carnivoreMatrices.Length > 0)
-                    Graphics.DrawMeshInstanced(carnivoreMesh, 0, carnivoreMat, carnivoreMatrices);
-
-                if (herbivoreMatrices.Length > 0)
-                    Graphics.DrawMeshInstanced(herbivoreMesh, 0, herbivoreMat, herbivoreMatrices);
-
-                if (builderMatrices.Length > 0)
-                    Graphics.DrawMeshInstanced(builderMesh, 0, builderMat, builderMatrices);
-
-                if (gathererMatrices.Length > 0)
-                    Graphics.DrawMeshInstanced(gathererMesh, 0, gathererMat, gathererMatrices);
-
-                if (cartMatrices.Length > 0)
-                    Graphics.DrawMeshInstanced(cartMesh, 0, cartMat, cartMatrices);
-            }
-
-            _requiresRedraw = false;
-        }
 
         private void FixedUpdate()
         {
@@ -268,7 +147,7 @@ namespace NeuralNetworkDirectory
             if (unitSpawned) UpdateTcAgentsCopy();
 
 
-            _requiresRedraw = true;
+            agentsRenderer.Render();
             uiManager.OnGenTimeUpdate?.Invoke(accumTime);
             uiManager.UpdateFitnessAvg(0);
         }

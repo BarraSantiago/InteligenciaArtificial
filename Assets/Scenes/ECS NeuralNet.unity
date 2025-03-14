@@ -8288,6 +8288,61 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1119257684}
   m_CullTransparentMesh: 1
+--- !u!1 &1121037181
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1121037183}
+  - component: {fileID: 1121037182}
+  m_Layer: 0
+  m_Name: AgentsRenderer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1121037182
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1121037181}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bc10b4d5d614c1c946917c63001f6bd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  carnivoreMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+  carnivoreMat: {fileID: 2100000, guid: 8395f03388a6eed42a35fc82f5101d86, type: 2}
+  herbivoreMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+  herbivoreMat: {fileID: 2100000, guid: 4cd40a1be9568f049bb8720e10474142, type: 2}
+  cartMesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+  cartMat: {fileID: 2100000, guid: 270848fc9f2ee884fa2b6bfccb1525b0, type: 2}
+  builderMesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+  builderMat: {fileID: 2100000, guid: 12c120f2400576c4f97a98bcca5529bc, type: 2}
+  gathererMesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+  gathererMat: {fileID: 2100000, guid: 65b34bd0b696fd64c809daa8ff1aac63, type: 2}
+  _requiresRedraw: 0
+--- !u!4 &1121037183
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1121037181}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1124220972
 GameObject:
   m_ObjectHideFlags: 0
@@ -12574,16 +12629,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a112d98ecacf488a9c8d9a9c4c832381, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  carnivoreMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
-  carnivoreMat: {fileID: 2100000, guid: 8395f03388a6eed42a35fc82f5101d86, type: 2}
-  herbivoreMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
-  herbivoreMat: {fileID: 2100000, guid: 4cd40a1be9568f049bb8720e10474142, type: 2}
-  cartMesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
-  cartMat: {fileID: 2100000, guid: 270848fc9f2ee884fa2b6bfccb1525b0, type: 2}
-  builderMesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
-  builderMat: {fileID: 2100000, guid: 12c120f2400576c4f97a98bcca5529bc, type: 2}
-  gathererMesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
-  gathererMat: {fileID: 2100000, guid: 65b34bd0b696fd64c809daa8ff1aac63, type: 2}
   carnivoreCount: 10
   herbivoreCount: 10
   mutationRate: 0.07
@@ -15914,5 +15959,6 @@ SceneRoots:
   - {fileID: 1659154293}
   - {fileID: 2030189942}
   - {fileID: 258884562}
+  - {fileID: 1121037183}
   - {fileID: 729433697}
   - {fileID: 1397350393}
