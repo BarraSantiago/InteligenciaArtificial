@@ -34,9 +34,9 @@ This project was created to explore various advanced concepts including:
    Ensure you have **Unity 2022.3.X** installed.
 
 2. **Clone the Repository:**  
-   ```bash
+
    git clone https://github.com/BarraSantiago/InteligenciaArtificial
-   ```
+
    
 3. **Open the Project:**  
    Open the cloned project folder in Unity.
