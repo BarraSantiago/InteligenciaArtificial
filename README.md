@@ -1,7 +1,8 @@
-```markdown
 # Genetic Algorithm-Based Ecosystem Simulation
 
-A Unity C# project developed for an Artificial Intelligence course that simulates a dynamic ecosystem. In this simulation, herbivore agents learn to eat, move, and escape from carnivore agents, which in turn learn to move and attack. Additionally, gatherers, builders, and carts operate using a finite state machine (FSM) to manage resource collection, construction, and delivery.
+A Unity C# project developed for an Artificial Intelligence course that simulates a dynamic ecosystem. 
+In this simulation, herbivore agents learn to eat, move, and escape from carnivore agents, which in turn learn to move and attack. 
+Additionally, gatherers, builders, and carts operate using a finite state machine (FSM) to manage resource collection, construction, and delivery.
 
 ## Overview
 
@@ -72,4 +73,3 @@ This project is licensed under the [MIT License](LICENSE).
 ---
 
 *This project was initially developed for an AI university course and is now showcased as part of my professional portfolio to highlight advanced AI and simulation techniques in game development.*
-```
