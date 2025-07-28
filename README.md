@@ -57,8 +57,7 @@ This project was created to explore various advanced concepts including:
 
 - Simulation Explanation
 > ![Simulation Overview](ProjectExplanation.png)
-- Simulation Running
-> ![Agents in Action](ProjectScreenshot.png)
+
 
 ## Credits
 
